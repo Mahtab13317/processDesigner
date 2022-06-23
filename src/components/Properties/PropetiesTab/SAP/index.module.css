@@ -33,7 +33,7 @@
   font: normal normal 600 12px/17px Open Sans !important;
   letter-spacing: 0px;
   color: #606060;
-  width: 11rem;
+  flex:1;
 }
 .headerLabel1 {
   text-align: left;
@@ -41,7 +41,7 @@
   letter-spacing: 0px;
   color: #606060;
   margin-left: 1rem;
-  width: 11rem;
+  flex:1;
 }
 
 .tableLabel {
@@ -49,7 +49,7 @@
   font: normal normal normal 12px/17px Open Sans !important;
   letter-spacing: 0px;
   color: #606060;
-  width: 11rem;
+  flex:1;
 }
 .tableLabel1 {
   text-align: left;
@@ -57,7 +57,7 @@
   letter-spacing: 0px;
   color: #606060;
   margin-left: 1rem;
-  width: 11rem;
+  flex:1;
 }
 .menuItemStyles {
   text-align: left;
@@ -112,5 +112,18 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  margin-bottom: 1rem !important;
+  align-items: center;
+  padding: 0.25rem 0;
+}
+
+.tableRow:nth-child(even) {
+  background-color: #F8F8F8;
+}
+
+.tabSection {
+  background: none !important;
+}
+
+.sapSubTab {
+  background-color: white !important;
 }

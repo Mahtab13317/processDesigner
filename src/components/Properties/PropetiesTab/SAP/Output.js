@@ -175,7 +175,7 @@ function Output(props) {
 
   return (
     <React.Fragment>
-      <div className="row" style={{ marginTop: "1rem", marginBottom: "1rem" }}>
+      <div className="row" style={{marginTop: "1rem", padding: "0.5rem 0", backgroundColor: "#F8F8F8" }}>
         <p className={styles.headerLabel1}>{t("processvariable(s)")}</p>
         <p className={styles.headerLabel}>{t("exportParameters")}</p>
         <p className={styles.headerLabel}>{t("parentName")}</p>

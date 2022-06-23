@@ -297,18 +297,20 @@ function Sap(props) {
           <h4 style={{ marginTop: "2%" }}>{t("parameterMapping")}</h4>
 
           <Tabs
-            tabType="processSubTab"
+            tabType={styles.sapSubTab}
             tabContentStyle="processSubTabContentStyle"
             tabBarStyle="processSubTabBarStyle"
             oneTabStyle="processSubOneTabStyle"
             tabStyling="processViewTabs"
             tabsStyle="processViewSubTabs"
             TabNames={[t("Input"), t("Output"), t("table")]}
+            
             TabElement={[
               <Input
                 sapOutput={sapOutput}
                 processVarDropdown={processVarDropdown}
                 changeFunction={isChangeFunc}
+                
               />,
               <Output
                 sapOutput={sapOutput}

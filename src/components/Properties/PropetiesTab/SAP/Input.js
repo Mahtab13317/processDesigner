@@ -35,7 +35,7 @@ function Input(props) {
   useEffect(() => {
     let temp = [];
     let selVar = [];
-    
+
     props?.sapOutput[0]?.ParameterDetails.map((val) => {
       if (val.ParameterType === "I") {
         temp.push(val);
@@ -48,7 +48,7 @@ function Input(props) {
       temp.forEach((data, i) => {
         for (var obj in mappedData) {
           if (mappedData[obj].paramName == data.Name) {
-           
+
             selVar[i].name = mappedData[obj].selectedVar;
             selVar[i].paramName = mappedData[obj].paramName;
           }
@@ -66,7 +66,7 @@ function Input(props) {
 
   const getFilterList = (index, val) => {
     let filterProcess = "";
-    
+
     filterProcess = props.processVarDropdown
       .filter(
         (d) =>
@@ -94,9 +94,9 @@ function Input(props) {
         VariableName: tempProcess[0].VariableName + "." + data.VariableName,
         VariableType: data.VariableType,
       }));
-   
+
     let tempProcessList = [...Subprocess, ...filterProcess];
-   
+
 
     return tempProcessList;
   };
@@ -112,12 +112,12 @@ function Input(props) {
       [];
 
     let changedVar = selectedVariable?.filter((d) => d.name != "0");
-   
+
     if (changedVar?.length > 0) {
       changedVar?.map((data, i) => {
         inputList?.map((item, j) => {
           if (item.Name == data.paramName) {
-            
+
 
             const tempVar = {
               bConstantVal: false,
@@ -165,62 +165,65 @@ function Input(props) {
 
   return (
     <React.Fragment>
-      <div className="row" style={{ marginTop: "1rem", marginBottom: "1rem" }}>
-        <p className={styles.headerLabel1}>{t("importParameters")}</p>
-        <p className={styles.headerLabel}>{t("parentName")}</p>
-        <p className={styles.headerLabel}>{t("processvariable(s)")}</p>
-      </div>
-      <div className={styles.scroll}>
-        {inputList &&
-          inputList.map((val, i) => {
-            return (
-              <div className={styles.tableRow}>
-                <p className={styles.tableLabel1}>{val.Name}</p>
-                <p className={styles.tableLabel}>-</p>
-                <div className={styles.tableLabel}>
-                  <Select
-                    className={styles.dataDropdown}
-                    MenuProps={{
-                      anchorOrigin: {
-                        vertical: "bottom",
-                        horizontal: "left",
-                      },
-                      transformOrigin: {
-                        vertical: "top",
-                        horizontal: "left",
-                      },
-                      style: {
-                        maxHeight: 400,
-                      },
-                      getContentAnchorEl: null,
-                    }}
-                    style={{ width: "8rem", border: ".5px solid #c4c4c4" }}
-                    key={i}
-                    value={selectedVariable[i].name}
-                    onChange={(e) => {
-                      changeVariable(e, i, val.Name);
-                    }}
-                  >
-                    {getFilterList(i, val)?.map((option) => {
-                      return (
-                        <MenuItem
-                          className={
-                            direction === RTL_DIRECTION
-                              ? arabicStyles.webSDropdownData
-                              : styles.webSDropdownData
-                          }
-                          value={option.VariableName}
-                        >
-                          {option.VariableName}
-                        </MenuItem>
-                      );
-                    })}
-                  </Select>
+      <div>
+        <div className="row" style={{ marginTop: "1rem", padding: "0.5rem 0", backgroundColor: "#F8F8F8" }}>
+          <p className={styles.headerLabel1}>{t("importParameters")}</p>
+          <p className={styles.headerLabel}>{t("parentName")}</p>
+          <p className={styles.headerLabel}>{t("processvariable(s)")}</p>
+        </div>
+        <div className={`${styles.scroll} ${styles.tabSection}`}>
+          {inputList &&
+            inputList.map((val, i) => {
+              return (
+                <div className={styles.tableRow}>
+                  <p className={styles.tableLabel1}>{val.Name}</p>
+                  <p className={styles.tableLabel}>-</p>
+                  <div className={styles.tableLabel}>
+                    <Select
+                      className={styles.dataDropdown}
+                      MenuProps={{
+                        anchorOrigin: {
+                          vertical: "bottom",
+                          horizontal: "left",
+                        },
+                        transformOrigin: {
+                          vertical: "top",
+                          horizontal: "left",
+                        },
+                        style: {
+                          maxHeight: 400,
+                        },
+                        getContentAnchorEl: null,
+                      }}
+                      style={{ width: "8rem", border: ".5px solid #c4c4c4", background:"white" }}
+                      key={i}
+                      value={selectedVariable[i].name}
+                      onChange={(e) => {
+                        changeVariable(e, i, val.Name);
+                      }}
+                    >
+                      {getFilterList(i, val)?.map((option) => {
+                        return (
+                          <MenuItem
+                            className={
+                              direction === RTL_DIRECTION
+                                ? arabicStyles.webSDropdownData
+                                : styles.webSDropdownData
+                            }
+                            value={option.VariableName}
+                          >
+                            {option.VariableName}
+                          </MenuItem>
+                        );
+                      })}
+                    </Select>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+        </div>
       </div>
+
     </React.Fragment>
   );
 }
