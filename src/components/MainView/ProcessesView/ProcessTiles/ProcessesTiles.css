@@ -1,0 +1,49 @@
+.processTypeTable {
+  display: flex;
+  flex-direction: column;
+  border-bottom: #f3f4ed solid 1px;
+  padding-top: 0.5rem;
+}
+
+.oneRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 13px;
+  padding: 0.25rem 0 0.25rem 0.3125rem !important;
+  cursor: pointer;
+}
+
+.selectedRow {
+  color: #1072c6;
+  font-weight: 600;
+  background-color: #0072c614;
+}
+.oneRow img {
+  margin: 0px 2px;
+}
+.oneRowProcessType {
+  width: 20vw;
+  font-size: 13px;
+}
+.processCount {
+  display: flex;
+  font-size: 12px;
+  height: 23px;
+  text-align: right;
+}
+.processCount img {
+  height: 16px;
+  width: 16px;
+  margin-top: 3px;
+  margin-right: 3px;
+}
+
+.processDotColor{
+height: 13px;
+width: 13px;
+transform: translateY(2px);
+margin-right: 4px;
+}

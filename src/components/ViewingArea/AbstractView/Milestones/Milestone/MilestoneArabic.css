@@ -1,0 +1,111 @@
+.mileDivSelected .milestoneArrowArabic,
+.mileDivSelected .milestoneArrowEndArabic,
+.mileDivSelected .milestoneArrowFullArabic {
+  width: 290px;
+  background: #0072c6;
+}
+
+.mileDivSelected .milestoneArrowArabic:before,
+.mileDivSelected .milestoneArrowEndArabic:before,
+.mileDivSelected .milestoneArrowFullArabic:before {
+  border-left: 20px solid #0072c6;
+}
+
+.milestoneArrowFullArabic {
+  width: 290px;
+  height: 40px;
+  position: relative;
+  background: rgb(68, 66, 68);
+  border: none;
+  color: white;
+  position: sticky;
+  top: -0.2%;
+  z-index: 2;
+}
+.milestoneArrowFullArabic:after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-right: 20px solid transparent;
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+}
+.milestoneArrowFullArabic:before {
+  content: "";
+  position: absolute;
+  left: -15px;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-right: 15px solid rgb(68, 66, 68);
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+}
+.milestoneArrowFullArabic:hover .addBetween,
+.milestoneArrowArabic:hover .addBetween {
+  background: transparent;
+  border: none;
+  height: 2.5rem;
+  position: relative;
+  width: 4%;
+  margin-right: auto;
+  border-radius: 50%;
+  display: block;
+}
+
+.milestoneArrowArabic,
+.milestoneArrowEndArabic {
+  width: 290px;
+  height: 40px;
+  position: relative;
+  background: rgb(68, 66, 68);
+  border: none;
+  color: white;
+  position: sticky;
+  top: -0.2%;
+  z-index: 2;
+  margin-left: 5%;
+}
+.milestoneArrowArabic:after,
+.milestoneArrowEndArabic:after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-right: 20px solid white;
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+}
+.milestoneArrowArabic:before,
+.milestoneArrowEndArabic:before {
+  content: "";
+  position: absolute;
+  left: -15px;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-right: 15px solid rgb(68, 66, 68);
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+}
+
+.mileIdNoArabic {
+  margin: 4%;
+  margin-right: 10%;
+  margin-top: 9px;
+  font-size: 15px;
+  height: 25px;
+}
+
+.dragIconHandleArabic {
+  margin: 4%;
+  margin-right: 10%;
+  margin-top: 9px;
+  font-size: 15px;
+  height: 25px;
+}

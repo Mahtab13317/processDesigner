@@ -1,0 +1,400 @@
+.logoSize {
+  height: 20px;
+  width: 20px;
+  margin-right: 4px;
+}
+
+.activityInput {
+  border: none;
+  width: 100%;
+  height: 1.2rem;
+  margin-left: 0%;
+  background-color: inherit;
+}
+
+.newActivityDiv {
+  margin-top: 2%;
+  width: 290px;
+  height: 30px;
+  background: rgb(246, 246, 246);
+  border: 0.05rem dashed rgb(196, 196, 196);
+  color: rgb(124, 124, 124);
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  padding-top: 0.2rem;
+}
+
+.newAssociatedActivityDiv {
+  margin: 0 4% 3%;
+  width: 100%;
+  height: 26px;
+  background: rgb(246, 246, 246);
+  border: 0.05rem dashed rgb(196, 196, 196);
+  color: rgb(124, 124, 124);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+  padding-top: 0.2rem !important;
+}
+
+.newActivityDiv:hover,
+.newAssociatedActivityDiv:hover {
+  background: rgb(246, 246, 246);
+  border: 0.05rem dashed rgb(20, 52, 164);
+  color: rgb(20, 52, 164);
+}
+
+.outlinedCard {
+  position: relative;
+  overflow: visible !important;
+  width: 290px;
+  border: 4px solid transparent !important;
+  background: transparent !important;
+}
+
+.cardSelected {
+  border: 4px solid #cac6c6 !important;
+}
+
+.cardSelected .activityCard {
+  border-radius: 0;
+}
+
+.activityCard {
+  border-radius: 4px;
+  padding: 7px 0 0 0 !important;
+  position: relative;
+  background: white;
+}
+
+.startActivityCard {
+  border: 1px solid #2db100;
+  border-left: 6px solid #2db100;
+}
+
+.workdeskActivityCard {
+  border: 1px solid #0072c6;
+  border-left: 6px solid #0072c6;
+}
+
+.gatewayActivityCard {
+  border: 1px solid #c9c94b;
+  border-left: 6px solid #c9c94b;
+}
+
+.EventActivityCard {
+  border: 1px solid #c9c94b;
+  border-left: 6px solid #c9c94b;
+}
+
+.endActivityCard {
+  border: 1px solid #d30000;
+  border-left: 6px solid #d30000;
+}
+
+.artefactActivityCard {
+  border: 1px solid #606060;
+  border-left: 6px solid #606060;
+}
+
+.closeTile {
+  font-size: 10px;
+  margin-right: 4px;
+  color: white;
+  float: right;
+  cursor: pointer;
+}
+
+.activityCardDropdown {
+  width: 100%;
+  margin-top: 2%;
+  border: none;
+  padding-bottom: 1%;
+  /* display: none; */
+}
+
+.altMilestone {
+  font-family: OpenSans-Semibold;
+  font-size: 14px;
+  color: #000000;
+  font-weight: 600;
+  margin-top: 2rem;
+}
+
+.alternateStage {
+  width: 218px;
+  height: 40px;
+  position: relative;
+  background: rgb(236, 234, 236);
+  color: rgb(145, 143, 145);
+  text-align: center;
+}
+
+.alternateStage:before {
+  content: "";
+  position: absolute;
+  right: -20px;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-left: 20px solid rgb(236, 234, 236);
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+}
+
+.alternateStage p {
+  padding-top: 8px;
+}
+
+.detectingWorkType {
+  margin: 0;
+  background-color: #e7e7e7;
+  font-family: OpenSans;
+  font-size: 12px;
+  color: #606060;
+  font-weight: 400;
+  padding-left: 20px;
+}
+
+.spinner {
+  height: 15px !important;
+  width: 15px !important;
+  margin-top: 5px !important;
+  color: grey !important;
+}
+
+.selectedActivityType {
+  /* background: #2DB11D1A 0% 0% no-repeat padding-box; */
+  border-radius: 2px;
+  opacity: 1;
+  margin-right: 10px;
+  font: "OpenSans-Semibold";
+  font-size: 10px;
+  cursor: pointer;
+}
+
+/* .swimlaneInputBox {
+  border: none !important;
+} */
+
+.task_count_activity {
+  text-align: left;
+  font: normal normal 600 11px/15px Open Sans;
+  letter-spacing: 0px;
+  text-transform: capitalize;
+}
+
+.task_activity {
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #462d2d;
+  display: flex;
+  text-transform: capitalize;
+}
+
+.grey_square_activity {
+  width: 10px;
+  height: 10px;
+  background: #cccccc 0% 0% no-repeat padding-box;
+  margin-top: 3px;
+  margin-right: 7px;
+}
+.selectedActivityType {
+  background: rgba(16, 114, 198, 0.098);
+}
+
+.workdeskType {
+  text-align: left;
+  letter-spacing: 0px;
+  color: #767676;
+  text-transform: capitalize;
+  opacity: 1;
+  /* width: 100px; */
+  margin-left: auto;
+  font: "OpenSans-Semibold";
+  font-size: 10px;
+  margin-right: 5px;
+  cursor: pointer;
+  background-color: #f0f0f0;
+}
+
+.activity_dropdown {
+  position: absolute;
+  left: 65%;
+  z-index: 1;
+  width: 180px;
+  top: 65px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000029;
+  border: 1px solid #c4c4c4;
+  border-radius: 1px;
+}
+
+.activityDropdown_List li {
+  padding: 0.5rem;
+  height: 26px;
+  cursor: pointer;
+}
+
+.activityInnerList {
+  overflow-y: auto;
+  height: 24vh;
+  overflow-x: hidden;
+  border-top: 1px solid rgb(196, 196, 196);
+}
+
+.activityInnerList::-webkit-scrollbar {
+  width: 5px;
+  height: 10px;
+  background-color: white;
+}
+
+.activityInnerList::-webkit-scrollbar-thumb {
+  background-color: #dadada;
+  border-radius: 10px;
+}
+
+.activityDropdown_List .mainMenuHeading {
+  padding: 0.25rem 0.5rem !important;
+  height: 24px !important;
+}
+
+.oneToolList {
+  padding: 0 !important;
+}
+.expandedIcon {
+  height: 14px !important;
+  width: 14px !important;
+  padding-top: 4px !important;
+}
+
+.SwimlaneButton {
+  text-align: center;
+  letter-spacing: 0px;
+  color: #767676 !important;
+  text-transform: capitalize !important;
+  font-size: 10px !important;
+}
+
+.swimlaneCheckbox {
+  border: none !important;
+}
+
+.swimlaneChecked {
+  background: white 0% 0% no-repeat padding-box !important;
+}
+
+.swimlaneCheckIcon {
+  color: #1072c6 !important;
+}
+
+.oneSortOptionActivity {
+  margin-top: 0px;
+  font-size: 12px;
+  color: #000000;
+  cursor: pointer;
+  padding-left: 10px;
+  padding-top: 5px;
+}
+
+.sortByDivActivity {
+  display: block;
+  height: 25px;
+  width: 163px;
+  text-align: left;
+}
+/* .dividerLineActivity{
+  margin-bottom: 5px !important;
+} */
+
+.sortByDivActivity :hover {
+  background-color: #f5f5f5;
+}
+
+.threeDotsButton {
+  width: 28px;
+  height: 28px;
+  border: none !important;
+  padding: 5px;
+  cursor: pointer;
+  background-color: transparent;
+  position: relative;
+}
+
+.sortByDiv_arabicActivity {
+  padding: 0px 10px 0px 0px !important;
+}
+.oneSortOption_arabicActivity {
+  margin-top: 5px !important;
+}
+
+.dividerLine_arabicActivity {
+  margin-top: 2px !important;
+  margin-bottom: 0px !important;
+}
+
+.modalPaperActivity {
+  margin-top: -5px;
+  margin-left: 10px;
+  position: absolute;
+  width: 165px !important;
+  z-index: 100;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000029;
+  border: 1px solid #c4c4c4;
+}
+
+.modalPaperActivity ul {
+  padding-top: 0px !important;
+  margin-bottom: 3px;
+}
+
+.dragIcon {
+  color: grey;
+  max-height: 27px;
+  padding: 0;
+}
+
+.moreVertIconDiv {
+  margin-left: auto !important;
+  margin-right: 2%;
+  text-align: right;
+  position: relative;
+}
+
+.cardSelected .startActivityCard {
+  background-color: #eeffe8;
+}
+
+.cardSelected .workdeskActivityCard {
+  background-color: #ebf4fb;
+}
+
+.cardSelected .gatewayActivityCard {
+  background: #ffffd9;
+}
+
+.cardSelected .EventActivityCard {
+  background: #ffffd9;
+}
+
+.cardSelected .endActivityCard {
+  background: #d308141a;
+}
+
+.cardSelected .artefactActivityCard {
+  background: #a9a9a93b;
+}
+.openProcessModal {
+  color: grey;
+}
+
+#activityCard #subActivityCard .MuiBox-root {
+  margin-top: 3px !important;
+}
+
+.activityMainDiv {
+  margin-top: 5px;
+}

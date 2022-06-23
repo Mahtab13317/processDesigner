@@ -1,0 +1,227 @@
+.searchBox {
+  flex: 1;
+  margin-left: 0.5vw;
+}
+
+.categoryHeading {
+  text-align: right;
+  font: normal normal 600 16px/22px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  margin-right: 0.5rem;
+}
+
+.searchBox {
+  flex: 1;
+  margin-left: 0.5vw;
+}
+
+.templateListTableHeaderName {
+  width: 63%;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.templateListTableHeaderCreatedBy {
+  width: 20%;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.templateListTableHeaderDate {
+  width: 30%;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.templateListTableHeaderExtras {
+  width: 16.5%;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.templateListTableHeaderUsage {
+  width: 24%;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.templateListTableName {
+  width: 63.5%;
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+  font-size: 12px;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.templateListTableCreatedBy {
+  width: 20%;
+  font-size: 12px;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+}
+
+.templateListTableDate {
+  width: 29.9%;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.templateListTableName span,
+.templateListTableDate span {
+  text-align: right;
+  letter-spacing: 0px;
+  color: #606060;
+}
+
+.templateListTableExtras {
+  width: 16.5%;
+  font-size: 12px;
+  font-weight: 600;
+  justify-content: start;
+  padding-left: 2vw;
+  display: inline-flex;
+  align-items: center;
+}
+
+.templateListTableUsage {
+  width: 24%;
+  font-size: 12px;
+  font-weight: 600;
+  justify-content: start;
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+}
+
+.createProcessBtn {
+  text-align: right;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #0072c6;
+  background: transparent;
+  border: none;
+  margin-left: 1vw;
+  cursor: pointer;
+}
+
+.templateUsageCount {
+  text-align: right;
+  font: italic normal normal 11px/15px Open Sans;
+  letter-spacing: 0px;
+  color: #727272;
+  margin-left: 1vw;
+}
+
+.addCategoryHeading {
+  text-align: right;
+  font: normal normal 600 16px/21px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  margin-bottom: 1rem;
+}
+
+.labelHeading {
+  text-align: right;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  margin-bottom: 0.25rem;
+}
+
+.nameInput {
+  width: 25vw;
+  height: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: right;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  border: 1px solid #dadada;
+  padding: 0.5rem;
+}
+
+.descInput {
+  width: 25vw;
+  height: 5rem;
+  margin-bottom: 0.5rem;
+  text-align: right;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  border: 1px solid #dadada;
+  padding: 0.5rem;
+}
+
+.errorMessage {
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  text-align: right;
+  color: red;
+  height: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.categoryHeadingDesc {
+  text-align: right;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  margin-right: 0.5rem;
+  width: 65vw;
+  white-space: break-spaces;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.templateInfoIcon {
+  width: 1rem !important;
+  height: 1rem !important;
+  margin-right: 0.25rem;
+  margin-top: 0.125rem;
+  color: #70707095 !important;
+}
+
+.templatePredefinedIcon {
+  width: 1rem !important;
+  height: 1rem !important;
+  margin-right: 0.25rem;
+  margin-top: 1px;
+  color: #0072c6 !important;
+  /* color: #70707095 !important; */
+}
+
+.moreVertTemplateModal {
+  position: absolute;
+  width: 8vw !important;
+  z-index: 100;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000029;
+  border: 1px solid #c4c4c4;
+  margin-left: 1vw;
+  left: 0;
+}
+
+.moreVertHeaderModal {
+  position: absolute;
+  width: 8vw !important;
+  z-index: 100;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000029;
+  border: 1px solid #c4c4c4;
+  margin-left: 2vw;
+  left: 0;
+  margin-top: -0.125rem;
+}

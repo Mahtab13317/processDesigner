@@ -1,0 +1,174 @@
+.selectWithInputTextField_WS {
+  width: 180px !important;
+  height: 28px !important;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border-radius: 2px;
+  border: none !important;
+}
+
+.selectWithInputTextField_WS_Expanded {
+  width: 190px !important;
+  height: 28px !important;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border-radius: 2px;
+  border: none !important;
+}
+.selectWithInputTextField_WS .MuiOutlinedInput-notchedOutline {
+  border: 1px solid #c4c4c4 !important;
+}
+
+.selectWithInputTextField_WS
+  .MuiOutlinedInput-root:hover
+  .MuiOutlinedInput-notchedOutline {
+  border: 1px solid #c4c4c4 !important;
+}
+
+.multiSelectConstInput_WS {
+  position: absolute;
+  width: 110px;
+  height: 17px;
+  top: 0.25rem;
+  left: 2vw;
+  z-index: 100;
+  font: normal normal normal 12px/17px Open Sans !important;
+  border: none;
+}
+
+.multiSelectConstInput_WS_Expanded {
+  position: absolute;
+  width: 125px;
+  height: 17px;
+  top: 0.25rem;
+  left: 2vw;
+  z-index: 100;
+  font: normal normal normal 12px/17px Open Sans !important;
+  border: none;
+}
+.selectWithInput_WS {
+  width: 180px !important;
+  margin-bottom: 10px;
+}
+.selectWithInput_WS_Expanded {
+  width: 190px !important;
+  margin-bottom: 10px;
+}
+
+.selectDateTime_options {
+  width: 61px;
+  height: 24px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  font: normal normal normal 12px/17px Open Sans;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  margin-right: 10px;
+  margin-top: 10px;
+  margin-left: 14px;
+}
+
+.selectPlusMinus_options {
+  width: 50px;
+  height: 24px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  font: normal normal normal 12px/17px Open Sans;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  margin-right: 10px;
+  margin-top: 10px;
+}
+
+.time_Options {
+  width: 120px;
+  height: 24px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  font: normal normal normal 12px/17px Open Sans;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  margin-right: 10px;
+  margin-top: 8px;
+}
+
+.options_days {
+  /* margin-right: 14px; */
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.options_hours {
+  /* margin-right: 8px; */
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.options_minutes {
+  /* margin-right: 16px; */
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.options_seconds {
+  /* margin-right: 14px; */
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.options_time {
+  display: flex;
+}
+
+#OptionsTab {
+  padding: 5px;
+  overflow-y: scroll;
+  height: 70vh;
+}
+
+.holdUntilLabel {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.holdUntilDiv,
+.onExpiryDivSection {
+  display: flex;
+}
+
+.optionsTab_timeMapping {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  margin-left: 49px;
+}
+
+.option_selectionBoxes {
+  display: flex;
+  flex-direction: column;
+}
+
+.onExpiryLabel {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 8px;
+  /* margin-right: 16px; */
+}
+
+.triggerLabel {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.turnAroundTimeLabel {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 20px;
+  margin-left: -20px;
+}
+
+.triggerDivSection {
+  display: flex;
+  align-items: center;
+}

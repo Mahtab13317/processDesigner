@@ -1,0 +1,38 @@
+.mainCheckbox {
+  height: "20px";
+  width: "20px";
+  margin-right: "8px";
+}
+.view {
+  margin-right: 1rem;
+  width: 6rem;
+  font: normal normal 500 15px/17px Open Sans;
+}
+.viewBox {
+  width: 6rem;
+  font: normal normal 500 15px/17px Open Sans;
+}
+.update {
+  margin-right: 1rem;
+  width: 6rem;
+  font: normal normal 500 15px/17px Open Sans;
+}
+.checkboxHeader {
+  margin-right: 1rem;
+  width: 6rem;
+  font: normal normal 500 15px/17px Open Sans;
+}
+.checkboxDownload {
+  margin-right: 1rem;
+  width: 8rem;
+  font: normal normal 500 15px/17px Open Sans;
+}
+.docTypes {
+  margin-right: 1rem;
+  width: 10rem;
+  font: normal normal 500 15px/17px Open Sans;
+}
+.searchbox {
+  margin-top: 1rem;
+  margin-right: 1rem;
+}

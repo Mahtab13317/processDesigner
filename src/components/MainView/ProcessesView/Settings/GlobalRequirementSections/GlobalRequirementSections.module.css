@@ -1,0 +1,162 @@
+.heading {
+  display: flex;
+  flex-direction: row;
+  width: 76vw;
+  justify-content: space-between;
+  height: 10vh;
+}
+
+.headingProjectLevel {
+  display: flex;
+  flex-direction: row;
+  width: 74.9vw;
+  justify-content: space-between;
+  height: 10vh;
+}
+
+.headingText {
+  font: 1.2rem "Open Sans";
+  letter-spacing: 0rem;
+  color: rgb(0, 0, 0);
+  opacity: 1;
+  font-weight: 600;
+}
+.page {
+  width: 78vw;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.buttonText {
+  font: 0.8rem "Open Sans";
+  letter-spacing: 0rem;
+  opacity: 1;
+  font-weight: 500;
+}
+
+.headingInfo {
+  font: 0.8rem "Open Sans";
+  letter-spacing: 0rem;
+  opacity: 1;
+  margin: 0.3rem 0 0 0;
+}
+.headingBox {
+  display: flex;
+  flex-direction: column;
+}
+
+.addSectionButton {
+  width: 6rem !important;
+  height: 1.75rem !important;
+  background-color: #0072c6 !important;
+  /* border: 1px solid #C4C4C4 !important; */
+
+  opacity: 1 !important;
+  font-size: 0.625rem;
+  text-transform: none !important;
+  margin: 0.3rem !important;
+  white-space: nowrap;
+}
+
+.body {
+  min-height: 100vh;
+  padding: "0 5px 0 5px";
+  width: 76vw;
+}
+.buttons {
+  width: 4.8125rem !important;
+  height: 1.75rem !important;
+  background: #0072c6 0% 0% no-repeat padding-box !important;
+  font-family: "Open Sans";
+  opacity: 1 !important;
+  font-size: 0.625rem !important;
+  text-transform: none !important;
+  margin-right: 0.4375rem !important;
+  white-space: nowrap !important;
+  color: white !important;
+}
+.styleInFocus {
+  border: 0.5px solid transparent;
+  width: 65vw;
+  height: 1.5rem;
+  font: 0.8rem "Open Sans";
+  resize: none;
+}
+
+.styleInFocus:hover {
+  border: 0.5px solid rgba(0, 0, 0, 0.295);
+  width: 65vw;
+  height: 1.5rem;
+  font: 0.8rem "Open Sans";
+  resize: none;
+}
+
+textarea:focus {
+  border: 0.5px solid rgba(0, 0, 0, 0.295) !important;
+  outline: none !important;
+
+  resize: none;
+}
+
+.orderIdInput {
+  border: 0.5px solid transparent;
+}
+
+.iconsandtextBox:hover input {
+  border: 0.5px solid rgba(0, 0, 0, 0.295);
+}
+
+.styleOutOfFocus {
+  border: none;
+  width: 65vw;
+  height: 1.5rem;
+  resize: none;
+  font: 0.8rem "Open Sans";
+}
+
+.topTitle {
+  color: #0072c6;
+  font: 0.8rem "Open Sans";
+  opacity: 1;
+  font-weight: bold;
+}
+
+.desc {
+  color: #000000;
+  font: 0.8rem "Open Sans";
+  opacity: 1;
+}
+
+.iconsandtextBox {
+  display: flex;
+  flex-direction: row;
+
+  justify-content: space-between;
+}
+
+.hideBorder {
+  background-color: red;
+}
+
+.accordianInner2 {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  min-height: 2rem !important;
+  /* height: 6rem !important; */
+  margin-top: 0px !important;
+}
+
+.accordianOuter {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  min-height: 1rem !important;
+  height: auto !important;
+  margin-top: 0px !important;
+}
+.accordianInner {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  min-height: 2rem !important;
+  /* height: 5.5rem !important; */
+  margin-top: 0px !important;
+}

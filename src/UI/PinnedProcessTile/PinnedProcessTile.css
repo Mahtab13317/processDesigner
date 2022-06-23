@@ -1,0 +1,107 @@
+.cardPinned {
+  width: 16.1vw;
+  height: 6.375rem !important;
+  margin-bottom: 1rem !important;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  margin-right: 1.4vw;
+  border: 0 !important;
+  cursor: pointer;
+  position: relative;
+  overflow: unset !important;
+}
+
+.cardPinned:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  margin: 0;
+  align-items: center;
+}
+
+.titlePinned {
+  height: 19px;
+  text-align: left;
+  font: normal normal 600 13px/18px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  margin-bottom: 0;
+  margin-top: 0.5rem;
+}
+
+.version {
+  font: normal normal normal 13px/18px Open Sans;
+  letter-spacing: 0px;
+  color: #828282;
+  margin-left: 0.5rem;
+}
+
+.processStatus {
+  font: normal normal 600 11px/15px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  text-transform: uppercase;
+  height: 17px;
+  text-align: left;
+  opacity: 1;
+  margin-top: 0.44vw;
+  margin-left: 0.125vw;
+  margin-bottom: 0.1rem;
+}
+
+.processCat {
+  font: normal normal normal 11px/15px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  height: 17px;
+  margin: 0.15rem 0 0.3rem 0;
+}
+
+.processModification {
+  top: 0px;
+  left: 0px;
+  text-align: left;
+  font: normal normal normal 10px/14px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  margin: 0;
+}
+
+.fileLogo {
+  margin-top: 0.5rem;
+  width: 18px !important;
+  height: 17.2px !important;
+  transform: translateX('17px');
+}
+.typeColor {
+  border-radius: 50%;
+  height: 7px;
+  width: 7px;
+  margin: 3.5px 0 0;
+}
+
+.pinnedCardContent {
+  padding: 0.25rem !important;
+}
+
+.processNameDiv {
+  background: rgba(0, 114, 198, 0.07) 0% 0% no-repeat padding-box;
+  border-radius: 4px;
+  padding-left: 9px;
+}
+
+.logoDiv {
+  flex: 1;
+}
+
+.titleDiv {
+  flex: 5;
+  text-align: left;
+  margin-left:-8px !important;
+}
+
+.pinnedProcessAlignment {
+  margin-left: 2.5vw !important;
+}

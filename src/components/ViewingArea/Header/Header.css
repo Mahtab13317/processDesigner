@@ -1,0 +1,405 @@
+.header_processes {
+  display: flex;
+  padding: 0px 15px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  height: 40px;
+}
+
+.leftHeader {
+  flex: 1;
+  display: flex;
+  padding: 7px 0;
+}
+
+.rightHeader {
+  flex: 1;
+  text-align: right;
+  padding: 7px 0;
+  justify-content: flex-end;
+  display: flex;
+}
+
+.processName {
+  text-align: left;
+  letter-spacing: 0px;
+  margin-left: 10px;
+  color: #000000;
+  font-weight: bolder;
+  font-size: 19px;
+  margin-right: 10px;
+}
+
+.versionName {
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  opacity: 1;
+  margin-top: 2px;
+  padding: 5px 10px 2px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.versionCard {
+  height: 14rem;
+  width: 22rem;
+  position: absolute;
+  left: 8%;
+  top: 5%;
+  z-index: 3;
+}
+.versionCardVal {
+  margin-bottom: 1rem;
+  font: normal normal normal 12px/17px Open Sans;
+}
+.versionHistory {
+  color: #1072c6;
+  font: normal normal normal 14px/18px Open Sans;
+  margin-left: 8rem;
+  cursor: pointer;
+}
+.versionCardLabel {
+  font: normal normal normal 14px/18px Open Sans;
+}
+.processType {
+  display: flex;
+  padding: 2px 15px;
+  margin-top: 4px;
+  border-left: 1px solid #606060;
+}
+
+.processTypeName {
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  text-transform: capitalize;
+  opacity: 1;
+  margin: 1px 0 0 1px;
+}
+
+.processTypeLogo {
+  margin: 6px 5px 0 0;
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+}
+
+.selectedWrapper {
+  margin: 0px 3px 0 0;
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  border: 3px solid rgb(244, 164, 60);
+}
+
+.selectedNumWrapper {
+  border: 2px solid rgb(196, 196, 196);
+  border-radius: 50%;
+  width: 26px;
+  margin: 2px;
+  height: 26px;
+}
+
+.wrapper {
+  margin: 0px 3px 0 0;
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  padding: 3px 0;
+  border: none;
+}
+
+.selectedCollabTypeLogo {
+  margin: 1.5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  position: relative;
+}
+
+.collabTypeLogo {
+  margin: 1.5px;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  position: relative;
+}
+
+.collabName {
+  text-align: center;
+  font: normal normal normal 9px/13px Open Sans;
+  letter-spacing: 0px;
+  color: #ffffff;
+  opacity: 1;
+  position: absolute;
+  right: 20%;
+  top: 15%;
+}
+
+.collabNumber {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0px;
+  color: #1072c6;
+  opacity: 1;
+  position: absolute;
+  right: 15%;
+  top: -1px;
+}
+
+.closeButton {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  display: inline-flex;
+  padding: 0px 10px;
+  cursor: pointer;
+}
+
+.closeButtonIcon {
+  color: #606060;
+  margin-top: 2px;
+  width: 20px !important;
+  height: 18px !important;
+}
+
+.closeText {
+  margin-top: 3px;
+  margin-left: 2px;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  opacity: 1;
+}
+
+.deployIcon {
+  margin-top: 5px;
+}
+
+.deployButton {
+  background: #0072c6 0% 0% no-repeat padding-box;
+  border-radius: 2px;
+  opacity: 1;
+  display: inline-flex;
+  padding: 0px 15px;
+  margin-right: 10px;
+  border: none;
+}
+
+.deployText {
+  margin-top: 4px;
+  margin-left: 2px;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #ffffff;
+  opacity: 1;
+}
+
+.moreButton {
+  background: white;
+  opacity: 1;
+  display: inline-flex;
+  padding: 0.5px 15px 0 20px;
+  margin-right: 5px;
+  border: none;
+  /* border-left: 1px solid #606060; */
+}
+
+.moreBtnDropdown {
+  position: absolute;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  z-index: 5;
+  right: 10%;
+  width: 12vw;
+  top: 120%;
+  text-align: left;
+  padding: 0 0 0.45rem 0rem;
+  font: normal normal 600 12px/16px Open Sans;
+  letter-spacing: 0px;
+  color: #000000d9;
+  cursor: pointer;
+}
+
+.moreBtnDropdown ul li:hover {
+  background: rgb(246, 246, 246);
+}
+
+.moreBtnDropdown ul li {
+  padding: 0 0.5vw;
+  align-items: center;
+  display: flex;
+}
+
+.moreText {
+  margin-top: 4px;
+  margin-left: 6px;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  opacity: 1;
+}
+
+.collabDiv {
+  display: inline-flex;
+  padding: 0px 15px 0 20px;
+  margin-right: 5px;
+}
+
+.deleteProcess {
+  background-color: white;
+  height: 185px;
+  width: 422px;
+}
+
+.deleteNotification {
+  font-size: 12px;
+  border-bottom: 1px solid #c4c4c4;
+  padding: 7px;
+}
+
+.moreModalHead {
+  font-size: 12px;
+  border-bottom: 1px solid #c4c4c4;
+  padding: 7px;
+}
+
+.moreModalButtons {
+  background-color: #f5f5f5;
+  text-align: right;
+  padding: 10px;
+  margin-top: 14px;
+}
+
+.buttonOne {
+  width: 50px !important;
+  height: 27px !important;
+  font-size: 11px !important;
+  text-transform: none !important;
+  margin-right: 10px !important;
+  background-color: white !important;
+}
+
+.buttonThree {
+  border: 1px solid #338ed1 !important;
+  color: #338ed1 !important;
+  background-color: white !important;
+  width: 110px !important;
+  height: 27px !important;
+  font-size: 11px !important;
+  text-transform: none !important;
+  margin-right: 6px !important;
+}
+
+.buttonTwo {
+  width: auto !important;
+  height: 27px !important;
+  font-size: 11px !important;
+  text-transform: none !important;
+  background-color: #035397 !important;
+}
+
+.moreBtnDropdown ul {
+  padding: 0px !important;
+}
+
+.moreBtnDropdown ul li {
+  list-style: none !important;
+  height: 26px;
+  font-size: 12px !important;
+  cursor: pointer !important;
+}
+
+.processActionModal {
+  padding: 0 !important;
+  width: 28vw !important;
+  left: 35% !important;
+  top: 25% !important;
+}
+
+.processVersion {
+  display: block;
+  margin-left: 50px;
+}
+
+.deleteProcessVersion {
+  width: auto !important;
+  height: 27px !important;
+  font-size: 11px !important;
+  text-transform: none !important;
+  background-color: #035397 !important;
+}
+
+.deleteAllVersionNote {
+  width: 402px !important;
+  height: 45px !important;
+  border: 1px solid #d53d3d !important;
+  background: #d53d3d3d 0% 0% no-repeat padding-box !important;
+  border-radius: 2px !important;
+  font-size: 12px !important;
+  text-align: center !important;
+  margin-left: 10px !important;
+}
+
+.processVersionToDelete {
+  font-size: 12px !important;
+  margin: 5px 0px !important;
+  padding: 10px !important;
+}
+
+.cancelButton {
+  width: 50px !important;
+  height: 27px !important;
+  font-size: 11px !important;
+  text-transform: none !important;
+  margin-right: 10px !important;
+  background-color: white !important;
+}
+
+.deleteAllVersions {
+  border: 1px solid #338ed1 !important;
+  color: #338ed1 !important;
+  background-color: white !important;
+  width: 130px !important;
+  height: 27px !important;
+  font-size: 11px !important;
+  text-transform: none !important;
+  margin-right: 6px !important;
+}
+
+.deleteFromServerModal {
+  background-color: white;
+  height: 280px;
+  width: 422px;
+}
+
+.processVersionServer {
+  font-size: 12px;
+  padding: 8px;
+}
+
+.commentHeadServer {
+  font-size: 12px;
+  padding: 15px 7px 7px 7px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.deleteButtonsDiv {
+  background-color: #f5f5f5 !important;
+  text-align: right !important;
+  padding: 10px !important;
+  margin-top: 14px !important;
+}
+
+.MuiDrawer-paperAnchorBottom {
+  left: 85px !important;
+}

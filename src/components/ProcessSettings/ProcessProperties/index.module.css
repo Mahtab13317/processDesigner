@@ -1,0 +1,286 @@
+.mainDiv {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 2px 6px #00000014;
+  opacity: 1;
+  height: 78vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.subDiv {
+  padding-left: 1.25rem;
+  padding-top: 13.75px;
+}
+
+.mainDiv::-webkit-scrollbar {
+  width: 0.375rem;
+  height: 24.125rem;
+}
+
+.mainDiv::-webkit-scrollbar-thumb {
+  background: #8c8c8c 0% 0% no-repeat padding-box;
+  border-radius: 0.313rem;
+}
+
+.processDetails {
+  text-align: left;
+  font: normal normal 600 12px/24px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  margin-left: 5px;
+}
+
+.basicDetailsDiv {
+  margin-top: 21.25px;
+  width: 100%;
+}
+
+.heading {
+  text-align: left;
+  font: normal normal 600 14px/19px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  display: flex;
+}
+
+.flexRow {
+  display: flex;
+  flex-direction: row;
+}
+
+.flexColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.fieldTitle {
+  text-align: left;
+  font: normal normal 600 12px/24px Open Sans;
+  letter-spacing: 0px;
+  opacity: 1;
+  color: #606060;
+}
+
+.blackColor {
+  color: #000000;
+}
+
+.turnaroundTimeMargin {
+  margin-right: 20px;
+  margin-left: 5px;
+  margin-top: 4px;
+}
+
+.fieldValue {
+  margin-left: 6px;
+  margin-right: 40px;
+  width: 20px;
+}
+
+.ownerEmailIdText {
+  margin-top: 20px;
+}
+
+.fieldText {
+  display: flex;
+  color: #606060;
+}
+
+.ownerEmailIdInput {
+  border: 1px solid #cecece;
+  border-radius: 2px;
+  opacity: 1;
+  height: 28px;
+  width: 405px;
+  margin-top: 2px;
+  margin-right: 48px;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.peopleAndSystemHeading {
+  margin-top: 26.75px;
+}
+
+.title {
+  margin-top: 8.25px;
+  display: flex;
+}
+
+.keyPerformanceIndicesHeading {
+  margin-top: 11.75px;
+}
+
+.costInput {
+  width: 100px;
+}
+
+.turnAroundTimeInput {
+  width: 44px;
+  margin-right: 0px;
+}
+
+.escalateToFieldsDropdown {
+  width: 100px;
+  height: 28px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  font: normal normal normal 12px/17px Open Sans !important;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  margin-right: 10px;
+}
+
+.inputField {
+  border: 1px solid #cecece;
+  border-radius: 2px;
+  opacity: 1;
+  height: 28px;
+  width: 405px;
+  margin-top: 2px;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.providerInput {
+  margin-left: 20.5px;
+}
+
+.addIcon {
+  color: white;
+  background: #0072c6;
+  height: 1.8rem;
+  width: 1.8rem;
+  margin-left: -22px;
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+.marginBottom {
+  margin-bottom: 20px;
+}
+
+.menuItemStyles {
+  text-align: left;
+  font: normal normal normal 12px/24px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+}
+
+.multiSelect {
+  border-radius: 2px;
+  opacity: 1;
+  height: 28px;
+  width: 29.64vw;
+  margin-top: 2px;
+  margin-right: 48px;
+}
+
+.deleteIcon {
+  float: right;
+  color: grey;
+  margin-top: 0.125rem;
+  margin-left: 2px;
+  cursor: pointer;
+  width: 5px;
+  transform: translate(-28px, 2px);
+}
+.deleteIconSpace {
+  width: 5px;
+  margin-top: 0.125rem;
+  margin-left: 21px;
+}
+
+.footerDivFinal {
+  width: 100%;
+  height: 50px;
+  position: absolute;
+  bottom: 0;
+  background: #f5f5f5 0% 0% no-repeat padding-box;
+  opacity: 1;
+  display: flex;
+  justify-content: space-between;
+}
+
+.saveButton {
+  background: #0072c6 0% 0% no-repeat padding-box;
+  border-radius: 2px;
+  opacity: 1;
+  padding: 0px 15px;
+  border: none;
+  height: 28px;
+  padding: 5px;
+  color: white;
+  cursor: pointer;
+  margin-right: 2%;
+  margin-left: 1%;
+}
+
+.footerDiv {
+  background-color: #f8f8f8;
+  box-shadow: 0px 3px 6px #00000029;
+  opacity: 1;
+  height: 49px;
+}
+
+.footerSubDiv {
+  float: right;
+  margin-right: 20px;
+  margin-top: 11px;
+}
+
+.cancelBtn {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  border-radius: 2px;
+  padding: 2px;
+  height: 28px;
+  width: 60px;
+  color: #606060 !important;
+  font: normal normal 600 12px/17px Open Sans !important;
+  cursor: pointer;
+}
+
+.saveBtn {
+  background: #0072c6 0% 0% no-repeat padding-box !important;
+  border-radius: 2px !important;
+  border: 1px solid #0072c6 !important;
+  text-align: center;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px !important;
+  color: #ffffff !important;
+  padding: 2px;
+  height: 28px;
+  margin-left: 10px;
+  width: 40px;
+  cursor: pointer;
+}
+
+.asterisk {
+  color: red;
+  margin-top: 12px;
+  margin-left: 2px;
+  font-size: 0.75rem;
+}
+
+.disabledBtn {
+  background: rgba(0, 0, 0, 0.12) !important;
+  border-radius: 2px !important;
+  border: none !important;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px !important;
+  color: rgba(0, 0, 0, 0.5) !important;
+  text-transform: none !important;
+  padding: 0.125rem 0.125rem !important;
+  cursor: default !important;
+  height: 28px;
+}

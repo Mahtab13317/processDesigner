@@ -1,0 +1,104 @@
+.hrLineProjectCreation {
+  width: 100%;
+  line-height: 0.1em;
+  border: 1px solid #c4c4c4;
+  opacity: 1;
+}
+.projectCreationTittle {
+  height: 19px;
+  color: var(--unnamed-color-000000);
+  text-align: left;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  font: normal normal 600 15px/19px Open Sans;
+  margin: 3%;
+}
+
+.Label {
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #383737;
+  opacity: 1;
+  width: 50%;
+  margin-top: 2%;
+  margin-bottom: 1%;
+  margin-left: 5%;
+}
+.AddDesc {
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #0072c6;
+  opacity: 1;
+  width: 50%;
+  margin-top: 2%;
+  margin-bottom: 1%;
+  margin-left: 4%;
+  cursor: pointer;
+}
+.projectInput {
+  width: 90%;
+  height: 29px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  padding-left: 2%;
+  margin-left: 5%;
+}
+.footerProjectCreation {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  height: 50px;
+  background: #f5f5f5 0% 0% no-repeat padding-box;
+  opacity: 1;
+  position: absolute;
+  bottom: 0;
+  padding: 0 1rem;
+}
+.sun-editor .se-wrapper {
+  height: 45vh !important;
+  max-height: 100vh !important;
+}
+.descriptionToShow .sun-editor {
+  width: 90% !important;
+  margin-left: 5% !important;
+}
+.create {
+  background: #0072c6 0% 0% no-repeat padding-box;
+  border-radius: 2px;
+  opacity: 1;
+  padding: 0px 15px;
+  border: none;
+  height: 28px;
+  padding: 5px;
+  color: white;
+  cursor: pointer;
+}
+.createDisable {
+  background: #0072c6 0% 0% no-repeat padding-box;
+  border-radius: 2px;
+  opacity: 1;
+  padding: 0px 15px;
+  border: none;
+  height: 28px;
+  padding: 5px;
+  cursor: pointer;
+  color: #606060;
+}
+.cancel {
+  padding: 0.25rem 0.5rem;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  cursor: pointer;
+  margin: 0 0.25rem;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  height: 28px;
+  border-radius: 2px;
+  margin-left: auto;
+}

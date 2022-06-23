@@ -1,0 +1,72 @@
+.timeDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: 1 1;
+}
+
+.textDiv {
+  display: flex;
+  flex: 3;
+  align-items: center;
+}
+
+.textDiv span {
+  color: #0072C6;
+  cursor: pointer;
+}
+
+.Avatar {
+  background-color: #e4e4e4;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  padding: 0.1rem 0.25rem;
+  margin-right: 0.5rem;
+  position:relative;
+}
+
+.cardContent {
+  padding: 0.5vw;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.time {
+  font: normal normal normal 10px/14px Open Sans;
+  letter-spacing: 0px;
+  color: #727272;
+  opacity: 1;
+  margin: 0;
+}
+
+.activityInfo {
+  font-size: 12px;
+  text-align: left;
+  margin: 0.5vw 0;
+}
+
+.textDiv span {
+  font-weight: 600;
+}
+
+.avatarImage {
+  margin-top: 0.15rem;
+}
+
+.moreHorizonIcon{
+  color: #727272 !important;
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+.fiberManualIcon{
+  color: #0072C6 !important;
+  top: -0.3rem;
+  left: -0.3rem;
+  width: 0.5rem !important;
+  height: 0.5rem !important;
+  border-radius: 50%;
+  position: absolute;
+}

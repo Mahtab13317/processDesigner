@@ -1,0 +1,25 @@
+.tableRow {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000029;
+  opacity: 1;
+  width: 940px;
+  height: 45px;
+  margin-left: 10px;
+  /* border: 1px solid red; */
+}
+.tableRows {
+  max-height: 420px;
+  margin-top: 10px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.tableRows::-webkit-scrollbar {
+  width: 7px;
+  height: 10px;
+  background-color: white;
+}
+.tableRows::-webkit-scrollbar-thumb {
+  background-color: #d8d8d8;
+  border-radius: 4px;
+}

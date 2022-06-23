@@ -1,0 +1,94 @@
+.variableName {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.5rem 1.813rem 0.438rem 0rem;
+}
+
+.variableType {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.5rem 5.375rem 0.438rem 0rem;
+}
+
+.dataType {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.5rem 5.938rem 0.438rem 0rem;
+}
+
+.defaultValue {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.5rem 4.875rem 0.438rem 0rem;
+}
+
+.variableLength {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.5rem 4.063rem 0.438rem 0rem;
+}
+
+.variableNameData {
+  margin: 0.875rem 1.813rem 0.875rem 0rem;
+  text-align: right;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  width: 5.313rem;
+}
+
+.variableTypeData {
+  width: 6.438rem;
+  text-align: right;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.875rem 5.5rem 0.875rem 0rem;
+}
+
+.dataTypeValue {
+  text-align: right;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.875rem 4.375rem 0.875rem 0rem;
+  width: 6.438rem;
+}
+
+.defaultValueData {
+  text-align: right;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  width: 3.125rem;
+  margin: 0.875rem 4.375rem 0.875rem 0rem;
+}
+
+.variableLengthData {
+  text-align: right;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  width: 3.125rem;
+  margin: 0.875rem 4.375rem 0.875rem 0rem;
+}

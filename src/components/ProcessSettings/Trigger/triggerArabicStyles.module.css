@@ -1,0 +1,156 @@
+.triggerListViewArea {
+  display: inline;
+  width: 22vw;
+  background: white;
+  margin-right: 0.5vw;
+}
+
+.addTrigger {
+  text-align: right;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #0072c6;
+  background: white;
+  border: none;
+  cursor: pointer;
+}
+
+.triggerNameTypeDiv {
+  margin-left: 5vw;
+}
+
+.triggerFormLabel {
+  display: inline-block;
+  width: 10vw;
+  margin-left: 1vw;
+  margin-top: 0.25rem;
+  text-align: right;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+}
+
+.triggerFormInput {
+  width: 21vw;
+  height: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: right;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  border: 1px solid #dadada;
+  direction: rtl;
+}
+
+.nameFormInput {
+  padding: 0.25rem 0.5rem;
+}
+
+.triggerSelectInput {
+  border: 1px solid #dadada;
+  width: 21vw;
+  text-align: right;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.triggerDropdownData {
+  padding: 0.25rem 0.5rem !important;
+  width: 21vw;
+  text-align: right !important;
+  justify-content: flex-end !important;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+}
+
+.descriptionInput {
+  width: 24.75vw;
+  height: 4rem;
+  margin-bottom: 1rem;
+  text-align: right;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  border: 1px solid #dadada;
+}
+
+.triggerFileIcon {
+  margin-top: 0.45rem;
+  margin-left: 0.5rem;
+}
+
+.cancelTriggerButton {
+  background: #ffffff 0% 0% no-repeat padding-box !important;
+  border: 1px solid #c4c4c4 !important;
+  border-radius: 2px !important;
+  text-align: right;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px !important;
+  color: #606060 !important;
+  text-transform: none !important;
+  margin-left: 0.5rem !important;
+  padding: 0.25rem 0.5rem !important;
+}
+
+.definitionLine {
+  width: 56.5vw;
+  margin-top: 0.6rem !important;
+  margin-right: 1vw !important;
+  height: 1px !important;
+}
+
+.starIcon {
+  color: red;
+  margin-right: 0.25vw;
+  font-size: 0.75rem;
+}
+
+.triggerListRow {
+  display: flex;
+  padding: 0.25rem 0 0.25rem 0.5vw;
+  border-right: 0.25rem solid #fff;
+  text-align: right;
+  width: 22vw;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  cursor: pointer;
+}
+
+.triggerListRow:hover {
+  background: rgba(0, 0, 0, 0.04);
+  border-right: 0.25rem solid rgba(0, 0, 0, 0.04);
+}
+
+.selectedTriggerListRow {
+  background: #e8f3fa 0% 0% no-repeat padding-box !important;
+  border-right: 0.25rem solid #007cc6 !important;
+}
+
+.addTriggerDiv {
+  position: relative;
+  text-align: left;
+}
+
+.triggerListView {
+  height: 70vh;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding-top: 0.25rem;
+  padding-left: 1vw;
+}
+
+.triggerListView::-webkit-scrollbar {
+  display: none;
+}
+
+.FlashOnIcon {
+  color: #c2c2c2 !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  margin-top: 1.5px;
+  margin-left: 0.5vw;
+}

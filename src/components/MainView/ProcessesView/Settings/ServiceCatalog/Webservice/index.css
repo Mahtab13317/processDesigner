@@ -1,0 +1,3 @@
+.webSSelect_disabled .MuiSelect-select {
+  cursor: default !important;
+}

@@ -1,0 +1,8 @@
+.processesView{
+    height: inherit;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    z-index: 2;
+}
+

@@ -1,0 +1,26 @@
+.deployIcon {
+    margin-top: 5px;
+  }
+  
+  .deployButton {
+    background: #0072c6 0% 0% no-repeat padding-box;
+    border-radius: 2px;
+    opacity: 1;
+    display: inline-flex;
+    padding: 0px 15px;
+    margin-right: 10px;
+    border: none;
+    height:25px !important;
+    cursor: pointer;
+  }
+  
+  .deployText {
+    margin-top: 4px;
+    margin-left: 2px;
+    text-align: left;
+    font: normal normal normal 12px/17px Open Sans;
+    letter-spacing: 0px;
+    color: #ffffff;
+    opacity: 1;
+  }
+  

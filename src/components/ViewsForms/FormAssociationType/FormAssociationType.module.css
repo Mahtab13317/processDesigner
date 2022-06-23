@@ -1,0 +1,21 @@
+.formLabel {
+  font-size: 0.875rem;
+  font-weight: bold;
+}
+.box {
+  width: 47%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mainDiv {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  padding-inline: 1.6rem;
+  padding-block: 1rem;
+}

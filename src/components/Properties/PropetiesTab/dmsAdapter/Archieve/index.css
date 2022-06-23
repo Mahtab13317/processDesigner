@@ -1,0 +1,191 @@
+.dropDownSelectLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.dropDownSelectLabel_expanded {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.dropDownSelect {
+  width: 138px;
+  height: 28px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  font: normal normal normal 12px/17px Open Sans;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  /* margin-right: 10px; */
+  margin-top: 10px;
+}
+
+.dropDownSelect_expanded {
+  width: 138px;
+  height: 28px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  font: normal normal normal 12px/17px Open Sans;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  margin-right: 10px;
+  margin-top: 10px;
+  position: absolute;
+  left: 45%;
+}
+
+.userNameInput,
+.passwordInput {
+  width: 138px;
+  height: 25px;
+  margin-right: 10px;
+  border: 1px solid #c4c4c4;
+  padding: 5px;
+}
+
+.folderNameTextArea {
+  width: 208px;
+  height: 55px;
+  border: 1px solid #c4c4c4;
+  margin-left: 110px;
+  padding: 5px;
+}
+.table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table th {
+  text-align: left;
+  padding: 8px;
+  font-size: 14px;
+}
+
+.table td {
+  text-align: left;
+  padding: 8px;
+  font-size: 12px;
+}
+
+.table tr {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+}
+
+.filterTriggerButton {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  padding: 0 0.25rem;
+  height: 1.5rem;
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+.propertiesAddButton {
+  padding: 0.25rem 1vw;
+  text-transform: capitalize;
+  margin-bottom: 0.25rem;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #338ed1;
+  border-radius: 2px;
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #0072c6;
+  cursor: pointer;
+}
+
+.propertiesAddButton:disabled {
+  cursor: default;
+  background-color: rgba(84, 84, 84, 0.04);
+  color: rgba(84, 84, 84, 0.6);
+  border: 1px solid rgba(84, 84, 84, 0.5);
+}
+
+.argStringBodyInput {
+  width: 15vw;
+  height: 7rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #dadada;
+  margin-right: 10px;
+}
+
+.propertiesAddButton_connect {
+  padding: 0.25rem 1vw;
+  text-transform: capitalize;
+  margin-bottom: 0.25rem;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #338ed1;
+  border-radius: 2px;
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #0072c6;
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+.archieveScreen {
+  overflow-y: scroll;
+  height: 70vh;
+}
+
+#archieve_cabinet {
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+#archieve_userName {
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+#archieve_password {
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+#archieve_folderName {
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+#archieve_dataClass {
+  font-size: 14px;
+  margin-left: 5px;
+  margin-top: 8px;
+}
+
+#archieve_workItemAudit {
+  font-size: 14px;
+  margin-top: 8px;
+  margin-left: 5px;
+}
+
+#archieve_docTypes {
+  font-size: 14px;
+  font-weight: 700;
+  margin-left: 5px;
+}
+
+#ok_AddVariableModal_DMSAdapter {
+  height: 25px;
+  width: 50px !important;
+  min-width: none;
+  margin-left: 2px;
+  margin-right: 10px;
+}
+
+#close_AddVariableModal_DMSAdapter {
+  height: 26px;
+  width: 65px;
+  text-transform: none;
+}

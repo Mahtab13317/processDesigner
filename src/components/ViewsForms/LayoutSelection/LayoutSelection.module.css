@@ -1,0 +1,44 @@
+.steps {
+  width: 50%;
+  height: 44px;
+}
+
+.stepName {
+  text-align: left;
+  font: normal normal normal 12px/18px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  width: 75px;
+}
+
+.stepButton {
+  height: 12px !important;
+  margin-left: 10px;
+  margin-right: 10px;
+  padding: 0px;
+}
+.buttons {
+  width: auto !important;
+  height: 1.75rem !important;
+  /* background: #0072c6 0% 0% no-repeat padding-box !important; */
+  /* font-family: "Open Sans"; */
+  opacity: 1 !important;
+  font-size: 0.75rem !important;
+  text-transform: none !important;
+  margin-inline: 0.3375rem !important;
+  white-space: nowrap !important;
+  color: white !important;
+}
+.cancelButton {
+  width: auto !important;
+  height: 1.75rem !important;
+  background: white 0% 0% no-repeat padding-box !important;
+  /* font-family: "Open Sans"; */
+  opacity: 1 !important;
+  font-size: 0.75rem !important;
+  text-transform: none !important;
+  margin-inline: 0.3375rem !important;
+  white-space: nowrap !important;
+  color: #020202b9 !important;
+}

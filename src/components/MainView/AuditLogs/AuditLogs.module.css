@@ -1,0 +1,154 @@
+.wrapperDiv {
+  width: 100vw;
+  font-family: "Open Sans";
+  overflow: hidden;
+  padding: 1rem;
+}
+
+.heading {
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+}
+.toolbox {
+  display: flex;
+  flex-direction: row;
+  width: 50%;
+  justify-content: space-between;
+  margin-top: 1rem;
+  flex: 1;
+}
+.bold {
+  color: #000000;
+  letter-spacing: 0px;
+  font: normal normal 600 1rem/1.375rem Open Sans;
+  opacity: 1;
+}
+
+.generateButton {
+  background: #0072c6;
+  border-radius: 0.1875rem;
+  margin-top: 1.4rem;
+  margin-left: 1.25rem;
+  opacity: 1;
+  width: 6.375rem;
+  height: 2rem;
+  border: none;
+}
+
+.generateText {
+  font: normal normal 600 0.75rem/1.0625rem Open Sans;
+  letter-spacing: 0px;
+  color: #ffffff;
+  opacity: 1;
+  width: 4rem;
+}
+
+.toolboxHeading {
+  font: normal normal 600 0.9rem Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  opacity: 1;
+  margin-bottom: 0.2rem;
+}
+
+.tableContainer {
+  width: 100vw;
+margin-top: 2rem;
+  overflow-y: scroll;
+  padding-left: 0.5rem;
+  height: 100%;
+  z-index: 1;
+}
+
+.tableHead {
+  background-color: #F8F8F8;
+    width: 100vw;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.queuetable {
+  font-family: "Open Sans";
+  border-collapse: collapse;
+  width: 93vw !important;
+  display: flex;
+  flex-direction: column;
+  
+  overflow-y: scroll;
+  height: 80%;
+}
+.queuetable::-webkit-scrollbar {
+  background-color: transparent;
+  width: 0.375rem;
+  height: 1.125rem;
+}
+.queuetable::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 0.313rem;
+}
+
+.queuetable:hover::-webkit-scrollbar {
+  overflow-y: scroll;
+  width: 0.375rem;
+  height: 1.125rem;
+}
+.queuetable:hover::-webkit-scrollbar-thumb {
+  background: #8c8c8c 0% 0% no-repeat padding-box;
+  border-radius: 0.313rem;
+}
+
+.tableCellText {
+  font-family: "Open Sans";
+  font-size: 0.875rem;
+  font-weight: bold;
+  padding: 0;
+  color: #070707;
+  letter-spacing: 0.0262rem;
+}
+.tableRow {
+  font-family: "Open Sans";
+background-color: #FFFFFF !important;
+}
+.tableCellBody {
+  font-family: "Open Sans";
+  font-size: 0.75rem;
+  color: #000000;
+  opacity: 1
+}
+
+.iconForProcessType{
+  margin: 7px;
+  margin-top: 6px;
+  height: 7px;
+  width: 7px;
+  border-radius: 50%;
+}
+
+.fromToCalculatorDiv{
+  width: 100px;
+  height: 28px;
+  border: 1px solid rgb(0,0,0,0.5);
+  border-radius: 2px;
+  padding-top: 3px;
+  padding-left: 9px;
+  font-family: "Open Sans";
+  font-size: 0.75rem;
+  color: #000000;
+  opacity: 1;
+  font-weight: 600;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.eventIcon{
+  opacity: 0.5;
+  padding: 2px;
+  padding-top: 0px;
+}
+.calender{
+  z-index: 99999 !important;
+  background-color: white;
+}

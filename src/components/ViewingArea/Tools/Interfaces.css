@@ -1,0 +1,521 @@
+.DocTypes {
+  display: flex;
+  align-items: center;
+  height: 80vh;
+  max-height: 80vh;
+  background-color: white;
+}
+
+.DocTypes .MuiSvgIcon-root {
+  font-size: 1rem !important;
+}
+
+.DocTypes .MuiFormControlLabel-root span {
+  font-size: 0.75rem !important;
+  margin-bottom: -0.3125rem !important;
+}
+
+.DocTypes #searchBoxId {
+  width: 12.8125rem !important;
+}
+
+.DocTypes .oneBox {
+  display: flex;
+  flex-direction: column;
+  width: 80vw;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.oneBox .checkBoxes {
+  transform: translate(1.5rem, 1.5625rem);
+}
+
+.DocTypes
+  .MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary {
+  text-transform: none !important;
+}
+.addDocs {
+  background-color: white;
+  position: absolute;
+  top: 30%;
+  left: 30%;
+  padding: 0.625rem;
+  width: 650px;
+  height: 350px;
+  top: 15%;
+}
+
+.addDocsHeading {
+  font-size: 1rem;
+  margin-bottom: 0.625rem;
+  font: normal normal 600 16px/22px Open Sans;
+}
+.addDocs .buttons_add .MuiButtonBase-root.MuiButton-root.MuiButton-outlined {
+  width: 3.8125rem !important;
+  height: 1.75rem !important;
+  background: #ffffff 0% 0% no-repeat padding-box !important;
+  border: 1px solid #c4c4c4 !important;
+  border-radius: 2px !important;
+  opacity: 1 !important;
+  font-size: 0.625rem;
+  text-transform: none !important;
+  margin-right: 0.4375rem;
+}
+
+.addDocs
+  .buttons_add
+  .MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary {
+  width: 5.9375rem;
+  height: 1.75rem;
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: white;
+  opacity: 1;
+  font-size: 0.625rem;
+  margin-right: 0.4375rem;
+  text-transform: none !important;
+  border-radius: 0px !important;
+}
+
+.nameInput {
+  top: 280px;
+  left: 365px;
+  width: 286px;
+  height: 24px;
+  background: #f8f8f8 0% 0% no-repeat padding-box;
+  border: 1px solid #e6e6e6;
+  border-radius: 2px;
+  margin-bottom: 8px;
+  opacity: 1;
+}
+
+.descInputlabel {
+  display: block;
+  font-size: 0.875rem;
+}
+
+.descTextArea {
+  width: 286px;
+  height: 80px;
+}
+
+.descriptionInput {
+  top: 334px;
+  left: 365px;
+  width: 286px;
+  height: 54px;
+  background: #f8f8f8 0% 0% no-repeat padding-box;
+  border: 1px solid #e6e6e6;
+  border-radius: 2px;
+  opacity: 1;
+  padding-left: 0px !important;
+  padding-top: 0px !important;
+}
+
+.nameInputlabel {
+  font-size: 0.875rem;
+  margin-bottom: 0.625rem;
+}
+
+.activities {
+  width: 12.5rem;
+  border-right: 1px solid rgb(218, 208, 194);
+  font-size: 0.8125rem;
+  text-align: center;
+  border-bottom: 1px solid rgb(218, 208, 194);
+}
+
+.activities:first-child {
+  border-left: 1px solid rgb(218, 208, 194);
+  border-right: 1px solid rgb(218, 208, 194);
+}
+
+.oneActivityColumn {
+  width: 12.51875rem;
+  border-right: 1px solid #dad0c2;
+  text-align: center;
+}
+
+.checkBoxesThree {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+}
+.screenHeading {
+  /* margin-right: 1.875rem; */
+  font-size: 1rem;
+  font: normal normal 600 16px/22px Open Sans;
+  cursor: pointer;
+}
+.actvitySearchDiv {
+  display: flex;
+  align-items: center;
+}
+.docSearchBar {
+  margin-right: 0.625rem;
+}
+
+.activityNameDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  margin-top: 10px;
+}
+.checkBoxesStyling {
+  margin-top: -0.625rem;
+  margin-left: 0.625rem;
+}
+
+.docNameDiv {
+  display: flex;
+  margin-bottom: 0rem;
+  padding: 0.25rem 0rem;
+  font-size: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: white;
+}
+
+.docName {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.docDescription {
+  font-size: 10px;
+  width: 135px;
+}
+.oneDocDiv {
+  height: 100%;
+  width: 17.4375rem;
+  /* background-color: white; */
+  margin-top: 0.625rem;
+  display: flex;
+  flex-direction: column;
+}
+
+#ToDoDescInput,
+#ExceptionNameInput,
+#ExceptionDescInput,
+#ToDoNameInput,
+#groupNameInput_exception,
+#todo_groupNameId,
+#DocDescInput,
+#DocNameInput {
+  padding: 5px !important;
+}
+
+.Rules {
+  color: grey;
+  /* font-size: 1rem; */
+  font: normal normal normal 16px/22px Open Sans;
+  cursor: pointer;
+}
+.selectedBottomBorder {
+  border-bottom: 5px solid #0072c6;
+}
+
+.docSearchDiv {
+  display: flex;
+  padding: 0.3125rem 0.3125rem 0rem 0.625rem;
+  position: sticky;
+  top: 0rem;
+  z-index: 1;
+  background-color: white;
+  margin-bottom: 0.5rem;
+}
+
+.activityName {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.activitySideDiv {
+  height: 100%;
+  width: 80%;
+  /* background-color: white; */
+  margin-top: 0.625rem;
+  margin-left: 0.1875rem;
+  /* border-left: 1px solid rgb(218, 208, 194); */
+}
+
+.activityHeadingDiv {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.48125rem;
+  border-bottom: 1px solid #dad0c2;
+  border-left: 1px solid rgb(218, 208, 194);
+  position: sticky;
+  top: 0rem;
+  height: 2.55rem;
+  z-index: 1;
+  background-color: white;
+}
+.activitySideHeading {
+  margin-right: 1.875rem;
+  font-size: 1rem;
+  font: normal normal 600 16px/22px Open Sans;
+}
+
+.exceptionMoveTo {
+  top: 0px;
+  left: 50%;
+}
+
+.addException {
+  color: #0072c6;
+  font-size: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f0d7;
+  /* position: absolute;
+  left: 11vw; */
+}
+
+.activityModal {
+  display: flex;
+  background-color: white;
+}
+
+.actModalCheckboxes {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+}
+
+.modalPaperDocType {
+  position: absolute;
+  z-index: 100;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000029;
+  border: 1px solid #c4c4c4;
+  display: flex;
+  background-color: white;
+  width: 12.5rem;
+  left: 0px;
+  padding: 1rem;
+  font-size: 14px;
+}
+
+.activityModal {
+  position: absolute;
+  z-index: 100;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000029;
+  border: 1px solid #c4c4c4;
+  display: flex;
+  background-color: white;
+  width: 12.5rem;
+  left: 0px;
+  top: 33%;
+  padding: 0.6rem;
+  font-size: 14px;
+}
+
+.activityModal .actModalCheckboxes .MuiFormControlLabel-root {
+  height: 30px;
+}
+
+.activityModal
+  .actModalCheckboxes
+  .MuiFormControlLabel-root
+  .MuiIconButton-label
+  .MuiSvgIcon-root {
+  font-size: 1rem !important;
+}
+
+.activityModal
+  .actModalCheckboxes
+  .MuiFormControlLabel-root
+  .MuiFormControlLabel-label {
+  font-size: 0.8rem;
+}
+
+.noDocTypesScreen {
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  left: 35%;
+}
+
+.activities .oneActivityColumn .MuiFormControlLabel-root {
+  margin-right: 5px !important;
+}
+
+.addDocs .MuiFormControlLabel-root .MuiSvgIcon-root.MuiSvgIcon-fontSizeSmall {
+  height: 1rem;
+}
+
+.addDocs .MuiFormControlLabel-root .MuiTypography-body1 {
+  font-size: 0.8rem !important;
+}
+
+.addDocs #ExceptionDescInput {
+  width: 378px;
+  height: 110px;
+  padding: 5px !important;
+}
+
+.activityHeader {
+  background-color: white;
+  height: 2rem;
+  width: 12.4rem;
+  border-bottom: 1px solid rgb(218, 208, 194);
+}
+
+.activityNameDivDocs {
+  display: flex;
+  align-items: center;
+}
+
+.activityHeaderToDo {
+  background-color: white;
+  height: 2rem;
+  width: 12.4rem;
+  border-bottom: 1px solid rgb(218, 208, 194);
+  /* margin-bottom: 10px; */
+}
+
+.oneBox::-webkit-scrollbar {
+  display: none;
+}
+
+.groupNamesDiv {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 10px;
+}
+
+.groupName {
+  margin: 5px 0px 8px 0px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.addExpButtonDiv {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+#moveExp_To_OtherGroup {
+  display: flex;
+  align-items: center;
+}
+
+.activityNameBlock {
+  background-color: #eef4fcc4;
+  border-bottom: 1px solid #dad0c2;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 10px 6px 10px;
+}
+
+.associateFieldDiv {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  flex-direction: column;
+}
+
+.radioGroupsDiv {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 5px 5px 1rem;
+  /* margin-top: 10px; */
+  margin-left: -12px;
+}
+
+.selectedToDoTypeModal {
+  display: flex;
+  flex-direction: column;
+  margin-left: 50px;
+}
+
+.selectedToDoTypeDiv {
+  display: flex;
+  flex-direction: column;
+}
+
+.selectTrigger {
+  border: 1px solid #d3d3d3;
+  height: 17px;
+  background-color: white;
+  margin: 5px 0px 0px 5px;
+  font-size: 10px;
+}
+
+.searchBarNFilterInterface {
+  display: flex;
+  align-items: center;
+}
+
+.activities:first-child .oneActivityColumn {
+  width: 12.45rem !important;
+}
+
+.pickListInputDiv {
+  display: flex;
+}
+
+.buttonsAddToDo {
+  width: 629px;
+  margin-top: 15px;
+  position: absolute;
+  bottom: 8px;
+  text-align: right;
+  background: #f5f5f5 0% 0% no-repeat padding-box;
+}
+
+#addDocButton {
+  cursor: pointer;
+  width: 33px;
+  height: 17px;
+  font: var(--unnamed-font-style-normal) normal var(--unnamed-font-weight-600)
+    var(--unnamed-font-size-12) / var(--unnamed-line-spacing-17)
+    var(--unnamed-font-family-open-sans);
+  letter-spacing: var(--unnamed-character-spacing-0);
+  color: var(--blue-1-0072c6);
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #0072c6;
+  opacity: 1;
+}
+
+.addGroupButton {
+  width: 46px;
+  height: 17px;
+  font: var(--unnamed-font-style-normal) normal var(--unnamed-font-weight-600)
+    var(--unnamed-font-size-12) / var(--unnamed-line-spacing-17)
+    var(--unnamed-font-family-open-sans);
+  letter-spacing: var(--unnamed-character-spacing-0);
+  color: var(--blue-1-0072c6);
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #0072c6;
+  opacity: 1;
+  cursor: pointer;
+}
+
+#addGroup {
+  color: #0072c6;
+}
+
+#triggerInput_todo {
+  width: 200px;
+  height: 28px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  margin-bottom: 3px;
+  padding-left: 3px;
+}

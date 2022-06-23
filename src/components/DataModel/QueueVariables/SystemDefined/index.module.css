@@ -1,0 +1,112 @@
+.headerDiv {
+  background: #f0f0f0 0% 0% no-repeat padding-box;
+  opacity: 1;
+  height: 2rem;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.variableName {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.25rem 0rem 0.438rem 1.813rem;
+}
+
+.variableType {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.25rem 0rem 0.438rem 5.375rem;
+}
+
+.dataType {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.25rem 0rem 0.438rem 5.938rem;
+}
+
+.defaultValue {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.25rem 0rem 0.438rem 4.875rem;
+}
+
+.variableLength {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.25rem 0rem 0.438rem 4.063rem;
+}
+
+.dataDiv {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  opacity: 1;
+  height: 2.813rem;
+  margin-bottom: 0.125rem;
+  display: flex;
+  flex-direction: row;
+}
+
+.variableNameData {
+  margin: 0.875rem 0rem 0.875rem 1.813rem;
+  text-align: left;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  width: 5.313rem;
+}
+
+.variableTypeData {
+  width: 6.438rem;
+  text-align: left;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.875rem 0rem 0.875rem 5.5rem;
+}
+
+.dataTypeValue {
+  text-align: left;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.875rem 0rem 0.875rem 4.375rem;
+  width: 6.438rem;
+}
+
+.defaultValueData {
+  text-align: left;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  width: 3.125rem;
+  margin: 0.875rem 0rem 0.875rem 4.375rem;
+}
+
+.variableLengthData {
+  text-align: left;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  width: 3.125rem;
+  margin: 0.875rem 0rem 0.875rem 4.375rem;
+}

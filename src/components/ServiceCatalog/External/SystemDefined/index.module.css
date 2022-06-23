@@ -1,0 +1,104 @@
+.mainDiv {
+  width: 100%;
+}
+
+.headerDiv {
+  background: #f0f0f0 0% 0% no-repeat padding-box;
+  height: 2.5rem;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 2rem;
+}
+
+.bodyDiv {
+  max-height: 50vh;
+  overflow-y: auto;
+  width: 100%;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  padding: 0 2rem;
+}
+
+.bodyDiv::-webkit-scrollbar {
+  display: none;
+}
+
+.variableName {
+  text-align: left;
+  font: normal normal 600 12px/24px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  width: 18%;
+}
+
+.dataType {
+  text-align: left;
+  font: normal normal 600 12px/24px Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  width: 25%;
+}
+
+.variableLength {
+  text-align: left;
+  font: normal normal 600 12px/24px Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  width: 15%;
+}
+
+.globalVarIcon {
+  width: 1rem !important;
+  height: 1rem !important;
+  margin-top: 0.18rem;
+  color: #95d1ff !important;
+}
+
+.dataDiv {
+  margin-bottom: 0.5rem;
+  display: flex;
+  flex-direction: row;
+  height: 1.5rem;
+  align-items: center;
+}
+
+.iconDiv {
+  width: 3%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+}
+
+.variableNameData {
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  width: 18%;
+}
+
+.dataTypeValue {
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  width: 25%;
+}
+
+.variableLengthData {
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  width: 15%;
+}
+
+.paramCount {
+  text-align: left;
+  font: italic normal normal 12px/24px Open Sans;
+  letter-spacing: 0px;
+  color: #727272;
+  margin-right: 1vw;
+  cursor: pointer;
+}

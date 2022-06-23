@@ -1,0 +1,187 @@
+.mainDiv {
+  width: 100%;
+  overflow: hidden;
+  font-family: "Open Sans";
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  width: 100%;
+  margin-bottom: 0.9rem;
+  height: 8%;
+  background: #ffffff;
+}
+
+.contentDiv {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  /* padding-top: 0.6rem; */
+  padding-bottom: 0.6rem;
+}
+.contentDiv::-webkit-scrollbar {
+  background-color: transparent;
+  width: 0.375rem;
+  height: 1.125rem;
+}
+.contentDiv::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 0.313rem;
+}
+
+.contentDiv:hover::-webkit-scrollbar {
+  overflow-y: scroll;
+  width: 0.375rem;
+  height: 1.125rem;
+}
+.contentDiv:hover::-webkit-scrollbar-thumb {
+  background: #8c8c8c 0% 0% no-repeat padding-box;
+  border-radius: 0.313rem;
+}
+/* .contentDiv:hover::-webkit-scrollbar-button{
+      height: 1rem
+  } */
+
+.processNameInput {
+  width: 17.6875rem;
+  height: 2rem;
+
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  font-size: 0.85rem;
+  border: 1px solid #d3caca;
+  padding: 0.5rem;
+  border-radius: 0.1875rem;
+}
+
+.fieldsDiv {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.fieldsDivSettings {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.fieldsSettingsDiv {
+  display: flex;
+  width: 100%;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.fieldsName {
+  color: #606060;
+  font-size: 0.85rem;
+  opacity: 1;
+  font-weight: 600;
+  margin-top: 0.4375rem;
+}
+
+.footerDiv {
+  width: 100%;
+  height: 3.125rem;
+  display: flex;
+  flex-direction: row-reverse;
+  padding: 0.875rem;
+  background-color: #f5f5f5;
+}
+
+.footerDivSettings {
+  position: absolute;
+  bottom: 10%;
+  width: 79.3%;
+  height: 50px;
+  display: flex;
+  flex-direction: row-reverse;
+  padding: 0.875rem;
+  background-color: #f5f5f5;
+}
+
+.dropDown {
+  font-size: 15px;
+  font-family: "Open Sans";
+  width: 17.6875rem;
+  height: 1.8rem;
+  text-align: left;
+  padding: 10px 10px 10px 3px;
+  font-family: "Open Sans";
+  font-size: 0.8rem;
+
+  border: 1px solid #d3caca;
+  background: #ffffff;
+  border-radius: 0.1875rem;
+}
+
+.buttons {
+  width: 3.5rem;
+  height: 1.75rem;
+  margin-inline: 0.3rem;
+  border: none;
+  color: #ffffff;
+  border-radius: 3px;
+}
+
+.DeploynSaveButton{
+  width: 6.5rem;
+  height: 1.75rem;
+  margin-inline: 0.3rem;
+  border: none;
+  color: #ffffff;
+  border-radius: 3px;
+}
+
+.infoIcon {
+  color: #606060;
+  margin-top: 5px;
+  padding: 0.25rem;
+  /* margin-left: 1.5rem; */
+  opacity: 1;
+}
+
+.starIcon {
+  color: #d12c2c !important;
+  padding: 5px;
+  margin-top: 0.1rem;
+  margin-left: -0.3125rem;
+  font-size: 8px;
+}
+
+.deployProcessHeading {
+  font-size: 0.9rem;
+  font-weight: 600;
+  /* margin-left: 1.5rem; */
+  margin-top: 1rem;
+  color: #383737;
+}
+
+.hrTag {
+  outline: #c4c4c4 solid 0.0313rem;
+  border: none;
+  width: 100%;
+}
+
+.type1text {
+  font-size: 0.85rem;
+  text-align: left;
+  color: #606060;
+  margin-bottom: 0.5rem;
+  padding: 5px;
+}
+

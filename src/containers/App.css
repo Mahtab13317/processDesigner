@@ -1,0 +1,260 @@
+.App {
+  text-align: center;
+  vertical-align: top;
+  font-family: "Open Sans";
+}
+
+.pmwidth100 {
+  width: 100%;
+  position: relative;
+  border-spacing: 0px;
+}
+
+.propertiesArea {
+  width: 27%;
+  border-bottom: 2px solid #e8e8e8;
+  border-left: 2px solid #e8e8e8;
+  border-right: 2px solid #e8e8e8;
+  height: 500px;
+}
+
+.pmviewingArea {
+  width: 100vw;
+  background: white;
+  height: 100%;
+}
+
+.processHierarchy {
+  background-color: #404040;
+  vertical-align: top;
+  width: 3%;
+  height: 500px;
+  padding-top: 10px;
+}
+
+.selectedView {
+  background-color: #f5e1d4;
+  width: 100px;
+  border: 0px;
+  border-radius: 10cm;
+  margin: 0;
+  /*float: left*/
+}
+
+.unselectedView {
+  background-color: #f6f6f6;
+  width: 100px;
+  border: 0px;
+  border-radius: 1m;
+  margin: 0;
+}
+.bgGrayLike {
+  background-color: #f6f6f6;
+}
+
+.tile {
+  background-color: #f5e1d4;
+  width: 400px;
+  border: 1px solid gray;
+  border-radius: 3cm;
+}
+
+.addMile {
+  width: 40px;
+  height: 40px;
+  position: relative;
+  background: darkgray;
+  color: white;
+}
+
+.addMile:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-left: 20px solid white;
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+}
+
+.addMile:before {
+  content: "";
+  position: absolute;
+  right: -20px;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-left: 20px solid darkgray;
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+}
+
+.flex {
+  display: flex;
+}
+
+.flexColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.w100 {
+  width: 100%;
+}
+
+.right {
+  text-align: right;
+}
+
+.center {
+  text-align: center;
+}
+
+.relative {
+  position: relative;
+}
+
+.MuiAccordionDetails-root {
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+  /* height: 0rem !important; */
+}
+.MuiAccordion-root.Mui-expanded {
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+  min-height: 1rem !important;
+}
+.MuiAccordionSummary-root.Mui-expanded {
+  min-height: 0 !important;
+}
+
+.MuiIconButton-colorPrimary:hover,
+.MuiIconButton-colorSecondary:hover {
+  background-color: transparent !important ;
+}
+
+.block {
+  display: block !important;
+}
+
+.inlineBlock {
+  display: inline-block;
+}
+
+.inlineFlex {
+  display: inline-flex;
+}
+
+.flex05 {
+  flex: 0.5;
+}
+
+.alignCenter {
+  align-items: center;
+}
+
+.justifyCenter {
+  justify-content: center;
+}
+
+.flex1 {
+  flex: 1;
+}
+
+.flex2 {
+  flex: 2;
+}
+
+.flex3 {
+  flex: 3;
+}
+
+.flex4 {
+  flex: 4;
+}
+
+.MuiRadio-colorSecondary.Mui-checked {
+  color: #0075ff !important;
+}
+
+.MuiCheckbox-colorPrimary.Mui-checked {
+  color: #0072c6 !important;
+}
+
+.MuiRadio-colorSecondary.Mui-disabled,
+.MuiCheckbox-colorPrimary.Mui-disabled {
+  color: rgba(0, 0, 0, 0.26) !important;
+}
+
+textarea {
+  resize: none;
+}
+
+.MuiInputBase-root.Mui-disabled {
+  color: rgb(84, 84, 84);
+  cursor: default;
+}
+
+.MuiDrawer-modal {
+  z-index: 100 !important;
+}
+
+.MuiMenu-paper::-webkit-scrollbar {
+  background-color: transparent;
+  width: 0.375rem;
+  height: 0.6rem;
+}
+.MuiMenu-paper::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 0.313rem;
+}
+
+.MuiMenu-paper:hover::-webkit-scrollbar {
+  overflow: scroll;
+  width: 0.375rem;
+  height: 0.6rem;
+}
+.MuiMenu-paper:hover::-webkit-scrollbar-thumb {
+  background: #8c8c8c 0% 0% no-repeat padding-box;
+  border-radius: 0.313rem;
+}
+
+.MuiInput-underline:after {
+  border-bottom: none !important;
+}
+
+.MuiInput-underline:before {
+  border-bottom: none !important;
+}
+
+.MuiTabs-indicator {
+  background: #0072c6 !important;
+}
+
+::-webkit-scrollbar {
+  background-color: transparent;
+  width: 0.375rem;
+  height: 0.6rem;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 0.6rem;
+}
+
+:hover::-webkit-scrollbar {
+  overflow-y: scroll;
+  width: 0.375rem;
+  height: 0.6rem;
+}
+:hover::-webkit-scrollbar-thumb {
+  background: #8c8c8c 0% 0% no-repeat padding-box;
+  border-radius: 0.313rem;
+}
+.MuiTab-wrapped {
+  display: flex !important;
+  flex-direction: row !important;
+}

@@ -1,0 +1,308 @@
+.triggerDiv {
+  display: flex;
+  flex-direction: row;
+  background: #f3f3f3 0% 0% no-repeat padding-box;
+  height: 100vh;
+  margin-top: 0.125rem;
+}
+
+.triggerDivRules {
+  height: 79vh;
+  justify-content: center;
+}
+
+.noTriggerScreen {
+  width: 100%;
+  margin: 8% 0;
+  text-align: center;
+  align-items: center;
+}
+
+.deployedNoTriggerScreen {
+  width: 100%;
+  margin: 10% 0;
+  text-align: center;
+  align-items: center;
+}
+
+.noSelectedTriggerScreen {
+  width: 100%;
+  margin: 10% 0;
+  text-align: center;
+  align-items: center;
+}
+
+.notriggerAddedString {
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  margin: 1rem 0;
+}
+
+.addTriggerButton {
+  background: #0072c6 0% 0% no-repeat padding-box !important;
+  border-radius: 2px !important;
+  border: 1px solid #0072c6 !important;
+  text-align: center;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px !important;
+  color: #ffffff !important;
+  text-transform: none !important;
+  position: relative;
+  padding: 0.25rem 0.5rem !important;
+}
+
+.cancelTriggerButton {
+  background: #ffffff 0% 0% no-repeat padding-box !important;
+  border: 1px solid #c4c4c4 !important;
+  border-radius: 2px !important;
+  text-align: center;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px !important;
+  color: #606060 !important;
+  text-transform: none !important;
+  margin-right: 0.5rem !important;
+  padding: 0.25rem 0.5rem !important;
+}
+
+.triggerSearchDiv {
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding: 0 0.5vw;
+}
+
+.triggerListViewArea {
+  display: inline;
+  width: 22vw;
+  background: white;
+  margin-left: 0.5vw;
+}
+
+.triggerMainFormArea {
+  display: inline;
+  width: 75.5vw;
+  margin: 0 1vw;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 2px 6px #00000014;
+}
+
+.addTrigger {
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #0072c6;
+  background: white;
+  border: none;
+  cursor: pointer;
+}
+
+.addTriggerDiv {
+  position: relative;
+  text-align: right;
+}
+
+.triggerMainView {
+  display: flex;
+  flex-direction: column;
+  padding-top: 1vh;
+}
+
+.triggerFormView {
+  display: flex;
+  flex-direction: row;
+  margin: 0 1vw;
+}
+
+.triggerNameTypeDiv {
+  margin-right: 5vw;
+}
+
+.triggerFormLabel {
+  display: inline-block;
+  width: 10vw;
+  margin-right: 1vw;
+  margin-top: 0.25rem;
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+}
+
+.starIcon {
+  color: red;
+  margin-left: 0.25vw;
+  font-size: 0.75rem;
+}
+
+.triggerFormInput {
+  width: 21vw;
+  height: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  border: 1px solid #DADADA;
+}
+
+.descriptionInput {
+  width: 24.75vw;
+  height: 4rem;
+  margin-bottom: 1rem;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  border: 1px solid #DADADA;
+}
+
+.nameFormInput {
+  padding: 0.25rem 0.5rem;
+}
+
+.triggerSelectInput {
+  border: 1px solid #DADADA;
+  width: 21vw;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.triggerSelectInput:active,
+.triggerSelectInput:target {
+  border: 1px solid #0072c6;
+}
+
+.triggerActionButtons {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.triggerListView {
+  height: 70vh;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding-top: 0.25rem;
+  padding-right: 1vw;
+}
+
+.triggerListView::-webkit-scrollbar {
+  display: none;
+}
+
+.triggerListRow {
+  display: flex;
+  padding: 0.25rem 0 0.25rem 0.5vw;
+  border-left: 0.25rem solid #fff;
+  text-align: left;
+  width: 22vw;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  cursor: pointer;
+}
+
+.triggerListRow:hover {
+  background: rgba(0, 0, 0, 0.04);
+  border-left: 0.25rem solid rgba(0, 0, 0, 0.04);
+}
+
+.selectedTriggerListRow {
+  background: #e8f3fa 0% 0% no-repeat padding-box !important;
+  border-left: 0.25rem solid #007cc6 !important;
+}
+
+.triggerDropdownData {
+  padding: 0.25rem 0.5rem !important;
+  width: 21vw;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+}
+
+.definitionHeading {
+  padding: 0.5rem 1vw;
+  display: flex;
+  font: normal normal 600 14px/19px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.triggerTypeHeading {
+  display: flex;
+  font: normal normal 600 11px/15px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  text-transform: uppercase;
+  position: absolute;
+  background: white;
+  top: -0.5rem;
+  padding: 0 0.5vw;
+}
+
+.definitionLine {
+  width: 67vw;
+  margin-top: 0.6rem !important;
+  margin-left: 1vw !important;
+  height: 1px !important;
+}
+
+.triggerTypeList {
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  position: relative;
+  padding-top: 0.75rem;
+  margin-top: 1rem;
+}
+
+.triggerTypeList:first-child {
+  margin-top: 0;
+}
+
+.triggerNameHeading {
+  font: normal normal 600 16px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.triggerFileIcon {
+  margin-top: 0.45rem;
+  margin-right: 0.5rem;
+}
+
+.triggerHeadDiv {
+  justify-content: space-between;
+  margin: 1rem 1vw 1.25rem;
+}
+
+.triggerAddButton {
+  background: #0072c6 0% 0% no-repeat padding-box !important;
+  border-radius: 2px !important;
+  margin-right: 0vw !important;
+  margin-bottom: 0.5rem !important;
+  text-align: center;
+  font: normal normal 500 0.9vw Open Sans !important;
+  letter-spacing: 0px !important;
+  color: #ffffff !important;
+  padding: 0.45rem 0 !important;
+}
+
+.FlashOnIcon {
+  color: #c2c2c2 !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  margin-top: 1.5px;
+  margin-right: 0.5vw;
+}
+
+.filterSetTrigger {
+  justify-content: space-between;
+  padding: 0.5rem 0.5rem 0.25rem;
+}
+
+.defaultSelectValue {
+  opacity: 0;
+  height: 0 !important;
+}

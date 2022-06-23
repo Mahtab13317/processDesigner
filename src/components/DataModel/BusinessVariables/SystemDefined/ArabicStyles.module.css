@@ -1,0 +1,94 @@
+.variableName {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.25rem 1.813rem 0.438rem 0rem;
+}
+
+.variableType {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.25rem 5.375rem 0.438rem 0rem;
+}
+
+.dataType {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 4px 118px 7px 0px;
+}
+
+.defaultValue {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.5rem 4.875rem 0.438rem 0rem;
+}
+
+.variableLength {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.25rem 3.875rem 0.438rem 0rem;
+}
+
+.variableNameData {
+  margin: 0.875rem 1.813rem 0.875rem 0rem;
+  text-align: right;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  width: 7.8125rem;
+}
+
+.variableTypeData {
+  width: 6.438rem;
+  text-align: right;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.875rem 5.5rem 0.875rem 0rem;
+}
+
+.dataTypeValue {
+  text-align: right;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.875rem 5rem 0.875rem 0rem;
+  width: 6.4375rem;
+}
+
+.defaultValueData {
+  text-align: right;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  width: 150px;
+  margin: 0.875rem 4.375rem 0.875rem 0rem;
+}
+
+.variableLengthData {
+  text-align: right;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  width: 3.125rem;
+  margin: 0.875rem 1.875rem 0.875rem 0rem;
+}

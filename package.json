@@ -1,0 +1,75 @@
+{
+  "name": "processdesigner",
+  "version": "0.1.0",
+  "private": true,
+  "homepage": "/processDesigner",
+  "dependencies": {
+    "@material-ui/core": "^4.11.3",
+    "@material-ui/icons": "^4.11.2",
+    "@material-ui/lab": "^4.0.0-alpha.60",
+    "@reduxjs/toolkit": "^1.7.1",
+    "@testing-library/jest-dom": "^5.11.8",
+    "@testing-library/react": "^11.2.2",
+    "@testing-library/user-event": "^12.6.0",
+    "axios": "^0.21.1",
+    "babel": "^6.23.0",
+    "classnames": "^2.2.6",
+    "i18next": "^19.8.4",
+    "i18next-browser-languagedetector": "^6.0.1",
+    "i18next-http-backend": "^1.2.8",
+    "i18next-xhr-backend": "^3.2.2",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.1",
+    "mxgraph": "^4.2.2",
+    "prop-types": "^15.7.2",
+    "radium": "^0.26.1",
+    "react": "^17.0.1",
+    "react-app-polyfill": "^2.0.0",
+    "react-beautiful-dnd": "^13.1.0",
+    "react-datetime": "^3.1.1",
+    "react-dom": "^17.0.1",
+    "react-dropzone": "^11.4.2",
+    "react-i18next": "^11.8.5",
+    "react-katex": "^2.0.2",
+    "react-query": "^3.34.5",
+    "react-redux": "^7.2.3",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "4.0.1",
+    "react-slick": "^0.28.1",
+    "redux": "^4.0.5",
+    "redux-thunk": "^2.4.1",
+    "slick-carousel": "^1.8.1",
+    "state-pool": "^0.6.0",
+    "styled-components": "^5.2.1",
+    "suneditor": "^2.41.0",
+    "suneditor-react": "^3.1.2",
+    "web-vitals": "^0.2.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "compile": "npm run build && cd build && jar -cvf processDesigner.war ."
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all",
+      "ie 11"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version",
+      "ie 11"
+    ]
+  }
+}

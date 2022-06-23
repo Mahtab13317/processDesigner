@@ -1,0 +1,121 @@
+.mainDiv {
+  margin-left: 0.625rem;
+  padding-top: 0.625rem;
+  margin-right: 0.625rem;
+}
+
+.headingsDiv {
+  display: flex;
+  flex-direction: row;
+  height: 3.063rem;
+  width: 100%;
+  background-color: #ffffff;
+}
+
+.headerLogo {
+  height: 1rem;
+  width: 1rem;
+  background-color: lightgrey;
+  border-radius: 0.25rem;
+  margin: 1.125rem 0rem 0.938rem 0.938rem;
+}
+
+.queueVariableHeading {
+  width: 8.125rem;
+  text-align: left;
+  font: normal normal 600 1rem/1.375rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.938rem 0rem 0.75rem 0.25rem;
+}
+
+.queueVariableSubHeading {
+  text-align: left;
+  font: normal normal normal 0.75rem/1.063 Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 1.25rem 0rem 0.75rem 0rem;
+}
+
+.buttonsDiv {
+  display: flex;
+  flex-direction: row;
+  margin: 0.75rem 0rem 0.563rem 35.75rem;
+  margin-left: auto;
+  margin-right: 0.625rem;
+}
+
+.exportDefinitionButton {
+  height: 1.751rem;
+  width: 8.25rem;
+  margin-left: 0.625rem;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 0.063rem solid #c4c4c4;
+  border-radius: 0.125rem;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.exportDefinitionButtonText {
+  margin-top: 0.125rem;
+  text-align: left;
+  font: normal normal 600 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #606060;
+  opacity: 1;
+}
+
+.buttonContent {
+  padding: 0.313rem;
+  display: flex;
+  flex-direction: row;
+}
+
+.auditHistoryButton {
+  height: 1.751rem;
+  margin-left: 0.625rem;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 0.063rem solid #c4c4c4;
+  border-radius: 0.125rem;
+  opacity: 1;
+  cursor: pointer;
+}
+.auditButtonText {
+  margin-top: 0.125rem;
+  margin-left: 0.125rem;
+  text-align: left;
+  font: normal normal 600 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #606060;
+  opacity: 1;
+}
+
+.erDiagramButton {
+  height: 1.751rem;
+  margin-left: 0.625rem;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 0.063rem solid #c4c4c4;
+  border-radius: 0.125rem;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.erDiagramButtonText {
+  margin-top: 0.125rem;
+  margin-left: 0.125rem;
+  text-align: left;
+  font: normal normal 600 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #606060;
+  opacity: 1;
+}
+
+.moreOptionsIcon {
+  height: 1.75rem;
+  width: 1.75rem;
+  border: 0.063rem solid #c4c4c4;
+  margin-left: 0.625rem;
+  border-radius: 0.125rem;
+}

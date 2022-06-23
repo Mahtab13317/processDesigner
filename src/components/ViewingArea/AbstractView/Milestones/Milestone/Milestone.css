@@ -1,0 +1,209 @@
+.milebg {
+  width: 160px;
+  height: 20px;
+  background-color: #414141;
+  color: #fff;
+  padding: 10px;
+  position: relative;
+  margin-right: 30px;
+  margin-top: 10px;
+  margin-left: 0px;
+  float: left;
+  font-family: Calibri Light;
+  font-size: 16px;
+}
+
+.milebg.arrowright:after {
+  content: " ";
+  position: absolute;
+  right: -20px;
+  top: 0px;
+  border-top: 20px solid transparent;
+  border-right: none;
+  border-left: 15px solid #414141;
+  border-bottom: 20px solid transparent;
+}
+
+.mileDeleteIcon {
+  height: 14px;
+  width: 14px;
+  /* margin-right: 5px; */
+  margin-top: 7%;
+  margin-left: 2%;
+}
+
+.mileDiv {
+  margin-left: 0.9rem;
+  /* margin-top: 10px; */
+}
+
+.mileDivSelected {
+  background: #e6e6e6;
+  margin-left: 0.9rem;
+  /* margin-top: 10px; */
+}
+
+.mileDivSelected .milestoneArrow,
+.mileDivSelected .milestoneArrowEnd,
+.mileDivSelected .milestoneArrowFull {
+  width: 290px;
+  background: #0072c6;
+}
+
+.mileDivSelected .milestoneArrow:before,
+.mileDivSelected .milestoneArrowEnd:before,
+.mileDivSelected .milestoneArrowFull:before {
+  border-left: 15px solid #0072c6;
+}
+
+
+.milestonePosition {
+  display: flex;
+  flex-direction: row;
+  padding-left: 1.1rem;
+}
+
+.milestoneArrow,
+.milestoneArrowEnd {
+  width: 290px;
+  height: 40px;
+  background: rgb(68, 66, 68);
+  border: none;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-right: 5%;
+}
+.milestoneArrow:after,
+.milestoneArrowEnd:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-left: 15px solid white;
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+}
+.milestoneArrow:before,
+.milestoneArrowEnd:before {
+  content: "";
+  position: absolute;
+  right: -15px;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-left: 15px solid rgb(68, 66, 68);
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+}
+
+.milestoneArrowFull {
+  width: 290px;
+  height: 40px;
+  position: relative;
+  background: rgb(68, 66, 68);
+  border: none;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.milestoneArrowFull:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+}
+.milestoneArrowFull:before {
+  content: "";
+  position: absolute;
+  right: -15px;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-left: 15px solid rgb(68, 66, 68);
+  border-top: 20px solid transparent;
+  border-bottom: 20px solid transparent;
+}
+.milestoneInput {
+  background-color: transparent;
+  color: white;
+  border: 0px solid;
+  width: 65%;
+  height: 25px;
+  margin-top: 7.5px;
+  font: normal normal 600 14px/17px Open Sans;
+}
+input:focus {
+  outline: none;
+}
+::placeholder {
+  color: white;
+  opacity: 1;
+  font-size: small;
+}
+.mileIdNo {
+  margin: 4%;
+  margin-top: 0.75rem;
+  height: 1.6rem;
+  margin-right: 2%;
+  font: normal normal 600 14px/17px Open Sans;
+}
+
+.addBetween {
+  display: none;
+}
+.milestoneArrowFull:hover .addBetween,
+.milestoneArrow:hover .addBetween {
+  background: transparent;
+  border: none;
+  height: 40px;
+  position: relative;
+  width: 4%;
+  margin-left: auto;
+  border-radius: 50%;
+  display: block;
+}
+.milestoneArrowEnd:hover .addBetween {
+  display: none;
+  height: 40px;
+}
+
+.dragIconHandle {
+  margin: 4%;
+  margin-top: 0.75rem;
+  height: 1.6rem;
+  margin-right: 0.4rem;
+  width: 0.8125rem;
+  font: normal normal 600 14px/17px Open Sans;
+}
+
+.addIcon {
+  position: absolute;
+  top: 25%;
+  right: 0;
+  font-size: large;
+  color: white;
+}
+
+.spaceAfterMile {
+  height: 10px;
+  background: white;
+  position: sticky;
+  margin-top: -9px;
+}
+
+.mileDivSelected .spaceAfterMile {
+  height: 10px;
+  background: #a9a9a93b;
+  position: sticky;
+  margin-top: -9px;
+}

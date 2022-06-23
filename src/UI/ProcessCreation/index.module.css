@@ -1,0 +1,195 @@
+.header {
+  font: normal normal 600 16px/22px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  width: 100%;
+  border-bottom: 1px solid black;
+}
+
+.moveBackDiv {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.backIcon {
+  width: 1rem !important;
+  height: 1rem !important;
+  margin-right: 0.5rem;
+  color: #707070 !important;
+}
+
+.footer {
+  width: 100%;
+  display: flex;
+  height: 50px;
+  background: #f5f5f5 0% 0% no-repeat padding-box;
+  opacity: 1;
+  position: fixed;
+  bottom: 0;
+  justify-content: end;
+  padding: 0 1rem;
+  align-items: center;
+}
+
+.templateFooter {
+  width: 100%;
+  display: flex;
+  height: 3.25rem;
+  background: #e1e0e0 0% 0% no-repeat padding-box;
+  border-radius: 0px 0px 5px 5px;
+  left: 0;
+  align-items: center;
+  position: absolute;
+  bottom: 0;
+  padding: 0 1rem;
+  justify-content: flex-end;
+}
+
+.formArea {
+  width: 45%;
+  padding: 1rem;
+}
+
+.form {
+  margin: 0 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: 75%;
+}
+
+.templateArea {
+  width: 55%;
+  padding: 1rem;
+}
+
+.selectedTemplateDiv {
+  width: 80%;
+}
+
+.card {
+  height: 22rem;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #e4e4e4;
+  border-radius: 5px;
+  margin-top: 0.5rem;
+  position: relative;
+}
+
+.cardContent {
+  display: flex;
+  align-items: center;
+  height: 85%;
+  font: normal normal 600 12px/16px Open Sans;
+  letter-spacing: 0px;
+  color: #000000d9;
+}
+
+.cardContent p {
+  text-align: center;
+  width: 100%;
+}
+
+.previewButton {
+  height: 1.9rem;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  text-align: center;
+  margin: 0 0.25rem;
+  padding: 0 0.75vw;
+  cursor: pointer;
+}
+
+.mr05 {
+  margin-right: 0.5rem;
+}
+
+.inputField {
+  width: 30vw;
+  height: 35px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #707070 !important;
+  border-radius: 4px;
+  padding: 0 2%;
+}
+
+.disabledField {
+  width: 30vw;
+  height: 35px;
+  border: 1px solid #707070 !important;
+  border-radius: 4px;
+  padding: 0 2%;
+  background: rgba(239, 239, 239, 0.5);
+}
+
+.selectWithInputTextField {
+  width: 30vw !important;
+  height: 35px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #707070 !important;
+  border-radius: 4px;
+}
+
+.multiSelectConstInput {
+  position: absolute;
+  width: 24vw;
+  height: 28px;
+  top: 0.25rem;
+  left: 0.25vw;
+  z-index: 100;
+  font: normal normal normal 12px/17px Open Sans !important;
+  border: none;
+}
+
+.selectWithInput {
+  width: 30vw !important;
+  margin-bottom: 0;
+}
+
+.label {
+  text-align: left;
+  font: normal normal 600 12px/16px Open Sans;
+  letter-spacing: 0px;
+  color: #000000d9;
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+}
+
+.createBtn {
+  padding: 0.25rem 0.5rem;
+  text-align: center;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #ffffff;
+  cursor: pointer;
+  width: 5vw;
+  align-items: center;
+  height: 1.75rem;
+  background: #0072c6 0% 0% no-repeat padding-box;
+  border: 1px solid #0072c6;
+  border-radius: 2px;
+  margin: 0 0.25rem;
+}
+
+.cancelBtn {
+  padding: 0.25rem 0.5rem;
+  text-align: center;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  cursor: pointer;
+  width: 5vw;
+  align-items: center;
+  height: 1.75rem;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  margin: 0 0.25rem;
+}

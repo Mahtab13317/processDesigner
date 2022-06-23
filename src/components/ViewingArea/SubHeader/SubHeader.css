@@ -1,0 +1,155 @@
+.leftDiv {
+  display: flex;
+}
+
+.rightDiv {
+  flex: 1 1;
+  text-align: right;
+  justify-content: flex-end;
+  display: flex;
+}
+
+.sub-header {
+  display: flex;
+  background: #f8f8f8 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000029;
+  padding: 0 15px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  height: 35px;
+}
+
+.buttonImgDropdown {
+  border: none;
+  background: none;
+  margin-right: 5px;
+}
+
+.buttonImg {
+  background: none;
+  border: none;
+  margin-right: 12px;
+  cursor: pointer;
+}
+
+.buttonImgDisabled{
+  background: none;
+  border: none;
+  margin-right: 12px;
+  cursor: default;
+}
+
+.redoDiv {
+  margin-top: 6px;
+  height: fit-content;
+}
+
+.copyDiv {
+  margin: 4px 0;
+  padding: 2px 3px 0 15px;
+  border-left: 1px solid #dadada;
+  height: fit-content;
+}
+
+.selectDiv {
+  padding: 2px 0 0 12px;
+  border-left: 1px solid #dadada;
+  margin: 4px 0px;
+  height: fit-content;
+}
+
+.viewDiv {
+  padding: 2px 5px 0 12px;
+  border-left: 1px solid #dadada;
+  margin: 4px 0px;
+  height: fit-content;
+}
+
+.subprocessDropdown {
+  display: block;
+  outline: none;
+  background: inherit;
+  font-size: 12px;
+  padding: 0 7px 0 0px;
+  margin-right: 6px;
+}
+.subProcessBtn {
+  width: 8rem;
+  height: 1.7rem;
+  border: 1px solid #c3c3c3;
+  border-radius: 4px;
+  opacity: 1;
+  cursor: pointer;
+  background: white;
+}
+.subProcessCount {
+  height: 3rem;
+  width: 3rem;
+  background: #c3c3c359;
+  color: #767676;
+  border-radius: 50%;
+  margin-left: 0.3rem;
+  font-size: 10px;
+  padding: 0.25rem 0.5rem;
+}
+
+.subProcessActivityName {
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  margin-left: 0.5rem;
+  margin-bottom: 5px;
+  background: #f8f8f8 0% 0% no-repeat padding-box;
+  cursor: pointer;
+}
+.subProcessActivityNameDisable {
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 0.47;
+  margin-left: 0.5rem;
+  margin-bottom: 5px;
+}
+
+.openAllModalActivity {
+  text-align: left;
+  font: normal normal normal 11px/15px Open Sans;
+  letter-spacing: 0px;
+  color: #0072c6;
+  opacity: 1;
+  margin-left: 1rem;
+}
+.modalActivityTitle {
+  text-align: left;
+  font: normal normal 600 11px/15px Open Sans;
+  letter-spacing: 0px;
+  color: #848484;
+  /* text-transform: uppercase; */
+  opacity: 1;
+  margin: 0;
+  margin-top: 0.2rem;
+  margin-bottom: 0.5rem;
+}
+.subProcessDiv {
+  margin-top: 5px;
+}
+.modalDivOnClick {
+  overflow: scroll;
+  height: 9.5rem;
+}
+.modalDivOnClick::-webkit-scrollbar {
+  display: none;
+}
+.noProcessAdded {
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  margin-bottom: 5px;
+  width: 100%;
+  background: #f8f8f8 0% 0% no-repeat padding-box;
+}

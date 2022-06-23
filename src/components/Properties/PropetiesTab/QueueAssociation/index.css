@@ -1,0 +1,58 @@
+.buttons_add .MuiButtonBase-root.MuiButton-root.MuiButton-outlined {
+  width: 3.8125rem !important;
+  height: 1.75rem !important;
+  background: #ffffff 0% 0% no-repeat padding-box !important;
+  border: 1px solid #c4c4c4 !important;
+  border-radius: 2px !important;
+  opacity: 1 !important;
+  font-size: 0.625rem;
+  text-transform: none !important;
+  margin-right: 0.4375rem;
+}
+
+.buttons_add
+  .MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary {
+  width: 5.9375rem;
+  height: 1.75rem;
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: white;
+  opacity: 1;
+  font-size: 0.625rem;
+  margin-right: 0.4375rem;
+  text-transform: none !important;
+  border-radius: 0px !important;
+}
+
+.buttonsAddToDo_Queue {
+  width: 100%;
+  margin-top: 15px;
+  position: absolute;
+  bottom: 0px;
+  text-align: right;
+  padding: 6px;
+  background: #f5f5f5 0% 0% no-repeat padding-box;
+}
+
+.buttonsAddToDo_Queue_Groups{
+  width: 100%;
+  margin-top: 15px;
+  position: absolute;
+  bottom: 0px;
+  text-align: right;
+  padding: 6px;
+  background: #f5f5f5 0% 0% no-repeat padding-box;
+  margin-left: -10px !important;
+
+}
+
+.buttonsAddToDo_FilterScreen{
+  width: 100%;
+  margin-top: 15px;
+  position: absolute;
+  bottom: 0px;
+  text-align: right;
+  padding: 6px;
+  background: #f5f5f5 0% 0% no-repeat padding-box;
+}

@@ -1,0 +1,9 @@
+.errorInput {
+  border: 1px solid red !important;
+}
+
+.errorStatement {
+  color: red;
+  font: normal normal normal 11px/16px Open Sans;
+  margin-bottom: 0.5rem;
+}

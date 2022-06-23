@@ -1,0 +1,37 @@
+.triggerSelectInput {
+  border: 1px solid #dadada;
+  width: 21vw;
+  padding-left: 0;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.triggerSelectInput_arabicView {
+  border: 1px solid #dadada;
+  width: 21vw;
+  padding-left: 0;
+  text-align: right;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.triggerSelectInput_arabicView .MuiSelect-select {
+  padding-right: 0.5rem !important;
+}
+
+.triggerSelectInput_arabicView .MuiSelect-icon {
+  left: 0;
+  right: unset;
+}
+
+.triggerSelectDropdown_arabicView .MuiSelect-select {
+  padding-right: 0.5rem !important;
+}
+
+.triggerSelectDropdown_arabicView .MuiSelect-icon {
+  left: 0;
+  right: unset;
+}

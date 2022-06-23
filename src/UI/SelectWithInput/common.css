@@ -1,0 +1,91 @@
+.selectWithInputTextField .Mui-focused {
+  border: 1px solid#DADADA;
+}
+
+.selectWithInputTextField .MuiOutlinedInput-notchedOutline {
+  border: 1px solid#DADADA;
+}
+
+.selectWithInputTextField
+  .MuiOutlinedInput-root:hover
+  .MuiOutlinedInput-notchedOutline {
+  border: 1px solid#DADADA;
+}
+
+.selectWithInputTextField .MuiAutocomplete-inputRoot {
+  height: 100%;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+  padding: 0 0.25rem 0.125rem 0.25rem !important;
+  border: none !important;
+}
+
+.selectWithInputTextField .MuiAutocomplete-inputRoot .MuiAutocomplete-input {
+  padding: 0 0 0 0.25rem !important;
+}
+
+.selectWithInputTextField
+  .MuiAutocomplete-inputRoot
+  .MuiAutocomplete-endAdornment
+  .MuiAutocomplete-popupIndicator,
+.selectWithInputTextField
+  .MuiAutocomplete-inputRoot
+  .MuiAutocomplete-endAdornment
+  .MuiAutocomplete-clearIndicator {
+  margin-right: -9px;
+}
+
+.selectWithInputTextField
+  .MuiAutocomplete-inputRoot
+  .MuiAutocomplete-endAdornment
+  .MuiAutocomplete-clearIndicator
+  .MuiSvgIcon-fontSizeSmall {
+  font-size: 1rem;
+}
+
+.MuiAutocomplete-popper {
+  box-shadow: 0px 5px 5px -3px rgb(0 0 0 / 20%),
+    0px 8px 10px 1px rgb(0 0 0 / 14%), 0px 3px 14px 2px rgb(0 0 0 / 12%);
+  z-index: 1000 !important;
+  border: 1px solid#DADADA;
+}
+
+.MuiAutocomplete-popper div {
+  margin: 0;
+  padding: 0;
+}
+
+.MuiAutocomplete-popper ul {
+  padding: 0 !important;
+  max-height: 8rem;
+  min-height: 1.5rem;
+  overflow-y: auto;
+  background-color: white;
+}
+
+.MuiAutocomplete-popper ul::-webkit-scrollbar {
+  width: 0.25rem;
+  height: 10px;
+  background-color: white;
+}
+.MuiAutocomplete-popper ul::-webkit-scrollbar-thumb {
+  background-color: #d8d8d8;
+  border-radius: 4px;
+}
+
+.MuiAutocomplete-popper ul li {
+  padding: 0.25rem 0.75vw !important;
+  height: fit-content !important;
+  min-height: 1.25rem;
+}
+
+.MuiAutocomplete-noOptions {
+  padding: 0.25rem 0.75vw !important;
+  height: fit-content !important;
+  min-height: 1.25rem;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+}

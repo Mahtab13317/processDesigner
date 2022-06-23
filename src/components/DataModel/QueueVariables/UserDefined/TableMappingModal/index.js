@@ -1,0 +1,152 @@
+import React, { useState } from "react";
+import styles from "./index.module.css";
+import arabicStyles from "./ArabicStyles.module.css";
+import { useTranslation } from "react-i18next";
+import { Divider, Stepper, Step, StepButton } from "@material-ui/core";
+import TableDetailsStep from "./TableDetailsStep";
+import TableMappingStep from "./TableMappingStep";
+import TableRelationshipStep from "./TableRelationshipStep";
+import {
+  TABLE_STEP,
+  MAPPING_STEP,
+  RELATIONSHIP_STEP,
+  RTL_DIRECTION,
+} from "../../../../../Constants/appConstants";
+
+function TableMappingModal(props) {
+  let { t } = useTranslation();
+  const direction = `${t("HTML_DIR")}`;
+  const steps = [t("tableDetails"), t("mapping"), t("relationship")];
+  const { aliasName, handleClose } = props;
+  const [activeStep, setActiveStep] = useState(0);
+  const [childTableName, setChildTableName] = useState("");
+  const [childVariableName, setChildVariableName] = useState("");
+  const [columnData, setColumnData] = useState([]);
+
+  // Function to handle step change when the user goes from one step to another.
+  const handleStep = (step) => () => {
+    setActiveStep(step);
+  };
+
+  // Function that runs when the user goes to the previous step using the previous button.
+  const handlePreviousStep = () => {
+    if (activeStep > 0) {
+      setActiveStep(activeStep - 1);
+    }
+  };
+
+  // Function that runs when the user goes to the next step using the next button.
+  const handleNextStep = () => {
+    if (activeStep < steps.length - 1) {
+      setActiveStep(activeStep + 1);
+    }
+  };
+
+  return (
+    <div>
+      <div
+        className={
+          direction === RTL_DIRECTION
+            ? arabicStyles.headingsDiv
+            : styles.headingsDiv
+        }
+      >
+        <p
+          className={
+            direction === RTL_DIRECTION ? arabicStyles.heading : styles.heading
+          }
+        >
+          {t("tableCreationAndMapping")}
+        </p>
+        <p
+          className={
+            direction === RTL_DIRECTION
+              ? arabicStyles.aliasNameHeading
+              : styles.aliasNameHeading
+          }
+        >
+          {aliasName}
+        </p>
+      </div>
+      <Divider className={styles.divider} />
+      <Stepper className={styles.steps} nonLinear activeStep={activeStep}>
+        {steps.map((label, index) => (
+          <Step key={label}>
+            <StepButton
+              className={styles.stepButton}
+              color="inherit"
+              onClick={handleStep(index)}
+            >
+              <p className={styles.stepName}>{label}</p>
+            </StepButton>
+          </Step>
+        ))}
+      </Stepper>
+      <Divider className={styles.divider} />
+      {activeStep === TABLE_STEP && (
+        <div>
+          <TableDetailsStep
+            aliasName={aliasName}
+            setChildTableName={setChildTableName}
+            setChildVariableName={setChildVariableName}
+            setColumnData={setColumnData}
+          />
+        </div>
+      )}
+      {activeStep === MAPPING_STEP && (
+        <div>
+          <TableMappingStep
+            childTableName={childTableName}
+            aliasName={aliasName}
+            columnData={columnData}
+          />
+        </div>
+      )}
+      {activeStep === RELATIONSHIP_STEP && (
+        <div>
+          <TableRelationshipStep
+            childTableName={childTableName}
+            childVariableName={childVariableName}
+          />
+        </div>
+      )}
+
+      <div className={styles.buttonsDiv}>
+        <div>
+          <button
+            disabled={activeStep === 0}
+            onClick={handlePreviousStep}
+            className={
+              direction === RTL_DIRECTION
+                ? arabicStyles.previousButton
+                : styles.previousButton
+            }
+          >
+            <span className={styles.previousButtonText}>{t("previous")}</span>
+          </button>
+          <button
+            disabled={activeStep === 2}
+            onClick={handleNextStep}
+            className={
+              direction === RTL_DIRECTION
+                ? arabicStyles.nextButton
+                : styles.nextButton
+            }
+          >
+            <span className={styles.nextButtonText}>{t("next")}</span>
+          </button>
+        </div>
+        <div>
+          <button onClick={handleClose} className={styles.cancelButton}>
+            <span className={styles.cancelButtonText}>{t("cancel")}</span>
+          </button>
+          <button onClick={handleClose} className={styles.okButton}>
+            <span className={styles.okButtonText}>{t("done")}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default TableMappingModal;

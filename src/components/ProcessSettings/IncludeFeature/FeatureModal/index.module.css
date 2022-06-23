@@ -1,0 +1,45 @@
+.flexRow {
+  display: flex;
+  flex-direction: row;
+}
+
+.modalHeadingDiv {
+  display: flex;
+  justify-content: space-between;
+}
+
+.modalHeading {
+  text-align: left;
+  font: normal 600 normal 14px/19px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  margin-top: 16px;
+}
+
+.modalDivider {
+  color: #e4e4e4;
+  width: 100%;
+  margin-top: 15px !important;
+}
+
+.closeIcon {
+  margin-top: 16px;
+  cursor: pointer;
+}
+
+.labelTittle {
+  font: normal normal normal 12px/16px Open Sans;
+  margin-top: 1rem;
+}
+
+.footer {
+  position: absolute;
+  bottom: 5px;
+  right: 0 !important;
+}
+.input {
+  width: "100%" !important;
+  border: 1px solid #cecece;
+  height: 1.5rem;
+}

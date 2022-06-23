@@ -1,0 +1,20 @@
+.mainDiv {
+  width: 100%;
+}
+
+.mainTab {
+  background-color: #f8f8f8 !important;
+}
+
+.mainTabBarStyle {
+  background-color: #f8f8f8 !important;
+  margin-bottom: 0.75rem;
+}
+
+.mainOneTabStyle {
+  font: normal normal normal 14px/19px Open Sans !important;
+  letter-spacing: 0px !important;
+  margin-right: 1.5vw !important;
+  text-transform: capitalize !important;
+  min-height: 1rem !important;
+}

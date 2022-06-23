@@ -1,0 +1,136 @@
+.headingsDiv {
+  background: #f0f0f0 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  height: 10%;
+}
+
+.heading {
+  text-align: left;
+  font: normal normal 600 12px/24px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  padding: 2px;
+  margin-left: 10px;
+}
+
+.flexRow {
+  display: flex;
+  flex-direction: row;
+}
+
+.text {
+  margin: 10px 0px 0px 0px;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.mappedFieldDiv {
+  display: flex;
+  flex-direction: row;
+}
+
+.mappedField {
+  margin: 12px 0px 10px 10px;
+  width: 90px;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.typeInput {
+  background: #f0f0f0 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  width: 60%;
+  margin: 5px 0px 5px 0px;
+  height: 30px;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+}
+
+.inputBase {
+  background: #f0f0f0 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  margin: 5px 0px 5px 0px;
+  width: 20%;
+  height: 30px !important;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.quotesText {
+  margin: 12px 0px 10px 10px;
+  width: 60px;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.menuItemStyles {
+  text-align: left;
+  font: normal normal normal 12px/24px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+}
+
+.buttonsDiv {
+  background: #f0f0f0 0% 0% no-repeat padding-box;
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 20%;
+}
+
+.okButton {
+  cursor: pointer;
+  background: #0072c6 0% 0% no-repeat padding-box;
+  border-radius: 2px;
+  border: 2px solid #0072c6 !important;
+  width: 59px;
+  height: 28px;
+  margin: 15px 0px 11px 0px;
+  opacity: 1;
+  margin-left: auto;
+  margin-right: 5px;
+}
+
+.okButtonText {
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #ffffff;
+  opacity: 1;
+}
+
+.cancelButton {
+  cursor: pointer;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  padding: 4px;
+  width: 59px;
+  height: 28px;
+  margin: 15px 0px 11px 0px;
+  opacity: 1;
+  margin-right: 5px;
+}
+
+.cancelButtonText {
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  opacity: 1;
+}

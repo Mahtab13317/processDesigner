@@ -1,0 +1,21 @@
+.oms_templateTabs .MuiTabs-indicator {
+  background-color: #1072c6;
+}
+
+.oms_templateTabs .Mui-selected .MuiTab-wrapper {
+  color: #1072c6;
+  font-weight: 600 !important;
+}
+
+.oms_templateTabs .MuiTab-wrapper {
+  width: fit-content !important;
+}
+
+.oms_templateTabPanel {
+  height: 48vh;
+  padding: 0.5rem 1vw;
+}
+
+.oms_templateTabPanel .MuiBox-root {
+  height: auto !important;
+}

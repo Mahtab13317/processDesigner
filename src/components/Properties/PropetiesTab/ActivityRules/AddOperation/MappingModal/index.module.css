@@ -1,0 +1,14 @@
+.flexColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.dataModelTab {
+  min-height: 1.625rem !important;
+  padding: 0.125rem 0.25rem !important;
+  font: 0.75rem / 1.063rem Open Sans !important;
+  letter-spacing: 0rem !important;
+  color: black !important;
+  opacity: 1;
+  margin: 0.125rem 0 !important;
+}

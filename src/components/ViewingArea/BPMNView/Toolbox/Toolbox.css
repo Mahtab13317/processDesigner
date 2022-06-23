@@ -1,0 +1,235 @@
+.toolboxContainerExpanded {
+  position: absolute;
+  top: 15px;
+  left: 100px;
+  z-index: 15;
+}
+
+.muiList-padding
+  .MuiListItem-gutters
+  .MuiListItemText-root
+  .MuiTypography-displayBlock {
+  display: none !important;
+}
+
+.collapsedList {
+  padding-top: 0px;
+  display: flex;
+  flex-direction: column;
+  /* justify-content: space-between; */
+  align-items: center;
+  background: #ffffff;
+  height: 100%;
+}
+
+.expandedList li {
+  margin-left: 0px;
+  width: 100%;
+  padding: 0.5rem 0;
+}
+
+.expandedList {
+  width: 100%;
+  height: fit-content;
+  background-color: white;
+}
+
+.expandedList::-webkit-scrollbar {
+  width: 2px;
+  height: 2px;
+  background-color: white;
+}
+.expandedList::-webkit-scrollbar-thumb {
+  background-color: #dadada;
+  border-radius: 10px;
+}
+
+.toolTypeContainer {
+  height: 100vh;
+  width: 6vw;
+  box-shadow: 2px 0 4px 0 #dadada;
+  /* padding-top: 10px; */
+  background-color: white;
+}
+
+.toolTabs {
+  padding: 0.25rem 0.5rem !important;
+}
+
+.MuiListItem-gutters .MuiListItemIcon-root {
+  max-width: 100% !important;
+  margin-bottom: 0.25rem;
+  text-align: center;
+}
+
+.toolTypeContainerExpanded .MuiListItem-button {
+  height: 0px !important;
+  padding: 0.5rem !important;
+  margin: 0.5rem 0 0;
+}
+
+.expandedList ul {
+  margin-bottom: 0.25rem;
+  padding: 0.25rem !important;
+}
+
+.toolTypeContainerExpanded .MuiListItemText-primary {
+  text-transform: uppercase;
+  margin-left: -8px;
+  font-size: 10px;
+  color: #606060;
+}
+
+.toolTypeContainerExpanded {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  box-shadow: 2px 0 4px 0 #dadada;
+  flex-wrap: wrap;
+  position: absolute;
+  left: 6.1vw;
+  top: 0px;
+  z-index: 5;
+  width: 13.2vw;
+}
+
+.toolTypeContainerExpanded::-webkit-scrollbar {
+  width: 2px;
+  height: 2px;
+  background-color: white;
+}
+.toolTypeContainerExpanded::-webkit-scrollbar-thumb {
+  background-color: #dadada;
+  border-radius: 10px;
+}
+
+input::-webkit-input-placeholder {
+  color: #606060;
+}
+
+input:focus::-webkit-input-placeholder {
+  color: #606060;
+}
+
+.toolContainer {
+  flex-wrap: wrap;
+  align-content: flex-start;
+  background: #ffffff;
+  box-shadow: 2px 2px 4px 0 #dadada;
+  border-radius: 2px;
+  width: 231px;
+  left: 6.05vw;
+  position: absolute;
+  z-index: 1000;
+}
+
+.toolContainer img {
+  width: 16px;
+  max-height: 16px;
+}
+
+.toolIcon {
+  writing-mode: horizontal-tb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0.125rem 0.25rem;
+}
+
+.iconLabel {
+  font-size: 10px;
+  color: #606060;
+  text-align: center;
+}
+
+.inputBox {
+  width: 180px;
+  height: 28px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #0072c629;
+  border: 1px solid #dadada;
+  border-radius: 2px;
+  opacity: 1;
+  position: absolute;
+  left: 72px;
+}
+
+.closeIcon {
+  top: 125px;
+  transform: translateX(190px);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.selectedMenu:hover {
+  background-color: #0072c60d !important;
+}
+
+#userInput_collapsed {
+  display: none;
+  position: absolute;
+  top: 86px;
+  left: 6.1vw;
+  width: 13.5vw;
+  height: 28px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #0072c629;
+  border: 1px solid #dadada;
+  border-radius: 2px;
+}
+
+#closeSearchBoxIcon {
+  height: 15px;
+  width: 20px;
+  position: absolute;
+  top: 92px;
+  left: 17.5vw;
+  display: none;
+  cursor: pointer;
+}
+
+.toolBoxIconDiv {
+  width: 6vw;
+  white-space: nowrap;
+}
+
+.searchDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  margin-left: 0.625rem;
+  width: 5.0625rem;
+  margin-top: 0.125rem;
+  margin-bottom: 0.125rem;
+  height: 2.5rem;
+}
+
+.searchDiv:hover {
+  background-color: #0072c60d;
+}
+
+#searchActivityIcon_abstractView {
+  height: 16px;
+  width: 16px;
+  margin-top: 5px;
+}
+
+.subActivities:hover {
+  background-color: #f5f5f5;
+}
+
+.mainMenuHeading:hover {
+  background-color: white !important;
+  cursor: default !important;
+}
+
+.tooltypeHeading {
+  color: #3a3a3a;
+  text-transform: uppercase;
+  font: normal normal 500 11px/15px Open Sans;
+}

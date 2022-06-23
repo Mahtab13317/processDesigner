@@ -1,0 +1,379 @@
+.brtContainer
+{
+    font-size: 12px;
+    
+}
+
+.brtContainerExpand
+{
+    font-size: 14px;
+}
+
+.label-heading
+{
+margin: 8px;
+font-family: "Open Sans, Semibold";
+}
+.label-heading-expand
+{
+    margin: 8px;
+    font-family: "Open Sans, Semibold";
+}
+
+.radio-group
+{
+    padding-left: 10px;
+   
+}
+
+#brtRadio
+{
+ font-size: 12px;
+}
+#brtRadio .MuiSvgIcon-fontSizeSmall
+{
+    width: 12px;
+    height: 12px;
+}
+#brtRadio .MuiFormControlLabel-label
+{
+    font-size: 12px;
+    font-family: "Open Sans";
+}
+
+#brtRadioExpand
+{
+ font-size: 12px;
+}
+#brtRadioExpand .MuiSvgIcon-fontSizeSmall
+{
+    width: 12px;
+    height: 12px;
+}
+#brtRadioExpand .MuiFormControlLabel-label
+{
+    font-size: 12px;
+    font-family: "Open Sans";
+}
+
+.flex-container
+{
+    display:flex;
+    margin-top: 15px;
+    font-family: "Open Sans, Regular";
+  
+}
+
+.flex-item
+{
+  
+    margin-left: 10px;
+    
+   font-size: 12px;
+}
+
+.flex-item p .MuiSelect-select
+{
+    font-size: 11px;
+    border:1px solid #CECECE;
+    height: 15px;
+    border-radius: 2px;
+    font-family: "Open Sans";
+}
+
+.flex-item p .MuiButton-root
+{
+    font-size: 12px;
+    width: 80px;
+    top:23px;
+    text-transform: capitalize;
+    color:  #0072C6;
+    font-family: "Open Sans, Semibold";
+}
+
+.MuiMenu-list li
+{
+    font-size: 12px !important;
+}
+
+.associate-list,.associate-list-expand
+{
+  margin:10px !important;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.associate-tbl,.associate-tbl-expand,.associate-tbl-expand-rtl,.associate-tbl-rtl {
+    
+  
+    width: 100%;
+    border-spacing: 0;
+  }
+  
+.associate-tbl th {
+   
+    text-align: left;
+    padding: 5px;
+    font-size: 12px;
+    font-family: "Open Sans, Semibold";
+    
+  }
+
+.associate-tbl td
+{
+    text-align: left;
+    padding: 5px;
+    font-size: 11px;
+    font-family: "Open Sans, Regular";
+}
+
+.associate-tbl-rtl th {
+   
+    text-align: right;
+    padding: 5px;
+    font-size: 12px;
+    
+  }
+
+.associate-tbl-rtl td
+{
+    text-align: right;
+    padding: 5px;
+    font-size: 11px;
+}
+
+.associate-tbl-expand th {
+   
+    text-align: left;
+    padding: 5px;
+    font-size: 14px;
+    
+  }
+
+.associate-tbl-expand td
+{
+    text-align: left;
+    padding: 5px;
+    font-size: 12px;
+}
+
+.associate-tbl-expand-rtl th {
+   
+    text-align: right;
+    padding: 5px;
+    font-size: 14px;
+    
+  }
+
+.associate-tbl-expand-rtl td
+{
+    text-align: right;
+    padding: 5px;
+    font-size: 12px;
+}
+
+  .associate-tbl th,.associate-tbl-expand th,.associate-tbl-expand-rtl th,.associate-tbl-rtl th
+  {
+    background-color: #F8F8F8;
+    font-family: "Open Sans, Semibold";
+  }
+  .associate-tbl td,.associate-tbl-expand td,.associate-tbl-expand-rtl td,.associate-tbl-rtl td
+  {
+    
+    font-family: "Open Sans, Regular";
+  }
+
+  .associate-tbl tr:nth-child(odd){background-color: #F8F8F8}
+  .associate-tbl-expand tr:nth-child(odd){background-color: #F8F8F8}
+  .associate-tbl-rtl tr:nth-child(odd){background-color: #F8F8F8}
+  .associate-tbl-expand-rtl tr:nth-child(odd){background-color: #F8F8F8}
+
+  .required
+  {
+      color:#D53D3D
+  }
+
+  .flexExpanded
+  {
+    margin-left: 10px;
+    text-align: left;
+   font-size: 12px;
+  }
+
+  .flexExpanded p .MuiSelect-select
+{
+    font-size: 11px;
+    border:1px solid #CECECE;
+    height: 15px;
+    width: 220px;
+    border-radius: 2px;
+    font-family: "Open Sans";
+    
+}
+
+.versionExpanded
+  {
+    margin-left: 10px;
+    text-align: left;
+   font-size: 12px;
+  }
+
+  .versionExpanded p .MuiSelect-select
+{
+    font-size: 11px;
+    border:1px solid #CECECE;
+    height: 15px;
+    width: 60px;
+    border-radius: 2px;
+    font-family: "Open Sans";
+    
+}
+
+.mappingContainer
+{
+    margin-top: -35px;
+    margin-left: 35px;
+    border-left: 1px solid #606060;
+    color: #606060;
+    width:75%
+}
+
+.mapping-tbl-container
+{
+    margin-left:10px;
+    font-size: 14px;
+   
+    
+}
+
+.mapping-tbl
+{
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.mapping-tbl th, .mapping-tbl td{
+    text-align: left;
+    padding: 3px;
+    font-size: 12px;
+    
+}
+
+.mapping-tbl .MuiSelect-select
+{
+    font-size: 12px;
+    border:1px solid #CECECE;
+    height: 15px;
+    border-radius: 2px;
+    font-family: "Open Sans";
+}
+
+.mappingTab .MuiTabs-root
+{
+    border-bottom: 1px solid #CECECE;
+   
+}
+
+
+
+.tabList  .Mui-selected
+{
+    color:#0072C6 !important
+}
+.tabList .PrivateTabIndicator-colorSecondary-142
+{
+    background-color:#0072C6 !important
+}
+
+
+.mapped-tbl-container
+{
+    max-height: 275px;
+    overflow-y: auto;
+}
+
+.mapped-table-header
+{
+    background-color: #cecece;
+    opacity: .71;
+    border-radius: 2px;
+    color: #000;
+    max-width: 150px;
+    
+}
+
+.mapped-table .MuiTableCell-root
+{
+    border-bottom: none;
+    padding: 10px;
+    font-size:12px;
+   font-family: "Open Sans, Regular";
+}
+
+.outlined-basic .MuiOutlinedInput-input{
+
+    padding: 7.5px 14px;
+    min-width: 200px;
+    height: 15px;
+    font-size: 12px;
+}
+
+.outlined-basic .MuiOutlinedInput-notchedOutline{
+
+    border-radius: 2px;
+    border: 1px solid #cecece;
+}
+
+.brtInputRules
+{
+    padding: 0px 14px;
+    min-width: 200px;
+    height: 15px;
+    font-size: 12px;
+    font-family: "Open Sans, Regular";
+}
+
+
+.mapped-table .MuiSelect-select
+{
+    font-size: 12px;
+    
+    min-width: 200px;
+    border: 1px solid #cecece;
+    border-radius: 2px;
+    text-align: left;
+    height: 15px;
+    font-size: 12px;
+    font-family: "Open Sans";
+   
+}
+
+.tab{
+
+}
+
+.tab .MuiTab-wrapper{
+    font-weight: 600;
+    display: block;
+    color: black;
+}
+
+
+.Mui-selected .MuiTab-wrapper{
+    
+color:#0072C6 !important;
+font-family:"Open Sans, Semibold";
+}
+
+.icon{
+
+}
+
+.tabList .MuiTabs-indicator {
+    background-color:#0072C6 !important
+}
+
+
+
+  
+ 

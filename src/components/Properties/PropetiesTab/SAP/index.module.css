@@ -1,0 +1,116 @@
+.dataDropdown {
+  height: 1.8rem !important;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  padding-left: 10px !important;
+}
+
+.dropdownLabel {
+  height: 1.8rem !important;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  padding-left: 10px !important;
+}
+
+.dropdownLabelCompact {
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  padding-left: 10px !important;
+  margin-top: 1rem;
+}
+
+.headerLabel {
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #606060;
+  width: 11rem;
+}
+.headerLabel1 {
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #606060;
+  margin-left: 1rem;
+  width: 11rem;
+}
+
+.tableLabel {
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #606060;
+  width: 11rem;
+}
+.tableLabel1 {
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #606060;
+  margin-left: 1rem;
+  width: 11rem;
+}
+.menuItemStyles {
+  text-align: left;
+  font: normal normal normal 12px/24px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+}
+/* .scroll {
+  height: 10rem;
+  overflow: scroll;
+} */
+
+.scroll {
+  max-height: 10rem;
+  overflow-y: auto;
+}
+
+.scroll::-webkit-scrollbar {
+  background-color: transparent;
+  width: 0.25rem;
+  height: 10px;
+}
+
+.scroll::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 0.313rem;
+}
+
+.scroll:hover::-webkit-scrollbar {
+  overflow-y: visible;
+  width: 0.25rem;
+  height: 10px;
+}
+.scroll:hover::-webkit-scrollbar-thumb {
+  background-color: #dadada;
+  border-radius: 0.313rem;
+}
+.viewParameter {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #0072c5;
+  border-radius: 2px;
+  opacity: 1;
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #0072c6;
+  cursor: pointer;
+  margin-left: 5%;
+}
+.tableRow {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-bottom: 1rem !important;
+}

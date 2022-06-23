@@ -1,0 +1,297 @@
+.properties_TabStyling {
+  display: flex;
+}
+
+.properties_mainOneTabStyle {
+  margin: 0px !important;
+  min-height: 2.5rem !important;
+}
+
+.properties_mainTabBarStyle {
+  flex: 0.7 !important;
+  height: 100vh !important;
+  z-index: 10 !important;
+}
+
+.properties_mainTabBarStyle .MuiTabs-indicator,
+.properties_mainTabBarStyle_expandedView .MuiTabs-indicator {
+  background-color: #0072c6 !important;
+}
+
+.properties_mainTabBarStyle_expandedView {
+  flex: 0.7 !important;
+  height: 100vh !important;
+  max-width: 45px !important;
+  z-index: 10 !important;
+}
+
+.properties_mainTabContentStyle {
+  flex: 8 !important;
+  border-left: 1px solid grey;
+  background-color: white;
+  /* height: 100vh !important; */
+}
+
+.properties_mainTabContentStyle_Expanded {
+  flex: 8 !important;
+  border-left: 1px solid grey;
+  background-color: #f8f8f8;
+}
+.mainTab_properties {
+  height: 66vh;
+  /* width: 360px !important; */
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+}
+
+.mainTab_properties::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  background-color: white;
+}
+
+.mainTab_properties_expandedView {
+  width: 100vw !important;
+  height: 66vh;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+}
+
+.table {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+.MuiDrawer-paper {
+  overflow-y: hidden !important;
+}
+
+.flexScreen {
+  display: flex;
+}
+
+.basicDetails-mainDiv {
+  width: 100%;
+  /* height: 100vh;
+  justify-content: center;
+  align-items: center; */
+  flex-direction: column;
+  font-size: 0.875rem;
+}
+
+.basicDetails-addIcon {
+  color: white;
+  background: #0072c6;
+  height: 1.8rem;
+  width: 1.8rem;
+  margin-top: 0.125rem;
+}
+
+.basicDetails-webService {
+  display: flex;
+  flex-direction: row;
+  color: #727272;
+  margin-top: 1rem;
+}
+
+.basicDetails-peopleAndSysHeading {
+  color: #0072c6;
+  cursor: pointer;
+  margin-top: 1rem;
+  margin-bottom: 0.7rem;
+}
+
+.MuiDrawer-paper {
+  overflow-y: hidden !important;
+}
+
+.MuiDrawer-paper::-webkit-scrollbar {
+  background-color: transparent;
+  width: 0.375rem;
+  height: 1.125rem;
+}
+.MuiDrawer-paper::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 0.313rem;
+}
+
+.MuiDrawer-paper:hover::-webkit-scrollbar-thumb {
+  overflow-y: scroll;
+  width: 0.375rem;
+  height: 1.125rem;
+}
+
+.MuiDrawer-paper:hover::-webkit-scrollbar-thumb {
+  background: #8c8c8c 0% 0% no-repeat padding-box;
+  border-radius: 0.313rem;
+}
+
+.receiveInvocation {
+  padding: 7px;
+}
+
+.receiveInvocation .MuiFormGroup-root .MuiFormControlLabel-label {
+  font-size: 0.8rem;
+}
+
+.expandedPeopleAndSystems {
+  height: 100%;
+}
+
+#archieve_dataClass {
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+.dropDownSelect_expanded {
+  width: 138px;
+  height: 28px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  font: normal normal normal 12px/17px Open Sans;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  margin-right: 10px;
+  margin-top: 10px;
+  position: absolute;
+  left: 45%;
+}
+
+.dropDownSelect {
+  width: 138px;
+  height: 28px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  font: normal normal normal 12px/17px Open Sans;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  /* margin-right: 10px; */
+  margin-top: 10px;
+}
+
+.dropDownSelectLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  margin-top: 10px;
+}
+
+.dropDownSelectLabel_expanded {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  margin-top: 10px;
+}
+
+.propertiesFooterButtons {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  justify-content: flex-end;
+  background-color: #f8f8f8;
+}
+
+.propertiesFooterButtons_rtl {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  justify-content: flex-start;
+  background-color: #f8f8f8;
+}
+
+.properties_disabledButton {
+  background: rgba(0, 0, 0, 0.12) !important;
+  border-radius: 2px !important;
+  border: none !important;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px !important;
+  color: rgba(0, 0, 0, 0.5) !important;
+  text-transform: none !important;
+  margin-right: 0.5rem !important;
+  padding: 0.25rem 0.75rem !important;
+  cursor: default !important;
+}
+
+.properties_cancelButton {
+  background: #ffffff 0% 0% no-repeat padding-box !important;
+  border: 1px solid #c4c4c4 !important;
+  border-radius: 2px !important;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px !important;
+  color: #606060 !important;
+  text-transform: none !important;
+  margin-right: 0.5rem !important;
+  padding: 0.25rem 1rem !important;
+  cursor: pointer !important;
+}
+
+.properties_saveButton {
+  background: #0072c6 0% 0% no-repeat padding-box !important;
+  border-radius: 2px !important;
+  border: 1px solid #0072c6 !important;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px !important;
+  color: #ffffff !important;
+  text-transform: none !important;
+  margin-right: 0.5rem !important;
+  padding: 0.25rem 0.75rem !important;
+  cursor: pointer !important;
+}
+
+.propertiesGlobalTempButton {
+  background: #fff 0% 0% no-repeat padding-box !important;
+  border-radius: 2px !important;
+  border: 1px solid #0072c6 !important;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px !important;
+  color: #0072c6 !important;
+  text-transform: none !important;
+  margin-right: 0.5rem !important;
+  padding: 0.25rem 0.75rem !important;
+  cursor: pointer !important;
+}
+.propertiesGlobalTempDeleteButton {
+  background: #fff 0% 0% no-repeat padding-box !important;
+  border-radius: 2px !important;
+  border: 1px solid #c60021 !important;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px !important;
+  color: #c6000a !important;
+  text-transform: none !important;
+  margin-right: 0.5rem !important;
+  padding: 0.25rem 0.75rem !important;
+  cursor: pointer !important;
+}
+
+.prop_modalFooter {
+  display: flex;
+  align-items: right;
+  padding: 0.5rem;
+  justify-content: end;
+  background-color: #f5f5f5;
+}
+
+.prop_modalHeader {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1vw;
+  justify-content: space-between;
+}
+
+.prop_modalHeading {
+  font: normal normal 700 14px/19px Open Sans;
+  letter-spacing: 0rem !important;
+  color: black !important;
+}
+
+.prop_modalContent {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1vw;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #606060;
+}

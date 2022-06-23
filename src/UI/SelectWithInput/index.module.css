@@ -1,0 +1,52 @@
+.selectWithInput {
+  width: 21vw !important;
+  margin-bottom: 1rem;
+}
+
+.selectWithInputOptions {
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.selectWithInputTextField {
+  width: 21vw !important;
+}
+
+.selectWithInputTextField input {
+  height: 1.5rem;
+}
+
+.AddToConst {
+  overflow-y: hidden;
+}
+
+.AddToConst p:last-child {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.multiSelectConstInput {
+  position: absolute;
+  width: 17vw;
+  height: 1rem;
+  top: 0.25rem;
+  left: 2vw;
+  z-index: 100;
+  font: normal normal normal 12px/17px Open Sans !important;
+  border: none;
+}
+
+.multiSelectConstInput:disabled{
+  background: none !important;
+}
+
+.constantIcon {
+  font: normal normal 600 11px/16px Open Sans !important;
+  position: absolute;
+  top: 0;
+  margin: 0.25rem 0.25rem;
+  width: 1.5vw;
+  z-index: 1000;
+  text-align: center;
+  background: #e5e5e5;
+}

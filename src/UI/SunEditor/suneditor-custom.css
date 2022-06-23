@@ -1,0 +1,106 @@
+.App{
+    width: 100%;
+    margin: auto;
+	cursor: auto;
+}
+.sun-editor {
+    width: auto;
+    height: auto;
+    box-sizing: border-box;
+    font-family: Helvetica Neue;
+    background-color: #fff;
+	/* border: none; */
+    color: #000;
+}
+.sun-editor .se-toolbar {
+    display: block;
+    position: relative;
+    width: 100%;
+    /* overflow: hidden; */
+    padding: 0;
+    margin: auto;
+    outline: 1px solid #dadada;
+    z-index: 1000;
+    background: #F8F8F8 0% 0% no-repeat padding-box;
+    box-shadow: 2px 3px 6px #00000029;
+    border-radius: 2px;
+    opacity: 1;
+}
+.App .sun-editor .se-wrapper {
+    position: relative!important;
+    width: 100%;
+    min-height:100px;
+    max-height: 100px;
+    height:45vh;
+    /*overflow: auto !important;*/
+    z-index: 1;
+    /* margin-top: -10px; */
+    background: #FFFFFF 0% 0% no-repeat padding-box;
+    /* border: 0.5px solid #126CFC; */
+    opacity: 1;
+}
+.App .customStyle .sun-editor .se-wrapper {
+    position: relative!important;
+    width: 100%;
+    min-height:100px;
+    max-height: 100px;
+    height:6rem !important;
+    /*overflow: auto !important;*/
+    z-index: 1;
+    /* margin-top: -10px; */
+    background: #FFFFFF 0% 0% no-repeat padding-box;
+    /* border: 0.5px solid #126CFC; */
+    opacity: 1;
+}
+.se-resizing-bar {
+    display: flex;
+    width: auto;
+    min-height: 0px !important;
+    height: auto !important;
+    border-top: 1px solid #dadada;
+    padding: 0 4px;
+    background-color: #fafafa;
+}
+
+.sun-editor .se-btn {
+    float: left;
+    width: 17px;
+    height: unset;
+    border: 0;
+    border-radius: 4px;
+    margin: 1px!important;
+    padding: 0px 0px;
+    font-size: 12px;
+    line-height: unset;
+}
+
+.sun-editor{
+    text-align: left;
+}
+
+.sun-editor .se-menu-list, .sun-editor .se-menu-list li{
+    padding:0px !important;
+}
+
+.sun-editor .se-svg, .sun-editor button>svg {
+    margin-top: 8px;
+    width: 15px;
+    height: 10px;
+    fill: #767676;
+    display: block;
+    text-align: center;
+    float: none;
+}
+
+.sun-editor .se-btn-select>svg {
+    float: right;
+    margin-right: 5px;
+    width: 8px;
+    height: 8px;
+}
+
+.sun-editor .se-btn-select .txt {
+    flex: auto;
+    margin: 4px;
+    text-align: left;
+}

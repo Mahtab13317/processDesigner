@@ -1,0 +1,486 @@
+.propertiesMainView {
+  margin: 0.25rem 1vw;
+  display: flex;
+  width: 73vw;
+}
+
+.triggerNameTypeDiv {
+  margin-right: 5vw;
+}
+
+.propertiesColumnView {
+  display: flex;
+  flex-direction: column;
+  width: 73vw;
+  margin: 0.25rem 1vw;
+}
+
+.propertiesFormInput {
+  width: 21vw;
+  height: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #dadada;
+}
+
+.propertiesDescLabel {
+  display: inline-block;
+  width: 12.5vw;
+  margin-right: 1vw;
+  margin-top: 0.25rem;
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+}
+
+.triggerFormLabel {
+  display: inline-block;
+  width: 10vw;
+  margin-right: 1vw;
+  margin-top: 0.25rem;
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+}
+
+.starIcon {
+  color: red;
+  margin-left: 0.25vw;
+  font-size: 0.75rem;
+}
+
+.triggerSelectVariableInput {
+  height: fit-content;
+  border: 1px solid #dadada;
+  width: 21vw;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  margin-bottom: 1rem;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border-radius: 4px;
+}
+
+.propertiesFormInput:disabled {
+  background-color: #f8f8f8;
+}
+
+.properties_radioButton svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.propertiesAddButton {
+  padding: 0.25rem 1vw;
+  text-transform: capitalize;
+  margin-bottom: 0.25rem;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #338ed1;
+  border-radius: 2px;
+  text-align: center;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #0072c6;
+  cursor: pointer;
+}
+
+.propertiesAddButton:disabled {
+  cursor: default;
+  background-color: rgba(84, 84, 84, 0.04);
+  color: rgba(84, 84, 84, 0.6);
+  border: 1px solid rgba(84, 84, 84, 0.5);
+}
+
+.properties_radioDiv {
+  display: flex;
+  flex-direction: row !important;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.properties_radioButton {
+  margin-right: 1rem !important;
+  margin-left: 0rem !important;
+}
+
+.properties_radioButton span {
+  text-align: left;
+  font: normal normal normal 11px/15px Open Sans;
+  letter-spacing: 0px;
+  /* color: #707070; */
+}
+
+.properties_radioButton span:first-child {
+  height: 1rem;
+  width: 1rem;
+  margin: 0 0.25rem 0 0;
+}
+
+.sameParentCheckbox {
+  margin-bottom: 1rem;
+  margin-left: 0.5rem;
+}
+
+.propertiesTriggerLabel {
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  margin-top: 0.25rem;
+}
+
+.propertiesSetTriggerLabel {
+  font: normal normal 600 12px/17px Open Sans;
+  color: #606060;
+}
+
+.dataEntryHeading {
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.subjectMailInput {
+  width: 24.75vw;
+  height: 4rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #dadada;
+}
+
+.mailBodyInput {
+  width: 24.75vw;
+  height: 7rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #dadada;
+}
+
+.argStringBodyInput {
+  width: 21vw;
+  height: 7rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #dadada;
+}
+
+.addSetTrigger {
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #0072c6;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #338ed1;
+  border-radius: 2px;
+  padding: 0.25rem 1rem;
+  margin-left: 2vw;
+  cursor: pointer;
+}
+
+.setTriggerDropDowns {
+  margin-top: 1rem;
+  padding: 0.125rem;
+}
+
+.triggerSelectDropdown {
+  border: 1px solid #dadada;
+  background: #fff;
+  width: 24vw;
+  height: 3rem;
+}
+
+.triggerSelectDropdown span {
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.triggerDropdownData {
+  padding: 0.25rem 0.5rem !important;
+  width: 21vw;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+}
+
+.triggerSelectDropdownList {
+  height: 3rem !important;
+  border-bottom: 1px solid #d6d6d6;
+}
+
+.dropdownVariableDiv {
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+  padding: 0.5rem 1.5rem 0.5rem 0.5rem;
+  border-bottom: 1px solid #d6d6d6;
+}
+
+.filterSetTrigger {
+  justify-content: space-between;
+  padding: 0.5rem 0.5rem 0.25rem;
+}
+
+.filterTriggerButton {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  padding: 0 0.25rem;
+  margin-left: 0.25vw;
+  height: 1.5rem;
+  cursor: pointer;
+}
+
+.MuiMenu-list {
+  padding: 0 !important;
+}
+
+.triggerSelectDropdownList:last-child {
+  border-bottom: none;
+}
+
+.MuiSelect-select.MuiSelect-select .dropdownVariableDiv {
+  border-bottom: none;
+  padding: 0;
+}
+
+.dropdownVariable {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdownVariable span:first-child,
+.dropdownVariableType {
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+}
+
+.dropdownVariableType {
+  margin-top: 0.5rem;
+}
+
+.dropdownVariable span {
+  text-align: left;
+  font: normal normal normal 10px/14px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 0.48;
+}
+
+.triggerEqualTo {
+  margin: 0.5rem 1vw 0;
+}
+
+.triggerDeleteIcon {
+  margin: 0.75rem 1vw 0;
+}
+
+.setTriggerList {
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.setTriggerList::-webkit-scrollbar {
+  display: none;
+}
+
+.dataEntrySelectDiv {
+  margin-bottom: 0.85rem;
+}
+
+.dataTableHead {
+  background: #f0f0f0 0% 0% no-repeat padding-box;
+}
+
+.dataTableHeadCell,
+.dataTableBodyCell {
+  padding: 0.5rem 1rem !important;
+}
+
+.dataTableHeadCell_Buttons {
+  padding: 0.2rem 0.3rem !important;
+  border: 1px solid #c4c4c4;
+}
+
+.dataTableBodyCell_Queue {
+  padding: "0.5rem 1rem 0.5rem 0.3rem";
+}
+
+.dataTable {
+  min-height: 10rem;
+  height: 10rem;
+  max-height: 12rem;
+  overflow: auto;
+}
+
+.dataTableHeadCellContent {
+  text-align: left;
+  font: normal normal 600 12px/24px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.dataEntryAddRemoveBtnHeader {
+  text-align: right;
+  font: normal normal 600 12px/24px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  cursor: pointer;
+}
+
+.noDataEntryRecords {
+  position: absolute;
+  width: 100%;
+  top: 30%;
+  text-align: center;
+  margin: 1rem 0;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.dataTableRow {
+  height: 2rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dataTableRow_Queue {
+  height: 32px !important;
+  border-bottom: 1px solid #efefef;
+  display: flex;
+  align-items: center;
+}
+
+.dataTableBody {
+  border: 1px solid #f0f0f0;
+  display: block;
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+.dataTableBodyWithNoData {
+  min-height: 10rem;
+}
+
+.dataTableBodyWithNoDataQueueAss {
+  min-height: 14rem;
+}
+
+.dataTableBody::-webkit-scrollbar {
+  width: 0.25rem;
+  height: 10px;
+  background-color: white;
+}
+.dataTableBody::-webkit-scrollbar-thumb {
+  background-color: #dadada;
+  border-radius: 10px;
+}
+
+.dataTableHead,
+.dataTableBody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.dataDropdownConstantIcon {
+  font: normal normal 600 14px/16px Open Sans !important;
+  position: absolute;
+  top: 0.25rem;
+  margin: 0.5rem 0.5rem;
+  width: 2vw;
+  padding: 0.25rem 0.5rem;
+  z-index: 1000;
+  text-align: center;
+  background: #e5e5e5;
+}
+
+.dataDropdownConstInput {
+  position: absolute;
+  width: 17vw;
+  height: 1.5rem;
+  top: 0.75rem;
+  left: 3vw;
+  z-index: 100;
+  font: normal normal normal 12px/17px Open Sans !important;
+  border: none;
+}
+
+.dataDropdownConstInput:disabled {
+  background: none !important;
+}
+
+.mb025 {
+  margin-bottom: 0.25rem;
+}
+
+.mr05 {
+  margin-right: 0.5vw;
+}
+
+.mt025 {
+  margin-top: 0.25rem;
+}
+
+.defaultSelectValue {
+  opacity: 0;
+  height: 0 !important;
+  padding: 0 !important;
+}
+
+.descriptionInput {
+  width: 24.75vw;
+  height: 4rem;
+  margin-bottom: 1rem;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  border: 1px solid #dadada;
+  padding: 0.25rem 0.5rem;
+}
+
+.addVariablesBtn {
+  text-align: center;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #0072c6;
+  background: white;
+  border: none;
+}
+
+.subjectMailInput::-webkit-scrollbar,
+.mailBodyInput::-webkit-scrollbar,
+.argStringBodyInput::-webkit-scrollbar {
+  background-color: transparent;
+  width: 0.25rem;
+  height: 10px;
+}
+
+.subjectMailInput::-webkit-scrollbar-thumb,
+.mailBodyInput::-webkit-scrollbar-thumb,
+.argStringBodyInput::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 0.313rem;
+}
+.subjectMailInput:hover::-webkit-scrollbar,
+.mailBodyInput:hover::-webkit-scrollbar,
+.argStringBodyInput:hover::-webkit-scrollbar {
+  overflow-y: visible;
+  width: 0.25rem;
+  height: 10px;
+}
+.subjectMailInput:hover::-webkit-scrollbar-thumb,
+.mailBodyInput:hover::-webkit-scrollbar-thumb,
+.argStringBodyInput:hover::-webkit-scrollbar-thumb {
+  background-color: #dadada;
+  border-radius: 0.313rem;
+}

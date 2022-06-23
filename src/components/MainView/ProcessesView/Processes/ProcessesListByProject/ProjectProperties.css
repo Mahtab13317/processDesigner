@@ -1,0 +1,61 @@
+.margin2 {
+  margin: 2%;
+  padding: 1%;
+}
+.margin1 {
+  margin-top: 2%;
+  margin-bottom: 2%;
+}
+
+.nameAndDesc {
+  text-align: left;
+  font: normal normal 600 14px/19px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  margin-bottom: 1%;
+}
+
+.projectPropertiesLabel {
+  text-align: left;
+  font: normal normal normal 12px/15px Open Sans;
+  letter-spacing: 0px;
+  color: #798777;
+  opacity: 1;
+  width: 6rem;
+}
+
+.projectPropertiesValue {
+  text-align: left;
+  font: normal normal normal 12px/15px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  width: 12rem;
+}
+
+.footerProjectProperties {
+  width: 99%;
+  display: flex;
+  align-items: center;
+  height: 50px;
+  background: #f5f5f5 0% 0% no-repeat padding-box;
+  opacity: 1;
+  position: absolute;
+  bottom: 0;
+  margin-left: -2rem;
+}
+
+.createProperties {
+  background: #0072c6 0% 0% no-repeat padding-box;
+  border-radius: 2px;
+  opacity: 1;
+  padding: 0px 15px;
+  border: none;
+  height: 28px;
+  padding: 5px;
+  color: white;
+  cursor: pointer;
+  margin-right: 2%;
+  margin-left: 1%;
+}

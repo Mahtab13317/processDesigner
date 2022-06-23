@@ -1,0 +1,87 @@
+.marginAllAround {
+  margin: 2%;
+  height: 22rem;
+  overflow: auto;
+}
+.marginAllAround::-webkit-scrollbar {
+  display: none; /* for Chrome, Safari, and Opera */
+}
+
+.varUsedLabel {
+  text-align: left;
+  font: normal normal normal 12px/15px Open Sans;
+  letter-spacing: 0px;
+  color: #798777;
+  opacity: 1;
+  margin-top: 10px;
+}
+.menuItemStylesDropdown {
+  text-align: left;
+  font: normal normal normal 12px/24px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+}
+.dropdownEmail {
+  width: 200px;
+  height: 28px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  font: normal normal normal 12px/15px Open Sans !important;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  margin-right: 10px;
+  border-radius: 1px;
+}
+.document {
+  text-align: left;
+  font: normal normal normal 14px/16px Open Sans;
+  color: #070707;
+  opacity: 1;
+  width: 10rem;
+  vertical-align: middle;
+}
+.print {
+  text-align: left;
+  font: normal normal normal 14px/16px Open Sans;
+  color: #070707;
+  opacity: 1;
+  width: 10rem;
+  vertical-align: middle;
+}
+.notFound {
+  text-align: left;
+  font: normal normal normal 14px/16px Open Sans;
+  color: #070707;
+  opacity: 1;
+  width: 18rem;
+  vertical-align: middle;
+}
+.addbtnEmail {
+  width: 40px;
+  height: 28px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #0072c5;
+  border-radius: 2px;
+  text-align: center;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #0072c6;
+  opacity: 1;
+  cursor: pointer;
+}
+.boldText {
+  text-align: left;
+  font: normal normal bold 14px/16px Open Sans;
+  color: #070707;
+  opacity: 1;
+  width: 15rem;
+  vertical-align: middle;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+.hrLineSend {
+  border: 0.5px solid #c4c4c4;
+  opacity: 1;
+  width: 100%;
+}

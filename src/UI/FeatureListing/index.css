@@ -1,0 +1,35 @@
+.image-div {
+  height: 1.938rem;
+  width: 1.938rem;
+  margin: 0.563rem 0rem 0.625rem 0.688rem;
+  background-color: lightgrey;
+  border-radius: 0.313rem;
+}
+
+.features-data {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  height: 1.063rem;
+  margin: 1.063rem 0px 1rem 0.625rem;
+  cursor: pointer;
+}
+
+.features-help-icon {
+  height: 1.25vw !important;
+  width: 1.25vw !important;
+  color: grey;
+  margin: 1rem 0rem 1rem 0.5vw !important;
+  opacity: 0.5;
+}
+
+.custom-tag {
+  text-align: left;
+  cursor: "default";
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  margin: 1.061rem 0rem 1.186rem 0.313rem;
+  color: #989898;
+}

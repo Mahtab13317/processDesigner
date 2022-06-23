@@ -1,0 +1,31 @@
+.tittle {
+  text-align: right;
+  font: normal normal 600 16px/22px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  margin-bottom: 2rem;
+}
+
+.variableName {
+  text-align: right;
+  font: normal normal 600 14px/16px Open Sans;
+  letter-spacing: 0.42px;
+  color: #070707;
+  opacity: 1;
+  margin-right: 1rem;
+  width: 20rem;
+  vertical-align: middle;
+  padding-right: 10px;
+}
+
+.searchRights {
+  text-align: right;
+  font: normal normal 600 14px/16px Open Sans;
+  letter-spacing: 0.42px;
+  color: #070707;
+  opacity: 1;
+  margin-right: 2rem;
+  vertical-align: middle;
+  width: 57rem;
+}

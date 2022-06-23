@@ -1,0 +1,19 @@
+.toolIcon {
+  display: flex;
+  align-items: center;
+  flex-direction: row-reverse;
+  height: 1rem;
+  width: 1rem;
+}
+
+.oneToolBox {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-width: 100%;
+  height: 26px;
+}
+
+.oneToolBox:hover {
+  background-color: #f8f8f8;
+}

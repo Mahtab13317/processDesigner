@@ -1,0 +1,171 @@
+.mainDiv {
+  margin-right: 0.625rem;
+  padding-top: 0.625rem;
+  margin-left: 0.625rem;
+}
+
+.headingsDiv {
+  display: flex;
+  flex-direction: row;
+  height: 3.063rem;
+  width: 100%;
+  background-color: #ffffff;
+}
+
+.subHeadingDiv {
+  background: #f0f0f0 0% 0% no-repeat padding-box;
+  opacity: 1;
+  height: 2rem;
+  width: 100%;
+  margin-top: 0.688rem;
+  display: flex;
+  flex-direction: row;
+}
+
+.mainCheckBox {
+  height: 0.875rem;
+  width: 0.875rem;
+  margin-top: 0.563rem !important;
+  margin-right: 0.938rem !important;
+  color: #c4c4c4 !important;
+}
+
+.inputDivs {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  opacity: 1;
+  width: 100%;
+  height: 2.813rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.constantLogo {
+  height: 1rem;
+  width: 1rem;
+  background-color: lightgrey;
+  border-radius: 0.25rem;
+  margin: 1.125rem 0.938rem 0.938rem 0rem;
+}
+
+.constantHeading {
+  text-align: right;
+  font: normal normal 600 1rem/1.375rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.938rem 0.25rem 0.75rem 0rem;
+}
+
+.auditHistoryButton {
+  height: 1.751rem;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 0.063rem solid #c4c4c4;
+  border-radius: 0.125rem;
+  opacity: 1;
+  cursor: pointer;
+  margin: 0.75rem 53.125rem 0.561rem 0rem;
+  margin-right: auto;
+}
+
+.constantName {
+  text-align: right;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.375rem 0.563rem 0.438rem 0rem;
+}
+
+.defaultValue {
+  text-align: right;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.375rem 15.688rem 0.438rem 0rem;
+}
+
+.constantInputField {
+  margin: 0.5rem 0.688rem 0.438rem 0rem;
+  /* margin: 0.5rem 2.688rem 0.438rem 0rem; */
+  color: #000000;
+  padding: 6px;
+  width: 20.75rem;
+  height: 1.875rem;
+  background: #f0f0f0 0% 0% no-repeat padding-box;
+  font: normal normal 600 0.75rem/1.063rem Open Sans !important;
+  border: 0.063rem solid #c4c4c4;
+  border-radius: 0.125rem;
+  opacity: 1;
+}
+
+.defaultValueInputField {
+  color: #000000;
+  margin: 0.5rem 0.563rem 0.438rem 0rem;
+  padding: 6px;
+  width: 10.875rem;
+  height: 1.875rem;
+  background: #f0f0f0 0% 0% no-repeat padding-box;
+  font: normal normal 600 0.75rem/1.063rem Open Sans !important;
+  border: 0.063rem solid #c4c4c4;
+  border-radius: 0.125rem;
+  opacity: 1;
+}
+
+.createConstantButton {
+  background: #0072c6 0% 0% no-repeat padding-box;
+  border: 0.125rem solid #0072c6;
+  opacity: 1;
+  font: normal normal 600 0.75rem/1.063rem Open Sans;
+  color: white;
+  border-radius: 0.125rem;
+  opacity: 1;
+  padding: 0.313rem 0.5rem 1.375rem 0.5rem;
+  float: right;
+  cursor: pointer;
+  margin: 0.5rem 0.563rem 0.563rem;
+}
+
+.constantsNameData {
+  margin-left: 0.875rem;
+  color: #000000;
+  margin-top: 0.875rem;
+  width: 20.75rem;
+  height: 1.875rem;
+  opacity: 1;
+  text-align: right;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+}
+
+.defaultValueData {
+  color: #000000;
+  padding: 6px;
+  margin-right: 0.563rem !important;
+  margin-top: 0.438rem;
+  width: 10.875rem;
+  height: 1.875rem;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  font: normal normal 600 0.75rem/1.063rem Open Sans !important;
+  border: 0.063rem solid #c4c4c4;
+  border-radius: 0.125rem;
+  opacity: 1;
+  text-align: right !important;
+}
+
+.dataCheckbox {
+  height: 0.875rem;
+  width: 0.875rem;
+  margin: 0.875rem 1rem 0.938rem 0rem !important;
+  color: #c4c4c4 !important;
+  border: 1px solid #c4c4c4;
+}
+
+.deleteIcon {
+  float: right;
+  color: grey;
+  margin: 0.809rem 34.125rem 0.875rem 1.188rem;
+  cursor: pointer;
+  margin-right: auto;
+}

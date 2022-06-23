@@ -1,0 +1,6 @@
+.showRedBorder {
+  border: 0.0625rem solid red !important;
+}
+.height {
+  max-height: 50px;
+}

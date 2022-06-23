@@ -1,0 +1,158 @@
+.mainDiv {
+  width: 99%;
+}
+
+.headerDiv {
+  background: #f0f0f0 0% 0% no-repeat padding-box;
+  opacity: 1;
+  height: 2rem;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.dataMainDiv {
+  overflow-y: scroll;
+  height: 60%;
+}
+
+.dataMainDiv::-webkit-scrollbar {
+  background-color: transparent;
+  width: 0.375rem;
+  height: 1.125rem;
+}
+.dataMainDiv::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 0.313rem;
+}
+
+.variableName {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.25rem 0rem 0.438rem 1.813rem;
+}
+
+.variableType {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.25rem 0rem 0.438rem 5.375rem;
+}
+
+.dataType {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 4px 0px 7px 118px;
+}
+
+.defaultValue {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.25rem 0rem 0.438rem 4.875rem;
+}
+
+.variableLength {
+  text-align: left;
+  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.25rem 0rem 0.438rem 3.875rem;
+}
+
+.dataDiv {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  opacity: 1;
+  height: 2.813rem;
+  margin-bottom: 0.125rem;
+  display: flex;
+  flex-direction: row;
+}
+
+.variableNameData {
+  margin: 0.875rem 0rem 0.875rem 1.813rem;
+  text-align: left;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  width: 7.8125rem;
+}
+
+.modifiableVariableType {
+  background: #dbf0ff 0% 0% no-repeat padding-box;
+  border: 1px solid #95d1ff;
+  border-radius: 12px;
+  opacity: 1;
+  width: 105px;
+  text-align: center;
+  margin: 10px 0px 0px 0px;
+  height: 24px;
+}
+
+.modifiableText {
+  padding: 6px;
+  font: normal normal normal 0.75rem/1.063rem Open Sans !important;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+}
+
+.nonModifiable {
+  background: #f2f2f2 0% 0% no-repeat padding-box;
+  border: 1px solid #dcdcdc;
+  border-radius: 100px;
+  opacity: 1;
+  height: 24px;
+  width: 105px;
+  margin: 10px 0px 0px 0px;
+}
+
+.nonModifiableText {
+  padding: 6px;
+  font: normal normal normal 0.75rem/1.063rem Open Sans !important;
+  letter-spacing: 0rem;
+  color: #5e5e5e;
+  opacity: 1;
+}
+
+.dataTypeValue {
+  text-align: left;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  margin: 0.875rem 0rem 0.875rem 5rem;
+  width: 6.4375rem;
+}
+
+.defaultValueData {
+  text-align: left;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  width: 150px;
+  margin: 0.875rem 0rem 0.875rem 4.375rem;
+}
+
+.variableLengthData {
+  text-align: left;
+  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  letter-spacing: 0rem;
+  color: #000000;
+  opacity: 1;
+  width: 3.125rem;
+  margin: 0.875rem 0rem 0.875rem 1.875rem;
+}

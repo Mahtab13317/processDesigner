@@ -1,0 +1,528 @@
+/* CSS FOR PROCESSES SECTION (RIGHT SIDE) */
+* {
+  padding: 0px;
+  box-sizing: border-box;
+  margin: 0px;
+}
+.tableHeading {
+  font-size: 14px;
+  margin-left: 25px;
+}
+
+.processes {
+  align-items: center;
+  width: 75vw;
+  padding: 0.5rem;
+  position: absolute;
+  right: 5%;
+  height: 90vh;
+  box-shadow: 0px 3px 6px #00000029;
+  background-color: #f6f6f6;
+}
+
+.processes_rtl {
+  align-items: center;
+  width: 75vw;
+  padding: 0.5rem;
+  position: absolute;
+  left: 0%;
+  height: 90vh;
+  box-shadow: 0px 3px 6px #00000029;
+  background-color: #f6f6f6;
+}
+
+.newProcessHeader {
+  background-color: white;
+  padding: 5px 0px 5px 5px;
+  margin-bottom: 12px;
+}
+
+.processName {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.importOrCreateProcessButtons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.selectedProjectInfo {
+  font-size: 14px;
+  margin-top: 5px;
+  margin-left: 10px;
+}
+.importButton {
+  outline: none;
+  color: "#c7cfb7";
+  padding: 10px;
+  border: #c8c6a7 1px solid;
+  background-color: white;
+}
+.newProcessButtons button {
+  margin-right: 10px;
+}
+.searchBar {
+  display: flex;
+  align-items: center;
+}
+.processCount {
+  display: flex;
+  font-size: 12px;
+  align-items: center;
+  width: 40px;
+  height: 23px;
+  text-align: left;
+}
+.processTable {
+  margin-top: 10px;
+}
+
+.tableRow:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.tableHead {
+  display: flex;
+  margin-left: 10px;
+  align-items: center;
+  width: 98%;
+}
+.processName_Search_Filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 15px;
+  width: 99.5%;
+}
+.processName_Search_Filters p {
+  font-size: 14px;
+  font-weight: bold;
+}
+.filterBox {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  margin: -5px -10px 0 0;
+}
+
+.pinnedAtTop_Table {
+  /* background-color: white; */
+  padding-right: 2px;
+  overflow-y: auto;
+  height: 70vh;
+}
+.pinnedAtTop_Table::-webkit-scrollbar {
+  display: none;
+}
+
+.pinnedAtTop_Table h4 {
+  margin: 10px 0px 5px 20px;
+  font-size: 15px;
+}
+
+/* --------------------------------------- */
+/* CSS FOR PROJECTS SECTION (LEFT SIDE) */
+
+.projects {
+  width: 20vw;
+  /* overflow: auto; */
+  height: 90vh;
+}
+.projects::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+  display: none;
+}
+.MuiTableRow-root.Mui-selected {
+  background-color: #0072c614 !important;
+  /* color: #1072C6 !important; */
+}
+.project_Header_Adder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 18vw;
+  /* z-index: 10; */
+}
+.project_Header_Adder h1 {
+  color: #5eaaa8;
+}
+.searchBarNFilter {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.searchbar_N_Header {
+  background-color: inherit;
+  display: flex;
+  flex-direction: column;
+  padding: 0px 8px 0px 10px;
+}
+.MuiPaper-elevation1 {
+  box-shadow: none !important;
+}
+
+.MuiInputBase-input {
+  padding-left: 8px !important;
+}
+.table {
+  /* padding-left: 7px; */
+  overflow: auto;
+}
+.table::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+  display: none;
+}
+.backToTopButton {
+  position: absolute;
+  bottom: 15px;
+  width: 132px;
+  height: 25px;
+  left: 159px;
+  background-color: #daebfa;
+  border: none;
+  box-shadow: 0px 3px 6px #00000029;
+  border-radius: 14px;
+  cursor: pointer;
+  outline: none;
+  color: #0072c6;
+  padding-left: 10px;
+}
+/* --------------------------------------------------------------------- */
+
+/* CSS for ProcessListByProjectTable   */
+.tableRow {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  /* box-shadow: 0px 3px 6px #00000029; */
+  opacity: 1;
+  width: 97.5%;
+  height: 45px;
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  padding: 4px 0px 4px 0px;
+}
+
+.subTabContentToScroll {
+  overflow-y: auto;
+  height: 62vh;
+}
+.subTabContentToScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.tableRows {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.iconTypeProject {
+  margin-top: 0.25rem;
+}
+
+.iconTypeProcess {
+  width: 18px;
+  height: 17.2px;
+  margin-top: 5px;
+}
+/* --------------------------------------------- */
+.processListRow1 {
+  width: 5%;
+  padding-left: 10px;
+}
+.processListRow2 {
+  width: 35.2%;
+  font-weight: 400;
+  font-size: 12px;
+}
+.processListRow2 span {
+  display: block;
+  font-size: 11px;
+  color: grey;
+}
+.processListRow3 {
+  width: 35.1%;
+  font-weight: 400;
+  font-size: 12px;
+}
+.processListRow3 span {
+  display: block;
+  font-size: 11px;
+  color: grey;
+}
+.processListRow4 {
+  width: 24%;
+  font-weight: 400;
+  font-size: 12px;
+}
+.processListRow4 span {
+  display: block;
+  font-size: 11px;
+  color: grey;
+}
+.processListHead1 {
+  width: 5%;
+  padding-left: 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.processListHead2 {
+  display: flex;
+  width: 35%;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+}
+.processListHead3 {
+  display: flex;
+  width: 35%;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+}
+.processListHead4 {
+  display: flex;
+  flex-grow: 1;
+  width: 25%;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+}
+/* ---------------------------------------------------- */
+.tableRows::-webkit-scrollbar {
+  width: 7px;
+  height: 10px;
+  background-color: white;
+}
+.tableRows::-webkit-scrollbar-thumb {
+  background-color: #d8d8d8;
+  border-radius: 4px;
+}
+
+.MuiCheckbox-colorSecondary.Mui-checked {
+  color: #1072c6 !important;
+}
+/* ----------------------------------------------------- */
+.tabStyling
+  .MuiButtonBase-root.MuiTab-root.MuiTab-textColorInherit.Mui-selected {
+  font-family: 900;
+}
+
+.tabStyling .MuiBox-root {
+  padding: 0px !important;
+}
+
+.tabStyling .MuiTab-wrapper {
+  text-transform: none;
+  font-weight: 500;
+  letter-spacing: 0px;
+}
+
+.tabStyling .Mui-selected .MuiTab-wrapper {
+  font-weight: bolder;
+}
+.mainTab .MuiTabs-indicator {
+  height: 3px;
+  background-color: #1072c6;
+  transform: translateY(-8px);
+}
+.subTabBarStyle {
+  /* background-color: white !important ; */
+  margin-top: 5px !important;
+  padding-top: 10px !important;
+  padding-left: 10px !important;
+}
+.mainTabBarStyle {
+  margin-left: 10px !important;
+}
+.mainOneTabStyle {
+  color: #798777 !important;
+  font-size: 12px !important;
+  margin-right: 25px !important;
+  font-weight: lighter !important;
+}
+.subTab .MuiTabs-indicator {
+  background-color: transparent !important;
+}
+.mainTabContentStyle {
+  margin-top: -11px !important;
+  background-color: white !important;
+}
+.subTabContentStyle {
+  margin-top: -14px !important;
+  /* background-color: white !important; */
+}
+.mainOneTabStyle.Mui-selected {
+  color: #0072c6 !important;
+  font-weight: 400 !important;
+}
+.subOneTabStyle {
+  color: #a2b29f !important;
+  font-size: 12px !important;
+  /* width: 72px !important; */
+  /* padding: 0px 5px !important; */
+  height: 23px !important;
+  border: 1px solid #dadada !important;
+  margin-right: 10px !important;
+  border-radius: 1px !important;
+  padding: 0px !important;
+  min-height: 23px !important;
+}
+
+.subOneTabStyleHidden {
+  color: #a2b29f !important;
+  font-size: 12px !important;
+  /* width: 72px !important; */
+  /* padding: 0px 5px !important; */
+  height: 23px !important;
+  border: 1px solid #dadada !important;
+  margin-right: 10px !important;
+  border-radius: 1px !important;
+  padding: 0px !important;
+  min-height: 23px !important;
+}
+
+.MuiTab-wrapper {
+  padding: 2px 5px !important;
+}
+.subOneTabStyle.Mui-selected {
+  border: 1px solid #0072c6 !important;
+  color: #0072c6 !important;
+  background: #0072c627 0% 0% no-repeat padding-box;
+}
+
+.subOneTabStyleHidden.Mui-selected {
+  border: 1px solid #0072c6 !important;
+  color: #0072c6 !important;
+  background: #0072c627 0% 0% no-repeat padding-box;
+  display: none;
+}
+
+.filterBox #searchBoxId {
+  margin-left: 45px !important;
+  margin-right: 15px !important;
+}
+/* ------------------------------------------------ */
+/* Project OnHover ToolTip */
+.projectToolTip {
+  position: absolute;
+  top: -7px;
+  left: -100%;
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  background: #000000f2 0% 0% no-repeat padding-box;
+  opacity: 1;
+  text-align: left;
+  padding: 3px 10px;
+}
+/* ----------------------------------------------------- */
+/* BPMN VIEW TAB STYLING */
+.processViewTabs
+  .MuiButtonBase-root.MuiTab-root.MuiTab-textColorInherit.Mui-selected {
+  font-family: 900;
+}
+
+.processViewTabs .MuiBox-root {
+  padding: 0px !important;
+}
+
+.processViewTabs .MuiTab-wrapper {
+  text-transform: none;
+  font-weight: 500;
+  letter-spacing: 0px;
+}
+
+.processViewTabs .Mui-selected .MuiTab-wrapper {
+  font-weight: bolder;
+  /* display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  width: 100% !important; */
+}
+
+.processSubTab .MuiTabs-indicator {
+  background-color: #0072c6 !important;
+  height: 3px;
+  /* transform: translateY(-19px); */
+  /* left: 0 !important; */
+}
+
+.processSubTabContentStyle {
+  /* margin-top: -14px !important; */
+  /* background-color: #F3F3F3 !important; */
+}
+
+.processSubTabBarStyle {
+  background-color: white !important ;
+  /* margin-top: 5px !important; */
+  /* padding-top: 10px !important;
+    padding-left: 10px !important; */
+}
+.processSubTabBarStyle .MuiTabs-root {
+  min-height: 30px !important;
+  padding: 3px 7px 0px !important;
+}
+
+.processSubOneTabStyle {
+  color: #000000 !important;
+  font-size: 12px !important;
+  height: 7px !important;
+  margin-right: 10px !important;
+  border-radius: 1px !important;
+  padding: 0px !important;
+  /* min-height:23px !important; */
+}
+
+.processSubOneTabStyleProcessType {
+  color: #000000 !important;
+  font-size: 12px !important;
+  height: 7px !important;
+  margin-right: 10px !important;
+  border-radius: 1px !important;
+  padding: 0px !important;
+}
+
+.processViewSubTabs {
+  box-shadow: 0px 3px 4px #dadada !important;
+  max-height: 100%;
+}
+
+.processViewSubTabs .MuiTabs-flexContainer {
+  height: 30px !important;
+}
+
+.processViewTabs .FloatButton .MuiTabs-root .MuiTabs-flexContainer {
+  height: 0px !important;
+}
+
+.processSubOneTabStyle .MuiTab-wrapper {
+  margin: -19px 5px 0px 0px !important;
+}
+.filterButton {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #c4c4c4;
+  padding: 5px;
+  cursor: pointer;
+  background-color: white;
+  position: relative;
+}
+.modalPaperProjects {
+  position: absolute;
+  width: 160px;
+  z-index: 100;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000029;
+  border: 1px solid #c4c4c4;
+}
+
+.processDotsOnTab {
+  margin-right: 0.125vw;
+  height: 12px;
+  width: 12px;
+  margin-top: -2.25px;
+}
