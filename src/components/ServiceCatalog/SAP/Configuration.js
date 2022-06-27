@@ -214,7 +214,7 @@ function Configuration(props) {
   };
 
   return (
-    <div className={styles.mainWrappingDiv} style={{ height: "70vh" }}>
+    <div className={styles.mainWrappingDiv} style={{ height: "73vh" }}>
       {spinner ? (
         <CircularProgress
           style={

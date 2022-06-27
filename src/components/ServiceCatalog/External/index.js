@@ -3,13 +3,12 @@ import {
   OPTION_USER_DEFINED,
   OPTION_SYSTEM_DEFINED,
   SERVER_URL,
-  ENDPOINT_GET_EXTERNAL_METHODS,
   SYSTEM_DEFINED_SCOPE,
   USER_DEFINED_SCOPE,
   GLOBAL_SCOPE,
   DEFAULT_GLOBAL_ID,
-  DEFAULT_GLOBAL_TYPE,
   RTL_DIRECTION,
+  ENDPOINT_GET_WEBSERVICE,
 } from "../../../Constants/appConstants";
 import { Accordion, AccordionDetails, Divider } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
@@ -31,21 +30,24 @@ function ExternalMethods(props) {
   const [expanded, setExpanded] = useState(2);
   const [primaryInputStrip, setPrimaryInputStrip] = useState(false);
   const [spinner, setSpinner] = useState(true);
+  const [maxMethodCount, setMaxMethodCount] = useState(0);
 
   useEffect(() => {
+    //code edited on 16 June 2022 for BugId 110949
     axios
       .get(
         SERVER_URL +
-          ENDPOINT_GET_EXTERNAL_METHODS +
+          ENDPOINT_GET_WEBSERVICE +
           `${
             props.scope === GLOBAL_SCOPE
-              ? `/${DEFAULT_GLOBAL_ID}/${DEFAULT_GLOBAL_TYPE}`
-              : `/${props.openProcessID}/${props.openProcessType}`
+              ? DEFAULT_GLOBAL_ID
+              : props.openProcessID
           }`
       )
       .then((res) => {
         if (res.data.Status === 0) {
-          setMethodList(res.data.Methods.Method);
+          setMethodList(res.data.Methods.Catalog);
+          setMaxMethodCount(res.data.Methods.MaxExtFuncGlblMethodIndex);
           setSpinner(false);
         } else {
           setSpinner(false);
@@ -165,6 +167,10 @@ function ExternalMethods(props) {
             primaryInputStrip={primaryInputStrip}
             setPrimaryInputStrip={setPrimaryInputStrip}
             setMethodList={setMethodList}
+            //code added on 16 June 2022 for BugId 110949
+            maxMethodCount={maxMethodCount}
+            setMaxMethodCount={setMaxMethodCount}
+            scope={props.scope}
           />
         </AccordionDetails>
       </Accordion>

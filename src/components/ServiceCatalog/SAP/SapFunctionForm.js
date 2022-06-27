@@ -18,7 +18,6 @@ import {
 
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { validateRegex } from "../../../validators/validator";
 import { setToastDataFunc } from "../../../redux-store/slices/ToastDataHandlerSlice";
 import TextInput from "../../../UI/Components_With_ErrrorHandling/InputField";
 import Modal from "../../../UI/Modal/Modal";
@@ -51,9 +50,6 @@ function SapFunctionForm(props) {
     rfchostNameRequired: false,
     rfcHostname: "",
   });
-  const [detailsFetched, setDetailsFetched] = useState(false);
-  const [appList, setAppList] = useState([]);
-  const [methodList, setMethodList] = useState([]);
   const [error, setError] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [configDrop, setConfigDrop] = useState([]);
@@ -61,7 +57,6 @@ function SapFunctionForm(props) {
 
   useEffect(() => {
     if (selected) {
-      setDetailsFetched(false);
       if (selected.status === STATE_ADDED) {
         setsapConfigObj({
           configuration: selectedConfig?.ConfigName,
@@ -80,8 +75,6 @@ function SapFunctionForm(props) {
           setRfcCheck(true);
         }
       } else if (selected.status === STATE_CREATED) {
-        setAppList([]);
-        setMethodList([]);
         setsapConfigObj({
           configuration: "",
           hostName: "",
@@ -259,9 +252,8 @@ function SapFunctionForm(props) {
         onChangeEvent={onChange}
         name="hostName"
         idTag="Sap_hostName"
-        readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+        readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
       />
-
       <div
         className={direction === RTL_DIRECTION ? arabicStyles.rfc : styles.rfc}
       >
@@ -281,7 +273,7 @@ function SapFunctionForm(props) {
               : styles.rfcCheckbox
           }
           label={t("toolbox.serviceCatalogSap.rfcHostname")}
-          disabled={selected.status == STATE_ADDED ? true : false}
+          disabled={selected?.status == STATE_ADDED ? true : false}
         />
 
         {rfcCheck ? (
@@ -291,7 +283,7 @@ function SapFunctionForm(props) {
             idTag="rfcHost"
             onChangeEvent={onChange}
             inputValue={sapConfigObj?.rfcHostname}
-            readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+            readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
           />
         ) : (
           ""
@@ -322,7 +314,7 @@ function SapFunctionForm(props) {
         onChangeEvent={onChange}
         name="clientName"
         idTag="Sap_clientName"
-        readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+        readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
       />
 
       <label
@@ -349,7 +341,7 @@ function SapFunctionForm(props) {
         onChangeEvent={onChange}
         name="username"
         idTag="Sap_userName"
-        readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+        readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
       />
 
       <label
@@ -377,7 +369,7 @@ function SapFunctionForm(props) {
         name="password"
         type="password"
         idTag="Sap_password"
-        readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+        readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
       />
       <div className="row">
         <div>
@@ -405,7 +397,7 @@ function SapFunctionForm(props) {
             onChangeEvent={onChange}
             name="language"
             idTag="Sap_language"
-            readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+            readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
           />
         </div>
 
@@ -434,7 +426,7 @@ function SapFunctionForm(props) {
             onChangeEvent={onChange}
             name="instanceNo"
             idTag="Sap_instanceNo"
-            readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+            readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
           />
         </div>
       </div>
@@ -465,14 +457,14 @@ function SapFunctionForm(props) {
             onChangeEvent={onChange}
             name="functionName"
             idTag="Sap_functionName"
-            readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+            readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
           />
         </div>
         <div style={{ marginLeft: "1rem" }}>
           <button
             className={`${styles.primaryBtn} ${styles.pd025}`}
             onClick={goHandler}
-            disabled={selected.status == STATE_ADDED ? true : false}
+            disabled={selected?.status == STATE_ADDED ? true : false}
           >
             {t("Go")}
           </button>

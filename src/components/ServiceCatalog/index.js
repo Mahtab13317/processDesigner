@@ -19,8 +19,17 @@ function ServiceCatalog(props) {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
   return (
-    <div style={{ display: "flex", flexDirection: "row", height: "91.84vh" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        height: `${
+          props.callLocation === "webServicePropTab" ? "70vh" : "91.84vh"
+        }`,
+      }}
+    >
       <div
         className="tabs"
         style={{ width: "17vw", background: "#FFF", marginTop: "4px" }}
@@ -61,7 +70,11 @@ function ServiceCatalog(props) {
       </div>
       <div style={{ width: "83vw", marginTop: "5px" }}>
         <TabPanel style={{ padding: "0.25rem 0.5rem" }} value={value} index={0}>
-          <Webservice style={{ height: "80vh" }} scope={LOCAL_SCOPE} />
+          <Webservice
+            {...props}
+            style={{ height: "80vh" }}
+            scope={LOCAL_SCOPE}
+          />
         </TabPanel>
         <TabPanel value={value} index={1}>
           <External scope={LOCAL_SCOPE} />

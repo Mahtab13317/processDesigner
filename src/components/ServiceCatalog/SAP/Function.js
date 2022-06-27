@@ -30,8 +30,8 @@ function Function(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
-  const loadedActivityPropertyData = store.getState("activityPropertyData");
+  const [localLoadedProcessData, setlocalLoadedProcessData] =
+    useGlobalState(loadedProcessData);
   const dispatch = useDispatch();
   const [spinner, setspinner] = useState(true);
   const [functionList, setfunctionList] = useState([]);
@@ -81,14 +81,12 @@ function Function(props) {
   const addNewSapFunction = () => {
     let temp = [...functionList];
     let indexVal;
-    let maxId = 0;
+    //code added on 16 June 2022 for BugId 110949
+    let maxId = +localLoadedProcessData.MaxMethodIndex + 1;
     //to remove existing temporary SAP from list, before adding new temporary SAP
     temp?.forEach((webS, index) => {
       if (webS.status && webS.status === STATE_CREATED) {
         indexVal = index;
-      }
-      if (maxId < webS.FunctionID) {
-        maxId = webS.FunctionID;
       }
     });
     if (indexVal >= 0) {
@@ -96,12 +94,13 @@ function Function(props) {
     }
     temp.splice(0, 0, {
       FunctionName: t("toolbox.serviceCatalogSap.newFunction"),
-      FunctionID: maxId + 1,
+      FunctionID: maxId,
       status: STATE_CREATED,
     });
     setSelected(temp[0]);
     setfunctionList(temp);
   };
+
   const handleFunctionSAP = (statusConstant) => {
     let paramTypeMap = {},
       isValid = true;
@@ -118,7 +117,6 @@ function Function(props) {
         },
       };
     });
-
     if (selected?.ParameterDetails?.length > 0) {
       paramList = selected?.ParameterDetails?.map((el) => {
         return {
@@ -137,7 +135,7 @@ function Function(props) {
 
     let json = {
       processDefId: localLoadedProcessData.ProcessDefId,
-      methodIndex: selected.FunctionID,
+      methodIndex: selected?.FunctionID,
       functionName: changedSelection.functionName,
       objSAPConfiguration: {
         iConfigurationId: parseInt(changedSelection.iConfigurationId),
@@ -188,7 +186,6 @@ function Function(props) {
               status: selected.status,
               strSAPAuthCred: null,
             };
-
             tempConfig[0] = {
               ...newObj,
               status: STATE_ADDED,
@@ -198,6 +195,10 @@ function Function(props) {
               temp.status = STATE_ADDED;
               return temp;
             });
+            //code added on 16 June 2022 for BugId 110949
+            let temp = { ...localLoadedProcessData };
+            temp.MaxMethodIndex = parseInt(temp.MaxMethodIndex) + 1;
+            setlocalLoadedProcessData(temp);
           } else if (statusConstant === MODIFY_CONSTANT) {
           }
           setConfigList(tempConfig);
@@ -209,7 +210,7 @@ function Function(props) {
   const cancelAddWebservice = () => {};
 
   return (
-    <div className={styles.mainWrappingDiv} style={{ height: "70vh" }}>
+    <div className={styles.mainWrappingDiv} style={{ height: "73vh" }}>
       {spinner ? (
         <CircularProgress
           style={

@@ -143,7 +143,7 @@ function SapForm(props) {
         onChangeEvent={onChange}
         name="configuration"
         idTag="Sap_configuration"
-        readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+        readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
       />
 
       <label
@@ -170,7 +170,7 @@ function SapForm(props) {
         onChangeEvent={onChange}
         name="hostName"
         idTag="Sap_hostName"
-        readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+        readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
       />
 
       <div
@@ -192,7 +192,7 @@ function SapForm(props) {
               : styles.rfcCheckbox
           }
           label={t("toolbox.serviceCatalogSap.rfcHostname")}
-          disabled={selected.status == STATE_ADDED ? true : false}
+          disabled={selected?.status == STATE_ADDED ? true : false}
         />
 
         {rfcCheck ? (
@@ -202,7 +202,7 @@ function SapForm(props) {
             idTag="rfcHost"
             inputValue={sapConfigObj?.rfcHostname}
             onChangeEvent={onChange}
-            readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+            readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
           />
         ) : (
           ""
@@ -233,7 +233,7 @@ function SapForm(props) {
         onChangeEvent={onChange}
         name="clientName"
         idTag="Sap_clientName"
-        readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+        readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
       />
 
       <label
@@ -260,7 +260,7 @@ function SapForm(props) {
         onChangeEvent={onChange}
         name="userName"
         idTag="Sap_userName"
-        readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+        readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
       />
 
       <label
@@ -287,7 +287,7 @@ function SapForm(props) {
         onChangeEvent={onChange}
         name="password"
         idTag="Sap_password"
-        readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+        readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
       />
       <div className="row">
         <div>
@@ -315,7 +315,7 @@ function SapForm(props) {
             onChangeEvent={onChange}
             name="language"
             idTag="Sap_language"
-            readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+            readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
           />
         </div>
 
@@ -344,7 +344,7 @@ function SapForm(props) {
             onChangeEvent={onChange}
             name="instanceNo"
             idTag="Sap_instanceNo"
-            readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+            readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
           />
         </div>
       </div>
@@ -373,7 +373,7 @@ function SapForm(props) {
         onChangeEvent={onChange}
         name="httpPort"
         idTag="Sap_httpPort"
-        readOnlyCondition={selected.status == STATE_ADDED ? true : false}
+        readOnlyCondition={selected?.status == STATE_ADDED ? true : false}
       />
 
       <div className="row">
@@ -408,7 +408,7 @@ function SapForm(props) {
                   ? arabicStyles.webS_radioButton
                   : styles.webS_radioButton
               }
-              disabled={selected.status == STATE_ADDED ? true : false}
+              disabled={selected?.status == STATE_ADDED ? true : false}
             />
             <FormControlLabel
               value={"HTTPS"}
@@ -420,7 +420,7 @@ function SapForm(props) {
                   ? arabicStyles.webS_radioButton
                   : styles.webS_radioButton
               }
-              disabled={selected.status == STATE_ADDED ? true : false}
+              disabled={selected?.status == STATE_ADDED ? true : false}
             />
           </RadioGroup>
         </div>
@@ -455,7 +455,7 @@ function SapForm(props) {
                   ? arabicStyles.webS_radioButton
                   : styles.webS_radioButton
               }
-              disabled={selected.status == STATE_ADDED ? true : false}
+              disabled={selected?.status == STATE_ADDED ? true : false}
             />
             <FormControlLabel
               value={"S"}
@@ -467,7 +467,7 @@ function SapForm(props) {
                   ? arabicStyles.webS_radioButton
                   : styles.webS_radioButton
               }
-              disabled={selected.status == STATE_ADDED ? true : false}
+              disabled={selected?.status == STATE_ADDED ? true : false}
             />
           </RadioGroup>
         </div>

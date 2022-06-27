@@ -14,6 +14,8 @@ import ParamDivOnHover from "../ParamDivOnHover";
 import DeleteOutlinedIcon from "@material-ui/icons/DeleteOutlined";
 import {
   COMPLEX_VARTYPE,
+  DEFAULT_GLOBAL_ID,
+  DEFAULT_GLOBAL_TYPE,
   ENDPOINT_ADD_EXTERNAL_METHODS,
   ENDPOINT_DELETE_EXTERNAL_METHODS,
   ENDPOINT_MODIFY_EXTERNAL_METHODS,
@@ -35,12 +37,20 @@ import EditIcon from "@material-ui/icons/Edit";
 import DoneIcon from "@material-ui/icons/Done";
 import axios from "axios";
 import { connect } from "react-redux";
+import { store, useGlobalState } from "state-pool";
 
 function UserDefined(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
-  let { methodList, primaryInputStrip, setPrimaryInputStrip, setMethodList } =
-    props;
+  let {
+    methodList,
+    primaryInputStrip,
+    setPrimaryInputStrip,
+    setMethodList,
+    maxMethodCount,
+    setMaxMethodCount,
+    scope,
+  } = props;
   const [data, setData] = useState({
     appName: "",
     methodName: "",
@@ -49,6 +59,9 @@ function UserDefined(props) {
     paramList: [],
   });
   const [editMethod, setEditMethod] = useState(null);
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData, setlocalLoadedProcessData] =
+    useGlobalState(loadedProcessData);
 
   const ParamTooltip = withStyles((theme) => ({
     tooltip: {
@@ -70,14 +83,16 @@ function UserDefined(props) {
     },
   }))(Tooltip);
 
+  //code edited on 21 June 2022 for BugId 111099
   const addExternalMethod = () => {
     let newData = [...methodList];
-    let maxVarId = 0;
-    newData?.forEach((val) => {
-      if (+val.MethodIndex > +maxVarId) {
-        maxVarId = +val.MethodIndex;
-      }
-    });
+    let maxVarId;
+    //code added on 16 June 2022 for BugId 110949
+    if (scope === GLOBAL_SCOPE) {
+      maxVarId = +maxMethodCount + 1;
+    } else {
+      maxVarId = +localLoadedProcessData.MaxMethodIndex + 1;
+    }
     let jsonParams = data.paramList?.map((el) => {
       return {
         paramName: el.paramName,
@@ -89,15 +104,17 @@ function UserDefined(props) {
       };
     });
     let json = {
-      processDefId: props.openProcessID,
-      processType: props.openProcessType,
+      processDefId:
+        scope === GLOBAL_SCOPE ? DEFAULT_GLOBAL_ID : props.openProcessID,
+      processType:
+        scope === GLOBAL_SCOPE ? DEFAULT_GLOBAL_TYPE : props.openProcessType,
       methodName: data.methodName,
-      methodIndex: maxVarId + 1,
+      methodIndex: maxVarId,
       returnType: getTypeByVariable(data.returnType),
       appName: data.appName,
       appType: USER_DEFINED_SCOPE,
       paramList: jsonParams,
-      methodType: data.isGlobal ? GLOBAL_SCOPE : LOCAL_SCOPE,
+      methodType: scope,
     };
     axios.post(SERVER_URL + ENDPOINT_ADD_EXTERNAL_METHODS, json).then((res) => {
       if (res.data.Status === 0) {
@@ -116,7 +133,7 @@ function UserDefined(props) {
           AppType: USER_DEFINED_SCOPE,
           MethodIndex: maxVarId + 1,
           MethodName: data.methodName,
-          MethodType: data.isGlobal ? GLOBAL_SCOPE : LOCAL_SCOPE,
+          MethodType: scope,
           Parameter: parameters,
           ReturnType: getTypeByVariable(data.returnType),
         });
@@ -135,6 +152,16 @@ function UserDefined(props) {
             },
           ],
         });
+        //code added on 16 June 2022 for BugId 110949
+        if (scope === GLOBAL_SCOPE) {
+          setMaxMethodCount((prev) => {
+            return prev + 1;
+          });
+        } else {
+          let temp = { ...localLoadedProcessData };
+          temp.MaxMethodIndex = temp.MaxMethodIndex + 1;
+          setlocalLoadedProcessData(temp);
+        }
         setPrimaryInputStrip(false);
       }
     });
@@ -358,6 +385,8 @@ function UserDefined(props) {
                       ? arabicStyles.variableNameInput
                       : styles.variableNameInput
                   }
+                  //code added on 16 June 2022 for BugId 110847
+                  autocomplete="off"
                   name="appName"
                   value={data.appName}
                   onChange={onChange}
@@ -376,6 +405,8 @@ function UserDefined(props) {
                       ? arabicStyles.variableNameInput
                       : styles.variableNameInput
                   }
+                  //code added on 16 June 2022 for BugId 110847
+                  autocomplete="off"
                   name="methodName"
                   value={data.methodName}
                   onChange={onChange}
@@ -435,7 +466,8 @@ function UserDefined(props) {
                     : styles.variableLengthData
                 }
               >
-                <span
+                {/*code commented on 21 June 2022 for BugId 111099 */}
+                {/* <span
                   className={styles.paramArray}
                   style={{ textAlign: "left" }}
                 >
@@ -463,7 +495,7 @@ function UserDefined(props) {
                     }
                     label={t("globalMethod")}
                   />
-                </span>
+                </span> */}
               </p>
               <p className={styles.addButtonDiv}>
                 <button
@@ -772,7 +804,8 @@ function UserDefined(props) {
                               : styles.variableLengthData
                           }
                         >
-                          <span
+                          {/*code commented on 21 June 2022 for BugId 111099 */}
+                          {/* <span
                             className={styles.paramArray}
                             style={{ textAlign: "left" }}
                           >
@@ -794,7 +827,7 @@ function UserDefined(props) {
                               }
                               label={t("globalMethod")}
                             />
-                          </span>
+                          </span> */}
                         </p>
                         <p className={styles.addButtonDiv}></p>
                         <p className={styles.closeIconButtonDiv}>
