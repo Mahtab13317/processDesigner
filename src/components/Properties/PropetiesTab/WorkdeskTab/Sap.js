@@ -94,6 +94,7 @@ function Sap(props) {
 
 useEffect(() => {
 
+  //setting config list
 const tempconfig=[...configList,
   {configID:1,configName:"sapConfig"},
   {configID:2,configName:"testConfig"},
@@ -102,6 +103,7 @@ const tempconfig=[...configList,
   setConfigList(tempconfig);
 
 
+  //settting Def list
   const tempDef=[...defList,
     {
       DefinitionID:1,
@@ -125,6 +127,8 @@ setDefList(tempDef)
 setSelectedConfig(tempconfig[1].configID);
 setSelectedDef(tempDef[1].DefinitionID);
 setTCode("TCode");
+
+//setting Tcode List
 
 const temptcodeList=[...tCodeList,
   {id:1,tcodeName:"tcode1"},
@@ -175,6 +179,8 @@ setSelectedTcode(temptcodeList[0].tcodeName);
    
   };
 
+
+  //function for Definition Name handler input
   const changeDefName=(e)=>{
       setDefName(e.target.value)
   }
