@@ -326,10 +326,11 @@ function ActivityRules(props) {
       } else if (cellActivityType === 32 && cellActivitySubType === 1) {
         activityData =
           entrySettingsData &&
+          !!taskIndex &&
           entrySettingsData.ActivityProperty &&
           entrySettingsData.ActivityProperty.Interfaces &&
-          entrySettingsData.ActivityProperty.Interfaces.TaskTypes[taskIndex] &&
-          entrySettingsData.ActivityProperty.Interfaces.TaskTypes[taskIndex]
+          entrySettingsData.ActivityProperty.Interfaces?.TaskTypes[taskIndex] &&
+          entrySettingsData.ActivityProperty.Interfaces?.TaskTypes[taskIndex]
             .TaskRules;
       }
       setRules(

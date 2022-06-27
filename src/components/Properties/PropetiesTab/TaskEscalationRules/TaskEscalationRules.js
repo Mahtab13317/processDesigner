@@ -270,7 +270,10 @@ function TaskEscalationRules(props) {
 
     const newRules = [...allRules];
     const ids = newRules.map((rule) => +rule.ruleId);
-    const maxId = Math.max(...ids);
+    let maxId = Math.max(...ids);
+    if (newRules.length === 0) {
+      maxId = 0;
+    }
 
     const newRule = {
       ruleId: `${maxId + 1}`,

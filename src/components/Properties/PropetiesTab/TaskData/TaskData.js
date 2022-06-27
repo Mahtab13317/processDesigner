@@ -420,7 +420,10 @@ function TaskData(props) {
 
     const newVars = [...taskVariablesList];
     const ids = newVars.map((variable) => +variable.m_iOrderId);
-    const maxId = Math.max(...ids);
+    let maxId = Math.max(...ids);
+    if (ids.length === 0) {
+      maxId = 0;
+    }
 
     const newVar = {
       m_bSelectVariable: false,

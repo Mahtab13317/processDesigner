@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./index.css";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
 import { Select, MenuItem } from "@material-ui/core";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -18,6 +19,7 @@ import {
   ARCHIEVE_CONNECT,
   ASSOCIATE_DATACLASS_MAPPING,
   FOLDERNAME_ARCHIEVE,
+  propertiesLabel,
 } from "../../../../../Constants/appConstants";
 import {
   setActivityPropertyChange,
@@ -35,6 +37,7 @@ import ButtonDropdown from "../../../../../UI/ButtonDropdown/index";
 import { useDispatch, useSelector } from "react-redux";
 
 function DMSAdapter(props) {
+  let { t } = useTranslation();
   const dispatch = useDispatch();
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
@@ -108,13 +111,13 @@ function DMSAdapter(props) {
         setShowRedBorder(true);
         dispatch(
           setActivityPropertyChange({
-            Archieve: { isModified: true, hasError: true },
+            [propertiesLabel.archive]: { isModified: true, hasError: true },
           })
         );
       } else {
         dispatch(
           setActivityPropertyChange({
-            Archieve: { isModified: true, hasError: false },
+            [propertiesLabel.archive]: { isModified: true, hasError: false },
           })
         );
       }
@@ -201,7 +204,7 @@ function DMSAdapter(props) {
 
     dispatch(
       setActivityPropertyChange({
-        Archieve: { isModified: true, hasError: false },
+        [propertiesLabel.archive]: { isModified: true, hasError: false },
       })
     );
   };
@@ -322,7 +325,10 @@ function DMSAdapter(props) {
               setUserName(event.target.value);
               dispatch(
                 setActivityPropertyChange({
-                  Archieve: { isModified: true, hasError: false },
+                  [propertiesLabel.archive]: {
+                    isModified: true,
+                    hasError: false,
+                  },
                 })
               );
             }}
@@ -357,7 +363,10 @@ function DMSAdapter(props) {
               setPassword(event.target.value);
               dispatch(
                 setActivityPropertyChange({
-                  Archieve: { isModified: true, hasError: false },
+                  [propertiesLabel.archive]: {
+                    isModified: true,
+                    hasError: false,
+                  },
                 })
               );
             }}
@@ -531,7 +540,8 @@ function DMSAdapter(props) {
       </div>
       <hr style={{ marginTop: "10px" }} />
       <div style={{ marginTop: "10px" }}>
-        <p id="archieve_docTypes">Archieve Document Types</p>
+        {/*code added on 16 June 2022 for BugId 108976*/}
+        <p id="archieve_docTypes">{t("ArchiveDocumentTypes")}</p>
         <table className="table">
           <tr>
             <th>

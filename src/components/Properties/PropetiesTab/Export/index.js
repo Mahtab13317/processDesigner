@@ -1,30 +1,31 @@
 import React, { useState, useEffect } from "react";
-import { connect } from "react-redux";
-import axios from "axios";
+import { connect, useDispatch } from "react-redux";
+import { store, useGlobalState } from "state-pool";
 import { useTranslation } from "react-i18next";
 import styles from "./index.module.css";
-import { useGlobalState } from "state-pool";
 import { Tab, Tabs } from "@material-ui/core";
 import { TabPanel } from "../../../ProcessSettings";
 import TableDetails from "./TableDetails";
 import FileDetails from "./FileDetails";
 import {
-  SERVER_URL,
-  ENDPOINT_GET_ACTIVITY_PROPERTY,
   PROCESSTYPE_LOCAL,
+  propertiesLabel,
 } from "../../../../Constants/appConstants";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 
 function Export(props) {
-  const { openProcessType } = props;
-  const [localLoadedProcessData] = useGlobalState("loadedProcessData");
+  const { openProcessType, openProcessID } = props;
   let { t } = useTranslation();
-  const { cellName, cellID } = props;
+  const dispatch = useDispatch();
+  const globalActivityData = store.getState("activityPropertyData");
+  const loadedProcessData = store.getState("loadedProcessData"); //current processdata clicked
+  const [localActivityPropertyData, setLocalActivityPropertyData] =
+    useGlobalState(globalActivityData);
   const [fields, setFields] = useState([]);
   const [value, setValue] = useState(0);
   const [activityData, setActivityData] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
   const [isProcessReadOnly, setIsProcessReadOnly] = useState(false);
+  const [varAndConstList, setVarAndConstList] = useState([]);
 
   // Function that runs when the component mounts.
   useEffect(() => {
@@ -33,6 +34,40 @@ function Export(props) {
     }
   }, [openProcessType]);
 
+  // Function to set global data when the user does any action.
+  const setGlobalData = (actData) => {
+    let temp = JSON.parse(JSON.stringify(localActivityPropertyData));
+    temp.ActivityProperty.exportInfo = actData;
+    setLocalActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.Export]: { isModified: true, hasError: false },
+      })
+    );
+  };
+
+  // Function that runs when the component loads and loadedProcessData.value.DynamicConstant & loadedProcessData.value.Variable changes.
+  useEffect(() => {
+    if (loadedProcessData) {
+      let tempArr = [];
+      loadedProcessData?.value?.DynamicConstant?.forEach((element) => {
+        let tempObj = {
+          VariableName: element.ConstantName,
+          VariableScope: "C",
+        };
+        tempArr.push(tempObj);
+      });
+
+      loadedProcessData?.value?.Variable?.forEach((element) => {
+        tempArr.push(element);
+      });
+      setVarAndConstList(tempArr);
+    }
+  }, [
+    loadedProcessData.value.DynamicConstant,
+    loadedProcessData.value.Variable,
+  ]);
+
   // Function to handle tab change.
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -40,52 +75,56 @@ function Export(props) {
 
   // Function that runs when the component loads.
   useEffect(() => {
-    axios
-      .get(
-        SERVER_URL +
-          `${ENDPOINT_GET_ACTIVITY_PROPERTY}/${localLoadedProcessData.ProcessDefId}/${localLoadedProcessData.ProcessType}/${localLoadedProcessData.VersionNo}/${localLoadedProcessData.ProcessName}/${localLoadedProcessData.ProcessVariantType}/${cellID}/${cellName}`
-      )
-      .then((res) => {
-        if (res.status === 200) {
-          const getActivityData = res.data;
-          setActivityData(getActivityData.ActivityProperty.Export);
-          setIsLoading(false);
-        }
-      })
-      .catch(() => setIsLoading(false));
+    if (localActivityPropertyData) {
+      setActivityData(localActivityPropertyData?.ActivityProperty?.exportInfo);
+    }
   }, []);
 
   return (
     <div>
-      {isLoading ? (
-        <CircularProgress className="circular-progress" />
-      ) : (
-        <div>
-          <div className={styles.tabStyles}>
-            <Tabs value={value} onChange={handleChange}>
-              <Tab label={t("tableDetails")} />
-              <Tab label={t("fileDetails")} />
-            </Tabs>
-          </div>
-          <div className={styles.tabPanelStyles}>
-            <TabPanel value={value} index={0}>
-              <TableDetails
-                data={activityData}
-                fields={fields}
-                setFields={setFields}
-                isProcessReadOnly={isProcessReadOnly}
-              />
-            </TabPanel>
-            <TabPanel value={value} index={1}>
-              <FileDetails
-                data={activityData && activityData.CSVInfo}
-                fields={fields}
-                isProcessReadOnly={isProcessReadOnly}
-              />
-            </TabPanel>
-          </div>
+      <div>
+        <div className={styles.tabStyles}>
+          <Tabs
+            value={value}
+            onChange={handleChange}
+            TabIndicatorProps={{ style: { background: "#0072C5" } }}
+          >
+            <Tab
+              className={value === 0 && styles.tabLabel}
+              label={t("tableDetails")}
+            />
+            <Tab
+              className={value === 1 && styles.tabLabel}
+              label={t("fileDetails")}
+            />
+          </Tabs>
         </div>
-      )}
+        <div className={styles.tabPanelStyles}>
+          <TabPanel value={value} index={0}>
+            <TableDetails
+              openProcessType={openProcessType}
+              openProcessID={openProcessID}
+              data={activityData}
+              fields={fields}
+              setFields={setFields}
+              isProcessReadOnly={isProcessReadOnly}
+              documentList={loadedProcessData.value.DocumentTypeList}
+              variablesList={varAndConstList}
+              setActivityData={setActivityData}
+              handleChange={handleChange}
+              setGlobalData={setGlobalData}
+            />
+          </TabPanel>
+          <TabPanel value={value} index={1}>
+            <FileDetails
+              data={activityData && activityData.fileInfo}
+              setActivityData={setActivityData}
+              fields={fields}
+              isProcessReadOnly={isProcessReadOnly}
+            />
+          </TabPanel>
+        </div>
+      </div>
     </div>
   );
 }
@@ -97,8 +136,10 @@ const mapStateToProps = (state) => {
     cellName: state.selectedCellReducer.selectedName,
     cellType: state.selectedCellReducer.selectedType,
     openProcessType: state.openProcessClick.selectedType,
+    openProcessID: state.openProcessClick.selectedId,
     cellActivityType: state.selectedCellReducer.selectedActivityType,
     cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
   };
 };
+
 export default connect(mapStateToProps, null)(Export);

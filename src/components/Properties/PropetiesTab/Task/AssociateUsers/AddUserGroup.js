@@ -11,6 +11,49 @@ function AddUserGroup(props) {
     props.getUserGroupList(window.userGroupPickerRef.current.getSelection());
     props.closeModal();
   };
+  // user_index : 12
+  // user_name : "arjun",
+  // cabinet_name : "bamdev5sp2",
+  // user_cred : "system123"
+
+  let microAppsJSON = {
+    MicroApps: [
+      {
+        AuthData: {
+          ExtendSession: false, // important
+          locale: "en_US",
+          user_index: 12,
+          user_name: "dash",
+          session_id: "",
+          cabinet_name: "bamdev5sp2",
+          personal_name: "",
+          family_name: "",
+          client_gmt_offset: "",
+          BatchSize: "",
+          server_gmt_offset: "",
+          theme_id: "",
+          udb_encrypt: "N",
+          user_cred: "system123", //important
+        },
+        Module: "ORM", // Need to check
+        MicroFrontends: [
+          {
+            Component: "UserGroupPicklistMF", //Need to check
+            InFrame: false,
+            Props: {
+              data: {
+                // Need to check
+                // onchange : (value) => console.log('selectedValue',value),
+                ext: true,
+              },
+              locale: "en_US",
+              ContainerId: "rdDIv",
+            },
+          },
+        ],
+      },
+    ],
+  };
   return (
     <div
       style={{
@@ -59,17 +102,16 @@ function AddUserGroup(props) {
       <div style={{ width: "100%", height: "85%" }}>
         {" "}
         <MicroFrontendContainer
-          data={{ ext: true }}
-          moduleName="ORM"
-          containerId="rdDIv"
           styles={{
-            width: "calc(100% - 2px)",
-            height: "calc(100% - 2px)",
-            position: "absolute",
-            overflow: "auto",
+            width: "100%",
+            height: "50vh",
+            paddingInline: "10px",
+            // background: "red",
           }}
-          componentName="UserGroupPicklistMF"
-          domainUrl="http://192.168.153.130:8080"
+          containerId="rdDIv"
+          microAppsJSON={microAppsJSON}
+          domainUrl=""
+          //ProcessDefId={localLoadedProcessData.ProcessDefId}
         />
       </div>
       {/* <div

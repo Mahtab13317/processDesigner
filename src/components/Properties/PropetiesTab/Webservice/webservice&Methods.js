@@ -23,19 +23,18 @@ const StyledTableCell = withStyles((theme) => ({
 
 const StyledTableRow = withStyles((theme) => ({
   root: {
-    "&:nth-of-type(odd)": {
+    "&:nth-of-type(even)": {
       backgroundColor: theme.palette.action.hover,
     },
   },
 }))(TableRow);
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   table: {
-    // width: props.isDrawerExpanded? '100%': 324,
     height: 40,
   },
   tableContainer: {
-    padding: 5,
+    padding: "0.5rem 1vw",
     height: 270,
   },
   tableRow: {
@@ -44,45 +43,53 @@ const useStyles = makeStyles({
   tableHeader: {
     fontWeight: 600,
     fontSize: 14,
-    backgroundColor:'white',
-    color:'black'
-  },
-  tableHeaderEmpty:{
-    backgroundColor:'white !important',
-    color:'black !important'
+    backgroundColor: theme.palette.action.hover,
+    color: "black",
   },
   tableBodyCell: {
     fontSize: 12,
   },
-});
+}));
 
 export default function CustomizedTables(props) {
   const classes = useStyles();
-  console.log("associations", props.associations);
   const mappingHandler = (webservice) => {
     props.setShowMapping(true);
     props.setServiceNameClicked(webservice);
-    console.log("webservice", webservice);
   };
 
   return (
     <TableContainer component={Paper} className={classes.tableContainer}>
+      {/*code changes on 21 June 2022 for BugId 110907 */}
       <Table
-        className={classes.table}
-        style={{ width: props.isDrawerExpanded ? "100%" : "324px" }}
+        className={`${classes.table} webServicePropertiestable`} /*code added on 22 June 2022 for BugId 111065 and BugId 110846*/
+        style={{ width: "100%" }}
         aria-label="customized table"
         stickyHeader
       >
         <TableHead>
           <StyledTableRow className={classes.tableRow}>
-            <StyledTableCell className={classes.tableHeader}>
+            <StyledTableCell
+              className={classes.tableHeader}
+              style={{ width: "30vw" }}
+            >
               Webservice
             </StyledTableCell>
-            <StyledTableCell className={classes.tableHeader} align="right">
+            <StyledTableCell
+              className={classes.tableHeader}
+              style={{ width: "65vw" }}
+            >
               Method
             </StyledTableCell>
-            <StyledTableCell className={classes.tableHeaderEmpty}></StyledTableCell>
-            <StyledTableCell className={classes.tableHeaderEmpty} align="right"></StyledTableCell>
+            <StyledTableCell
+              className={classes.tableHeader}
+              style={{ width: "2.5vw" }}
+            ></StyledTableCell>
+            <StyledTableCell
+              className={classes.tableHeader}
+              align="right"
+              style={{ width: "2.5vw" }}
+            ></StyledTableCell>
           </StyledTableRow>
         </TableHead>
         <TableBody className="associatedTemplateDiv">
@@ -93,17 +100,21 @@ export default function CustomizedTables(props) {
                   className={classes.tableBodyCell}
                   component="th"
                   scope="row"
+                  style={{ width: "30vw" }}
                 >
                   {row.webservice}
                 </StyledTableCell>
               ) : null}
-              <StyledTableCell className={classes.tableBodyCell} align="right">
+              <StyledTableCell
+                className={classes.tableBodyCell}
+                style={{ width: "65vw" }}
+              >
                 {row.method}
               </StyledTableCell>
-              <StyledTableCell align="right">
+              <StyledTableCell align="right" style={{ width: "2.5vw" }}>
                 <SwapHorizIcon onClick={() => mappingHandler(row)} />
               </StyledTableCell>
-              <StyledTableCell align="right">
+              <StyledTableCell align="right" style={{ width: "2.5vw" }}>
                 <DeleteIcon />
               </StyledTableCell>
             </StyledTableRow>

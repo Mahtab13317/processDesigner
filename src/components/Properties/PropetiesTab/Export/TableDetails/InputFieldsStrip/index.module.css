@@ -3,12 +3,17 @@
   flex-direction: row;
 }
 
+.flexRow {
+  display: flex;
+  flex-direction: row;
+}
+
 .inputBase {
-  background: #f0f0f0 0% 0% no-repeat padding-box;
+  background: #ffffff 0% 0% no-repeat padding-box;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
-  margin: 5px 0px 5px 28px;
+  margin: 10px 0px 5px 15px;
   width: 190px;
   height: 30px !important;
   text-align: left;
@@ -18,24 +23,24 @@
 }
 
 .typeInput {
-  background: #f0f0f0 0% 0% no-repeat padding-box;
+  background: #ffffff 0% 0% no-repeat padding-box;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
   width: 126px;
-  margin: 5px 0px 5px 50px;
+  margin: 10px 0px 5px 50px;
   height: 30px;
   text-align: left;
   font: normal normal normal 12px/17px Open Sans !important;
 }
 
 .lengthData {
-  background: #f0f0f0 0% 0% no-repeat padding-box;
+  background: #ffffff 0% 0% no-repeat padding-box;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
-  margin: 5px 0px 5px 54px;
-  width: 80px;
+  margin: 12px 0px 5px 58px;
+  width: 50px;
   height: 30px !important;
   text-align: left;
   font: normal normal normal 12px/17px Open Sans !important;
@@ -46,8 +51,9 @@
 .constraintsRadioDiv {
   display: flex;
   flex-direction: row;
-  margin-left: 45px;
+  margin-left: 50px;
   height: 40px;
+  margin-top: 6px;
 }
 
 .constraintsText {
@@ -65,7 +71,7 @@
 }
 
 .moreOptionsInput {
-  margin: 9px 0px 18px 0px;
+  margin: 16px 0px 18px 0px;
   cursor: pointer;
 }
 
@@ -76,7 +82,7 @@
   border: 2px solid #0072c6 !important;
   width: 50px;
   height: 28px;
-  margin: 5px 0px 5px 30px;
+  margin: 13px 0px 5px 30px;
   opacity: 1;
 }
 
@@ -90,7 +96,7 @@
 
 .closeInputStrip {
   cursor: pointer;
-  margin: 7px 10px 8px 8px;
+  margin: 14px 10px 8px 8px;
   color: #707070;
   opacity: 1;
 }
@@ -101,4 +107,25 @@
   letter-spacing: 0px;
   color: #000000;
   opacity: 1;
+}
+
+.precisionText {
+  margin: 16px 0px 5px 10px;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.precisionInput {
+  margin: 12px 0px 5px 6px;
+  width: 40px;
+}
+
+.disabledTextColor {
+  color: rgba(0, 0, 0, 0.38);
+}
+
+.inlineErrorStyle {
+  margin-left: 1rem;
 }

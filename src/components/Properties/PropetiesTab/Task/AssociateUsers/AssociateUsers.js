@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import classes from "../Task.module.css";
-import {  Checkbox } from "@material-ui/core";
+import { Checkbox } from "@material-ui/core";
 import Modal from "../../../../../UI/Modal/Modal";
 import AddUserGroup from "./AddUserGroup";
 import { connect } from "react-redux";
@@ -10,7 +10,7 @@ import { store, useGlobalState } from "state-pool";
 import { useTranslation } from "react-i18next";
 
 function AssociateUsers(props) {
-  let {t} = useTranslation();
+  let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const [openAddUserModal, setopenAddUserModal] = useState(false);
   const [userListing, setuserListing] = useState([]);
@@ -55,7 +55,7 @@ function AssociateUsers(props) {
 
   React.useEffect(() => {
     let newUser = {};
-    localLoadedActivityPropertyData.ActivityProperty.Interfaces.TaskTypes.forEach(
+    localLoadedActivityPropertyData.ActivityProperty?.Interfaces?.TaskTypes?.forEach(
       (task) => {
         if (task.TaskId === props.taskInfo.TaskId) {
           task.Users.forEach((user) => {
@@ -79,8 +79,6 @@ function AssociateUsers(props) {
       }
     );
   }, [props.taskInfo.TaskId]);
-
- 
 
   useEffect(() => {
     let allUser = true,
@@ -144,11 +142,13 @@ function AssociateUsers(props) {
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
-        direction: direction
+        direction: direction,
       }}
     >
       {userListing.length === 0 && groupListing.length === 0 ? (
-        <button onClick={() => setopenAddUserModal(true)}>{t("addUserHere")}</button>
+        <button onClick={() => setopenAddUserModal(true)}>
+          {t("addUserHere")}
+        </button>
       ) : null}
 
       <Modal
@@ -196,7 +196,7 @@ function AssociateUsers(props) {
                   marginInline: "0.2rem",
                 }}
               >
-               {t("AssociateUsers/Groups")}
+                {t("AssociateUsers/Groups")}
               </p>
             </button>
           </div>
@@ -208,7 +208,8 @@ function AssociateUsers(props) {
               marginBlock: "0.5rem",
             }}
           >
-            {userListing.length} {t("user(s)and")} {groupListing.length} {t("group(s)associated")}
+            {userListing.length} {t("user(s)and")} {groupListing.length}{" "}
+            {t("group(s)associated")}
           </p>
           <div
             style={{

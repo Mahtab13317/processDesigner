@@ -126,7 +126,11 @@ const SaveAsGlobalTaskTemplateModal = (props) => {
         setIsCreating(false);
         handleClose();
         const ids = globalTemplates.map((variable) => +variable.m_iTemplateId);
-        const maxId = Math.max(...ids);
+
+        let maxId = Math.max(...ids);
+        if (globalTemplates.length === 0) {
+          maxId = 0;
+        }
         const templateData = {
           taskGenPropInfo: {
             taskTemplateInfo: {

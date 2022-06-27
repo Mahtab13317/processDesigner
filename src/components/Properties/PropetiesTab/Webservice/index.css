@@ -6,21 +6,25 @@
   opacity: 1;
 }
 
-.associateButton_webService {
-  position: absolute;
-  right: 10px;
-  color: #0172c6;
-  text-transform: none;
-  padding: 0px !important;
-  width: 80px;
-  height: 30px;
-  font-weight: 500;
-  border: 1.5px solid #0172c6;
-  border-radius: unset !important;
+/*code edited on 21 June 2022 for BugId 111085*/
+.associateButton_webSProp {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #0072c6;
+  border-radius: 2px;
+  text-align: center;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #0072c6;
+  padding: 0.125rem 1vw;
+  cursor: pointer;
+  height: 1.5rem;
+  display: flex;
+  margin-bottom: 1rem;
 }
 
-.MuiTableCell-root {
-  padding: 0px !important;
+/*code added on 22 June 2022 for BugId 111065 and BugId 110846*/
+.webServicePropertiestable .MuiTableCell-root {
+  padding: 0.25rem 0vw 0.25rem 0.25vw!important;
 }
 
 .select_webService_mapping {

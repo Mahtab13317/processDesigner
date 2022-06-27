@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import { getActivityProps } from "../../../../utility/abstarctView/getActivityProps";
 import AddIcon from "@material-ui/icons/Add";
 import { makeStyles } from "@material-ui/core/styles";
@@ -13,6 +13,7 @@ import ManageRights from "./ManageRights/ManageRights";
 import AssociateUsers from "./AssociateUsers/AssociateUsers";
 import ManageRules from "./ManageRules/ManageRules";
 import Modal from "../../../../UI/Modal/Modal";
+import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 
 function Task(props) {
   let { t } = useTranslation();
@@ -23,6 +24,7 @@ function Task(props) {
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData, setlocalLoadedProcessData] =
     useGlobalState(loadedProcessData);
+  let dispatch = useDispatch();
   const useStyles = makeStyles({
     root: {
       flexGrow: 1,
@@ -100,7 +102,7 @@ function Task(props) {
   useEffect(() => {
     let temp = JSON.parse(JSON.stringify(localLoadedProcessData));
     temp.Tasks.map((task1) => {
-      localLoadedActivityPropertyData.ActivityProperty.Interfaces.TaskTypes.map(
+      localLoadedActivityPropertyData.ActivityProperty?.Interfaces?.TaskTypes?.map(
         (task2) => {
           if (task1.TaskId === task2.TaskId) {
             task1["isChecked"] = false;
@@ -115,6 +117,11 @@ function Task(props) {
     });
 
     setlocalLoadedProcessData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        Task: { isModified: true, hasError: false },
+      })
+    );
   }, []);
 
   const addTasksAssociated = (newTaskList) => {

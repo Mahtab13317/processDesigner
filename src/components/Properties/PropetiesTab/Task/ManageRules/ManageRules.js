@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 function ManageRules(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
-  const [taskIndex, setTaskIndex] = useState(0);
+  const [taskIndex, setTaskIndex] = useState();
 
   useEffect(() => {
     props.associatedTasks.forEach((task, index) => {

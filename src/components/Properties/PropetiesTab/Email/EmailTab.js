@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import CustomizedDropdown from "../../../../UI/Components_With_ErrrorHandling/Dropdown";
 import "./index.css";
 import { Select, MenuItem } from "@material-ui/core";
 import { Checkbox } from "@material-ui/core";
@@ -378,7 +377,6 @@ function EmailTab(props) {
       <div className="row">
         <div>
           <p className="varUsedLabel">{t("from")}*</p>
-
           <SelectWithInput
             dropdownOptions={dropdown}
             optionKey="VariableName"
@@ -390,7 +388,6 @@ function EmailTab(props) {
             isConstant={fromConstant}
             showEmptyString={false}
             showConstValue={true}
-            // disabled={readOnlyProcess}
             id="from_select_input"
           />
         </div>
@@ -405,7 +402,6 @@ function EmailTab(props) {
             isConstant={toConstant}
             showEmptyString={false}
             showConstValue={true}
-            // disabled={readOnlyProcess}
             id="to_select_input"
           />
         </div>
@@ -420,8 +416,7 @@ function EmailTab(props) {
             isConstant={ccConstant}
             showEmptyString={false}
             showConstValue={true}
-            // disabled={readOnlyProcess}
-            id="to_select_input"
+            id="cc_select_input" //code edited on 21 June 2022 for BugId 110973
           />
         </div>
         <div>
@@ -435,8 +430,7 @@ function EmailTab(props) {
             isConstant={bccConstant}
             showEmptyString={false}
             showConstValue={true}
-            // disabled={readOnlyProcess}
-            id="to_select_input"
+            id="bcc_select_input" //code edited on 21 June 2022 for BugId 110973
           />
         </div>
         <div>

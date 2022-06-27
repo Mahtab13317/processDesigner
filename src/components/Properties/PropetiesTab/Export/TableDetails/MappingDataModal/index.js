@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from "react";
-import {
-  Radio,
-  Select,
-  MenuItem,
-  InputBase,
-  Checkbox,
-} from "@material-ui/core";
+import { Radio, MenuItem, InputBase, Checkbox } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
-import { useGlobalState } from "state-pool";
 import styles from "./index.module.css";
+import ClearOutlinedIcon from "@material-ui/icons/ClearOutlined";
+import clsx from "clsx";
+import { useDispatch } from "react-redux";
+import CustomizedDropdown from "../../../../../../UI/Components_With_ErrrorHandling/Dropdown";
+import { setToastDataFunc } from "../../../../../../redux-store/slices/ToastDataHandlerSlice";
 
 function MappingDataModal(props) {
   let { t } = useTranslation();
-  const [variableDefinition] = useGlobalState("variableDefinition");
   const {
     index,
     dataFields,
@@ -21,39 +18,41 @@ function MappingDataModal(props) {
     handleClose,
     fieldName,
     isProcessReadOnly,
+    documentList,
+    variablesList,
   } = props;
-  const [typeValue, setTypeValue] = useState("");
+  const dispatch = useDispatch();
+  const [typeValue, setTypeValue] = useState("0");
   const [mappedField, setMappedField] = useState("");
   const [dropdownOptions, setDropdownOptions] = useState([]);
+  const [docList, setDocList] = useState([]);
+  const [varList, setVarList] = useState([]);
+  const [length, setLength] = useState("0");
+  const [alignment, setAlignment] = useState("L");
+  const [quoteFlag, setQuoteFlag] = useState("N");
+  const [exportAllDocsFlag, setExportAllDocsFlag] = useState("N");
 
-  const documentDropdownOptions = [
-    "Aadhar_Card",
-    "Application_Form",
-    "PAN_Card",
-    "CA_Certificate",
-  ];
-
-  const menuProps = {
-    anchorOrigin: {
-      vertical: "bottom",
-      horizontal: "left",
-    },
-    transformOrigin: {
-      vertical: "top",
-      horizontal: "left",
-    },
-    getContentAnchorEl: null,
-  };
+  // Function that runs when the component runs.
+  useEffect(() => {
+    setDocList(documentList);
+    setVarList(variablesList);
+    getDataDropdownOptions();
+  }, []);
 
   // Function that runs when the component loads.
   useEffect(() => {
-    getDataDropdownOptions();
-    if (dataFields && dataFields.DataMap) {
+    if (dataFields && dataFields.mappingList) {
       let temp = { ...dataFields };
-      temp.DataMap.forEach((element) => {
-        if (element.FieldName === fieldName) {
-          setTypeValue(element.DocTypeId);
-          setMappedField(element.MappedFieldName);
+      temp.mappingList.forEach((element) => {
+        if (element.m_objExportMappedFieldInfo.fieldName === fieldName) {
+          setTypeValue(element.m_objExportMappedFieldInfo.docTypeId);
+          setMappedField(element.m_objExportMappedFieldInfo.mappedFieldName);
+          setLength(element.m_objExportMappedFieldInfo.fieldLength);
+          setExportAllDocsFlag(
+            element.m_objExportMappedFieldInfo.exportAllDocs
+          );
+          setAlignment(element.m_objExportMappedFieldInfo.alignment);
+          setQuoteFlag(element.m_objExportMappedFieldInfo.quoteflag);
         }
       });
     }
@@ -61,45 +60,59 @@ function MappingDataModal(props) {
 
   // Function to get dropdown options.
   const getDataDropdownOptions = () => {
-    const emptyArr = [];
-    setDropdownOptions([...emptyArr]);
-    const tempOptions = [...dropdownOptions];
-    variableDefinition &&
-      variableDefinition.forEach((element) => {
+    let tempOptions = [];
+    variablesList &&
+      variablesList.forEach((element) => {
         tempOptions.push(element.VariableName);
       });
-    setDropdownOptions(tempOptions);
+    setDropdownOptions([...tempOptions]);
   };
 
   // Function that runs when a component loads.
   useEffect(() => {
-    getDataDropdownOptions();
-  }, [variableDefinition]);
+    if (typeValue === "0") {
+      getDataDropdownOptions();
+    } else {
+      let docArr = [];
+      docList &&
+        docList.forEach((element) => {
+          docArr.push(element.DocName);
+        });
+      setDropdownOptions(docArr);
+    }
+  }, [varList]);
 
   // Function that gets called when the user clicks on ok button.
   const handleSaveChanges = () => {
-    console.log("%%%%%", dataFields);
-
-    // let temp = { ...dataFields };
-    // temp.DataMap[index].DocTypeId = typeValue;
-    // temp.DataMap[index].MappedFieldName = mappedField;
-    // setDataFields(temp);
-
-    // handleClose();
-
-    if (index > -1) {
-      let temp = dataFields;
-      temp.DataMap[index].DocTypeId = typeValue;
-      temp.DataMap[index].MappedFieldName = mappedField;
-      setDataFields({ ...temp });
-      handleClose();
+    if (length !== "") {
+      if (index > -1) {
+        let temp = { ...dataFields };
+        temp.mappingList[index].m_objExportMappedFieldInfo.docTypeId =
+          typeValue;
+        temp.mappingList[index].m_objExportMappedFieldInfo.mappedFieldName =
+          mappedField;
+        setDataFields({ ...temp });
+        handleClose();
+      } else {
+        const obj = {
+          mappingType: typeValue,
+          mappedField: mappedField,
+          length: length,
+          alignment: alignment,
+          quoteflag: quoteFlag,
+          exportAllDocsFlag: exportAllDocsFlag,
+        };
+        setValue({ ...obj });
+        handleClose();
+      }
     } else {
-      const obj = {
-        mappingType: typeValue,
-        mappedField: mappedField,
-      };
-      setValue({ ...obj });
-      handleClose();
+      dispatch(
+        setToastDataFunc({
+          message: t("pleaseEnterValidLength"),
+          severity: "error",
+          open: true,
+        })
+      );
     }
   };
 
@@ -107,8 +120,13 @@ function MappingDataModal(props) {
   useEffect(() => {
     if (typeValue === "0") {
       getDataDropdownOptions();
-    } else if (typeValue === "1") {
-      setDropdownOptions([...documentDropdownOptions]);
+    } else {
+      let docArr = [];
+      docList &&
+        docList.forEach((element) => {
+          docArr.push(element.DocName);
+        });
+      setDropdownOptions(docArr);
     }
   }, []);
 
@@ -119,111 +137,176 @@ function MappingDataModal(props) {
     if (event.target.value === "0") {
       getDataDropdownOptions();
     } else {
-      setDropdownOptions([...documentDropdownOptions]);
+      let docArr = [];
+      docList &&
+        docList.forEach((element) => {
+          docArr.push(element.DocName);
+        });
+      setDropdownOptions(docArr);
     }
   };
 
   return (
     <div>
       <div className={styles.headingsDiv}>
-        <p className={styles.heading}>{t("exportMapping")}</p>
+        <div className={styles.flexRow}>
+          <p className={styles.heading}>{t("mapping")}</p>
+          <ClearOutlinedIcon
+            id="MM_Close_Modal"
+            fontSize="small"
+            onClick={handleClose}
+            className={styles.closeModal}
+          />
+        </div>
       </div>
-      <div className={styles.flexRow}>
-        <Radio
-          disabled={isProcessReadOnly}
-          id="mapping_data_modal_data_radio"
-          checked={typeValue === "0"}
-          onChange={handleType}
-          value={"0"}
-          size="small"
-        />
-        <p className={styles.text}>{t("data")}</p>
-        <Radio
-          disabled={isProcessReadOnly}
-          id="mapping_data_modal_document_radio"
-          checked={typeValue === "1"}
-          onChange={handleType}
-          value={"1"}
-          size="small"
-        />
-        <p className={styles.text}>{t("document")}</p>
-      </div>
-      <div className={styles.mappedFieldDiv}>
-        <p className={styles.mappedField}>{t("mappedField")}</p>
-        <Select
-          disabled={isProcessReadOnly}
-          id="mapping_data_modal_mapped_field_dropdown"
-          MenuProps={menuProps}
-          className={styles.typeInput}
-          value={mappedField}
-          onChange={(event) => setMappedField(event.target.value)}
-        >
-          {dropdownOptions &&
-            dropdownOptions.map((d) => {
-              return (
-                <MenuItem className={styles.menuItemStyles} value={d}>
-                  {d}
-                </MenuItem>
-              );
-            })}
-        </Select>
-      </div>
-      <div className={styles.flexRow}>
-        <p className={styles.mappedField}>{t("length")}</p>
-        <InputBase
-          id="mapping_data_modal_length_input"
-          disabled
-          variant="outlined"
-          className={styles.inputBase}
-        />
-        <p className={styles.quotesText}>{t("quotes")}</p>
-        <Checkbox
-          disabled={isProcessReadOnly}
-          id="mapping_data_modal_quotes_checkbox"
-          className={styles.orderByCheckBox}
-          size="small"
-        />
-      </div>
-      <div className={styles.flexRow}>
-        <p className={styles.mappedField}>{t("alignment")}</p>
-        <Radio
-          disabled={isProcessReadOnly}
-          id="mapping_data_modal_left_radio"
-          disabled
-          checked={typeValue === "Left"}
-          value={"Left"}
-          size="small"
-        />
-        <p className={styles.text}>{t("left")}</p>
-        <Radio
-          disabled={isProcessReadOnly}
-          id="mapping_data_modal_right_radio"
-          disabled
-          checked={typeValue === "Right"}
-          value={"Right"}
-          size="small"
-        />
-        <p className={styles.text}>{t("right")}</p>
-        {!isProcessReadOnly ? (
-          <div className={styles.buttonsDiv}>
-            <button
-              id="mapping_data_modal_save_changes_button"
-              disabled={typeValue === "" || mappedField === ""}
-              onClick={handleSaveChanges}
-              className={styles.okButton}
+      <div className={styles.subDiv}>
+        <p className={styles.modalSubHeading}>{t("mappingType")}</p>
+        <div className={styles.flexRow}>
+          <Radio
+            disabled={isProcessReadOnly}
+            id="mapping_data_modal_data_radio"
+            checked={typeValue === "0"}
+            onChange={handleType}
+            value={"0"}
+            size="small"
+          />
+          <p className={styles.text}>{t("data")}</p>
+          <Radio
+            disabled={isProcessReadOnly}
+            id="mapping_data_modal_document_radio"
+            checked={typeValue !== "0"}
+            onChange={handleType}
+            value={"1"}
+            size="small"
+          />
+          <p className={styles.text}>{t("document")}</p>
+        </div>
+        <div className={styles.flexRow}>
+          <div className={styles.flexColumn}>
+            <p className={styles.mappedField}>{t("mappedField")}</p>
+            <CustomizedDropdown
+              disabled={isProcessReadOnly}
+              id="mapping_data_modal_mapped_field_dropdown"
+              className={styles.typeInput}
+              value={mappedField}
+              onChange={(event) => setMappedField(event.target.value)}
+              isNotMandatory={true}
             >
-              <span className={styles.okButtonText}>{t("okSmallCase")}</span>
-            </button>
-            <button
-              id="mapping_data_modal_cancel_button"
-              onClick={handleClose}
-              className={styles.cancelButton}
-            >
-              <span className={styles.cancelButtonText}>{t("cancel")}</span>
-            </button>
+              {dropdownOptions &&
+                dropdownOptions.map((element) => {
+                  return (
+                    <MenuItem className={styles.menuItemStyles} value={element}>
+                      {element}
+                    </MenuItem>
+                  );
+                })}
+            </CustomizedDropdown>
           </div>
-        ) : null}
+          <div className={styles.flexColumn}>
+            <div className={styles.flexRow}>
+              <p className={clsx(styles.mappedField, styles.length)}>
+                {t("length")}
+              </p>
+              <span className={styles.asterisk}>*</span>
+            </div>
+            <InputBase
+              id="mapping_data_modal_length_input"
+              disabled={typeValue !== "0"}
+              variant="outlined"
+              className={styles.inputBase}
+              value={length}
+              type="number"
+              onChange={(event) => setLength(event.target.value)}
+            />
+          </div>
+        </div>
+        <div className={styles.flexRow}>
+          <div className={styles.flexRow}>
+            <Checkbox
+              disabled={isProcessReadOnly}
+              id="mapping_data_modal_quotes_checkbox"
+              readOnly={typeValue !== "0"}
+              size="small"
+              checked={quoteFlag === "Y"}
+              onChange={() =>
+                setQuoteFlag((prevState) => {
+                  let temp = "Y";
+                  if (temp === prevState) {
+                    temp = "N";
+                  }
+                  return temp;
+                })
+              }
+            />
+            <p className={styles.quotesText}>{t("quotes")}</p>
+          </div>
+          {typeValue !== "0" && (
+            <div className={styles.flexRow}>
+              <Checkbox
+                disabled={isProcessReadOnly}
+                id="mapping_data_modal_export_all_documents_checkbox"
+                readOnly={typeValue !== "0"}
+                size="small"
+                checked={exportAllDocsFlag === "Y"}
+                onChange={() =>
+                  setExportAllDocsFlag((prevState) => {
+                    let temp = "Y";
+                    if (temp === prevState) {
+                      temp = "N";
+                    }
+                    return temp;
+                  })
+                }
+              />
+              <p className={styles.exportAllDocText}>
+                {t("exportAllDocuments")}
+              </p>
+            </div>
+          )}
+        </div>
+        <div className={styles.flexColumn}>
+          <p className={styles.mappedField}>{t("alignment")}</p>
+          <div className={styles.flexRow}>
+            <Radio
+              id="mapping_data_modal_left_radio"
+              checked={alignment === "L"}
+              value={"L"}
+              size="small"
+              disabled={isProcessReadOnly || typeValue !== "0"}
+              onChange={(event) => setAlignment(event.target.value)}
+            />
+            <p className={styles.text}>{t("left")}</p>
+            <Radio
+              id="mapping_data_modal_right_radio"
+              checked={alignment === "R"}
+              value={"R"}
+              size="small"
+              disabled={isProcessReadOnly || typeValue !== "0"}
+              onChange={(event) => setAlignment(event.target.value)}
+            />
+            <p className={styles.text}>{t("right")}</p>
+          </div>
+        </div>
       </div>
+      {!isProcessReadOnly ? (
+        <div className={styles.buttonsDiv}>
+          <button
+            id="mapping_data_modal_cancel_button"
+            onClick={handleClose}
+            className={styles.cancelButton}
+          >
+            <span className={styles.cancelButtonText}>{t("cancel")}</span>
+          </button>
+          <button
+            id="mapping_data_modal_save_changes_button"
+            disabled={length === ""}
+            onClick={handleSaveChanges}
+            className={styles.okButton}
+          >
+            <span className={styles.okButtonText}>{t("save")}</span>
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

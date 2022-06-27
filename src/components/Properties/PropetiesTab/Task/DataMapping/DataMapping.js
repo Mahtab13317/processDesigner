@@ -12,7 +12,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { useTranslation } from "react-i18next";
 
 function DataMapping(props) {
-  let {t}=useTranslation();
+  let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const [taskVariables, settaskVariables] = React.useState([]);
   const varDef = store.getState("variableDefinition");
@@ -27,7 +27,7 @@ function DataMapping(props) {
   }, [props.taskInfo?.TaskTemplateVar]);
 
   useEffect(() => {
-    localLoadedActivityPropertyData.ActivityProperty.Interfaces?.TaskTypes.forEach(
+    localLoadedActivityPropertyData.ActivityProperty.Interfaces?.TaskTypes?.forEach(
       (task) => {
         if (task.TaskId === props.taskInfo.TaskId) {
           setdataMapping(task);
@@ -38,7 +38,7 @@ function DataMapping(props) {
 
   const changeDataMapping = (e, task) => {
     let temp = JSON.parse(JSON.stringify(dataMapping));
-    temp.VariableMappings.forEach((data) => {
+    temp?.VariableMappings?.forEach((data) => {
       if (data.TaskVariableName === task.TaskVariableName) {
         data.VariableId = e.target.value + "";
       }
@@ -53,12 +53,12 @@ function DataMapping(props) {
         height: "40vh",
         fontFamily: "Open Sans",
         padding: "0.5rem",
-        direction: direction
+        direction: direction,
       }}
     >
       <TableContainer
         className={classes.queuetable}
-style={{ direction: direction}}
+        style={{ direction: direction }}
         //   component={Paper}
       >
         <Table style={{ width: "100%" }}>
@@ -67,21 +67,21 @@ style={{ direction: direction}}
               <TableCell
                 width="33%"
                 style={{ paddingBottom: "0" }}
-                align={direction==="rtl" ? "right":"left"}
+                align={direction === "rtl" ? "right" : "left"}
               >
                 <p className={classes.tableCellText}>Task Variable</p>
               </TableCell>
               <TableCell
                 width="47%"
                 style={{ paddingBottom: "0" }}
-                align={direction==="rtl" ? "right":"left"}
+                align={direction === "rtl" ? "right" : "left"}
               >
                 <p className={classes.tableCellText}>Process Variable(s)</p>
               </TableCell>
               <TableCell
                 width="20%"
                 style={{ paddingBottom: "0" }}
-                align={direction==="rtl" ? "right":"left"}
+                align={direction === "rtl" ? "right" : "left"}
               >
                 <p className={classes.tableCellText}>Read Only</p>
               </TableCell>
@@ -94,7 +94,7 @@ style={{ direction: direction}}
                 <TableRow className={classes.tableRow}>
                   <TableCell
                     width="33%"
-                    align={direction==="rtl" ? "right":"left"}
+                    align={direction === "rtl" ? "right" : "left"}
                     component="th"
                     scope="row"
                   >
@@ -122,7 +122,10 @@ style={{ direction: direction}}
                       </p>
                     </div>
                   </TableCell>
-                  <TableCell width="47%"  align={direction==="rtl" ? "right":"left"}>
+                  <TableCell
+                    width="47%"
+                    align={direction === "rtl" ? "right" : "left"}
+                  >
                     <Select
                       IconComponent={ExpandMoreIcon}
                       style={{
@@ -150,7 +153,10 @@ style={{ direction: direction}}
                       })}
                     </Select>
                   </TableCell>
-                  <TableCell width="20%" align={direction==="rtl" ? "right":"left"}>
+                  <TableCell
+                    width="20%"
+                    align={direction === "rtl" ? "right" : "left"}
+                  >
                     <Checkbox checked={task.ReadOnly === "Y" ? true : false} />
                   </TableCell>
                 </TableRow>

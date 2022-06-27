@@ -150,7 +150,6 @@
       "userMsg": "Enter username and password",
       "emptyField": "This field should not be empty"
     },
-
     "serviceCatalogSap": {
       "newFunction": "New Function",
       "rfcHostname": "RFC Host Name",
@@ -160,7 +159,17 @@
       "sapPassword": "SAP Password",
       "configuration": "Configuration"
     },
-    
+    "workdeskSap":{
+      "newDef":"New Definition",
+      "defName":"Definition Name",
+      "sapTcode":"SAP TCode",
+      "mapping":"Mapping",
+      "discard":"Discard",
+      "save":"Save",
+      "sapFieldName":"SAP Field Name",
+      "name":"Name"
+      
+    },
     "intermediateEvents": {
       "head": "Intermediate Events",
       "event": "Event",
@@ -1369,5 +1378,18 @@
   "singleFormCompleteProcess": "Single form for the complete process",
   "settingUpYourWorkitemView": "Setting Up Your Workitem View",
   "createAGlobalTemplate": "Create a Global Template",
-  "saveGtNote": "Note: Escalation Rules and Options will not be a part of Global Template."
+  "saveGtNote": "Note: Escalation Rules and Options will not be a part of Global Template.",
+  "basicVariables": "Basic Variables",
+  "extendedVariables": "Extended Variables",
+  "systemVariables": "System Variables",
+  "processImportedSuccessfully": "Process imported successfully",
+  "processImportFailed": "Failed to import process",
+  "processExportedSuccessfully": "Process exported successfully",
+  "processExportedFailed": "Failed to export process",
+  "validateProcess": "Validate Process",
+  "ArchiveDocumentTypes": "Archive Document Types",
+  "GoToCatalog":"Go To Catalog",
+  "Proceed":"Proceed",
+  "noWebServiceAdded": "No webservices have been added.",
+  "AssociatedWebservicesandMethods":"Associated Webservices and Methods"
 }

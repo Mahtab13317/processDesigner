@@ -13,7 +13,7 @@ import { store, useGlobalState } from "state-pool";
 import { useTranslation } from "react-i18next";
 
 function ManageRights(props) {
-  let {t} = useTranslation();
+  let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const actProperty = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
@@ -26,7 +26,7 @@ function ManageRights(props) {
   useEffect(() => {
     let tabNames = [];
     let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
-    temp.ActivityProperty.Interfaces.TaskTypes.forEach((task) => {
+    temp.ActivityProperty?.Interfaces?.TaskTypes?.forEach((task) => {
       if (task.TaskId === props.taskInfo.TaskId) {
         setactiveTask(task);
         task.TaskAssociation.forEach((right) => {
@@ -61,7 +61,7 @@ function ManageRights(props) {
         height: "40vh",
         fontFamily: "Open Sans",
         // padding: "0.5rem",
-        direction: direction
+        direction: direction,
       }}
     >
       <TabPanel style={{ height: "10px", width: "100%" }}>
@@ -87,7 +87,7 @@ function ManageRights(props) {
 }
 
 function RightsTable({ val, activeTask }) {
-  let {t}=useTranslation();
+  let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const [tableHeaders, settableHeaders] = useState([]);
   const [tableWidth, settableWidth] = useState();
@@ -97,6 +97,9 @@ function RightsTable({ val, activeTask }) {
   const [documentsArray, setdocumentsArray] = useState([]);
   const [todosArray, settodosArray] = useState([]);
   const [CurrentTab, setCurrentTab] = useState();
+  const actProperty = store.getState("activityPropertyData");
+  const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
+    useGlobalState(actProperty);
 
   useEffect(() => {
     activeTask &&
@@ -160,6 +163,23 @@ function RightsTable({ val, activeTask }) {
     else return false;
   };
 
+  const onRightsChange = (e, data) => {
+    // let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
+    // if (e.target.name === "exception") {
+    //   temp?.ActivityProperty?.Interfaces?.TaskTypes?.forEach((task) => {
+    //     if (task.TaskId === activeTask.TaskId) {
+    //       task.TaskAssociation?.forEach((assocData) => {
+    //         if (assocData.hasOwnProperty("TaskExceptionTypes")) {
+    //           assocData.TaskExceptionTypes.forEach((exc) => {
+    //             if (exc.ExceptionId === data.ExceptionId) {
+    //             }
+    //           });
+    //         }
+    //       });
+    //     }
+    //   });
+    // }
+  };
   const dataForTabs = () => {
     if (CurrentTab === "Exceptions") {
       return (
@@ -169,7 +189,7 @@ function RightsTable({ val, activeTask }) {
               <TableCell
                 width={tableWidth}
                 style={{ paddingBottom: "0" }}
-                 align={direction==="rtl" ? "right":"left"}
+                align={direction === "rtl" ? "right" : "left"}
               >
                 <p style={{ fontSize: "0.8rem", fontWeight: "500" }}>
                   {exception.ExceptionName}
@@ -178,30 +198,50 @@ function RightsTable({ val, activeTask }) {
               <TableCell
                 width={tableWidth}
                 style={{ paddingBottom: "0" }}
-                 align={direction==="rtl" ? "right":"left"}
+                align={direction === "rtl" ? "right" : "left"}
               >
-                <Checkbox size="small" checked={YNConvert(exception.View)} />
+                <Checkbox
+                  size="small"
+                  name="exception"
+                  onChange={(e) => onRightsChange(e, exception)}
+                  checked={YNConvert(exception.View)}
+                />
               </TableCell>
               <TableCell
                 width={tableWidth}
                 style={{ paddingBottom: "0" }}
-                 align={direction==="rtl" ? "right":"left"}
+                align={direction === "rtl" ? "right" : "left"}
               >
-                <Checkbox size="small" checked={YNConvert(exception.Raise)} />
+                <Checkbox
+                  size="small"
+                  name="exception"
+                  onChange={onRightsChange}
+                  checked={YNConvert(exception.Raise)}
+                />
               </TableCell>
               <TableCell
                 width={tableWidth}
                 style={{ paddingBottom: "0" }}
-                 align={direction==="rtl" ? "right":"left"}
+                align={direction === "rtl" ? "right" : "left"}
               >
-                <Checkbox size="small" checked={YNConvert(exception.Respond)} />
+                <Checkbox
+                  size="small"
+                  name="exception"
+                  onChange={onRightsChange}
+                  checked={YNConvert(exception.Respond)}
+                />
               </TableCell>
               <TableCell
                 width={tableWidth}
                 style={{ paddingBottom: "0" }}
-                 align={direction==="rtl" ? "right":"left"}
+                align={direction === "rtl" ? "right" : "left"}
               >
-                <Checkbox size="small" checked={YNConvert(exception.Clear)} />
+                <Checkbox
+                  size="small"
+                  name="exception"
+                  onChange={onRightsChange}
+                  checked={YNConvert(exception.Clear)}
+                />
               </TableCell>
             </TableRow>
           ))}
@@ -215,7 +255,7 @@ function RightsTable({ val, activeTask }) {
               <TableCell
                 width={tableWidth}
                 style={{ paddingBottom: "0" }}
-                 align={direction==="rtl" ? "right":"left"}
+                align={direction === "rtl" ? "right" : "left"}
               >
                 <p style={{ fontSize: "0.8rem", fontWeight: "500" }}>
                   {document.DocTypeName}
@@ -224,23 +264,38 @@ function RightsTable({ val, activeTask }) {
               <TableCell
                 width={tableWidth}
                 style={{ paddingBottom: "0" }}
-                 align={direction==="rtl" ? "right":"left"}
+                align={direction === "rtl" ? "right" : "left"}
               >
-                <Checkbox size="small" checked={YNConvert(document.Add)} />
+                <Checkbox
+                  size="small"
+                  name="doc"
+                  onChange={onRightsChange}
+                  checked={YNConvert(document.Add)}
+                />
               </TableCell>
               <TableCell
                 width={tableWidth}
                 style={{ paddingBottom: "0" }}
-                 align={direction==="rtl" ? "right":"left"}
+                align={direction === "rtl" ? "right" : "left"}
               >
-                <Checkbox size="small" checked={YNConvert(document.Modify)} />
+                <Checkbox
+                  size="small"
+                  name="doc"
+                  onChange={onRightsChange}
+                  checked={YNConvert(document.Modify)}
+                />
               </TableCell>
               <TableCell
                 width={tableWidth}
                 style={{ paddingBottom: "0" }}
-                 align={direction==="rtl" ? "right":"left"}
+                align={direction === "rtl" ? "right" : "left"}
               >
-                <Checkbox size="small" checked={YNConvert(document.View)} />
+                <Checkbox
+                  size="small"
+                  name="doc"
+                  onChange={onRightsChange}
+                  checked={YNConvert(document.View)}
+                />
               </TableCell>
             </TableRow>
           ))}
@@ -254,7 +309,7 @@ function RightsTable({ val, activeTask }) {
               <TableCell
                 width={tableWidth}
                 style={{ paddingBottom: "0" }}
-                 align={direction==="rtl" ? "right":"left"}
+                align={direction === "rtl" ? "right" : "left"}
               >
                 <p style={{ fontSize: "0.8rem", fontWeight: "500" }}>
                   {form.FormName === "null" ? "Default" : form.FormName}
@@ -263,22 +318,26 @@ function RightsTable({ val, activeTask }) {
               <TableCell
                 width={tableWidth}
                 style={{ paddingBottom: "0" }}
-                 align={direction==="rtl" ? "right":"left"}
+                align={direction === "rtl" ? "right" : "left"}
               >
                 <Checkbox
                   size="small"
                   disabled={form.TaskForm_Id === null ? true : false}
+                  name="form"
+                  onChange={onRightsChange}
                   checked={YNConvert(form.Modify)}
                 />
               </TableCell>
               <TableCell
                 width={tableWidth}
                 style={{ paddingBottom: "0" }}
-                 align={direction==="rtl" ? "right":"left"}
+                align={direction === "rtl" ? "right" : "left"}
               >
                 <Checkbox
                   size="small"
                   disabled={form.TaskForm_Id === null ? true : false}
+                  name="form"
+                  onChange={onRightsChange}
                   checked={YNConvert(form.Raise)}
                 />
               </TableCell>
@@ -298,7 +357,7 @@ function RightsTable({ val, activeTask }) {
               <TableCell
                 width={tableWidth}
                 style={{ paddingBottom: "0" }}
-                 align={direction==="rtl" ? "right":"left"}
+                align={direction === "rtl" ? "right" : "left"}
               >
                 <p className={classes.tableCellText}>{header.name}</p>
               </TableCell>

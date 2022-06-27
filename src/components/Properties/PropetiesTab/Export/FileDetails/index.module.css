@@ -1,35 +1,50 @@
+.flexColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.flexRow {
+  display: flex;
+  flex-direction: row;
+}
+
 .mainDiv {
-  margin-left: 10px;
+  margin-left: 23px;
   width: 100%;
   height: 60%;
-  overflow-y: auto;
-}
-
-.mainDiv::-webkit-scrollbar {
-  width: 7px;
-  height: 10px;
-  background-color: white;
-}
-
-.mainDiv::-webkit-scrollbar-thumb {
-  background-color: #d8d8d8;
-  border-radius: 4px;
 }
 
 .subDiv {
-  display: flex;
-  flex-direction: row;
-  margin: 10px 0px 0px 30px;
+  margin: 0px 0px 0px 20px;
+}
+
+.divHeight {
+  height: 78px;
+}
+
+.fieldTitle {
+  text-align: left;
+  font: normal normal normal 0.75rem/1.0625rem Open Sans;
+  letter-spacing: 0rem;
+  color: #606060;
+  opacity: 1;
 }
 
 .fieldName {
-  text-align: left;
-  font: normal normal 600 12px/24px Open Sans;
-  letter-spacing: 0px;
-  color: #000000;
-  opacity: 1;
+  margin: 0.75rem 0rem 0.3125rem 0rem;
+}
+
+.asterisk {
+  color: red;
+  margin-top: 11px;
+  margin-left: 2px;
+  font-size: 0.75rem;
+}
+
+.generateHeader {
   width: 125px;
-  margin: 12px 0px 5px 0px;
+  margin: 36px 0px 5px 0px;
+  color: #000000;
 }
 
 .dropdownInput {
@@ -37,8 +52,8 @@
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
-  width: 40%;
-  margin: 10px 0px 2px 0px;
+  width: 250px;
+  /* margin: 0px 0px 0px 0px; */
   height: 30px;
   text-align: left;
   font: normal normal normal 12px/17px Open Sans !important;
@@ -49,8 +64,8 @@
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
-  margin: 8px 0px 2px 0px;
-  width: 40%;
+  /* margin: 0px 0px 0px 0px; */
+  width: 250px;
   height: 30px !important;
   text-align: left;
   font: normal normal normal 12px/17px Open Sans !important;
@@ -59,9 +74,15 @@
 }
 
 .addIcon {
-  margin: 12px 0px 2px 5px;
+  margin: 34px 0px 2px 13px;
   color: #0072c6;
+  border: 1px solid #0072c5;
+  background-color: white;
   cursor: pointer;
+  width: 40px;
+  border-radius: 2px;
+  padding: 5px 8px 6px 8px;
+  height: 28px;
 }
 
 .menuItemStyles {
@@ -74,10 +95,10 @@
 
 .orderByCheckBox {
   padding-left: 0px;
-  margin-top: 5px;
+  margin-top: 28px;
 }
 
-.orderBy {
+/* .orderBy {
   text-align: left;
   font: normal normal 600 12px/24px Open Sans;
   letter-spacing: 0px;
@@ -85,7 +106,7 @@
   opacity: 1;
   width: 96px;
   margin: 13px 0px 0px 0px;
-}
+} */
 
 /* .modalDiv {
   display: flex;
@@ -108,7 +129,7 @@
   cursor: pointer;
 }
 
-.extraFields {
+/* .extraFields {
   text-align: left;
   font: normal normal 600 12px/24px Open Sans;
   letter-spacing: 0px;
@@ -116,9 +137,9 @@
   opacity: 1;
   width: 136px;
   margin: 12px 0px 5px 0px;
-}
+} */
 
-.secondDiv {
+/* .secondDiv {
   width: 100%;
 }
 
@@ -126,14 +147,21 @@
   display: flex;
   flex-direction: row;
   width: 90%;
-}
+} */
 
-.stringDivs {
+/* .stringDivs {
   width: 100%;
-}
+} */
 
-.thirdDiv {
+/* .thirdDiv {
   display: flex;
   flex-direction: row;
   width: 100%;
+} */
+
+.fieldDivider {
+  color: #e4e4e4;
+  margin-top: auto;
+  height: 75%;
+  margin-left: 23px;
 }

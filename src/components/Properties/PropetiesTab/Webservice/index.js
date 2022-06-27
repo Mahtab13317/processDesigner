@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { store, useGlobalState } from "state-pool";
-import CommonHeader from "../../PropetiesTab/commonTabHeader";
 import { connect } from "react-redux";
-import { getActivityProps } from "../../../../utility/abstarctView/getActivityProps";
 import { Select, MenuItem, List } from "@material-ui/core";
 import "./index.css";
 import Button from "@material-ui/core/Button";
@@ -19,25 +17,18 @@ import { propertiesLabel } from "../../../../Constants/appConstants";
 import {
   SERVER_URL,
   ENDPOINT_GET_WEBSERVICE,
-  ENDPOINT_GET_EXTERNAL_METHODS,
 } from "../../../../Constants/appConstants";
 import Mapping from "./mapping.js";
-import { hasIn, reverse } from "lodash";
-import { FlashAutoOutlined, WbSunnyOutlined } from "@material-ui/icons";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 import { useTranslation } from "react-i18next";
-import CatelogScreen from "../../../../components/ServiceCatalog/index.js";
+import CatalogScreenModal from "./CatalogScreenModal";
 
 function Webservice(props) {
   let { t } = useTranslation();
   const dispatch = useDispatch();
   const loadedActivityPropertyData = store.getState("activityPropertyData");
-  const [
-    localLoadedActivityPropertyData,
-    setlocalLoadedActivityPropertyData,
-    updatelocalLoadedActivityPropertyData,
-  ] = useGlobalState(loadedActivityPropertyData);
-  const [selectedActivityIcon, setSelectedActivityIcon] = useState();
+  const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
+    useGlobalState(loadedActivityPropertyData);
   const [webServicesList, setWebServicesList] = useState([]);
   const [serviceNameClicked, setServiceNameClicked] = useState(null);
   const [methodsList, setMethodsList] = useState([]);
@@ -62,18 +53,17 @@ function Webservice(props) {
             open: true,
           })
         );
-         dispatch(
-        setActivityPropertyChange({
-          [propertiesLabel.webService]: { isModified: true, hasError: true },
-        })
-      );
+        dispatch(
+          setActivityPropertyChange({
+            [propertiesLabel.webService]: { isModified: true, hasError: true },
+          })
+        );
       }
       dispatch(setSave({ SaveClicked: false }));
     }
   }, [saveCancelStatus.SaveClicked, saveCancelStatus.CancelClicked]);
 
   useEffect(() => {
-    console.log('TIMES');
     let temp = [];
     localLoadedActivityPropertyData?.ActivityProperty?.webserviceInfo?.objWebServiceDataInfo?.map(
       (info) => {
@@ -95,14 +85,6 @@ function Webservice(props) {
       );
     }
   }, [localLoadedActivityPropertyData]);
-
-  useEffect(() => {
-    let activityProps = getActivityProps(
-      props.cellActivityType,
-      props.cellActivitySubType
-    );
-    setSelectedActivityIcon(activityProps[0]);
-  }, [props.cellActivityType, props.cellActivitySubType, props.cellID]);
 
   useEffect(() => {
     axios
@@ -146,27 +128,20 @@ function Webservice(props) {
       );
 
       if (!combExists) {
-        let maxId = 0;
-        let tempOne = [...associations];
-        tempOne.forEach((t) => {
-          if (+t.id > +maxId) {
-            maxId = +t.id;
+        //code edited on 20 June 2022 for BugId 111107
+        let methodIndex;
+        webServicesList?.map((method) => {
+          if (method.AppName == selectedWebService) {
+            methodIndex = method.MethodIndex;
           }
         });
-
-        // tempOne.push({
-        //   method: selectedMethod,
-        //   webservice: selectedWebService,
-        //   id: maxId + 1,
-        // });
-
         // Saving Data
         let temp = { ...localLoadedActivityPropertyData };
         temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo.push({
           asynchActId: "0",
           fwdParamMapList: [],
           invocationType: "S",
-          methodIndex: maxId + 1,
+          methodIndex: methodIndex,
           methodName: selectedMethod,
           proxyEnabled: "F",
           revParamMapList: [],
@@ -175,8 +150,6 @@ function Webservice(props) {
         });
         setlocalLoadedActivityPropertyData(temp);
         // --------------------------
-
-        // setAssociations(tempOne);
         dispatch(
           setActivityPropertyChange({
             [propertiesLabel.webService]: {
@@ -257,12 +230,12 @@ function Webservice(props) {
     setShowCatelogScreen(true);
   };
 
+  {/*code changes on 21 June 2022 for BugId 110907 */}
   return (
     <div>
       <div
         style={{
           display: "flex",
-          // width: props.isDrawerExpanded && showMapping ? "60%" : "100%",
           borderRight:
             props.isDrawerExpanded && showMapping
               ? "1px solid #CECECE"
@@ -275,13 +248,13 @@ function Webservice(props) {
             width: props.isDrawerExpanded && showMapping ? "60%" : "100%",
           }}
         >
-          <div style={{ padding: "5px" }}>
+          <div style={{ padding: "0.5rem 1vw" }}>
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                marginBottom: "15px",
+                marginBottom: "1rem",
               }}
             >
               <p
@@ -291,7 +264,7 @@ function Webservice(props) {
                   fontWeight: "700",
                 }}
               >
-                Webservice
+                {t("webService")}
               </p>
               <p
                 style={{
@@ -302,27 +275,33 @@ function Webservice(props) {
                 }}
                 onClick={() => LandOnCatelogHandler()}
               >
-                Go To Catelog
+                {/*code edited on 21 June 2022 for BugId 110908*/}
+                {t("GoToCatalog")}
               </p>
             </div>
             <div
               style={{
                 display: props.isDrawerExpanded ? "flex" : "block",
-                // alignItems: props.isDrawerExpanded ? "center" : "normal",
+                alignItems: props.isDrawerExpanded ? "end" : "normal",
               }}
             >
               <div
                 style={{
-                  marginBottom: "15px",
-                  marginRight: props.isDrawerExpanded ? "20px" : "0px",
+                  marginBottom: "1rem",
+                  flex: 1,
                 }}
               >
-                <p style={{ fontSize: "12px", color: "#886F6F" }}>Webservice</p>
+                <p
+                  style={{ fontSize: "12px", color: "#886F6F", width: "100%" }}
+                >
+                  {t("webService")}
+                </p>
                 <Select
                   className="select_webService"
                   onChange={(e) => setSelectedWebService(e.target.value)}
                   style={{
                     fontSize: "12px",
+                    width: props.isDrawerExpanded ? "90%" : "100%",
                   }}
                   value={selectedWebService}
                   MenuProps={{
@@ -336,9 +315,6 @@ function Webservice(props) {
                     },
                     getContentAnchorEl: null,
                   }}
-                  // inputProps={{
-                  //   readOnly: selectedWebService == null,
-                  // }}
                 >
                   {webServicesList?.map((list) => {
                     return (
@@ -358,12 +334,17 @@ function Webservice(props) {
               </div>
               <div
                 style={{
-                  marginBottom: "15px",
+                  marginBottom: "1rem",
                   display: "flex",
                   flexDirection: "column",
+                  flex: 1,
                 }}
               >
-                <p style={{ fontSize: "12px", color: "#886F6F" }}>Method</p>
+                <p
+                  style={{ fontSize: "12px", color: "#886F6F", width: "100%" }}
+                >
+                  {t("method")}
+                </p>
                 <Select
                   className="select_webService"
                   onChange={(e) => setSelectedMethod(e.target.value)}
@@ -373,6 +354,7 @@ function Webservice(props) {
                       !selectedMethod && associateButtonClicked
                         ? "1px solid red"
                         : "1px solid #CECECE",
+                    width: props.isDrawerExpanded ? "90%" : "100%",
                   }}
                   value={selectedMethod}
                   disabled={selectedWebService ? false : true}
@@ -410,22 +392,25 @@ function Webservice(props) {
                   </span>
                 ) : null}
               </div>
-              <Button
-                variant="outlined"
+              <div
                 style={{
-                  position: "absolute",
-                  right: props.isDrawerExpanded ? "45%" : "10px",
-                  top: props.isDrawerExpanded ? "24%" : "auto",
+                  display: "flex",
+                  justifyContent: props.isDrawerExpanded ? "start" : "end",
+                  flex: 2,
                 }}
-                className="associateButton_webService"
-                onClick={() => associateServiceNMethod()}
               >
-                Associate
-              </Button>
+                <button
+                  variant="outlined"
+                  className="associateButton_webSProp"
+                  onClick={() => associateServiceNMethod()}
+                >
+                  {t("associate")}
+                </button>
+              </div>
             </div>
           </div>
           {/* ---------------------------- */}
-          <div style={{ padding: "5px", marginTop: "35px" }}>
+          <div style={{ padding: "0 1vw" }}>
             <div
               style={{
                 display: "flex",
@@ -435,12 +420,12 @@ function Webservice(props) {
             >
               <p
                 style={{
-                  fontSize: "12px",
+                  fontSize: "13px",
                   color: "#000000",
-                  fontWeight: "700",
+                  fontWeight: "600",
                 }}
               >
-                Associated Webservices and Methods
+                {t("AssociatedWebservicesandMethods")}
               </p>
             </div>
           </div>
@@ -468,22 +453,17 @@ function Webservice(props) {
         <Modal
           show={showCatelogScreen}
           style={{
-            top: "-20%",
+            top: "10%",
             left: "10%",
-            width: "83.2%",
-            position: "absolute",
+            width: "80%",
             zIndex: "1500",
             boxShadow: "0px 3px 6px #00000029",
-            border: "1px solid #D6D6D6",
-            borderRadius: "3px",
-            height: props.isDrawerExpanded ? "600px" : "81vh",
+            padding: "0",
           }}
           modalClosed={() => setShowCatelogScreen(false)}
           children={
-            <CatelogScreen
-              setShowCatelogScreen={setShowCatelogScreen}
-              callLocation="webServiceSOAPActivity"
-            />
+            // code edited on 20 June 2022 for BugId 110910
+            <CatalogScreenModal closeFunc={() => setShowCatelogScreen(false)} />
           }
         ></Modal>
       ) : null}

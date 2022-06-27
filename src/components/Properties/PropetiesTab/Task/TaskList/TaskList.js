@@ -4,6 +4,8 @@ import SearchComponent from "../../../../../UI/Search Component/index.js";
 import "./TaskList.css";
 import Button from "@material-ui/core/Button";
 import { store, useGlobalState } from "state-pool";
+import { useDispatch } from "react-redux";
+import { setActivityPropertyChange } from "../../../../../redux-store/slices/ActivityPropertyChangeSlice.js";
 
 function TaskList(props) {
   const loadedProcessData = store.getState("loadedProcessData");
@@ -11,6 +13,7 @@ function TaskList(props) {
     useGlobalState(loadedProcessData);
   const [json, setJson] = useState([]);
   const [SelectAllChecked, setSelectAllChecked] = useState(false);
+  let dispatch = useDispatch();
 
   useEffect(() => {
     let temp = JSON.parse(JSON.stringify(json));
@@ -47,6 +50,11 @@ function TaskList(props) {
     let temp2 = JSON.parse(JSON.stringify(localLoadedProcessData));
     temp2.Tasks = temp;
     setlocalLoadedProcessData(temp2);
+    dispatch(
+      setActivityPropertyChange({
+        Task: { isModified: true, hasError: false },
+      })
+    );
   };
 
   const addAssociatedTasks = () => {

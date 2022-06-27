@@ -5,8 +5,15 @@ import Modal from "../../../../../../UI/Modal/Modal";
 import MappingDataModal from "../MappingDataModal";
 
 function MappingModal(props) {
-  const { index, dataFields, setDataFields, fieldName, isProcessReadOnly } =
-    props;
+  const {
+    index,
+    dataFields,
+    setDataFields,
+    fieldName,
+    isProcessReadOnly,
+    documentList,
+    variablesList,
+  } = props;
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className={styles.moreOptionsInput}>
@@ -19,10 +26,10 @@ function MappingModal(props) {
         show={isOpen}
         modalClosed={() => setIsOpen(false)}
         style={{
-          width: "25%",
-          height: "45%",
-          left: "36%",
-          top: "34%",
+          width: "28%",
+          height: "54%",
+          left: "35%",
+          top: "27%",
           padding: "0px",
         }}
       >
@@ -33,6 +40,8 @@ function MappingModal(props) {
           setDataFields={setDataFields}
           handleClose={() => setIsOpen(false)}
           isProcessReadOnly={isProcessReadOnly}
+          documentList={documentList}
+          variablesList={variablesList}
         />
       </Modal>
     </div>
