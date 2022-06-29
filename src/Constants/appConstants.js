@@ -542,6 +542,8 @@ export const STRING_VARIABLE_TYPE = 10;
 export const BOOLEAN_VARIABLE_TYPE = 12;
 export const DATE_VARIABLE_TYPE = 8;
 export const INTEGER_VARIABLE_TYPE = 3;
+export const FLOAT_VARIABLE_TYPE = 6;
+export const LONG_VARIABLE_TYPE = 4;
 
 export const INSERTION_ORDER_ID = "InsertionOrderId";
 export const MAP_ID = "MapID";

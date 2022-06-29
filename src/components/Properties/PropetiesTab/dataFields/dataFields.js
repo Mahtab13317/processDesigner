@@ -45,64 +45,82 @@ function ExpenseInitiation(props) {
 
   const getVariableReadModifyType = (data) => {
     let temp = "";
-    activityDetails.forEach((act) => {
-      if (act.name === data.name) {
-        if (act.bRead && act.bModify) {
-          return "O";
-        } else if (act.bRead && !act.bModify) temp = "R";
-        else if (!act.bRead && act.bModify) temp = "O";
-        else temp = "R";
-      }
-    });
+
+    if (!!data.bRead && !!data.bModify) {
+      temp = "O";
+    } else if (data.bRead === true && data.bModify === false) temp = "R";
+    else if (data.bRead === false && data.bModify === true) temp = "O";
+    else if (!data.bRead && !data.bModify) temp = "S";
+    else temp = "R";
+
+    console.log("bbbbbbbbbbbread", data);
     return temp;
   };
 
-  const changeDataFields = (e, varName) => {
+  const getVariableInfo = (name) => {
+    let temp2 = {};
+    let temp = JSON.parse(JSON.stringify(localLoadedProcessData));
+    temp?.Variable.forEach((variable) => {
+      if (variable.VariableName === name) {
+        temp2 = variable;
+      }
+    });
+    return temp2;
+  };
+
+  const changeDataFields = (e, _var) => {
     let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
     let actTemp = JSON.parse(JSON.stringify(activityDetails));
+    let deleteBool = false;
+    let dataVariable = {};
 
     if (e.target.name === "bRead") {
-      actTemp.some((act) => {
-        if (act.name === varName) {
-          act.bRead = e.target.checked;
-          return true;
+      actTemp.forEach((act) => {
+        if (act.name === _var.name) {
+          dataVariable = act;
+          if (e.target.checked) {
+            act.bRead = e.target.checked;
+          } else {
+            act.bRead = e.target.checked;
+            act.bModify = e.target.checked;
+          }
         }
       });
     } else {
       actTemp.forEach((act) => {
-        if (act.name === varName) {
+        if (act.name === _var.name) {
           if (e.target.checked === true) {
             act.bModify = e.target.checked;
             act.bRead = e.target.checked;
           } else act.bModify = e.target.checked;
+          dataVariable = act;
         }
       });
     }
 
-    temp.ActivityProperty.DataVariables.forEach((variable, index) => {
-      actTemp.forEach((act) => {
-        if (act.name === variable.VariableName) {
-          if (act.bModify && act.bRead) {
-            variable.VariableType = "O";
-          } else if (act.bModify && !act.bRead) variable.VariableType = "O";
-          else if (!act.bModify && act.bRead) variable.VariableType = "R";
-          else if (!act.bModify && !act.bRead)
-            temp.ActivityProperty.DataVariables.splice(index, 1);
-        } else if (act.bRead || act.bModify) {
-          let el = {
-            DataType: act.type,
-            DefinitionType: variable.VariableType,
-            VariableName: act.name,
-            VariableType: getVariableReadModifyType(act),
-          };
-          temp.ActivityProperty.DataVariables.push(el);
-        }
-      });
+    temp.ActivityProperty.m_objDataVarMappingInfo.dataVarList = [];
+    let tempArr = [];
+    actTemp.forEach((act) => {
+      let el = {
+        m_strFetchedRights: getVariableReadModifyType(act),
+        processVarInfo: {
+          varName: act.name,
+          variableId: getVariableInfo(act.name).VariableId,
+          varScope: getVariableInfo(act.name).VariableScope,
+          type: getVariableInfo(act.name).VariableType,
+        },
+      };
+
+      if (el.m_strFetchedRights !== "S") {
+        tempArr.push(el);
+      }
     });
+
+    temp.ActivityProperty.m_objDataVarMappingInfo.dataVarList = tempArr;
 
     setlocalLoadedActivityPropertyData(temp);
     setactivityDetails(actTemp);
-    checkAllReadModify();
+    checkAllReadModify(actTemp);
     dispatch(
       setActivityPropertyChange({
         DataFields: { isModified: true, hasError: false },
@@ -112,15 +130,17 @@ function ExpenseInitiation(props) {
 
   const getVariableReadModifyData = (varName) => {
     let temp = "";
-    localLoadedActivityPropertyData?.ActivityProperty?.DataVariables?.forEach(
+
+    localLoadedActivityPropertyData?.ActivityProperty?.m_objDataVarMappingInfo?.dataVarList.forEach(
       (dataVar) => {
-        if (dataVar.VariableName === varName) temp = dataVar.VariableType;
+        if (dataVar.processVarInfo.varName === varName)
+          temp = dataVar.m_strFetchedRights;
       }
     );
     return temp;
   };
 
-  const checkAllReadModify = () => {
+  const checkAllReadModify = (activityDetails) => {
     let temp = JSON.parse(JSON.stringify(activityDetails));
     let readArr = [];
     let modifyArr = [];
@@ -164,36 +184,99 @@ function ExpenseInitiation(props) {
       });
 
       setactivityDetails(tempArr);
+      checkAllReadModify(tempArr);
     }
   }, [localLoadedActivityPropertyData?.Status]);
 
   const allChangeHandler = (e) => {
     let temp = JSON.parse(JSON.stringify(activityDetails));
+    let temp2 = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
+    temp2.ActivityProperty.m_objDataVarMappingInfo.dataVarList = [];
     if (e.target.name === "allRead") {
-      if (e.target.checked)
+      if (e.target.checked) {
         temp.forEach((act) => {
           act.bRead = true;
+          let el = {
+            m_strFetchedRights: getVariableReadModifyType(act),
+            processVarInfo: {
+              varName: act.name,
+              variableId: getVariableInfo(act.name).VariableId,
+              varScope: getVariableInfo(act.name).VariableScope,
+              type: getVariableInfo(act.name).VariableType,
+            },
+          };
+          temp2?.ActivityProperty?.m_objDataVarMappingInfo?.dataVarList.push(
+            el
+          );
         });
-      else
+      } else {
         temp.forEach((act) => {
           act.bRead = false;
+          act.bModify = false;
         });
+        temp2.ActivityProperty.m_objDataVarMappingInfo.dataVarList = [];
+
+        setallModifyBool(e.target.checked);
+      }
       setallReadBool(e.target.checked);
     } else {
-      if (e.target.checked)
+      if (e.target.checked) {
+        temp2.ActivityProperty.m_objDataVarMappingInfo.dataVarList = [];
         temp.forEach((act) => {
-          //act.bRead = true;
+          act.bRead = true;
           act.bModify = true;
+          let el = {
+            m_strFetchedRights: getVariableReadModifyType(act),
+            processVarInfo: {
+              varName: act.name,
+              variableId: getVariableInfo(act.name).VariableId,
+              varScope: getVariableInfo(act.name).VariableScope,
+              type: getVariableInfo(act.name).VariableType,
+            },
+          };
+          temp2?.ActivityProperty?.m_objDataVarMappingInfo?.dataVarList.push(
+            el
+          );
+
+          setallReadBool(e.target.checked);
         });
-      else
+      } else {
+        temp2.ActivityProperty.m_objDataVarMappingInfo.dataVarList = [];
         temp.forEach((act) => {
           // act.bRead = false;
           act.bModify = false;
+          let el = {
+            m_strFetchedRights: getVariableReadModifyType(act),
+            processVarInfo: {
+              varName: act.name,
+              variableId: getVariableInfo(act.name).VariableId,
+              varScope: getVariableInfo(act.name).VariableScope,
+              type: getVariableInfo(act.name).VariableType,
+            },
+          };
+          temp2?.ActivityProperty?.m_objDataVarMappingInfo?.dataVarList.push(
+            el
+          );
         });
+      }
       setallModifyBool(e.target.checked);
     }
+
+    setlocalLoadedActivityPropertyData(temp2);
     setactivityDetails(temp);
+    checkAllReadModify(temp);
+    dispatch(
+      setActivityPropertyChange({
+        DataFields: { isModified: true, hasError: false },
+      })
+    );
   };
+
+  console.log(
+    "vvvvvvvvvvvvvvvvvvvvvvvv",
+    localLoadedActivityPropertyData.ActivityProperty.m_objDataVarMappingInfo
+      .dataVarList
+  );
 
   return (
     <div>
@@ -355,17 +438,6 @@ function ExpenseInitiation(props) {
                 width: "100%",
               }}
             >
-              {/* <div
-                style={{
-                  width: "20%",
-                  textAlign: direction === "rtl" ? "right" : "left",
-                }}
-              >
-              <CheckBoxOutlineBlankSharpIcon
-                fontSize="small"
-                style={{ fontSize: "1.2rem", marginTop: "5px" }}
-              />
-              </div> */}
               <div
                 style={{
                   width: "20%",
@@ -474,10 +546,6 @@ function ExpenseInitiation(props) {
                 //alignItems: "center",
               }}
             >
-              {/* <CheckBoxOutlineBlankSharpIcon
-                fontSize="small"
-                style={{ fontSize: "1.2rem", marginTop: "7px" }}
-              /> */}
               <div
                 style={{
                   display: "flex",
@@ -544,7 +612,7 @@ function ExpenseInitiation(props) {
                   name="bRead"
                   color="primary"
                   inputProps={{ "aria-label": "secondary checkbox" }}
-                  onChange={(e) => changeDataFields(e, item.name)}
+                  onChange={(e) => changeDataFields(e, item)}
                 />
               </div>
               <div
@@ -562,7 +630,7 @@ function ExpenseInitiation(props) {
                   name="bModify"
                   color="primary"
                   inputProps={{ "aria-label": "secondary checkbox" }}
-                  onChange={(e) => changeDataFields(e, item.name)}
+                  onChange={(e) => changeDataFields(e, item)}
                 />
               </div>
             </div>

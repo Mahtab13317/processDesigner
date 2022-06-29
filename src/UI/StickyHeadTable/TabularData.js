@@ -30,6 +30,7 @@ import {
 } from "../../Constants/appConstants";
 import UnpinIcon from "../../../src/assets/abstractView/Icons/PD_PinEnabled.svg";
 import PinIcon from "../../../src/assets/abstractView/Icons/PD_Pinned.svg";
+import axios from "axios";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -557,21 +558,20 @@ function TabularData(props) {
   const [pinnedProcessDefIdArr, setpinnedProcessDefIdArr] = useState([]);
   const [showPinBoolean, setshowPinBoolean] = useState();
 
-  //uncomment here
-  // useEffect(() => {
-  //   async function getPinned() {
-  //     const res = await axios.get(SERVER_URL_LAUNCHPAD + "/pinnedList/1");
+  useEffect(() => {
+    async function getPinned() {
+      const res = await axios.get(SERVER_URL_LAUNCHPAD + "/pinnedList/1");
 
-  //     res.data?.forEach((data) => {
-  //       setpinnedProcessDefIdArr((prev) => {
-  //         let temp = [...prev];
-  //         temp.push(data.Id + "");
-  //         return temp;
-  //       });
-  //     });
-  //   }
-  //   getPinned();
-  // }, []);
+      res.data?.forEach((data) => {
+        setpinnedProcessDefIdArr((prev) => {
+          let temp = [...prev];
+          temp.push(data.Id + "");
+          return temp;
+        });
+      });
+    }
+    getPinned();
+  }, []);
 
   useEffect(() => {
     if (pinnedProcessDefIdArr.includes(rowSelected?.ProcessId + ""))
@@ -579,21 +579,48 @@ function TabularData(props) {
     else setshowPinBoolean(true);
   }, [rowSelected?.ProcessId]);
 
-  const handlePinUnpin = (e, row) => {
+  const handlePinUnpin = async (e, row) => {
     //need to integrate api
     e.stopPropagation();
-    if (pinnedProcessDefIdArr.includes(row?.ProcessId + ""))
-      setpinnedProcessDefIdArr((prev) => {
-        let temp = [...prev];
-        temp.splice(temp.indexOf(row?.ProcessId + ""), 1);
-        return temp;
+    if (pinnedProcessDefIdArr.includes(row?.ProcessId + "")) {
+      const res = await axios.post(SERVER_URL_LAUNCHPAD + "/unpin", {
+        status: row.status,
+        id: row.ProcessId,
+        applicationName: PMWEB,
+        type: "P",
+        applicationId: "1",
       });
-    else {
-      setpinnedProcessDefIdArr((prev) => {
-        let temp = [...prev];
-        temp.push(row?.ProcessId + "");
-        return temp;
+      if (res?.data?.Status === 0) {
+        setpinnedProcessDefIdArr((prev) => {
+          let temp = [...prev];
+          temp.splice(temp.indexOf(row?.ProcessId + ""), 1);
+          return temp;
+        });
+      }
+    } else {
+      const res = await axios.post(SERVER_URL_LAUNCHPAD + "/pin", {
+        name: row.name,
+        type: "P",
+        parent: row.allData.parentName,
+        editor: row.allData.editor,
+        status: row.status, //same for temp
+        creationDate: row.allData.creationDateTime,
+        modificationDate: row.allData.modificationDateTime,
+        accessedDate: row.allData.accessedDateTime, //same as it is temp.
+        applicationName: PMWEB, //hardcoded (const file)
+        id: row.ProcessId + "",
+        version: Number.parseFloat(row.version).toPrecision(2) + "",
+        statusMessage: "Created",
+        applicationId: "1",
+        parentId: row.allData.parentId + "",
       });
+      if (res?.data?.Status === 0) {
+        setpinnedProcessDefIdArr((prev) => {
+          let temp = [...prev];
+          temp.push(row?.ProcessId + "");
+          return temp;
+        });
+      }
     }
   };
 

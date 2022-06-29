@@ -11,6 +11,8 @@ import Lens from "../../assets/lens.png";
 const useStyles = makeStyles((theme) => ({
   searchBox: (props) => {
     return {
+      //code added on 21 June 2022 for BugId 110814
+      cursor: "text",
       position: "relative",
       marginLeft: 0,
       display: "flex",
@@ -49,6 +51,8 @@ const useStyles = makeStyles((theme) => ({
   },
   inputInput: {
     padding: theme.spacing(0.5, 1),
+    //code added on 16 June 2022 for BugId 110814
+    cursor: "text",
     marginTop: "1px",
     fontSize: "12px",
     height: "5px",

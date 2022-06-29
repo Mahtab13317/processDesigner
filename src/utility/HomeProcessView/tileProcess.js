@@ -24,6 +24,7 @@ export function tileProcess(process) {
     borderColor = "red";
     processTypeColor = "#0F54FB";
   } else if (process === "LC") {
+    // for showing checkout draft processes in recent list
     src = draft;
     processType = "Draft";
     backgroundColor = "#0054FE1A";
@@ -39,6 +40,7 @@ export function tileProcess(process) {
     borderColor = "yellow";
     processTypeColor = "#F5A623";
   } else if (process === "DC") {
+    // for showing checkout deployed processes in recent list
     src = deployed;
     processType = "Deployed";
     backgroundColor = "#FDCC0C1A";
@@ -89,6 +91,6 @@ export function tileProcess(process) {
     makerCheckerImg,
     borderColor,
     processTypeColor,
-    checked
+    checked,
   ];
 }

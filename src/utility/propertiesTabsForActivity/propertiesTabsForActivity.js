@@ -42,21 +42,22 @@ const InitialRule = React.lazy(() =>
 const Attachment = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/Attachment/Attachment")
 );
-// const Webservice = React.lazy(() =>
-//   import("../../components/Properties/PropetiesTab/Webservice/index.js")
-// );
 
-/*const Restful = React.lazy(() =>
+const Restful = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/Restful/index.js")
-);*/
+);
 
-/*const ResponseConsumerJMS= React.lazy(() =>
-import("../../components/Properties/PropetiesTab/ResponseConsumerJMS/index.js")
-);*/
+const ResponseConsumerJMS = React.lazy(() =>
+  import(
+    "../../components/Properties/PropetiesTab/ResponseConsumerJMS/index.js"
+  )
+);
 
-/*const RequestConsumerSoap= React.lazy(() =>
-import("../../components/Properties/PropetiesTab/requestConsumerSOAP/index.js")
-);*/
+const RequestConsumerSoap = React.lazy(() =>
+  import(
+    "../../components/Properties/PropetiesTab/requestConsumerSOAP/index.js"
+  )
+);
 
 const DataFields = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/dataFields/dataFields")
@@ -143,7 +144,15 @@ const Sap = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/SAP/Sap")
 );
 
-const Requirements = React.lazy(()=> import("../../components/ViewingArea/ProcessRequirements&Attchments/ProcessRequirements/index.js"))
+// const DataExchange = React.lazy(() =>
+//   import("../../components/Properties/PropetiesTab/DataExchange")
+// );
+
+const Requirements = React.lazy(() =>
+  import(
+    "../../components/ViewingArea/ProcessRequirements&Attchments/ProcessRequirements/index.js"
+  )
+);
 
 const BusinessRules = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/BusinessRules/index.js")
@@ -170,14 +179,14 @@ const tabNames = {
     label: propertiesLabel.dataFields,
   },
   3: {
-    name:<InitialRule />,
+    name: <InitialRule />,
     toolTip: "initialRules",
     icon: InitialRulesIcon,
     icon_enabled: InitialRulesIcon_EN,
     label: propertiesLabel.initialRules,
   },
   4: {
-    name: <Requirements/>,
+    name: <Requirements />,
     toolTip: "requirements",
     icon: RequirementsIcon,
     icon_enabled: RequirementsIcon_EN,
@@ -349,7 +358,8 @@ const tabNames = {
     label: propertiesLabel.initiateWorkstep,
   },
   36: {
-    name: <div>dataExchange to be painted here</div>,
+    // name: <DataExchange />,
+    name: <div>Data Exchange to be painted here</div>,
     toolTip: "dataExchange",
     label: propertiesLabel.dataExchange,
   },
@@ -359,7 +369,7 @@ const tabNames = {
     label: propertiesLabel.sap,
   },
   38: {
-    name: "Response consumer JMS painted here",
+    name: <ResponseConsumerJMS />,
     toolTip: "resConsumerJms",
     label: propertiesLabel.resConJMS,
   },
@@ -369,12 +379,12 @@ const tabNames = {
     label: propertiesLabel.resConSOAP,
   },
   40: {
-    name: "RequestConsumerSoap here",
+    name: <RequestConsumerSoap />,
     toolTip: "reqConsumerSoap",
     label: propertiesLabel.reqConSOAP,
   },
   41: {
-    name: "Restful painted here",
+    name: <Restful />,
     toolTip: "Restful",
     label: propertiesLabel.Restful,
   },

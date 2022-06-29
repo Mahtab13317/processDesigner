@@ -100,7 +100,6 @@ function RequireRightSection(props) {
   const [attachList, setAttachList] = useState([]);
   const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
 
-  console.log("CHACHI", props.selectedOrder);
   useEffect(() => {
     props?.completeSections?.map((section) => {
       if (
@@ -300,9 +299,10 @@ function RequireRightSection(props) {
     };
 
     if (saveCancelStatus.SaveClicked === true) {
-      alert('HEEEELLOOO');
+      //code commented on 21 June 2022 for BugId 110964
+      // alert('HEEEELLOOO');
       axios
-        .post(SERVER_URL + ENDPOINT_REGISTER_PROCESS + jsonBody)
+        .post(SERVER_URL + ENDPOINT_REGISTER_PROCESS, jsonBody)
         .then((res) => {
           // setMapList(
           //   res?.data?.map((elem) => ({

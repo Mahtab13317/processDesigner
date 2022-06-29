@@ -188,6 +188,7 @@ function Recent() {
           parent: elem.parentName,
           version: elem.version,
           ProcessId: elem.id,
+          allData: elem,
         };
       }),
   }));

@@ -27,9 +27,11 @@ import { useGlobalState } from "state-pool";
 import * as actionCreators from "../../../redux-store/actions/processView/actions.js";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
+import { setToastDataFunc } from "../../../redux-store/slices/ToastDataHandlerSlice";
 
 function ImportExportProcess(props) {
   const ProjectValue = useSelector(ImportExportSliceValue);
+
   const [selectedProcessName, setselectedProcessName] = useState("");
   const dispatch = useDispatch();
   const { setAction, processName, typeImportorExport } = props;
@@ -40,6 +42,11 @@ function ImportExportProcess(props) {
     processName: "",
     projectName: "",
   });
+  const [changeProjectBool, setchangeProjectBool] = useState(true);
+
+  useEffect(() => {
+    setchangeProjectBool(props.changeProjectBool);
+  }, [props.changeProjectBool]);
 
   useEffect(() => {
     if (selectedProcessName === "") {
@@ -56,9 +63,23 @@ function ImportExportProcess(props) {
       });
     }
   }, [selectedProcessName]);
+  const checkFormatType = (file) => {
+    let splitArr = file.name.split(".");
+
+    return splitArr[splitArr.length - 1];
+  };
 
   const uploadFile = (e) => {
-    if (e.target.files[0].type === "application/x-zip-compressed") {
+    console.log(
+      "lllllllllllll",
+      checkFormatType(e.target.files[0]),
+      "ssss",
+      importType
+    );
+    if (
+      checkFormatType(e.target.files[0]) ===
+      (importType === "xml" ? "zip" : importType)
+    ) {
       setselectedFile(e.target.files[0]);
       seterrorObj((prev) => {
         let temp = { ...prev };
@@ -68,16 +89,20 @@ function ImportExportProcess(props) {
     } else
       seterrorObj((prev) => {
         let temp = { ...prev };
-        temp.importType = "Please upload only .zip files";
+        temp.importType = `Please upload only .${
+          importType === "xml" ? "zip" : importType
+        } files`;
         return temp;
       });
   };
 
   useEffect(() => {
-    setselectedProcessName(
-      selectedFile?.name.split(".").slice(0, -1).join(".")
-    );
-  }, [selectedFile?.name]);
+    if (!props.showOverwrite) {
+      setselectedProcessName(
+        selectedFile?.name.split(".").slice(0, -1).join(".")
+      );
+    }
+  }, [selectedFile?.name, props.showOverwrite]);
   useEffect(() => {
     if (localLoadedProcessData?.ProcessDefId)
       setselectedProcessName(localLoadedProcessData.ProcessName);
@@ -96,7 +121,7 @@ function ImportExportProcess(props) {
   const [processCreationModal, setprocessCreationModal] = useState(false);
   const [exportType, setexportType] = useState("xml");
   const [importType, setimportType] = useState("xml");
-  const [disableImport, setdisableImport] = useState(false);
+  // const [disableImport, setdisableImport] = useState(false);
   const [showErrorsBool, setshowErrorsBool] = useState(false);
 
   useEffect(() => {
@@ -123,23 +148,27 @@ function ImportExportProcess(props) {
   };
 
   const modalRef = useRef(null);
-  React.useEffect(() => {
-    /**
-     * Alert if clicked on outside of element
-     */
-    function handleClickOutside(event) {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-        dispatch(setImportExportVal({ ProjectName: null, Type: null }));
-      }
-    }
+  // React.useEffect(() => {
+  //   /**
+  //    * Alert if clicked on outside of element
+  //    */
+  //   function handleClickOutside(event) {
+  //     if (
+  //       modalRef.current &&
+  //       !modalRef.current.contains(event.target) &&
+  //       changeProjectBool
+  //     ) {
+  //       dispatch(setImportExportVal({ ProjectName: null, Type: null }));
+  //     }
+  //   }
 
-    // Bind the event listener
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      // Unbind the event listener on clean up
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [modalRef]);
+  //   // Bind the event listener
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => {
+  //     // Unbind the event listener on clean up
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, [modalRef]);
 
   const StyledLabel = withStyles({
     label: {
@@ -202,6 +231,17 @@ function ImportExportProcess(props) {
   //   selectedProject,
   // ]);
 
+  const disableImport = () => {
+    if (
+      !!selectedProcessName &&
+      !!(selectedProject || props.selectedProjectId) &&
+      !!selectedFile?.name &&
+      selectedProject !== "none"
+    )
+      return false;
+    else return true;
+  };
+
   const handleSubmit = async (
     event,
     isOverwrite,
@@ -216,7 +256,7 @@ function ImportExportProcess(props) {
     ) {
       let payload = {
         processName: selectedProcessName,
-        projectId: selectedProject,
+        projectId: selectedProject || props.selectedProjectId,
         projectName:
           ProjectValue?.ProjectName?.ProjectName ||
           getProjectNameFromId(selectedProject),
@@ -251,7 +291,7 @@ function ImportExportProcess(props) {
           type: "application/json",
         })
       );
-      console.log("llllllllllll", selectedFile, payload);
+
       try {
         const response = await axios({
           method: "post",
@@ -262,9 +302,15 @@ function ImportExportProcess(props) {
             // type: "application/json",
           },
         });
-        if (response?.data?.Status) {
+        if (response?.status === 200) {
           setAction(null);
-
+          dispatch(
+            setToastDataFunc({
+              message: t("processImportedSuccessfully"),
+              severity: "success",
+              open: true,
+            })
+          );
           if (openProcessFlag) {
             props.openProcessClick(
               response.data.Process.ProcessDefId,
@@ -277,6 +323,13 @@ function ImportExportProcess(props) {
           }
         }
       } catch (error) {
+        dispatch(
+          setToastDataFunc({
+            message: t("processImportFailed"),
+            severity: "error",
+            open: true,
+          })
+        );
         console.log(error);
       }
     } else {
@@ -300,21 +353,38 @@ function ImportExportProcess(props) {
       method: "POST",
       responseType: "blob", // important
       data: payload,
-    }).then((res) => {
-      const url = window.URL.createObjectURL(
-        new Blob([res.data], {
-          type: res.headers["content-type"],
-        })
-      );
-      var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-      var matches = filenameRegex.exec(res.headers["content-disposition"]);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", matches[1].replace(/['"]/g, "")); //or any other extension
-      document.body.appendChild(link);
-      link.click();
-      setAction(null);
-    });
+    })
+      .then((res) => {
+        const url = window.URL.createObjectURL(
+          new Blob([res.data], {
+            type: res.headers["content-type"],
+          })
+        );
+        var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+        var matches = filenameRegex.exec(res.headers["content-disposition"]);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", matches[1].replace(/['"]/g, "")); //or any other extension
+        document.body.appendChild(link);
+        link.click();
+        setAction(null);
+        dispatch(
+          setToastDataFunc({
+            message: t("processExportedSuccessfully"),
+            severity: "success",
+            open: true,
+          })
+        );
+      })
+      .catch(function (error) {
+        dispatch(
+          setToastDataFunc({
+            message: t("processExportedFailed"),
+            severity: "error",
+            open: true,
+          })
+        );
+      });
   };
   const exportTypeDropdownHandler = (e) => {
     setexportType(e.target.value);
@@ -415,7 +485,16 @@ function ImportExportProcess(props) {
             }}
             variant="outlined"
             value={importType}
-            onChange={(e) => setimportType(e.target.value)}
+            onChange={(e) => {
+              setimportType(e.target.value);
+              seterrorObj({
+                importType: "",
+                processName: "",
+                projectName: "",
+              });
+              setselectedFile(undefined);
+              setselectedProcessName(undefined);
+            }}
             //autoWidth
           >
             <MenuItem value="xml">
@@ -517,7 +596,7 @@ function ImportExportProcess(props) {
                   type="file"
                   style={{ display: "none" }}
                   onChange={(e) => uploadFile(e)}
-                  accept="application/x-zip-compressed"
+                  // accept="application/x-zip-compressed"
                 />
                 {t("Choose File")}
               </label>
@@ -696,7 +775,7 @@ function ImportExportProcess(props) {
                   className={styles.buttons}
                   onClick={(e) => handleSubmit(e, true, false, false)}
                   style={{
-                    background: disableImport ? "grey" : "#0072c6",
+                    background: disableImport() ? "grey" : "#0072c6",
                     width: "10rem",
                   }}
                 >
@@ -708,8 +787,8 @@ function ImportExportProcess(props) {
                   className={styles.newVersionButton}
                   onClick={(e) => handleSubmit(e, false, true, false)}
                   style={{
-                    background: disableImport ? "grey" : "white",
-                    color: disableImport ? "white" : "#0072c6",
+                    background: disableImport() ? "grey" : "white",
+                    color: disableImport() ? "white" : "#0072c6",
                     width: "8rem",
                     border: "1px solid rgb(0,0,0,0.4)",
                     borderRadius: "3px",
@@ -726,10 +805,10 @@ function ImportExportProcess(props) {
                   className={styles.buttons}
                   onClick={(e) => handleSubmit(e, false, false, true)}
                   style={{
-                    background: disableImport ? "grey" : "#0072c6",
+                    background: disableImport() ? "grey" : "#0072c6",
                     width: "6rem",
                   }}
-                  disabled={disableImport}
+                  disabled={disableImport()}
                 >
                   {t("Import and Open")}
                 </button>
@@ -738,13 +817,13 @@ function ImportExportProcess(props) {
                   variant="outlined"
                   className={styles.newVersionButton}
                   style={{
-                    background: disableImport ? "grey" : "white",
-                    color: disableImport ? "white" : "#0072c6",
+                    background: disableImport() ? "grey" : "white",
+                    color: disableImport() ? "white" : "#0072c6",
                     border: "1px solid rgb(0,0,0,0.4)",
                     borderRadius: "3px",
                   }}
                   onClick={(e) => handleSubmit(e, false, false, false)}
-                  disabled={disableImport}
+                  disabled={disableImport()}
                 >
                   {t("import")}
                 </button>

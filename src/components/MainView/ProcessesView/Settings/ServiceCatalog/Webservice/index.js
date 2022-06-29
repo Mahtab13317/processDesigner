@@ -39,11 +39,16 @@ import { CircularProgress } from "@material-ui/core";
 import { getAuthenticationType } from "../../../../../../utility/ServiceCatalog/Webservice";
 import Modal from "../../../../../../UI/Modal/Modal";
 import ObjectDependencies from "../../../../../../UI/ObjectDependencyModal";
+import { store, useGlobalState } from "state-pool";
+import NoWebServiceScreen from "./NoWebServiceScreen";
 
 function Webservice(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const dispatch = useDispatch();
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData, setlocalLoadedProcessData] =
+    useGlobalState(loadedProcessData);
   const [webServiceList, setWebServiceList] = useState([]);
   const [spinner, setspinner] = useState(true);
   const [selected, setSelected] = useState(null);
@@ -51,6 +56,9 @@ function Webservice(props) {
   const [changedSelection, setChangedSelection] = useState(null);
   const [error, setError] = useState({});
   const [showDependencyModal, setShowDependencyModal] = useState(false);
+  //code added on 16 June 2022 for BugId 110949
+  const [maxSoapCount, setMaxSoapCount] = useState(0);
+  const [maxRestCount, setMaxRestCount] = useState(0);
   const subMainTabElements = [
     <WebServiceDefinition
       {...props}
@@ -94,6 +102,9 @@ function Webservice(props) {
             });
           });
           setWebServiceList(totalMethods);
+          //code added on 16 June 2022 for BugId 110949
+          setMaxSoapCount(methods.MaxSOAPGlblMethodIndex);
+          setMaxRestCount(methods.MaxRestMethodIndex);
           if (totalMethods?.length > 0 && !selected) {
             selectionFunc(totalMethods[0]);
           }
@@ -221,17 +232,13 @@ function Webservice(props) {
 
   const getSOAPJSON = (statusConstant) => {
     let methodIndex;
+    //code added on 16 June 2022 for BugId 110949
     if (selected?.status === STATE_CREATED) {
-      let maxIndex = null;
-      webServiceList?.forEach((li) => {
-        if (
-          li.webserviceType === WEBSERVICE_SOAP &&
-          (+li.MethodIndex > +maxIndex || !maxIndex)
-        ) {
-          maxIndex = li.MethodIndex;
-        }
-      });
-      methodIndex = +maxIndex + 1;
+      if (props.scope === GLOBAL_SCOPE) {
+        methodIndex = +maxSoapCount + 1;
+      } else {
+        methodIndex = +localLoadedProcessData.MaxMethodIndex + 1;
+      }
     } else {
       methodIndex = selected.MethodIndex;
     }
@@ -299,17 +306,13 @@ function Webservice(props) {
       reqBodyMap = {},
       resBodyMap = {},
       authDataList = [];
+    //code added on 16 June 2022 for BugId 110949
     if (selected?.status === STATE_CREATED) {
-      let maxIndex = null;
-      webServiceList?.forEach((li) => {
-        if (
-          li.webserviceType === WEBSERVICE_REST &&
-          (+li.MethodIndex > +maxIndex || !maxIndex)
-        ) {
-          maxIndex = li.MethodIndex;
-        }
-      });
-      methodIndex = +maxIndex + 1;
+      if (props.scope === GLOBAL_SCOPE) {
+        methodIndex = +maxRestCount + 1;
+      } else {
+        methodIndex = +localLoadedProcessData.MaxRestMethodIndex + 1;
+      }
     } else {
       methodIndex = selected.MethodIndex;
     }
@@ -586,13 +589,40 @@ function Webservice(props) {
                 temp.webserviceType = changedSelection.webserviceType;
                 return temp;
               });
+              //code added on 16 June 2022 for BugId 110949
+              if (changedSelection.webserviceType === WEBSERVICE_SOAP) {
+                if (props.scope === GLOBAL_SCOPE) {
+                  setMaxSoapCount((prev) => {
+                    return prev + 1;
+                  });
+                } else {
+                  let temp = { ...localLoadedProcessData };
+                  temp.MaxMethodIndex = temp.MaxMethodIndex + 1;
+                  setlocalLoadedProcessData(temp);
+                }
+              } else {
+                if (props.scope === GLOBAL_SCOPE) {
+                  setMaxRestCount((prev) => {
+                    return prev + 1;
+                  });
+                } else {
+                  let temp = { ...localLoadedProcessData };
+                  temp.MaxRestMethodIndex = temp.MaxRestMethodIndex + 1;
+                  setlocalLoadedProcessData(temp);
+                }
+              }
             } else if (statusConstant === DELETE_CONSTANT) {
               webServiceList.forEach((element) => {
                 if (element.MethodIndex === selected.MethodIndex) {
                   tempWebService.splice(tempWebService.indexOf(element), 1);
                 }
               });
-              setSelected(tempWebService[0]);
+              // code added on 21 June 2022 for BugId 111023
+              if (tempWebService?.length > 0) {
+                setSelected(tempWebService[0]);
+              } else {
+                setSelected(null);
+              }
             } else if (statusConstant === MODIFY_CONSTANT) {
               let newObj =
                 changedSelection.webserviceType === WEBSERVICE_SOAP
@@ -649,7 +679,9 @@ function Webservice(props) {
       className={styles.mainWrappingDiv}
       style={
         props.scope === LOCAL_SCOPE
-          ? { ...props.style, height: "84.84vh" }
+          ? props.callLocation === "webServicePropTab"
+            ? { ...props.style, height: "68vh" }
+            : { ...props.style, height: "84.84vh" }
           : { ...props.style }
       }
     >
@@ -663,104 +695,122 @@ function Webservice(props) {
         />
       ) : (
         <React.Fragment>
-          <div
-            className={styles.mainDiv}
-            style={props.scope === LOCAL_SCOPE ? { height: "70vh" } : {}}
-          >
-            <div className={styles.listDiv}>
-              <div className={styles.listHeader}>
-                <p
-                  className={
-                    direction === RTL_DIRECTION
-                      ? arabicStyles.listHeading
-                      : styles.listHeading
-                  }
-                >
-                  {t("webService")} {t("List")}
-                </p>
-                <button
-                  className={styles.secondaryBtn}
-                  onClick={addNewWebservice}
-                  id="webS_addNewBtn"
-                >
-                  {t("addWithPlusIcon")} {t("New")}
-                </button>
-              </div>
-              <div className={styles.searchHeader}>
-                <SearchComponent width="90%" />
-                <img src={Filter} className={styles.filterIcon} />
-              </div>
-              <WebserviceList
-                list={webServiceList}
-                selected={selected}
-                selectionFunc={selectionFunc}
-                scope={props.scope}
-              />
-            </div>
-            <div className={styles.formDiv}>
-              <Tab
-                tabType={`${styles.subMainTab} subMainTab_sc`}
-                tabBarStyle={styles.subMainTabBarStyle}
-                oneTabStyle={`${
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.subMainOneTabStyle
-                    : styles.subMainOneTabStyle
-                } subMainOneTabStyle_sc`}
-                tabContentStyle={styles.subMainTabContentStyle}
-                TabNames={subMainTabLabels}
-                TabElement={subMainTabElements}
-              />
-            </div>
-          </div>
-          <div
-            className={
-              direction === RTL_DIRECTION ? arabicStyles.footer : styles.footer
-            }
-          >
-            {selected?.status === STATE_ADDED ? (
-              <button
-                className={`${styles.cancelBtn} ${styles.pd025}`}
-                onClick={() => handleWebservice(DELETE_CONSTANT)}
-                id="webS_deleteBtn"
+          {webServiceList?.length > 0 ? (
+            <React.Fragment>
+              <div
+                className={styles.mainDiv}
+                style={
+                  props.scope === LOCAL_SCOPE
+                    ? {
+                        height: `${
+                          props.callLocation === "webServicePropTab"
+                            ? "60vh"
+                            : "70vh"
+                        }`,
+                      }
+                    : {}
+                }
               >
-                {t("delete")}
-              </button>
-            ) : selected?.status === STATE_EDITED ? (
-              <React.Fragment>
-                <button
-                  className={`${styles.cancelBtn} ${styles.pd025}`}
-                  onClick={cancelEditWebservice}
-                  id="webS_discardBtn"
-                >
-                  {t("discard")}
-                </button>
-                <button
-                  className={`${styles.primaryBtn} ${styles.pd025}`}
-                  onClick={() => handleWebservice(MODIFY_CONSTANT)}
-                  id="webS_saveChangeBtn"
-                >
-                  {t("saveChanges")}
-                </button>
-              </React.Fragment>
-            ) : selected?.status === STATE_CREATED ? (
-              <React.Fragment>
-                <button
-                  className={`${styles.cancelBtn} ${styles.pd025}`}
-                  onClick={cancelAddWebservice}
-                  id="webS_discardAddBtn"
-                >
-                  {t("discard")}
-                </button>
-                <button
-                  className={`${styles.primaryBtn} ${styles.pd025}`}
-                  onClick={() => handleWebservice(ADD_CONSTANT)}
-                  id="webS_addBtn"
-                >
-                  {t("addWebservice")}
-                </button>
-              </React.Fragment>
-            ) : null}
-          </div>
+                <div className={styles.listDiv}>
+                  <div className={styles.listHeader}>
+                    <p
+                      className={
+                        direction === RTL_DIRECTION
+                          ? arabicStyles.listHeading
+                          : styles.listHeading
+                      }
+                    >
+                      {t("webService")} {t("List")}
+                    </p>
+                    <button
+                      className={styles.secondaryBtn}
+                      onClick={addNewWebservice}
+                      id="webS_addNewBtn"
+                    >
+                      {t("addWithPlusIcon")} {t("New")}
+                    </button>
+                  </div>
+                  <div className={styles.searchHeader}>
+                    <SearchComponent width="90%" />
+                    <img src={Filter} className={styles.filterIcon} />
+                  </div>
+                  <WebserviceList
+                    list={webServiceList}
+                    selected={selected}
+                    selectionFunc={selectionFunc}
+                    scope={props.scope}
+                  />
+                </div>
+                <div className={styles.formDiv}>
+                  <Tab
+                    tabType={`${styles.subMainTab} subMainTab_sc`}
+                    tabBarStyle={styles.subMainTabBarStyle}
+                    oneTabStyle={`${
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.subMainOneTabStyle
+                        : styles.subMainOneTabStyle
+                    } subMainOneTabStyle_sc`}
+                    tabContentStyle={styles.subMainTabContentStyle}
+                    TabNames={subMainTabLabels}
+                    TabElement={subMainTabElements}
+                  />
+                </div>
+              </div>
+              <div
+                className={
+                  direction === RTL_DIRECTION
+                    ? arabicStyles.footer
+                    : styles.footer
+                }
+              >
+                {selected?.status === STATE_ADDED ? (
+                  <button
+                    className={`${styles.cancelBtn} ${styles.pd025}`}
+                    onClick={() => handleWebservice(DELETE_CONSTANT)}
+                    id="webS_deleteBtn"
+                  >
+                    {t("delete")}
+                  </button>
+                ) : selected?.status === STATE_EDITED ? (
+                  <React.Fragment>
+                    <button
+                      className={`${styles.cancelBtn} ${styles.pd025}`}
+                      onClick={cancelEditWebservice}
+                      id="webS_discardBtn"
+                    >
+                      {t("discard")}
+                    </button>
+                    <button
+                      className={`${styles.primaryBtn} ${styles.pd025}`}
+                      onClick={() => handleWebservice(MODIFY_CONSTANT)}
+                      id="webS_saveChangeBtn"
+                    >
+                      {t("saveChanges")}
+                    </button>
+                  </React.Fragment>
+                ) : selected?.status === STATE_CREATED ? (
+                  <React.Fragment>
+                    <button
+                      className={`${styles.cancelBtn} ${styles.pd025}`}
+                      onClick={cancelAddWebservice}
+                      id="webS_discardAddBtn"
+                    >
+                      {t("discard")}
+                    </button>
+                    <button
+                      className={`${styles.primaryBtn} ${styles.pd025}`}
+                      onClick={() => handleWebservice(ADD_CONSTANT)}
+                      id="webS_addBtn"
+                    >
+                      {t("addWebservice")}
+                    </button>
+                  </React.Fragment>
+                ) : null}
+              </div>
+            </React.Fragment>
+          ) : (
+            <NoWebServiceScreen addNewWebservice={addNewWebservice}/>
+          )}
         </React.Fragment>
       )}
       {showDependencyModal ? (

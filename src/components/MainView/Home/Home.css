@@ -97,16 +97,19 @@
   /* Firefox */
   padding-top: 10px;
   height: 100%;
-  width: 71.8vw;
+  width: 100%;
   overflow: auto;
 }
 
 .middleDivActivities {
   background-color: white;
   width: 23vw;
+}
+
+#mf_activitystream_lpweb {
   height: 100%;
-  display: flex;
-  flex-direction: column;
+  width: 100%;
+  text-align: center;
 }
 
 .RecentTableDiv {
@@ -116,7 +119,7 @@
 
 .middleDivContainer {
   height: 100%;
-  width: 94.8vw !important;
+  /* width: 94.8vw !important; */
   background-color: #f8f8f8;
 }
 

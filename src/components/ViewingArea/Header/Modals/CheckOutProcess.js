@@ -12,12 +12,23 @@ function CheckOutModal(props) {
   const [comment, setComment] = useState("");
 
   const checkoutProcess = () => {
-    let json = {
-      processDefId: +props.processDefId,
-      comment: comment,
-      projectName: props.projectName,
-      validateFlag: "N",
-    };
+    // let json = {
+    //   m_strProcessDefId: +props.processDefId,
+    //   m_strComment: comment,
+    //   m_strProjectName: props.projectName,
+    //   m_strValidateFlag: "N",
+    // };
+    let json = 
+      {
+        processDefId: +props.processDefId,
+        projectName: props.projectName,
+        type:1,
+        bNewVersion:true,
+        saveAsLocal:"N",
+        validateFlag:"N",
+        comment:comment
+    }
+
     axios.post(SERVER_URL + ENDPOINT_CHECKOUT, json).then((response) => {
       if (response.data.Status === 0) {
         props.setModalClosed();

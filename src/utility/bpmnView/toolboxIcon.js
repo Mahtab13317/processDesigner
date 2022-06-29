@@ -486,7 +486,10 @@ export const taskTemplates = {
 export const startEvents = {
   icon: startHeadIcon,
   title: "toolbox.startEvents.head",
-  tools: [startEvent, conditionalEvents, messageStart, timerStart],
+  tools: [startEvent, conditionalEvents,
+    //messageStart,
+    // timerStart
+  ],
 };
 
 export const activities = {

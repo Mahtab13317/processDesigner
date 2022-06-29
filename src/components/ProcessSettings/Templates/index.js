@@ -45,7 +45,7 @@ function Templates(props) {
 
   const deleteHandler = (id, index) => {
     let postBody = {
-      templteId: id,
+      templateId: id,
     };
     axios
       .delete(SERVER_URL + ENDPOINT_GET_REGISTER_TEMPLATE, {
@@ -54,8 +54,10 @@ function Templates(props) {
       })
 
       .then((res) => {
-        let temp = templateData;
+        let temp = [...templateData];
+        console.log("vvvvvvvvvvbefore", templateData);
         temp.splice(index, 1);
+        console.log("vvvvvvvvvv", temp);
         setTemplateData(temp);
       });
   };
@@ -91,6 +93,7 @@ function Templates(props) {
               }}
             >
               <TemplateModal
+                setTemplateData={setTemplateData}
                 setIsModalOpen={setIsModalOpen}
                 selected={selected}
               />

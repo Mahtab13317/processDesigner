@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import "./Home.css";
 import { Grid } from "@material-ui/core";
@@ -13,9 +13,7 @@ import Dropdown from "../../../UI/Dropdown/Dropdown";
 import ProcessTile from "./ProcessTiles";
 import Pinned from "./PinnedProcesses";
 import Recent from "./Recent";
-import ActivityStream from "./ActivityStream";
 import { useTranslation } from "react-i18next";
-import { activities } from "../../../Constants/activityStream";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import { connect } from "react-redux";
 import * as actionCreators from "../../../redux-store/actions/processView/actions";
@@ -103,6 +101,15 @@ function Home(props) {
       .catch((err) => console.log(err));
   };
 
+  useEffect(() => {
+    if (window.loadMicroFrontend) {
+      const timeout = setTimeout(() => {
+        window.loadActivityStream();
+      }, 500);
+      return () => clearTimeout(timeout);
+    }
+  }, [window.loadMicroFrontend]);
+
   const dropdownOptions = [
     {
       id: 0,
@@ -144,10 +151,12 @@ function Home(props) {
   const direction = `${t("HTML_DIR")}`;
 
   return (
-    <div className="w100" style={{ direction: `${t("HTML_DIR")}` }}>
+    <div className="w100 h100" style={{ direction: `${t("HTML_DIR")}` }}>
       <Grid container className="middleDivContainer">
         <Grid className="middleDiv" ref={refToGrid}>
-          <div style={{display:'none'}}><ProcessTile/></div>
+          <div style={{ display: "none" }}>
+            <ProcessTile />
+          </div>
           <div
             style={{
               display: dataLength > 0 ? "block" : "none",
@@ -214,12 +223,7 @@ function Home(props) {
           </div>
         </Grid>
         <Grid className="middleDivActivities">
-          <ActivityStream
-            showSearch={true}
-            heading={t("Activities")}
-            activities={activities}
-            direction={`${t("HTML_DIR")}`}
-          />
+          <div id="mf_activitystream_lpweb"></div>
         </Grid>
       </Grid>
     </div>

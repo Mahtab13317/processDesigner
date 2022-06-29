@@ -133,21 +133,21 @@ function Projects(props) {
       <div className={classes.projectName}>{projectData.ProjectName}</div>
     ),
     projectCount: (
-      <ProjectTooltip
-        enterDelay={500}
-        title={
-          <React.Fragment>
-            <OnHoverList
-              processTypeList={projectData.Processes}
-              allProcessesPerProject={props.allProcessesPerProject}
-            />
-          </React.Fragment>
-        }
-      >
-        <span className="processCount" style={{ paddingLeft: "0.7vw" }}>
-          {projectData.TotalProcessCount}
-        </span>
-      </ProjectTooltip>
+      // <ProjectTooltip
+      //   enterDelay={500}
+      //   title={
+      //     <React.Fragment>
+      //       <OnHoverList
+      //         processTypeList={projectData.Processes}
+      //         allProcessesPerProject={props.allProcessesPerProject}
+      //       />
+      //     </React.Fragment>
+      //   }
+      // >
+      <span className="processCount" style={{ paddingLeft: "0.7vw" }}>
+        {projectData.TotalProcessCount}
+      </span>
+      // </ProjectTooltip>
     ),
   }));
 
@@ -169,9 +169,9 @@ function Projects(props) {
     });
   });
 
-  useEffect(()=>{
+  useEffect(() => {
     setProcessType(null);
-  },[props.tabValue])
+  }, [props.tabValue]);
 
   let filteredRows = rows?.filter((row) => {
     if (searchTerm == "") {
@@ -203,8 +203,6 @@ function Projects(props) {
     props.setSelectedProjectId(projectId);
   };
 
-  // let modalHeight = bshowDesc === true ? "80vh" : "40vh";
-
   return (
     <div
       id="prod"
@@ -212,12 +210,14 @@ function Projects(props) {
       ref={parentRef}
       style={{ direction: `${t("HTML_DIR")}` }}
     >
+      {/* code added on 22 June 2022 for BugId 111210*/}
       <ProcessTiles
-        selectedProjectId={!processType}
+        selectedProjectId={props.defaultProjectId}
         setSelectedProjectId={props.setSelectedProjectId}
         selectedTileFromHome={selectedTileFromHome}
         getSelectedProcessTile={getSelectedProcessTile}
         processTypeList={props.processTypeList}
+        selectedProcessTile={props.selectedProcessTile}
       />
       <div className="searchbar_N_Header" ref={projectHeadRef}>
         <div className="project_Header_Adder">

@@ -294,12 +294,12 @@ function CategoryListView(props) {
           ]}
         />
       </div>
+      {/*code edited on 21 June 2022 for BugId 111115*/}
       {action === t("edit") || action === t("add") ? (
         <Modal
           show={action === t("edit") || action === t("add")}
           style={{
             width: "28vw",
-            height: "20rem",
             left: "40%",
             top: "25%",
             padding: "0",

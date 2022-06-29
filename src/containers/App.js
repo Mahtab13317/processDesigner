@@ -10,7 +10,7 @@ import AppHeader from "../components/AppHeader/AppHeader";
 import { store, useGlobalState } from "state-pool";
 
 import axios from "axios";
-import { SERVER_URL } from "../Constants/appConstants";
+import { APP_HEADER_HEIGHT, SERVER_URL } from "../Constants/appConstants";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import {
   setToastDataFunc,
@@ -18,10 +18,6 @@ import {
 } from "../redux-store/slices/ToastDataHandlerSlice";
 import { useDispatch, useSelector } from "react-redux";
 import Toast from "../UI/ErrorToast";
-import {
-  StylesProvider,
-  createGenerateClassName,
-} from "@material-ui/core/styles";
 import { setLaunchpadToken } from "../redux-store/slices/LaunchpadTokenSlice";
 
 function initializeStore() {
@@ -45,9 +41,6 @@ const App = (props) => {
   const [isLoading, setisLoading] = useState(false);
 
   let mainContainer = React.createRef();
-  useEffect(() => {
-    window.loadIntegrator();
-  }, []);
 
   const [state, setstate] = useState({
     //sets state
@@ -66,6 +59,9 @@ const App = (props) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    // if (window.loadIntegrator) {
+    //   window.loadIntegrator();
+    // }
     const ApiMethod = async () => {
       // const res2 = await axios.get(
       //   SERVER_URL + "/setSession/" + launchpadKey?.token
@@ -122,13 +118,6 @@ const App = (props) => {
   const translate = (langKey, defaultWord) => {
     return props.t(langKey, defaultWord);
   };
-  const generateClassName = createGenerateClassName({
-    seed: "pdes",
-
-    // disableGlobal:true,
-
-    productionPrefix: "pdes",
-  });
 
   return (
     <React.Fragment className="App">
@@ -145,7 +134,6 @@ const App = (props) => {
           <CircularProgress />
         </div>
       ) : (
-        // <StylesProvider generateClassName={generateClassName}>
         <BrowserRouter basename="/processDesigner">
           <AppHeader />
           {toastDataValue?.open ? (
@@ -156,51 +144,40 @@ const App = (props) => {
               severity={toastDataValue.severity}
             />
           ) : null}
-
-          {/* <select value = {this.props.i18n.language}
-                onChange = {(event) => this.changeLang(event)}>
-          <option value = "en">English</option>
-          <option value = "fr">French</option>
-        </select> */}
-
           <DisplayMessage
             displayMessage={state.displayMessage}
             setDisplayMessage={(message, toShow) =>
               setDisplayMessage(message, toShow)
             }
           />
-
-          <table
+          <div
             className="pmwidth100"
-            ref={mainContainer}
-            style={{ direction: direction }}
+            style={{
+              direction: direction,
+              height: `calc(100vh - ${APP_HEADER_HEIGHT})`,
+            }}
           >
-            <tbody>
-              <tr className="pmwidth100" style={{ direction: direction }}>
-                <Switch>
-                  <Route
-                    exact
-                    path="/"
-                    render={(props) => (
-                      <MainView {...props} mainContainer={mainContainer} />
-                    )}
+            <Switch>
+              <Route
+                exact
+                path="/"
+                render={(props) => (
+                  <MainView {...props} mainContainer={mainContainer} />
+                )}
+              />
+              <Route
+                path="/process"
+                render={(props) => (
+                  <ProcessView
+                    {...props}
+                    mainContainer={mainContainer}
+                    setDisplayMessage={setDisplayMessage}
                   />
-                  <Route
-                    path="/process"
-                    render={(props) => (
-                      <ProcessView
-                        {...props}
-                        mainContainer={mainContainer}
-                        setDisplayMessage={setDisplayMessage}
-                      />
-                    )}
-                  />
-                </Switch>
-              </tr>
-            </tbody>
-          </table>
+                )}
+              />
+            </Switch>
+          </div>
         </BrowserRouter>
-        // </StylesProvider>
       )}
     </React.Fragment>
   );

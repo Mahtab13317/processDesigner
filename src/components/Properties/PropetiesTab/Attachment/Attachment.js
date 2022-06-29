@@ -24,6 +24,7 @@ import axios from "axios";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 import arabicStyles from "../InitialRule/arabicStyles.module.css";
 function Attachment(props) {
+  console.log(props)
   let { t } = useTranslation();
   const dispatch = useDispatch();
   const direction = `${t("HTML_DIR")}`;
@@ -37,7 +38,7 @@ function Attachment(props) {
   const [attachList, setAttachList] = useState([]);
 
   useEffect(() => {
-    if (localLoadedActivityPropertyData?.Status === 0) {
+    if (localLoadedActivityPropertyData?.Status === 0 || !!props.ignoreSpinner) {
       setspinner(false);
     }
     if (
@@ -96,6 +97,10 @@ function Attachment(props) {
       docId: docId,
       repoType: props.openProcessType
     };
+
+   
+    
+
     try {
       const response = axios({
         method: "POST",
@@ -125,8 +130,9 @@ function Attachment(props) {
     selectedDocumentName,
     description
   ) => {
-    var n = selectedFile.value.name.lastIndexOf(".");
-    var result = selectedFile.value.name.substring(n + 1);
+    let n = selectedFile.value.name.lastIndexOf(".");
+    let result = selectedFile.value.name.substring(n + 1);
+    
 
     let payload = {
       processDefId: props.openProcessID,
@@ -148,6 +154,11 @@ function Attachment(props) {
         type: "application/json"
       })
     );
+
+    if(props.ignoreSpinner)
+    {
+      props.RAPayload(payload)
+    }
 
     try {
       const response = await axios({

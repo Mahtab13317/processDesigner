@@ -21,19 +21,12 @@ function PinnedProcesses(props) {
     async function getPinnedProcesses() {
       const res = await axios.get(SERVER_URL_LAUNCHPAD + "/pinnedList/1");
       if (res) {
-        // setpinnedData(res.data);
-        // props.pinnedDataList(res.data);
-        // props.getPinnedDataLength(res.data.length);
+        setpinnedData(res.data);
+        props.pinnedDataList(res.data);
+        props.getPinnedDataLength(res.data.length);
       }
-      setpinnedData([]);
-      props.pinnedDataList([]);
-      props.getPinnedDataLength(0);
     }
     getPinnedProcesses();
-
-    //   }
-    // })
-    // .catch((err) => console.log(err));
   }, []);
 
   // {Id:23,Name:'Expense Approval', Version:'2.1', Parent:'Expense Reporting', Type:'L', ModificationDate:'7 Mar, 05:06PM', Status:"Created", StatusDate:"12 Jan", Editor:"Sejal", EditDateTime:"4:00AM"},

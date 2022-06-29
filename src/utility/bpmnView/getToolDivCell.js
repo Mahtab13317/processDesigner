@@ -352,7 +352,7 @@ export function getToolDivCell(
   visibility = true;
   toolDiv.setAttribute(
     "style",
-    "border: 1px solid #C4C4C4;box-shadow: 0px 3px 6px #DADADA; border-radius: 1px; background: white; display: flex; position: absolute; flex-wrap: wrap; cursor: pointer; justify-content: center; z-index:100"
+    "border: 1px solid #C4C4C4;box-shadow: 0px 3px 6px #DADADA; border-radius: 1px; background: white; display: flex; position: absolute; flex-wrap: wrap; justify-content: center; z-index:100"
   );
   toolDiv.style.left =
     mainCell.geometry.x +
@@ -369,6 +369,8 @@ export function getToolDivCell(
       iconDiv.style.marginLeft = gridSize * 0.1 + "px";
       iconDiv.style.marginRight = gridSize * 0.1 + "px";
       iconDiv.style.height = "20px";
+      // code added on 21 June 2022 for BugId 110965
+      iconDiv.style.cursor = "move";
       var icon = mxUtils.createImage(subCell.icon);
       icon.style.width = "16px";
       icon.style.height = "16px";

@@ -64,9 +64,6 @@ function ActivityView(props) {
             if (+embAct.SequenceId > +MaxseqId && mIndex === index) {
               MaxseqId = +embAct.SequenceId;
             }
-            if (+maxXleftLoc < +embAct.xLeftLoc && mIndex === index) {
-              maxXleftLoc = +embAct.xLeftLoc;
-            }
             if (+maxActivityId < +embAct.ActivityId) {
               maxActivityId = +embAct.ActivityId;
             }

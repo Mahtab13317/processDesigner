@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
 import {
   ERROR_INCORRECT_FORMAT,
+  ERROR_INCORRECT_VALUE,
   ERROR_MANDATORY,
   ERROR_RANGE,
 } from "../../../Constants/appConstants";
 import { validateRegex } from "../../../validators/validator";
 import styles from "./index.module.css";
+import clsx from "clsx";
 
 function TextInput(props) {
+  const { maxLength, readOnlyCondition, inlineErrorStyles } = props;
   const [showMsg, setShowMsg] = useState(false);
 
   useEffect(() => {
@@ -50,7 +53,8 @@ function TextInput(props) {
   return (
     <div>
       <input
-        disabled={props.readOnlyCondition}
+        maxLength={maxLength}
+        disabled={readOnlyCondition}
         value={props.inputValue}
         id={props.idTag}
         onBlur={props.onBlurEvent}
@@ -69,7 +73,9 @@ function TextInput(props) {
       {props.inlineError && showMsg ? (
         <p
           className={
-            props.errorSeverity === "error" ? styles.errorStatement : null
+            props.errorSeverity === "error"
+              ? clsx(styles.errorStatement, inlineErrorStyles)
+              : null
           }
         >
           {props.errorStatement}

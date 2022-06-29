@@ -6,15 +6,23 @@ import {
   ENDPOINT_CHECKIN,
   SERVER_URL,
 } from "../../../../Constants/appConstants";
+import { store, useGlobalState } from "state-pool";
 
 function CheckInModal(props) {
   let { t } = useTranslation();
   const [comment, setComment] = useState("");
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData, setLocalLoadedProcessData] =
+    useGlobalState(loadedProcessData);
 
-  const checkinProcess = () => {
+  const checkinProcess = (bNewVersion) => {
     let json = {
-      processDefId: +props.processDefId,
+      processDefId: props.processDefId,
+      bNewVersion: bNewVersion,
       comment: comment,
+      type: 1,
+      processVariantType: localLoadedProcessData.ProcessVariantType,
+      action: "CI",
     };
     axios.post(SERVER_URL + ENDPOINT_CHECKIN, json).then((response) => {
       if (response.data.Status === 0) {
@@ -36,7 +44,8 @@ function CheckInModal(props) {
       commentMandatory={true}
       comment={comment}
       setComment={setComment}
-      buttonOneFunc={checkinProcess}
+      buttonOneFunc={()=>checkinProcess(true)}
+      buttonTwoFunc={()=>checkinProcess(false)}
       id="checkin_process"
     />
   );

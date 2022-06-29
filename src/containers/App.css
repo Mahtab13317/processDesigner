@@ -19,7 +19,7 @@
 }
 
 .pmviewingArea {
-  width: 100vw;
+  width: 100%;
   background: white;
   height: 100%;
 }
@@ -102,6 +102,10 @@
 
 .w100 {
   width: 100%;
+}
+
+.h100 {
+  height: 100%;
 }
 
 .right {

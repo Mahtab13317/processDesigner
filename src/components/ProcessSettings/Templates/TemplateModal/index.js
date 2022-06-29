@@ -159,23 +159,19 @@ function TemplateModal(props) {
     setSelectedTool(event.target.value);
 
     let InputFormatList = [];
-    let OutputFormatList = [];
+
     configData &&
       configData.forEach((element) => {
-        // listOfTools.push(element.Tool);
-        if (element.Tool == event.target.value) {
+        if (element.Tool === event.target.value) {
           element.SupportedSet?.forEach((el) => {
             if (!InputFormatList.includes(el.InputFormat)) {
               InputFormatList.push(el.InputFormat);
             }
-            if (!OutputFormatList.includes(el.OutputFormat)) {
-              OutputFormatList.push(el.OutputFormat);
-            }
           });
         }
       });
+
     setSelectedInputFormatList(InputFormatList);
-    setSelectedOutputFormatList(OutputFormatList);
   };
 
   const documentSelectHandler = (event) => {
@@ -232,9 +228,9 @@ function TemplateModal(props) {
         docName: selectedFile?.name.split(".").slice(0, -1).join("."),
       };
       const formData = new FormData();
-      formData.append("file", selectedFile);
+      formData.append("docFile", selectedFile);
       formData.append(
-        "processInfo",
+        "registerTemplateInfo",
         new Blob([JSON.stringify(payload)], {
           type: "application/json",
         })
@@ -249,13 +245,43 @@ function TemplateModal(props) {
             // type: "application/json",
           },
         });
-        // if (response?.data?.Status) {
-        console.log("@@@", response);
-        // }
+        if (response) {
+          props.setTemplateData((prev) => {
+            let temp = [...prev];
+            temp.push({
+              ...response.data,
+              docName: selectedFile?.name.split(".").slice(0, -1).join("."),
+            });
+            return temp;
+          });
+          dispatch(
+            setToastDataFunc({
+              message: "Template registered successfully",
+              severity: "success",
+              open: true,
+            })
+          );
+          props.setIsModalOpen(false);
+        }
       } catch (error) {
         console.log(error);
       }
     }
+  };
+
+  const handleInputFormatChange = (e) => {
+    setselectedInputFormat(e.target.value);
+    let outputFormat = [];
+    configData?.forEach((el) => {
+      if (el?.Tool === selectedTool) {
+        el.SupportedSet?.forEach((data) => {
+          if (data.InputFormat === e.target.value) {
+            outputFormat.push(data.OutputFormat);
+          }
+        });
+      }
+    });
+    setSelectedOutputFormatList(outputFormat);
   };
 
   return (
@@ -312,7 +338,7 @@ function TemplateModal(props) {
           <CustomizedDropdown
             id="RT_Input_Dropdown"
             value={selectedInputFormat}
-            onChange={(event) => setselectedInputFormat(event.target.value)}
+            onChange={(event) => handleInputFormatChange(event)}
             className={styles.dropdown}
             MenuProps={menuProps}
           >

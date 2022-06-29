@@ -26,10 +26,8 @@ const MainView = (props) => {
 
   const inMemoryDB = store.getState("inMemoryDB");
   const [localinMemoryDB, setlocalinMemoryDB] = useGlobalState(inMemoryDB);
-  const [counter, setCounter] = useState(true);
 
   React.useEffect(() => {
-    // if (counter) {
     if (localinMemoryDB !== null) {
       if (localinMemoryDB.value.option === "LIST") {
         setSelectedNavigationPanel("navigationPanel.processes");
@@ -44,15 +42,11 @@ const MainView = (props) => {
           Number.parseFloat(version).toPrecision(2) + "",
           name
         );
-
         history.push("/process");
       } else setSelectedNavigationPanel(defaultSelectedForMainView);
       setlocalinMemoryDB(null);
     }
-    // props.openProcessClick("11808", null, "L", "1.0", "wwe");
-    // history.push("/process");
-    // } else return;
-  }, [counter, localinMemoryDB, localinMemoryDB?.value, props]);
+  }, [localinMemoryDB, localinMemoryDB?.value, props]);
 
   return (
     <React.Fragment>
@@ -60,7 +54,7 @@ const MainView = (props) => {
       props.CreateProcessFlag === CREATE_PROCESS_FLAG_FROM_PROCESSES ? (
         <CreateProcessByTemplate bCreateFromScratchBtn={true} bCancel={true} />
       ) : (
-        <div className="flex">
+        <div className="flex h100">
           <NavigationPanel
             setSelection={(navigation) => {
               setSelectedNavigationPanel(navigation);

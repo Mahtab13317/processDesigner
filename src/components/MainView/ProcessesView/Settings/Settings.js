@@ -70,6 +70,7 @@ function Settings() {
               backgroundColor: "#F8F8F8",
               padding: "0.625rem 1vw",
               width: "78vw",
+              height: "100%",
             }}
             value={value}
             index={0}
@@ -84,7 +85,7 @@ function Settings() {
             value={value}
             index={2}
           >
-            <GlobalRequirementSections callLocation='Settings'/>
+            <GlobalRequirementSections callLocation="Settings" />
           </TabPanel>
         </div>
       </div>

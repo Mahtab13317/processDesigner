@@ -138,7 +138,6 @@ function ProjectCreation(props) {
           })}
           id="footerProjectCreation_cancel"
           onClick={cancelHandler}
-          id="cancelBtn_projectCreation"
         >
           {t("cancel")}
         </button>

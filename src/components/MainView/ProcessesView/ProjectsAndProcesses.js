@@ -19,9 +19,10 @@ import Tabs from "../../../UI/Tab/Tab";
 function ProjectsAndProcesses(props) {
   const [selectedProcessCode, setSelectedProcessCode] = useState();
   const [selectedProcessCount, setSelectedProcessCount] = useState();
-  const [selectedProjectId, setSelectedProjectId] = useState();
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [selectedProjectDesc, setSelectedProjectDesc] = useState();
   const [processesPerProject, setProcessesPerProject] = useState();
+  const [selectedProcessTile, setSelectedProcessTile] = useState(-1);
   const [projectList, setProjectList] = useState({
     Status: 0,
     Message: "",
@@ -60,9 +61,15 @@ function ProjectsAndProcesses(props) {
           setProjectList(data);
           if (data?.Projects?.length > 0) {
             setSelectedProjectId(data.Projects[0]?.ProjectId);
+          } 
+          else {
+            // code added on 22 June 2022 for BugId 111210
+            getSelectedProcessTile(value === 0 ? "L" : "R", 0);
+            setSelectedProcessTile(0);
+            setSelectedProjectId(null);
           }
           setSpinner(false);
-          // dispatch(setImportExportVal({ ProjectList: res.data.Projects }));
+          dispatch(setImportExportVal({ ProjectList: res.data.Projects }));
         } else {
           setSpinner(false);
         }
@@ -78,16 +85,23 @@ function ProjectsAndProcesses(props) {
       axios
         .get(
           SERVER_URL +
-            `/getprocesslist/${value === 0 ? "B" : "R"}/` +
+            `/getprocesslist/${value === 0 ? "L" : "R"}/` +
             selectedProjectId
         )
         .then((res) => {
           if (res.status === 200) {
             setProcessesPerProject(res.data.Processes);
+            if (value == 0) {
+              localStorage.setItem("draftProcesses", { ...res.data.Processes });
+            } else if (value == 1) {
+              localStorage.setItem("deployedProcesses", {
+                ...res.data.Processes,
+              });
+            }
           }
         })
         .catch((err) => console.log(err));
-    } else {
+    } else if (selectedProcessCode) {
       axios
         .get(SERVER_URL + `/getprocesslist/${selectedProcessCode}/-1`)
         .then((res) => {
@@ -213,60 +227,54 @@ function ProjectsAndProcesses(props) {
     <CircularProgress style={{ marginTop: "40vh", marginLeft: "50%" }} />
   ) : (
     <React.Fragment>
-      {projectList.Projects?.length === 0 ? (
-        <NoProcessJourney />
-      ) : (
-        <React.Fragment>
-          <Tabs
-            tabType="processSubTab"
-            tabContentStyle="processSubTabContentStyle"
-            tabBarStyle="processSubTabBarStyle"
-            oneTabStyle="processSubOneTabStyleProcessType"
-            tabStyling="processViewTabs"
-            TabNames={["DRAFTS", "DEPLOYED"]}
-            TabElement={[]}
-            setValue={(val) => {
-              // setSpinner(true);
-              setValue(val);
-            }}
-          />
-          <Projects
-            setSelectedProjectDesc={setSelectedProjectDesc}
-            getSelectedProcessTile={getSelectedProcessTile}
-            processTypeList={
-              value == 0
-                ? processTypeList?.filter((el) => {
-                    return el.ProcessType == "L";
-                  })
-                : processTypeList?.filter((el) => {
-                    return el.ProcessType == "R" || el.ProcessType == "E";
-                  })
-            }
-            projectList={projectList.Projects}
-            tabValue={value}
-            setSelectedProjectId={setSelectedProjectId}
-            defaultProjectId={selectedProjectId}
-          />
-          <Processes
-            projectList={projectList.Projects}
-            setProjectList={setProjectList}
-            selectedProjectDesc={selectedProjectDesc}
-            selectedProjectId={selectedProjectId}
-            allProcessesPerProject={processesPerProject}
-            selectedProcessCode={selectedProcessCode}
-            setSelectedProcessCode={setSelectedProcessCode}
-            selectedProcessCount={selectedProcessCount}
-            setSelectedProcessCount={setSelectedProcessCount}
-            pinnedDataList={pinnedDataList}
-            pinnedProcessesPerProject={pinnedProcessesPerProject}
-            selectedProjectTotalProcessCount={selectedProjectTotalProcessCount}
-            selectedProject={selectedProjectName}
-            processTypeList={processTypeList}
-            selectedTabAtNav={selectedTabAtNav}
-            tabValue={value}
-          />
-        </React.Fragment>
-      )}
+      <Tabs
+        tabType="processSubTab"
+        tabContentStyle="processSubTabContentStyle"
+        tabBarStyle="processSubTabBarStyle"
+        oneTabStyle="processSubOneTabStyleProcessType"
+        tabStyling="processViewTabs"
+        TabNames={["DRAFTS", "DEPLOYED"]}
+        TabElement={[]}
+        setValue={(val) => {
+          setValue(val);
+        }}
+      />
+      <Projects
+        setSelectedProjectDesc={setSelectedProjectDesc}
+        getSelectedProcessTile={getSelectedProcessTile}
+        processTypeList={
+          value == 0
+            ? processTypeList?.filter((el) => {
+                return el.ProcessType == "L";
+              })
+            : processTypeList?.filter((el) => {
+                return el.ProcessType == "R" || el.ProcessType == "E";
+              })
+        }
+        projectList={projectList.Projects}
+        tabValue={value}
+        selectedProcessTile={selectedProcessTile}
+        setSelectedProjectId={setSelectedProjectId}
+        defaultProjectId={selectedProjectId}
+      />
+      <Processes
+        projectList={projectList.Projects}
+        setProjectList={setProjectList}
+        selectedProjectDesc={selectedProjectDesc}
+        selectedProjectId={selectedProjectId}
+        allProcessesPerProject={processesPerProject}
+        selectedProcessCode={selectedProcessCode}
+        setSelectedProcessCode={setSelectedProcessCode}
+        selectedProcessCount={selectedProcessCount}
+        setSelectedProcessCount={setSelectedProcessCount}
+        pinnedDataList={pinnedDataList}
+        pinnedProcessesPerProject={pinnedProcessesPerProject}
+        selectedProjectTotalProcessCount={selectedProjectTotalProcessCount}
+        selectedProject={selectedProjectName}
+        processTypeList={processTypeList}
+        selectedTabAtNav={selectedTabAtNav}
+        tabValue={value}
+      />
     </React.Fragment>
   );
 }

@@ -3,6 +3,9 @@ import Tabs from "../../../UI/Tab/Tab.js";
 import "./index.css";
 import GlobalRequirementSections from "../../MainView/ProcessesView/Settings/GlobalRequirementSections/GlobalRequirementSections.js";
 import ProcessRequirements from "./ProcessRequirements/index.js";
+import AttachmentRequirement from "./AttachmentRequirement.js";
+
+
 
 function ProcessRequireNAttach(props) {
   const [isActive, setIsActive] = useState(false);
@@ -29,18 +32,20 @@ function ProcessRequireNAttach(props) {
         <div
           style={{
             position: "absolute",
-            top: "50%",
-            left: "35%",
+            top: "10%",
+            width:"100%",
             color: "black",
             fontStyle: "italic",
           }}
         >
           <p style={{ color: "black" }}>
-            Attachments of Process to be painted here.
+          <AttachmentRequirement />
           </p>
+          
         </div>,
         <div
           style={{
+          
             // position: "absolute",
             // backgroundColor: "white",
             // height: "95%",

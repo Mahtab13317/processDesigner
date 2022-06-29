@@ -233,12 +233,18 @@ function DocType(props) {
         .post(SERVER_URL + "/addDocType", {
           processDefId: props.openProcessID,
           docTypeName: DocToAdd,
-          docTypeId: maxId + 1,
+          docTypeId: +maxId + 1,
           docTypeDesc: DocDesc,
           sDocType: "D",
         })
         .then((res) => {
           if (res.data.Status == 0) {
+            let temp = JSON.parse(JSON.stringify(localLoadedProcessData));
+            temp.DocumentTypeList.push({
+              DocName: DocToAdd,
+              DocTypeId: +maxId + 1,
+            });
+            setlocalLoadedProcessData(temp);
             let addedActivity = [];
             let tempData = { ...docData };
             if (tempData.DocumentTypeList.length > 0) {

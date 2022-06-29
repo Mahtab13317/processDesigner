@@ -88,9 +88,11 @@
   padding: 0 0.75vw;
 }
 
+/*code added on 16 June 2022 for BugId 110815*/
 .filterIcon {
   width: 1.5rem;
   height: 1.5rem;
+  cursor: pointer;   
 }
 
 .subMainTab {
@@ -354,7 +356,10 @@
   padding: 0 0.75vw 0;
 }
 
-.webS_ListDiv::-webkit-scrollbar,
+.webS_ListDiv::-webkit-scrollbar{
+  overflow-y: visible;
+}
+
 .PA_tableBody::-webkit-scrollbar {
   background-color: transparent;
   width: 2px;
@@ -367,7 +372,6 @@
   border-radius: 0.313rem;
 }
 
-.webS_ListDiv:hover::-webkit-scrollbar,
 .PA_tableBody:hover::-webkit-scrollbar {
   overflow-y: visible;
 }
@@ -393,4 +397,31 @@
   letter-spacing: 0px;
   color: #000000;
   margin: 0.5rem 0;
+}
+
+.noWebSScreen{
+  width: 100%;
+  margin: 10% 0;
+  text-align: center;
+  align-items: center;
+}
+
+.nowebSAddedString{
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  margin: 1rem 0;
+}
+
+.addWebSButton{
+  background: #0072c6 0% 0% no-repeat padding-box !important;
+  border-radius: 2px !important;
+  border: 1px solid #0072c6 !important;
+  text-align: center;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px !important;
+  color: #ffffff !important;
+  text-transform: none !important;
+  position: relative;
+  padding: 0.25rem 0.5rem !important;
 }

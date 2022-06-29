@@ -34,7 +34,24 @@ window.loadIntegrator = function () {
   script.onload = () => {
     console.log("integration file loaded");
   };
-  document.head.appendChild(script);
+  document.body.appendChild(script);
+};
+
+window.loadActivityStream = function () {
+  window.lpweb_containerId_mf = "mf_activitystream_lpweb";
+  var props = {
+    Module: "LPWEB",
+    Component: "ActivityStream",
+    InFrame: false,
+    ContainerId: "mf_activitystream_lpweb",
+    Callback: null,
+    passedData: null,
+    Renderer: "renderActivityStream",
+  };
+
+  if (window && window?.loadMicroFrontend) {
+    window.loadMicroFrontend(props);
+  }
 };
 
 window.loadFormTemplates = function (callback) {
@@ -106,20 +123,13 @@ window.loadFormBuilder = function (containerId, passedData) {
 };
 window.loadFormBuilderPreview = function (passedData, containerId) {
   window.formBuilder_containerId_mf = containerId;
-
   var props = {
     Module: "FORMBUILDER",
-
     Component: "Preview",
-
     // "Component": "Interface",
-
     InFrame: false,
-
     ContainerId: containerId,
-
     Callback: "onReportLoad",
-
     passedData: { ...passedData, device: "Mobile", activePage: undefined },
   };
 
@@ -132,7 +142,6 @@ const token = launchpadKey?.token;
 if (token) {
   axios.interceptors.request.use(function (config) {
     config.headers.Authorization = token;
-
     return config;
   });
 }
@@ -142,8 +151,8 @@ ReactDOM.render(
     <Suspense fallback={<div>Loading...</div>}>
       <Provider store={store}>
         <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <App />
+        <CssBaseline />
+        <App />
         </ThemeProvider>
       </Provider>
     </Suspense>

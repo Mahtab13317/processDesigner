@@ -19,10 +19,10 @@
     background-color: white !important;
 }
 
-.MuiTypography-body1{
+/* .MuiTypography-body1{
     width: 100% !important;
     padding-left: 10px !important;
-}
+} */
 
 /* ------------------ */
 .select_webService {
@@ -44,10 +44,6 @@
     font-weight: 500;
     border: 1.5px solid #0172c6;
     border-radius: unset !important;
-  }
-  
-  .MuiTableCell-root {
-    padding: 0px !important;
   }
   
   .select_webService_mapping {

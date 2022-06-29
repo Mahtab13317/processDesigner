@@ -232,7 +232,7 @@
 }
 
 .moreBtnDropdown ul li {
-  padding: 0 0.5vw;
+  padding: 0.125rem 0.5vw;
   align-items: center;
   display: flex;
 }
@@ -312,7 +312,6 @@
 
 .moreBtnDropdown ul li {
   list-style: none !important;
-  height: 26px;
   font-size: 12px !important;
   cursor: pointer !important;
 }

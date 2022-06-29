@@ -125,6 +125,7 @@ export function getContextMenu(
   clearOldValues();
   dummy_graph = graph;
   visibility = true;
+  // code edited on 7 June 2022 for BugId 110045
   contextMenu.setAttribute(
     "style",
     "border: 1px solid #DADADA;box-shadow: 0px 3px 6px #DADADA; border-radius: 2px; background: white; position: absolute; flex-wrap: wrap; cursor: pointer; justify-content: center; z-index:200; padding:0.25rem 0"

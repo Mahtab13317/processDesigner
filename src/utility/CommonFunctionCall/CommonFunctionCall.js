@@ -141,9 +141,7 @@ export const getVariablesByScopes = function GetVariablesByScopes({
 };
 export const getVariableIdByName = function GetVariableId({ variables, name }) {
   const allVars = variables || [];
-  const variable = allVars.find(
-    (item) => name?.VariableName === item.VariableName
-  );
+  const variable = allVars.find((item) => name === item.VariableName);
   return variable?.VariableId || "0";
 };
 export const getVariableScopeByName = function GetVariableScope({
@@ -151,9 +149,7 @@ export const getVariableScopeByName = function GetVariableScope({
   name,
 }) {
   const allVars = variables || [];
-  const variable = allVars.find(
-    (item) => name?.VariableName === item.VariableName
-  );
+  const variable = allVars.find((item) => name === item.VariableName);
   return variable?.VariableScope || "C";
 };
 

@@ -297,7 +297,7 @@ function ToDo(props) {
       setShowDescError(true);
       document.getElementById("ToDoDescInput").focus();
     }
-    if(ToDoToAdd.trim() == ""){
+    if (ToDoToAdd.trim() == "") {
       setShowNameError(true);
     }
 
@@ -324,7 +324,7 @@ function ToDo(props) {
             viewType: toDoType,
             mandatory: mandatoryCheck,
             extObjID: "0",
-            associatedField: associateField,
+            associatedField: associateField ? associateField : "", //code added on 27 June 2022 for the issue-- todo cannot be added
             variableId: associateField == "CalenderName" ? "10001" : "42",
             varFieldId: "0",
             associatedWS: "",

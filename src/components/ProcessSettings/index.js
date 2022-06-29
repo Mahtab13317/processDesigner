@@ -66,6 +66,7 @@ function ProcessSettings(props) {
     <div style={{ display: "flex", flexDirection: "row", height: "91.84vh" }}>
       <div
         className="tabs"
+        // code edited on 29 April 2022 for BugId 108418
         style={{ width: "15vw", background: "#FFF", marginTop: "4px" }}
       >
         <Tabs
@@ -120,6 +121,7 @@ function ProcessSettings(props) {
           />
         </Tabs>
       </div>
+      {/* code edited on 29 April 2022 for BugId 108418 */}
       <div style={{ width: "85vw", marginTop: "5px" }}>
         <TabPanel style={{ padding: "0.625rem" }} value={value} index={0}>
           <ProcessProperties
@@ -169,9 +171,7 @@ function ProcessSettings(props) {
         <TabPanel style={{ padding: "0.625rem" }} value={value} index={3}>
           <QueueSwimlanes processType={openProcessType} />.
         </TabPanel>
-        <TabPanel style={{ padding: "0.625rem" }} value={value} index={4}>
-          Audit Logs section to be painted here.
-        </TabPanel>
+
         <TabPanel value={value} index={4}>
           <Templates />
         </TabPanel>

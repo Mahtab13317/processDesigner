@@ -23,6 +23,11 @@ function ProcessTypes(props) {
     props.defaultProcessTileIndex(nonZeroProcessTileIndex);
   }, []);
 
+  // code added on 22 June 2022 for BugId 111210
+  useEffect(() => {
+    setnonZeroProcessTileIndex(props.selectedProcessTile);
+  }, [props.selectedProcessTile]);
+
   let sendSelectedProcessTile = (
     selectedProcessTileCode,
     selectedProcessTileCount,
@@ -39,35 +44,34 @@ function ProcessTypes(props) {
   const direction = `${t("HTML_DIR")}`;
   return (
     <div className="processTypeTable" style={{ direction: `${t("HTML_DIR")}` }}>
-      {props.processTypeList &&
-        props.processTypeList.map((type, index) => {
-          return (
-            <div
-              className={`oneRow ${
-                nonZeroProcessTileIndex == index && !props.selectedProjectId
-                  ? "selectedRow"
-                  : ""
-              }`}
-              onClick={() =>
-                sendSelectedProcessTile(type.ProcessType, type.Count, index)
-              }
-            >
-              <p className="oneRowProcessType">
-                  <img
-                    className="processDotColor"
-                    src={tileProcess(type.ProcessType)[0]}
-                  />
-                {t(tileProcess(type.ProcessType)[1])}
-                {t(tileProcess(type.ProcessType)[5]) ? (
-                  <p style={{display:'inline', marginLeft:'4px'}}>Waiting</p>
-                ) : null}{" "}
-              </p>
-              <div className="processCount">
-                <span>{type.Count}</span>
-              </div>
+      {props.processTypeList?.map((type, index) => {
+        return (
+          <div
+            className={`oneRow ${
+              nonZeroProcessTileIndex == index && !props.selectedProjectId
+                ? "selectedRow"
+                : ""
+            }`}
+            onClick={() =>
+              sendSelectedProcessTile(type.ProcessType, type.Count, index)
+            }
+          >
+            <p className="oneRowProcessType">
+              <img
+                className="processDotColor"
+                src={tileProcess(type.ProcessType)[0]}
+              />
+              {t(tileProcess(type.ProcessType)[1])}
+              {t(tileProcess(type.ProcessType)[5]) ? (
+                <p style={{ display: "inline", marginLeft: "4px" }}>Waiting</p>
+              ) : null}{" "}
+            </p>
+            <div className="processCount">
+              <span>{type.Count}</span>
             </div>
-          );
-        })}
+          </div>
+        );
+      })}
     </div>
   );
 }

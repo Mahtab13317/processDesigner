@@ -1,6 +1,7 @@
 .templateMainScreen {
   background: #f6f6f6 0% 0% no-repeat padding-box;
   display: flex;
+  height: 100%;
 }
 
 .categoryListViewArea {
@@ -129,12 +130,12 @@
   border-radius: 4px;
 }
 
+/*code edited on 21 June 2022 for BugId 111115*/
 .errorMessage {
   font: normal normal normal 12px/17px Open Sans;
   letter-spacing: 0px;
   text-align: left;
   color: #d12c2c;
-  height: 1rem;
   margin-bottom: 0.75rem;
   padding: 0 1rem;
 }
@@ -441,16 +442,14 @@
   margin-right: 1vw;
 }
 
+/*code edited on 21 June 2022 for BugId 111115*/
 .buttonDiv {
-  left: 0;
   display: flex;
   justify-content: flex-end;
   width: 100%;
   align-items: center;
   margin-top: 0.5rem;
-  background: #f5f5f5 0% 0% no-repeat padding-box;
-  position: absolute;
-  bottom: 0;
+  background: #f5f5f5 0% 0% no-repeat padding-box; 
   padding: 0.75rem 1rem;
 }
 

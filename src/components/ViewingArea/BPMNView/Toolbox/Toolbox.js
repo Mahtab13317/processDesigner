@@ -25,6 +25,7 @@ import {
   artefacts,
   caseWorkdesk,
   sapAdapter,
+  sharePoint
 } from "../../../../utility/bpmnView/toolboxIcon";
 import searchIcon from "../../../../assets/bpmnView/toolbox/SearchToolbox.svg";
 import { getCaseEnabledActivities } from "../../../../utility/ViewingArea/CaseEnabledActivities";
@@ -173,6 +174,7 @@ function Toolbox(props) {
   let toolTypeList = [];
   let updatedActivities;
   let updatedIntegrationPointActivities;
+  let sharePointFlag = localLoadedProcessData?.SystemProperty[0]?.SHAREPOINTFLAG === "N" ? false : true
   if (
     // This condition runs when process is not case enabled and the user is in abstract view.
     caseEnabled === false &&
@@ -181,8 +183,11 @@ function Toolbox(props) {
     updatedActivities = getCaseEnabledActivities(caseEnabled, [caseWorkdesk]);
     updatedIntegrationPointActivities = getSapEnabledActivities(
       localLoadedProcessData?.SAPRequired,
-      [sapAdapter]
+      [sapAdapter], sharePointFlag, [sharePoint]
     );
+
+
+
     toolTypeList = [
       startEvents,
       updatedActivities,
@@ -199,7 +204,7 @@ function Toolbox(props) {
     updatedActivities = getCaseEnabledActivities(caseEnabled, [caseWorkdesk]);
     updatedIntegrationPointActivities = getSapEnabledActivities(
       localLoadedProcessData?.SAPRequired,
-      [sapAdapter]
+      [sapAdapter], sharePointFlag, [sharePoint]
     );
     toolTypeList = [
       startEvents,
@@ -217,7 +222,7 @@ function Toolbox(props) {
   ) {
     updatedIntegrationPointActivities = getSapEnabledActivities(
       localLoadedProcessData?.SAPRequired,
-      [sapAdapter]
+      [sapAdapter], sharePointFlag, [sharePoint]
     );
     toolTypeList = [
       taskTemplates,
@@ -236,7 +241,7 @@ function Toolbox(props) {
   ) {
     updatedIntegrationPointActivities = getSapEnabledActivities(
       localLoadedProcessData?.SAPRequired,
-      [sapAdapter]
+      [sapAdapter], sharePointFlag, [sharePoint]
     );
     toolTypeList = [
       startEvents,
@@ -273,7 +278,7 @@ function Toolbox(props) {
     expandedView
       ? (document.querySelectorAll(".toolTabs")[0].style.backgroundColor = "")
       : (document.querySelectorAll(".toolTabs")[0].style.backgroundColor =
-          "#0072C60D");
+        "#0072C60D");
     setExpandedView(!expandedView);
   };
 
@@ -294,10 +299,10 @@ function Toolbox(props) {
       if (
         ellToArray[i].getBoundingClientRect().top - searchBarFromTop < 46 &&
         ellToArray[i].getBoundingClientRect().top -
-          searchBarFromTop +
-          oneToolListToArray[i].clientHeight -
-          34 >
-          0
+        searchBarFromTop +
+        oneToolListToArray[i].clientHeight -
+        34 >
+        0
       ) {
         setTabIndex(i);
         tooltabs[tabIndex].style.backgroundColor = "#0072C60D";
@@ -519,9 +524,8 @@ function Toolbox(props) {
               <ListItemIcon>
                 <div
                   id="searchActivity_abstractView"
-                  className={`toolTabs ${
-                    expandedView ? "" : "onHoverTabStyle"
-                  }`}
+                  className={`toolTabs ${expandedView ? "" : "onHoverTabStyle"
+                    }`}
                   style={{
                     width: "8vw",
                     cursor: "pointer",
@@ -556,13 +560,12 @@ function Toolbox(props) {
               onMouseEnter={(event) =>
                 displayToolContainer(event, element, index)
               }
-              // onMouseLeave={(e) => hideToolContainer(e)}
+            // onMouseLeave={(e) => hideToolContainer(e)}
             >
               <ListItemIcon style={{ justifyContent: "center" }}>
                 <div
-                  className={`toolTabs ${
-                    expandedView ? "" : "onHoverTabStyle"
-                  }`}
+                  className={`toolTabs ${expandedView ? "" : "onHoverTabStyle"
+                    }`}
                   onClick={() => onClickHandler(index)}
                   style={{
                     display: "flex",
@@ -710,8 +713,8 @@ function Toolbox(props) {
           )}
           {toolTypeContainer}
           {toolboxDisplay !== null &&
-          toolMap.has(toolboxDisplay) &&
-          expandedView === false
+            toolMap.has(toolboxDisplay) &&
+            expandedView === false
             ? toolMap.get(toolboxDisplay).toolsDiv
             : null}
         </React.Fragment>

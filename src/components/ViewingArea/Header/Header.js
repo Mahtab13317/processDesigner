@@ -120,7 +120,7 @@ function Header(props) {
   useEffect(() => {
     async function getPinned() {
       const res = await axios.get(SERVER_URL_LAUNCHPAD + "/pinnedList/1");
-      if (res.data.Status === 0) {
+      if (res.status === 200) {
         res.data.forEach((data) => {
           setpinnedProcessDefIdArr((prev) => {
             let temp = [...prev];
@@ -132,6 +132,8 @@ function Header(props) {
     }
     getPinned();
   }, [processData.ProcessDefId]);
+
+  console.log("ccccccccccc", pinnedProcessDefIdArr);
 
   useEffect(() => {
     if (pinnedProcessDefIdArr.includes(processData.ProcessDefId))
@@ -420,8 +422,14 @@ function Header(props) {
                   <li
                     onClick={toggleDrawer("bottom", true)}
                     className="moreOptions"
+                    style={{
+                      display:
+                        processData.CheckedOut !== PROCESS_CHECKOUT
+                          ? ""
+                          : "none",
+                    }}
                   >
-                    Validate Process
+                    {t("validateProcess")}
                   </li>
                   {showPinBoolean ? (
                     <li
@@ -617,6 +625,8 @@ function Header(props) {
               setAction={() => setAction(null)}
               showOverwrite={true}
               processName={localLoadedProcessData?.ProcessName}
+              selectedProjectId={localLoadedProcessData.ProjectId}
+              changeProjectBool={false}
               typeImportorExport={
                 action === MENUOPTION_IMPORT ? "import" : "export"
               }

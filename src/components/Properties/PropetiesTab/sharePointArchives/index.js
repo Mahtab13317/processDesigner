@@ -1,3 +1,6 @@
+// #BugID - 111522 (Archive Tab Bug)
+//Date:28 June 2022
+// #BugDescription - Handled check to prevent the archive tab blank redirection.
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { connect, useDispatch, useSelector } from "react-redux";
@@ -71,35 +74,57 @@ function SharePointArchive(props) {
     setSelectedActivityIcon(activityProps[0]);
   }, [props.cellActivityType, props.cellActivitySubType, props.cellID]);
 
-  const tempLoc = localLoadedActivityPropertyData.ActivityProperty
-    .sharePointArchiveInfo.diffFolderLoc
+  {
+    /*code updated on 28 June 2022 for BugId 111522*/
+  }
+
+  const tempLoc = localLoadedActivityPropertyData?.ActivityProperty
+    ?.sharePointArchiveInfo.diffFolderLoc
     ? false
     : true;
 
   const [location, setLocation] = useState(tempLoc);
   const [assign, setAssign] = useState(
-    localLoadedActivityPropertyData.ActivityProperty.sharePointArchiveInfo
-      .sameFieldForAllDoc
+    localLoadedActivityPropertyData?.ActivityProperty?.sharePointArchiveInfo
+      ?.sameFieldForAllDoc
   );
   const [archiveVariables, setArchiveVariables] = useState([]);
   const [associateList, setAssociateList] = useState([]);
+
+  {
+    /*code updated on 28 June 2022 for BugId 111522*/
+  }
   const [serviceUrl, setServiceUrl] = useState(
-    localLoadedActivityPropertyData.ActivityProperty.sharePointArchiveInfo
-      .serviceURL
+    localLoadedActivityPropertyData?.ActivityProperty?.sharePointArchiveInfo
+      ?.serviceURL
   );
   const [url, setUrl] = useState(
-    localLoadedActivityPropertyData.ActivityProperty.sharePointArchiveInfo.url
+    localLoadedActivityPropertyData?.ActivityProperty?.sharePointArchiveInfo
+      ?.url
   );
+
+  {
+    /*code updated on 28 June 2022 for BugId 111522*/
+  }
   const [docLibrary, setDocLibrary] = useState(
-    localLoadedActivityPropertyData.ActivityProperty.sharePointArchiveInfo
-      .docLibrary
+    localLoadedActivityPropertyData?.ActivityProperty?.sharePointArchiveInfo
+      ?.docLibrary
   );
+
+  {
+    /*code updated on 28 June 2022 for BugId 111522*/
+  }
   const [domain, setDomain] = useState(
-    localLoadedActivityPropertyData.ActivityProperty.sharePointArchiveInfo
-      .domainName
+    localLoadedActivityPropertyData?.ActivityProperty?.sharePointArchiveInfo
+      ?.domainName
   );
+
+  {
+    /*code updated on 28 June 2022 for BugId 111522*/
+  }
   const [siteUrl, setSiteUrl] = useState(
-    localLoadedActivityPropertyData.ActivityProperty.sharePointArchiveInfo.site
+    localLoadedActivityPropertyData?.ActivityProperty?.sharePointArchiveInfo
+      ?.site
   );
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
@@ -129,7 +154,10 @@ function SharePointArchive(props) {
 
   const [mapProcessVar, setMapProcessVar] = useState([]);
 
-  const [mapUserData,setMapUserData]=useState({username:"",password:""})
+  const [mapUserData, setMapUserData] = useState({
+    username: "",
+    password: "",
+  });
 
   const [isIndModal, setIsIndModal] = useState(false);
 
@@ -137,7 +165,11 @@ function SharePointArchive(props) {
 
   const [indIndex, setIndIndex] = useState(null);
 
-  const[isError,setIsError]=useState({valid:false,msg:"",severity:""})
+  const [isError, setIsError] = useState({
+    valid: false,
+    msg: "",
+    severity: "",
+  });
 
   //function to show hide for folder location
   const showLocation = (e) => {
@@ -148,10 +180,6 @@ function SharePointArchive(props) {
   const showAssignment = (e) => {
     setAssign(e.target.checked);
   };
-
- 
-
- 
 
   useEffect(() => {
     //setting variable list from process
@@ -174,7 +202,7 @@ function SharePointArchive(props) {
     //fetching docTypeDCMapList from activityproperty
 
     setAssociateList(
-      localLoadedActivityPropertyData?.ActivityProperty?.sharePointArchiveInfo?.docTypeInfo?.docTypeDCMapList.map(
+      localLoadedActivityPropertyData?.ActivityProperty?.sharePointArchiveInfo?.docTypeInfo?.docTypeDCMapList?.map(
         (item, i) => ({
           archiveAs: item.archiveAs,
           archiveLoc: item.archiveLoc,
@@ -182,13 +210,13 @@ function SharePointArchive(props) {
           docTypeName: item.docTypeName,
           selectedDoc: item.selectedDoc,
           assignRights: item.assignRights,
-          checked:item.selectedDoc
+          checked: item.selectedDoc,
         })
       )
     );
 
     //setting map list data to state variable
-    localLoadedActivityPropertyData?.ActivityProperty?.sharePointArchiveInfo?.docTypeInfo?.docTypeDCMapList.forEach(
+    localLoadedActivityPropertyData?.ActivityProperty?.sharePointArchiveInfo?.docTypeInfo?.docTypeDCMapList?.forEach(
       (elem, i) => {
         setArchiveVar((archiveVar) => [...archiveVar, "0"]);
         setLocVarList((locVarList) => [...locVarList, "0"]);
@@ -238,41 +266,42 @@ function SharePointArchive(props) {
   };
 
   const addURL = () => {
-    
-    if(urlVar=="0" || urlVar=="" || urlVar==null)
-    {
-     
-      setIsError({valid:true,msg:t("toolbox.sharePointArchive.selURLVar"),severity:"error"})
-    }
-    else{
+    if (urlVar == "0" || urlVar == "" || urlVar == null) {
+      setIsError({
+        valid: true,
+        msg: t("toolbox.sharePointArchive.selURLVar"),
+        severity: "error",
+      });
+    } else {
       let str = addConstantsToString(url, urlVar);
       setUrl(str);
 
-      const tempLocalState={...localLoadedActivityPropertyData}
-      tempLocalState.ActivityProperty.sharePointArchiveInfo.url=str;
-      setlocalLoadedActivityPropertyData(tempLocalState)
+      const tempLocalState = { ...localLoadedActivityPropertyData };
+      tempLocalState.ActivityProperty.sharePointArchiveInfo.url = str;
+      setlocalLoadedActivityPropertyData(tempLocalState);
 
       dispatch(
         setActivityPropertyChange({
           ArchiveSharePoint: { isModified: true, hasError: false },
         })
       );
-    };
     }
-   
+  };
 
   const addDocVar = () => {
-    if(docVar=="0" || docVar=="" || docVar==null)
-    {
-     
-      setIsError({valid:true,msg:t("toolbox.sharePointArchive.selDocLib"),severity:"error"})
-    }else{
+    if (docVar == "0" || docVar == "" || docVar == null) {
+      setIsError({
+        valid: true,
+        msg: t("toolbox.sharePointArchive.selDocLib"),
+        severity: "error",
+      });
+    } else {
       let str = addConstantsToString(docLibrary, docVar);
       setDocLibrary(str);
 
-      const tempLocalState={...localLoadedActivityPropertyData}
-      tempLocalState.ActivityProperty.sharePointArchiveInfo.docLibrary=str;
-      setlocalLoadedActivityPropertyData(tempLocalState)
+      const tempLocalState = { ...localLoadedActivityPropertyData };
+      tempLocalState.ActivityProperty.sharePointArchiveInfo.docLibrary = str;
+      setlocalLoadedActivityPropertyData(tempLocalState);
 
       dispatch(
         setActivityPropertyChange({
@@ -280,29 +309,30 @@ function SharePointArchive(props) {
         })
       );
     }
-   
   };
 
   const addLocVar = () => {
-
-    if(locVar=="0" || locVar=="" || locVar==null)
-    {
-     
-      setIsError({valid:true,msg:t("toolbox.sharePointArchive.selLocVar"),severity:"error"})
-    }
-    else{
-
+    if (locVar == "0" || locVar == "" || locVar == null) {
+      setIsError({
+        valid: true,
+        msg: t("toolbox.sharePointArchive.selLocVar"),
+        severity: "error",
+      });
+    } else {
       let str = addConstantsToString(sameLocation, locVar);
       setSameLocation(str);
 
-      const tempLocalState={...localLoadedActivityPropertyData}
-      tempLocalState.ActivityProperty.sharePointArchiveInfo.folderInfo.folderName=str;
+      const tempLocalState = { ...localLoadedActivityPropertyData };
+      tempLocalState.ActivityProperty.sharePointArchiveInfo.folderInfo.folderName =
+        str;
 
-      tempLocalState?.ActivityProperty?.sharePointArchiveInfo?.docTypeInfo?.docTypeDCMapList?.map((data,i)=>{
-        data.archiveLoc=str
-      });
+      tempLocalState?.ActivityProperty?.sharePointArchiveInfo?.docTypeInfo?.docTypeDCMapList?.map(
+        (data, i) => {
+          data.archiveLoc = str;
+        }
+      );
 
-      setlocalLoadedActivityPropertyData(tempLocalState)
+      setlocalLoadedActivityPropertyData(tempLocalState);
 
       dispatch(
         setActivityPropertyChange({
@@ -310,11 +340,9 @@ function SharePointArchive(props) {
         })
       );
     }
-   
   };
 
   function getArchiveVar(e, index) {
-    
     let data = [...archiveVar];
     data[index] = e.target.value;
     setArchiveVar(data);
@@ -333,24 +361,27 @@ function SharePointArchive(props) {
   };
 
   const addArchiveVar = (index) => {
-   
-
-    if(archiveVar[index]=="0" || archiveVar[index]=="" || archiveVar[index]==null)
-    {
-     
-      setIsError({valid:true,msg:t("toolbox.sharePointArchive.selArchVar"),severity:"error"})
-    }
-    else{
+    if (
+      archiveVar[index] == "0" ||
+      archiveVar[index] == "" ||
+      archiveVar[index] == null
+    ) {
+      setIsError({
+        valid: true,
+        msg: t("toolbox.sharePointArchive.selArchVar"),
+        severity: "error",
+      });
+    } else {
       let str = addConstantsToString(archiveAsList[index], archiveVar[index]);
 
-   
-  
       let data = [...archiveAsList];
       data[index] = str;
       setArchiveAsList(data);
 
-      const tempLocalState={...localLoadedActivityPropertyData}
-      tempLocalState.ActivityProperty.sharePointArchiveInfo.docTypeInfo.docTypeDCMapList[index].archiveAs=str;
+      const tempLocalState = { ...localLoadedActivityPropertyData };
+      tempLocalState.ActivityProperty.sharePointArchiveInfo.docTypeInfo.docTypeDCMapList[
+        index
+      ].archiveAs = str;
       setlocalLoadedActivityPropertyData(tempLocalState);
 
       dispatch(
@@ -359,124 +390,120 @@ function SharePointArchive(props) {
         })
       );
     }
-
-    
   };
 
   const addArchiveLocation = (index) => {
-   
-    if(locVarList[index]=="0" || locVarList[index]=="" || locVarList[index]==null)
-    {
-      setIsError({valid:true,msg:t("toolbox.sharePointArchive.selLocVar"),severity:"error"})
-    }
-    else{
+    if (
+      locVarList[index] == "0" ||
+      locVarList[index] == "" ||
+      locVarList[index] == null
+    ) {
+      setIsError({
+        valid: true,
+        msg: t("toolbox.sharePointArchive.selLocVar"),
+        severity: "error",
+      });
+    } else {
       let str = addConstantsToString(archiveLocList[index], locVarList[index]);
-
-    
 
       let data = [...archiveLocList];
       data[index] = str;
       setArchiveLocList(data);
-  
-        const tempLocalState={...localLoadedActivityPropertyData}
-        tempLocalState.ActivityProperty.sharePointArchiveInfo.docTypeInfo.docTypeDCMapList[index].archiveLoc=str;
-        setlocalLoadedActivityPropertyData(tempLocalState);
-  
-  
+
+      const tempLocalState = { ...localLoadedActivityPropertyData };
+      tempLocalState.ActivityProperty.sharePointArchiveInfo.docTypeInfo.docTypeDCMapList[
+        index
+      ].archiveLoc = str;
+      setlocalLoadedActivityPropertyData(tempLocalState);
+
       dispatch(
         setActivityPropertyChange({
           ArchiveSharePoint: { isModified: true, hasError: false },
         })
       );
     }
-
-    
   };
 
   const mapData = () => {
-
-if(mapUserData.username=="" || mapUserData.password=="")
-{
-  
-  setIsError({valid:true,msg:t("toolbox.sharePointArchive.userMsg"),severity:"error"})
-}
-else{
-  setIsMapModalOpen(false);
-   openMapModalRes();
-
-    const postData = {
-      
-
-        serviceURL:serviceUrl,
-    
-        url:url,
-    
-        site:siteUrl,
-    
-        docLibrary:docLibrary,
-    
-        domainName:domain,
-    
-        userName:mapUserData.username,
-    
-        authCode:mapUserData.password
-    
-    
-    };
-
-   
-    
-
-    axios
-      .post(
-        SERVER_URL +
-        ENDPOINT_GET_LIBRARY_LIST +
-          localLoadedActivityPropertyData.ActivityProperty.actId,
-        postData
-      )
-      .then((res) => {
-    
-
-        setMapList(
-          res?.data?.map((elem) => ({
-            assocExtObjId: elem.assocExtObjId,
-            assocVarFieldId: elem.assocVarFieldId,
-            assocVarId: elem.assocVarId,
-            assocVarName: elem.assocVarName,
-            dataFieldId: elem.dataFieldId,
-            dataFieldLength: elem.dataFieldLength,
-            dataFieldType: elem.dataFieldType,
-            fieldName: elem.fieldName,
-            m_arrProcessVarList: elem.m_arrProcessVarList,
-            m_bShowConstantTextBox: elem.m_bShowConstantTextBox,
-            m_bchkFieldName: elem.m_bchkFieldName,
-            m_chkbxSelectAll: elem.m_chkbxSelectAll,
-            m_strLocalConstant: elem.m_strLocalConstant,
-            m_strSelectedProcessVar: elem.m_strSelectedProcessVar,
-          }))
-        );
-
-        res?.data?.forEach((elem, i) => {
-          const selData =
-            localLoadedActivityPropertyData?.ActivityProperty
-              ?.sharePointArchiveInfo?.folderInfo?.fieldMappingInfoList[i]
-              .assoFieldMapList[0].assocVarName;
-         
-          setMapProcessVar((mapProcessVar) => [...mapProcessVar, selData]);
-        });
-      })
-      .catch((err) => {
-        console.log("AXIOS ERROR: ", err);
+    if (mapUserData.username == "" || mapUserData.password == "") {
+      setIsError({
+        valid: true,
+        msg: t("toolbox.sharePointArchive.userMsg"),
+        severity: "error",
       });
+    } else {
+      setIsMapModalOpen(false);
+      openMapModalRes();
 
-    dispatch(
-      setActivityPropertyChange({
-        ArchiveSharePoint: { isModified: true, hasError: false },
-      })
-    );
-}
+      const postData = {
+        serviceURL: serviceUrl,
 
-  
+        url: url,
+
+        site: siteUrl,
+
+        docLibrary: docLibrary,
+
+        domainName: domain,
+
+        userName: mapUserData.username,
+
+        authCode: mapUserData.password,
+      };
+
+      {
+        /*code updated on 28 June 2022 for BugId 111522*/
+      }
+      axios
+        .post(
+          SERVER_URL +
+          ENDPOINT_GET_LIBRARY_LIST +
+          localLoadedActivityPropertyData?.ActivityProperty?.actId,
+          postData
+        )
+        .then((res) => {
+          setMapList(
+            res?.data?.map((elem) => ({
+              assocExtObjId: elem.assocExtObjId,
+              assocVarFieldId: elem.assocVarFieldId,
+              assocVarId: elem.assocVarId,
+              assocVarName: elem.assocVarName,
+              dataFieldId: elem.dataFieldId,
+              dataFieldLength: elem.dataFieldLength,
+              dataFieldType: elem.dataFieldType,
+              fieldName: elem.fieldName,
+              m_arrProcessVarList: elem.m_arrProcessVarList,
+              m_bShowConstantTextBox: elem.m_bShowConstantTextBox,
+              m_bchkFieldName: elem.m_bchkFieldName,
+              m_chkbxSelectAll: elem.m_chkbxSelectAll,
+              m_strLocalConstant: elem.m_strLocalConstant,
+              m_strSelectedProcessVar: elem.m_strSelectedProcessVar,
+            }))
+          );
+
+          {
+            /*code updated on 28 June 2022 for BugId 111522*/
+          }
+
+          res?.data?.forEach((elem, i) => {
+            const selData =
+              localLoadedActivityPropertyData?.ActivityProperty
+                ?.sharePointArchiveInfo?.folderInfo?.fieldMappingInfoList[i]
+                ?.assoFieldMapList[0]?.assocVarName;
+
+            setMapProcessVar((mapProcessVar) => [...mapProcessVar, selData]);
+          });
+        })
+        .catch((err) => {
+          console.log("AXIOS ERROR: ", err);
+        });
+
+      dispatch(
+        setActivityPropertyChange({
+          ArchiveSharePoint: { isModified: true, hasError: false },
+        })
+      );
+    }
   };
 
   const changeArchiveAsList = (e, index) => {
@@ -484,8 +511,10 @@ else{
     data[index] = e.target.value;
     setArchiveAsList(data);
 
-    const tempLocalState={...localLoadedActivityPropertyData}
-    tempLocalState.ActivityProperty.sharePointArchiveInfo.docTypeInfo.docTypeDCMapList[index].archiveAs=e.target.value;
+    const tempLocalState = { ...localLoadedActivityPropertyData };
+    tempLocalState.ActivityProperty.sharePointArchiveInfo.docTypeInfo.docTypeDCMapList[
+      index
+    ].archiveAs = e.target.value;
     setlocalLoadedActivityPropertyData(tempLocalState);
 
     dispatch(
@@ -500,9 +529,11 @@ else{
     data[index] = e.target.value;
     setArchiveLocList(data);
 
-    const tempLocalState={...localLoadedActivityPropertyData}
-      tempLocalState.ActivityProperty.sharePointArchiveInfo.docTypeInfo.docTypeDCMapList[index].archiveLoc=e.target.value;
-      setlocalLoadedActivityPropertyData(tempLocalState);
+    const tempLocalState = { ...localLoadedActivityPropertyData };
+    tempLocalState.ActivityProperty.sharePointArchiveInfo.docTypeInfo.docTypeDCMapList[
+      index
+    ].archiveLoc = e.target.value;
+    setlocalLoadedActivityPropertyData(tempLocalState);
 
     dispatch(
       setActivityPropertyChange({
@@ -517,17 +548,21 @@ else{
     setMapProcessVar(data);
   };
 
+  {
+    /*code updated on 28 June 2022 for BugId 111522*/
+  }
+
   const selectAll = (e) => {
     if (e.target.checked == true) {
       setAssignLibraryList(
-        assignLibraryList.map((assignLibraryList) => ({
+        assignLibraryList?.map((assignLibraryList) => ({
           ...assignLibraryList,
           checked: true,
         }))
       );
     } else {
       setAssignLibraryList(
-        assignLibraryList.map((assignLibraryList) => ({
+        assignLibraryList?.map((assignLibraryList) => ({
           ...assignLibraryList,
           checked: false,
         }))
@@ -565,7 +600,6 @@ else{
   //added data from mapping list to associated list
 
   const addedMapping = () => {
-   
     let temp = [];
 
     const newArr = mapList?.map((data, i) => {
@@ -587,7 +621,7 @@ else{
 
   const openIndivAssignModal = (index) => {
     setIsIndModal(true);
-    setIndIndex(index)
+    setIndIndex(index);
     if (Object.keys(assignLibraryList).length == 0) {
       const tempData = [...associateList];
       setAssignIndivList(
@@ -602,175 +636,176 @@ else{
     setIsIndModal(false);
   };
 
+  {
+    /*code updated on 28 June 2022 for BugId 111522*/
+  }
   //Add assign rights to same fields for all location
 
   const assignDataToList = () => {
     const tempData = [...associateList];
-    tempData?.map((data,i) => {
+    tempData?.map((data, i) => {
       data.assignRights = assignLibraryList?.filter((d) => d.checked === true);
     });
 
     setAssociateList(tempData);
 
-    const assignRightsGlobal=assignLibraryList?.filter((d) => d.checked === true).map((item)=>{
-      return { selLibVar: item.name, selected: item.checked }
-    })
+    const assignRightsGlobal = assignLibraryList
+      ?.filter((d) => d.checked === true)
+      ?.map((item) => {
+        return { selLibVar: item.name, selected: item.checked };
+      });
 
-    const tempLocalState={...localLoadedActivityPropertyData}
-    tempLocalState?.ActivityProperty?.sharePointArchiveInfo?.docTypeInfo?.docTypeDCMapList?.map((data,i)=>{
-       data.assignRights=assignRightsGlobal;
-    })
+    const tempLocalState = { ...localLoadedActivityPropertyData };
+    tempLocalState?.ActivityProperty?.sharePointArchiveInfo?.docTypeInfo?.docTypeDCMapList?.map(
+      (data, i) => {
+        data.assignRights = assignRightsGlobal;
+      }
+    );
     setlocalLoadedActivityPropertyData(tempLocalState);
 
-
-   
     setIsIndModal(false);
   };
-
 
   //Add assign rights to same fields for different location or Individual
 
   const assignDataToListInd = (index) => {
-   
     const tempData = [...associateList];
-    
 
-    tempData?.map((data,i) => {
-      if(i===index)
-      {
-        data.assignRights = assignLibraryList?.filter((d) => d.checked === true);
+    tempData?.map((data, i) => {
+      if (i === index) {
+        data.assignRights = assignLibraryList?.filter(
+          (d) => d.checked === true
+        );
       }
-      
     });
 
     setAssociateList(tempData);
 
+    {
+      /*code updated on 28 June 2022 for BugId 111522*/
+    }
 
-    const assignRightsGlobal=assignLibraryList?.filter((d) => d.checked === true).map((item)=>{
-      return { selLibVar: item.name, selected: item.checked }
-    });
+    const assignRightsGlobal = assignLibraryList
+      ?.filter((d) => d.checked === true)
+      ?.map((item) => {
+        return { selLibVar: item.name, selected: item.checked };
+      });
 
-    
-
-    const tempLocalState={...localLoadedActivityPropertyData}
-    tempLocalState?.ActivityProperty?.sharePointArchiveInfo?.docTypeInfo?.docTypeDCMapList?.map((data,i)=>{
-      if(i===index)
-      {
-        data.assignRights=assignRightsGlobal;
+    const tempLocalState = { ...localLoadedActivityPropertyData };
+    tempLocalState?.ActivityProperty?.sharePointArchiveInfo?.docTypeInfo?.docTypeDCMapList?.map(
+      (data, i) => {
+        if (i === index) {
+          data.assignRights = assignRightsGlobal;
+        }
       }
-      
-       
-    })
+    );
     setlocalLoadedActivityPropertyData(tempLocalState);
 
-   
     setIsIndModal(false);
   };
 
-const checkedAssocList=(e,index)=>
-  {
+  const checkedAssocList = (e, index) => {
+    let temp = [...associateList];
+    temp[index].checked = e.target.checked;
 
-    
-    let temp=[...associateList];
-    temp[index].checked=e.target.checked
-
-    temp?.map((data,i)=>{
-        if(i===index)
-        {
-         
-        }
+    temp?.map((data, i) => {
+      if (i === index) {
+      }
     });
-    setAssociateList(temp)
-   
+    setAssociateList(temp);
+  };
 
-  }
-
-
-  const handleChange=(properties,val)=>{
-
-    if(val=="")
-    {
-      setIsError({valid:true,msg:t("toolbox.sharePointArchive.emptyField"),severity:"error"})
-      
-    }
-    else{
-
-      const tempLocalState={...localLoadedActivityPropertyData}
-      if(properties=="serviceURL")
-      {
-        tempLocalState.ActivityProperty.sharePointArchiveInfo.serviceURL=val;
-      }
-      if(properties=="url")
-      {
-        tempLocalState.ActivityProperty.sharePointArchiveInfo.url=val;
-      }
-      if(properties=="siteUrl")
-      {
-        tempLocalState.ActivityProperty.sharePointArchiveInfo.site=val;
-      }
-      if(properties=="doclibrary")
-      {
-        tempLocalState.ActivityProperty.sharePointArchiveInfo.docLibrary=val;
-      }
-      if(properties=="domain")
-      {
-        tempLocalState.ActivityProperty.sharePointArchiveInfo.domainName=val;
-      }
-      if(properties=="location")
-      {
-        tempLocalState.ActivityProperty.sharePointArchiveInfo.folderInfo.folderName=val;
-        tempLocalState.ActivityProperty.sharePointArchiveInfo.docTypeInfo.docTypeDCMapList.map((data,i)=>{
-        data.archiveLoc=val
+  const handleChange = (properties, val) => {
+    if (val == "") {
+      setIsError({
+        valid: true,
+        msg: t("toolbox.sharePointArchive.emptyField"),
+        severity: "error",
       });
-
+    } else {
+      const tempLocalState = { ...localLoadedActivityPropertyData };
+      if (properties == "serviceURL") {
+        tempLocalState.ActivityProperty.sharePointArchiveInfo.serviceURL = val;
+      }
+      if (properties == "url") {
+        tempLocalState.ActivityProperty.sharePointArchiveInfo.url = val;
+      }
+      if (properties == "siteUrl") {
+        tempLocalState.ActivityProperty.sharePointArchiveInfo.site = val;
+      }
+      if (properties == "doclibrary") {
+        tempLocalState.ActivityProperty.sharePointArchiveInfo.docLibrary = val;
+      }
+      if (properties == "domain") {
+        tempLocalState.ActivityProperty.sharePointArchiveInfo.domainName = val;
+      }
+      if (properties == "location") {
+        {
+          /*code updated on 28 June 2022 for BugId 111522*/
+        }
+        tempLocalState.ActivityProperty.sharePointArchiveInfo.folderInfo.folderName =
+          val;
+        tempLocalState?.ActivityProperty?.sharePointArchiveInfo?.docTypeInfo?.docTypeDCMapList?.map(
+          (data, i) => {
+            data.archiveLoc = val;
+          }
+        );
       }
 
-      setlocalLoadedActivityPropertyData(tempLocalState)
-      
-     
+      setlocalLoadedActivityPropertyData(tempLocalState);
+
       dispatch(
         setActivityPropertyChange({
           ArchiveSharePoint: { isModified: true, hasError: false },
         })
       );
     }
-
-  }
-
-  
+  };
 
   return (
     <>
-      <div className={ direction==RTL_DIRECTION  ? "mainContainerRTL" : "mainContainer"}>
+      <div
+        className={
+          direction == RTL_DIRECTION ? "mainContainerRTL" : "mainContainer"
+        }
+      >
+        {isError.valid === true ? (
+          <Toast
+            open={isError.valid != false}
+            closeToast={() => setIsError({ ...isError, valid: false })}
+            message={isError.msg}
+            severity={isError.severity}
+          />
+        ) : null}
 
-      {
-        
-        (isError.valid===true) ?
-        
-        <Toast
-              open={isError.valid!=false}
-              closeToast={() => setIsError({...isError,valid:false})}
-              message={isError.msg}
-              severity={isError.severity}
-            />
-        :
-        null
-      }
-
-        { 
+        {
           //the below modal is for data comes after mapping
-         }
+        }
         <Modal
           open={isMapModalOpenRes}
           onClose={closeMapModalRes}
           id="map-modal"
         >
           <Box sx={styleModal}>
-          <div className={direction==RTL_DIRECTION ? "modalHeaderRTL":"modalHeader"}>
-                <div className={direction==RTL_DIRECTION ? "labels modalLabelRTL":"labels modalLabel"}>
+            <div
+              className={
+                direction == RTL_DIRECTION ? "modalHeaderRTL" : "modalHeader"
+              }
+            >
+              <div
+                className={
+                  direction == RTL_DIRECTION
+                    ? "labels modalLabelRTL"
+                    : "labels modalLabel"
+                }
+              >
                 <h4>{t("toolbox.sharePointArchive.mapDataShare")}</h4>
               </div>
-              <div className={direction==RTL_DIRECTION ? "modalCloseRTL":"modalClose"}>
+              <div
+                className={
+                  direction == RTL_DIRECTION ? "modalCloseRTL" : "modalClose"
+                }
+              >
                 <CloseIcon
                   style={{
                     fontSize: "medium",
@@ -788,7 +823,13 @@ const checkedAssocList=(e,index)=>
             </div>
             <div className="modalBody">
               <Box>
-                <table  className={direction==RTL_DIRECTION ? "archiveTableRTL":"archiveTable"}>
+                <table
+                  className={
+                    direction == RTL_DIRECTION
+                      ? "archiveTableRTL"
+                      : "archiveTable"
+                  }
+                >
                   <thead>
                     <tr>
                       <th>{t("toolbox.sharePointArchive.docLibField")}</th>
@@ -801,7 +842,11 @@ const checkedAssocList=(e,index)=>
                         <td>
                           <FormGroup>
                             <FormControlLabel
-                              className={direction==RTL_DIRECTION ? "controlTextRTL":"controlText"}
+                              className={
+                                direction == RTL_DIRECTION
+                                  ? "controlTextRTL"
+                                  : "controlText"
+                              }
                               control={
                                 <Checkbox
                                   size="small"
@@ -845,8 +890,18 @@ const checkedAssocList=(e,index)=>
                 </table>
               </Box>
             </div>
-            <div className={direction==RTL_DIRECTION ? "modalFooterRTL":"modalFooter"}>
-                <div className={direction==RTL_DIRECTION ? "modalFooterInnerRTL":"modalFooterInner"}>
+            <div
+              className={
+                direction == RTL_DIRECTION ? "modalFooterRTL" : "modalFooter"
+              }
+            >
+              <div
+                className={
+                  direction == RTL_DIRECTION
+                    ? "modalFooterInnerRTL"
+                    : "modalFooterInner"
+                }
+              >
                 <Button
                   id="cancelMapRes"
                   className="btn-archive cancelMap"
@@ -884,7 +939,11 @@ const checkedAssocList=(e,index)=>
             }
           >
             <p>
-              <FormHelperText className={direction==RTL_DIRECTION ? "textHelperRTL" : "textHelper"}>
+              <FormHelperText
+                className={
+                  direction == RTL_DIRECTION ? "textHelperRTL" : "textHelper"
+                }
+              >
                 {t("toolbox.sharePointArchive.serviceUrl")}
               </FormHelperText>
             </p>
@@ -894,11 +953,11 @@ const checkedAssocList=(e,index)=>
                 value={serviceUrl}
                 variant="outlined"
                 onChange={(e) => {
-                  setServiceUrl(e.target.value)
+                  setServiceUrl(e.target.value);
                 }}
-
-                onKeyUp={()=>{handleChange("serviceURL",serviceUrl)}}
-                
+                onKeyUp={() => {
+                  handleChange("serviceURL", serviceUrl);
+                }}
               />
             </p>
           </div>
@@ -908,7 +967,11 @@ const checkedAssocList=(e,index)=>
             }
           >
             <p>
-              <FormHelperText className={direction==RTL_DIRECTION ? "textHelperRTL" : "textHelper"}>
+              <FormHelperText
+                className={
+                  direction == RTL_DIRECTION ? "textHelperRTL" : "textHelper"
+                }
+              >
                 {t("toolbox.sharePointArchive.url")}
               </FormHelperText>
             </p>
@@ -924,7 +987,8 @@ const checkedAssocList=(e,index)=>
                   <MenuItem value="0">
                     {t("toolbox.sharePointArchive.selectItem")}
                   </MenuItem>
-                  {archiveVariables.map((data, i) => (
+                  {/*code updated on 28 June 2022 for BugId 111522*/}
+                  {archiveVariables?.map((data, i) => (
                     <MenuItem value={data.VariableName}>
                       {data.VariableName}
                     </MenuItem>
@@ -951,8 +1015,9 @@ const checkedAssocList=(e,index)=>
                   onChange={(e) => {
                     setUrl(e.target.value);
                   }}
-
-                  onKeyUp={()=>{handleChange("url",url)}}
+                  onKeyUp={() => {
+                    handleChange("url", url);
+                  }}
                 />
               </div>
             </p>
@@ -963,7 +1028,11 @@ const checkedAssocList=(e,index)=>
             }
           >
             <p>
-              <FormHelperText className={direction==RTL_DIRECTION ? "textHelperRTL" : "textHelper"}>
+              <FormHelperText
+                className={
+                  direction == RTL_DIRECTION ? "textHelperRTL" : "textHelper"
+                }
+              >
                 {t("toolbox.sharePointArchive.site")}
               </FormHelperText>
             </p>
@@ -975,7 +1044,9 @@ const checkedAssocList=(e,index)=>
                 onChange={(e) => {
                   setSiteUrl(e.target.value);
                 }}
-                onKeyUp={()=>{handleChange("siteUrl",siteUrl)}}
+                onKeyUp={() => {
+                  handleChange("siteUrl", siteUrl);
+                }}
               />
             </p>
           </div>
@@ -988,7 +1059,11 @@ const checkedAssocList=(e,index)=>
             }
           >
             <p>
-              <FormHelperText className={direction==RTL_DIRECTION ? "textHelperRTL" : "textHelper"}>
+              <FormHelperText
+                className={
+                  direction == RTL_DIRECTION ? "textHelperRTL" : "textHelper"
+                }
+              >
                 {t("toolbox.sharePointArchive.docLib")}
               </FormHelperText>
             </p>
@@ -1004,7 +1079,8 @@ const checkedAssocList=(e,index)=>
                   <MenuItem value="0">
                     {t("toolbox.sharePointArchive.selectItem")}
                   </MenuItem>
-                  {archiveVariables.map((data) => (
+                  {/*code updated on 28 June 2022 for BugId 111522*/}
+                  {archiveVariables?.map((data) => (
                     <MenuItem value={data.VariableName}>
                       {data.VariableName}
                     </MenuItem>
@@ -1031,8 +1107,9 @@ const checkedAssocList=(e,index)=>
                   onChange={(e) => {
                     setDocLibrary(e.target.value);
                   }}
-
-                  onKeyUp={()=>{handleChange("doclibrary",docLibrary)}}
+                  onKeyUp={() => {
+                    handleChange("doclibrary", docLibrary);
+                  }}
                 />
               </div>
             </p>
@@ -1043,7 +1120,11 @@ const checkedAssocList=(e,index)=>
             }
           >
             <p>
-              <FormHelperText className={direction==RTL_DIRECTION ? "textHelperRTL" : "textHelper"}>
+              <FormHelperText
+                className={
+                  direction == RTL_DIRECTION ? "textHelperRTL" : "textHelper"
+                }
+              >
                 {t("toolbox.sharePointArchive.domainName")}
               </FormHelperText>
             </p>
@@ -1055,7 +1136,9 @@ const checkedAssocList=(e,index)=>
                 onChange={(e) => {
                   setDomain(e.target.value);
                 }}
-                onKeyUp={()=>{handleChange("domain",domain)}}
+                onKeyUp={() => {
+                  handleChange("domain", domain);
+                }}
               />
             </p>
           </div>
@@ -1080,11 +1163,25 @@ const checkedAssocList=(e,index)=>
           }
           <Modal open={isMapModalOpen} onClose={closeMapModal} id="map-modal">
             <Box sx={styleModal}>
-              <div className={direction==RTL_DIRECTION ? "modalHeaderRTL":"modalHeader"}>
-                <div className={direction==RTL_DIRECTION ? "labels modalLabelRTL":"labels modalLabel"}>
+              <div
+                className={
+                  direction == RTL_DIRECTION ? "modalHeaderRTL" : "modalHeader"
+                }
+              >
+                <div
+                  className={
+                    direction == RTL_DIRECTION
+                      ? "labels modalLabelRTL"
+                      : "labels modalLabel"
+                  }
+                >
                   <h4> {t("toolbox.sharePointArchive.mapDataShare")}</h4>
                 </div>
-                <div className={direction==RTL_DIRECTION ? "modalCloseRTL":"modalClose"}>
+                <div
+                  className={
+                    direction == RTL_DIRECTION ? "modalCloseRTL" : "modalClose"
+                  }
+                >
                   <CloseIcon
                     style={{
                       fontSize: "medium",
@@ -1103,7 +1200,13 @@ const checkedAssocList=(e,index)=>
               <div className="modalBody">
                 <div className="formControl">
                   <p>
-                    <FormHelperText className={direction==RTL_DIRECTION ? "textHelperRTL" : "textHelper"}>
+                    <FormHelperText
+                      className={
+                        direction == RTL_DIRECTION
+                          ? "textHelperRTL"
+                          : "textHelper"
+                      }
+                    >
                       {t("toolbox.sharePointArchive.username")}
                       <span className="required">*</span>
                     </FormHelperText>
@@ -1113,13 +1216,24 @@ const checkedAssocList=(e,index)=>
                       className="outlinedBasic modalText"
                       variant="outlined"
                       value={mapUserData.username}
-                      onChange={(e)=>{setMapUserData({...mapUserData,username:e.target.value})}}
+                      onChange={(e) => {
+                        setMapUserData({
+                          ...mapUserData,
+                          username: e.target.value,
+                        });
+                      }}
                     />
                   </p>
                 </div>
                 <div className="formControl modalControl">
                   <p>
-                    <FormHelperText className={direction==RTL_DIRECTION ? "textHelperRTL" : "textHelper"}>
+                    <FormHelperText
+                      className={
+                        direction == RTL_DIRECTION
+                          ? "textHelperRTL"
+                          : "textHelper"
+                      }
+                    >
                       {t("toolbox.sharePointArchive.password")}
                       <span className="required">*</span>
                     </FormHelperText>
@@ -1131,53 +1245,128 @@ const checkedAssocList=(e,index)=>
                       type="password"
                       variant="outlined"
                       value={mapUserData.password}
-                      onChange={(e)=>{setMapUserData({...mapUserData,password:e.target.value})}}
+                      onChange={(e) => {
+                        setMapUserData({
+                          ...mapUserData,
+                          password: e.target.value,
+                        });
+                      }}
                     />
                   </p>
                 </div>
                 <div className="formControl modalControl">
                   <p>
-                    <FormHelperText className={direction==RTL_DIRECTION ? "textHelperRTL" : "textHelper"}>
+                    <FormHelperText
+                      className={
+                        direction == RTL_DIRECTION
+                          ? "textHelperRTL"
+                          : "textHelper"
+                      }
+                    >
                       {t("toolbox.sharePointArchive.serviceUrl")}
                     </FormHelperText>
                   </p>
-                  <p className={direction==RTL_DIRECTION ? "textHelperRTL" : ""}>{serviceUrl}</p>
+                  <p
+                    className={
+                      direction == RTL_DIRECTION ? "textHelperRTL" : ""
+                    }
+                  >
+                    {serviceUrl}
+                  </p>
                 </div>
                 <div className="formControl modalControl">
                   <p>
-                    <FormHelperText className={direction==RTL_DIRECTION ? "textHelperRTL" : "textHelper"}>
+                    <FormHelperText
+                      className={
+                        direction == RTL_DIRECTION
+                          ? "textHelperRTL"
+                          : "textHelper"
+                      }
+                    >
                       {t("toolbox.sharePointArchive.url")}
                     </FormHelperText>
                   </p>
-                  <p className={direction==RTL_DIRECTION ? "textHelperRTL" : ""}>{url}</p>
+                  <p
+                    className={
+                      direction == RTL_DIRECTION ? "textHelperRTL" : ""
+                    }
+                  >
+                    {url}
+                  </p>
                 </div>
                 <div className="formControl modalControl">
                   <p>
-                    <FormHelperText className={direction==RTL_DIRECTION ? "textHelperRTL" : "textHelper"}>
+                    <FormHelperText
+                      className={
+                        direction == RTL_DIRECTION
+                          ? "textHelperRTL"
+                          : "textHelper"
+                      }
+                    >
                       {t("toolbox.sharePointArchive.site")}
                     </FormHelperText>
                   </p>
-                  <p className={direction==RTL_DIRECTION ? "textHelperRTL" : ""}>{siteUrl}</p>
+                  <p
+                    className={
+                      direction == RTL_DIRECTION ? "textHelperRTL" : ""
+                    }
+                  >
+                    {siteUrl}
+                  </p>
                 </div>
                 <div className="formControl modalControl">
                   <p>
-                    <FormHelperText className={direction==RTL_DIRECTION ? "textHelperRTL" : "textHelper"}>
+                    <FormHelperText
+                      className={
+                        direction == RTL_DIRECTION
+                          ? "textHelperRTL"
+                          : "textHelper"
+                      }
+                    >
                       {t("toolbox.sharePointArchive.docLib")}
                     </FormHelperText>
                   </p>
-                  <p className={direction==RTL_DIRECTION ? "textHelperRTL" : ""}>{docLibrary}</p>
+                  <p
+                    className={
+                      direction == RTL_DIRECTION ? "textHelperRTL" : ""
+                    }
+                  >
+                    {docLibrary}
+                  </p>
                 </div>
                 <div className="formControl modalControl">
                   <p>
-                    <FormHelperText className={direction==RTL_DIRECTION ? "textHelperRTL" : "textHelper"}>
+                    <FormHelperText
+                      className={
+                        direction == RTL_DIRECTION
+                          ? "textHelperRTL"
+                          : "textHelper"
+                      }
+                    >
                       {t("toolbox.sharePointArchive.domainName")}
                     </FormHelperText>
                   </p>
-                  <p className={direction==RTL_DIRECTION ? "textHelperRTL" : ""}>{domain}</p>
+                  <p
+                    className={
+                      direction == RTL_DIRECTION ? "textHelperRTL" : ""
+                    }
+                  >
+                    {domain}
+                  </p>
                 </div>
               </div>
-              <div className={direction==RTL_DIRECTION ? "modalFooterRTL":"modalFooter"}>
-                <div className={direction==RTL_DIRECTION ? "modalFooterInnerRTL":"modalFooterInner"}>
+              <div
+                className={
+                  direction == RTL_DIRECTION ? "modalFooterRTL" : "modalFooter"
+                }
+              >
+                <div
+                  className={
+                    direction == RTL_DIRECTION
+                      ? "modalFooterInnerRTL"
+                      : "modalFooterInner"
+                  }
+                >
                   <Button
                     id="cancelMap"
                     className="btn-archive cancelMap"
@@ -1245,7 +1434,11 @@ const checkedAssocList=(e,index)=>
               <div className="labels">
                 <FormGroup>
                   <FormControlLabel
-                    className={direction==RTL_DIRECTION ? "controlTextRTL":"controlText"}
+                    className={
+                      direction == RTL_DIRECTION
+                        ? "controlTextRTL"
+                        : "controlText"
+                    }
                     control={
                       <Checkbox
                         size="small"
@@ -1255,12 +1448,17 @@ const checkedAssocList=(e,index)=>
                     }
                     label={t("toolbox.sharePointArchive.folderLocation")}
                   />
-                  {
-                    location ? (
+                  {location ? (
                     <Box className="flexRow">
                       <div className="formControl">
                         <p>
-                          <FormHelperText className={direction==RTL_DIRECTION ? "textHelperRTL" : "textHelper"}>
+                          <FormHelperText
+                            className={
+                              direction == RTL_DIRECTION
+                                ? "textHelperRTL"
+                                : "textHelper"
+                            }
+                          >
                             {t("toolbox.sharePointArchive.variables")}
                           </FormHelperText>
                         </p>
@@ -1275,7 +1473,8 @@ const checkedAssocList=(e,index)=>
                             <MenuItem value="0">
                               {t("toolbox.sharePointArchive.selectItem")}
                             </MenuItem>
-                            {archiveVariables.map((data) => (
+                            {/*code updated on 28 June 2022 for BugId 111522*/}
+                            {archiveVariables?.map((data) => (
                               <MenuItem value={data.VariableName}>
                                 {data.VariableName}
                               </MenuItem>
@@ -1294,7 +1493,13 @@ const checkedAssocList=(e,index)=>
                       </div>
                       <div className="formControl">
                         <p>
-                          <FormHelperText className={direction==RTL_DIRECTION ? "textHelperRTL" : "textHelper"}>
+                          <FormHelperText
+                            className={
+                              direction == RTL_DIRECTION
+                                ? "textHelperRTL"
+                                : "textHelper"
+                            }
+                          >
                             {t("toolbox.sharePointArchive.location")}
                           </FormHelperText>
                         </p>
@@ -1305,9 +1510,9 @@ const checkedAssocList=(e,index)=>
                             onChange={(e) => {
                               setSameLocation(e.target.value);
                             }}
-
-                            onKeyUp={()=>{handleChange("location",sameLocation)}}
-
+                            onKeyUp={() => {
+                              handleChange("location", sameLocation);
+                            }}
                             variant="outlined"
                           />
                         </p>
@@ -1318,7 +1523,11 @@ const checkedAssocList=(e,index)=>
                   )}
 
                   <FormControlLabel
-                   className={direction==RTL_DIRECTION ? "controlTextRTL":"controlText"}
+                    className={
+                      direction == RTL_DIRECTION
+                        ? "controlTextRTL"
+                        : "controlText"
+                    }
                     control={
                       <Checkbox
                         size="small"
@@ -1353,11 +1562,29 @@ const checkedAssocList=(e,index)=>
               }
               <Modal open={isOpenAssignModal} onClose={closeAssignModal}>
                 <Box sx={styleModal}>
-                <div className={direction==RTL_DIRECTION ? "modalHeaderRTL":"modalHeader"}>
-                <div className={direction==RTL_DIRECTION ? "labels modalLabelRTL":"labels modalLabel"}>
+                  <div
+                    className={
+                      direction == RTL_DIRECTION
+                        ? "modalHeaderRTL"
+                        : "modalHeader"
+                    }
+                  >
+                    <div
+                      className={
+                        direction == RTL_DIRECTION
+                          ? "labels modalLabelRTL"
+                          : "labels modalLabel"
+                      }
+                    >
                       <h4>{t("toolbox.sharePointArchive.assignRight")}</h4>
                     </div>
-                    <div className={direction==RTL_DIRECTION ? "modalCloseRTL":"modalClose"}>
+                    <div
+                      className={
+                        direction == RTL_DIRECTION
+                          ? "modalCloseRTL"
+                          : "modalClose"
+                      }
+                    >
                       <CloseIcon
                         style={{
                           fontSize: "medium",
@@ -1367,7 +1594,6 @@ const checkedAssocList=(e,index)=>
                           color: "#707070",
                           marginRight: "2px",
                           marginTop: "8px",
-                          
                         }}
                         onClick={closeAssignModal}
                       />
@@ -1377,7 +1603,11 @@ const checkedAssocList=(e,index)=>
                     <div className="allCheckContainer">
                       <FormGroup>
                         <FormControlLabel
-                          className={direction==RTL_DIRECTION ? "allCheckLabelRTL":"allCheckLabel"}
+                          className={
+                            direction == RTL_DIRECTION
+                              ? "allCheckLabelRTL"
+                              : "allCheckLabel"
+                          }
                           control={
                             <Checkbox
                               name="cehckedAll"
@@ -1393,7 +1623,11 @@ const checkedAssocList=(e,index)=>
                       <FormGroup>
                         {assignLibraryList?.map((data, j) => (
                           <FormControlLabel
-                            className={direction==RTL_DIRECTION ? "allCheckLabelRTL":"allCheckLabel"}
+                            className={
+                              direction == RTL_DIRECTION
+                                ? "allCheckLabelRTL"
+                                : "allCheckLabel"
+                            }
                             control={
                               <Checkbox
                                 size="small"
@@ -1412,8 +1646,20 @@ const checkedAssocList=(e,index)=>
                     </div>
                     <div></div>
                   </div>
-                  <div className={direction==RTL_DIRECTION ? "modalFooterRTL":"modalFooter"}>
-                    <div className={direction==RTL_DIRECTION ? "modalFooterInnerRTL":"modalFooterInner"}>
+                  <div
+                    className={
+                      direction == RTL_DIRECTION
+                        ? "modalFooterRTL"
+                        : "modalFooter"
+                    }
+                  >
+                    <div
+                      className={
+                        direction == RTL_DIRECTION
+                          ? "modalFooterInnerRTL"
+                          : "modalFooterInner"
+                      }
+                    >
                       <Button
                         id="cancelAssign"
                         className="btn-archive cancelMap"
@@ -1439,7 +1685,13 @@ const checkedAssocList=(e,index)=>
               </Modal>
             </Box>
             <Box className="flexRow section">
-              <table className={ direction==RTL_DIRECTION ? "archiveTableRTL" : "archiveTable"}>
+              <table
+                className={
+                  direction == RTL_DIRECTION
+                    ? "archiveTableRTL"
+                    : "archiveTable"
+                }
+              >
                 <thead>
                   <tr>
                     <th>{t("toolbox.sharePointArchive.docType")}</th>
@@ -1453,8 +1705,20 @@ const checkedAssocList=(e,index)=>
                       <td>
                         <FormGroup>
                           <FormControlLabel
-                            className={direction==RTL_DIRECTION ? "controlTextRTL":"controlText"}
-                            control={<Checkbox checked={data.checked} size="small" onChange={(e)=>{checkedAssocList(e,i)}}   />}
+                            className={
+                              direction == RTL_DIRECTION
+                                ? "controlTextRTL"
+                                : "controlText"
+                            }
+                            control={
+                              <Checkbox
+                                checked={data.checked}
+                                size="small"
+                                onChange={(e) => {
+                                  checkedAssocList(e, i);
+                                }}
+                              />
+                            }
                             label={data.docTypeName}
                           ></FormControlLabel>
                         </FormGroup>
@@ -1477,7 +1741,8 @@ const checkedAssocList=(e,index)=>
                               <MenuItem value="0">
                                 {t("toolbox.sharePointArchive.selectItem")}
                               </MenuItem>
-                              {archiveVariables.map((item) => (
+                              {/*code updated on 28 June 2022 for BugId 111522*/}
+                              {archiveVariables?.map((item) => (
                                 <MenuItem value={item.VariableName}>
                                   {item.VariableName}
                                 </MenuItem>
@@ -1530,7 +1795,7 @@ const checkedAssocList=(e,index)=>
                                 <MenuItem value="0">
                                   {t("toolbox.sharePointArchive.selectItem")}
                                 </MenuItem>
-                                {archiveVariables.map((data) => (
+                                {archiveVariables?.map((data) => (
                                   <MenuItem value={data.VariableName}>
                                     {data.VariableName}
                                   </MenuItem>
@@ -1586,14 +1851,30 @@ const checkedAssocList=(e,index)=>
                 //this modal is for individual assign rights
               }
               <Modal open={isIndModal} onClose={closeIndivAssignModal}>
-              
                 <Box sx={styleModal}>
-                  <div className={direction==RTL_DIRECTION ? "modalHeaderRTL":"modalHeader"}>
-                    <div className={direction==RTL_DIRECTION ? "labels modalLabelRTL":"labels modalLabel"}>
+                  <div
+                    className={
+                      direction == RTL_DIRECTION
+                        ? "modalHeaderRTL"
+                        : "modalHeader"
+                    }
+                  >
+                    <div
+                      className={
+                        direction == RTL_DIRECTION
+                          ? "labels modalLabelRTL"
+                          : "labels modalLabel"
+                      }
+                    >
                       <h4>{t("toolbox.sharePointArchive.assignRight")}</h4>
-                     
                     </div>
-                    <div className={direction==RTL_DIRECTION ? "modalCloseRTL":"modalClose"}>
+                    <div
+                      className={
+                        direction == RTL_DIRECTION
+                          ? "modalCloseRTL"
+                          : "modalClose"
+                      }
+                    >
                       <CloseIcon
                         style={{
                           fontSize: "medium",
@@ -1610,11 +1891,14 @@ const checkedAssocList=(e,index)=>
                     </div>
                   </div>
                   <div className="modalBody">
-                    <div  className="allCheckContainer">
+                    <div className="allCheckContainer">
                       <FormGroup>
                         <FormControlLabel
-                         
-                          className={direction==RTL_DIRECTION ? "allCheckLabelRTL":"allCheckLabel"}
+                          className={
+                            direction == RTL_DIRECTION
+                              ? "allCheckLabelRTL"
+                              : "allCheckLabel"
+                          }
                           control={
                             <Checkbox
                               name="cehckedAll"
@@ -1630,7 +1914,11 @@ const checkedAssocList=(e,index)=>
                       <FormGroup>
                         {assignIndivList?.map((data, j) => (
                           <FormControlLabel
-                            className={direction==RTL_DIRECTION ? "allCheckLabelRTL":"allCheckLabel"}
+                            className={
+                              direction == RTL_DIRECTION
+                                ? "allCheckLabelRTL"
+                                : "allCheckLabel"
+                            }
                             control={
                               <Checkbox
                                 size="small"
@@ -1649,8 +1937,20 @@ const checkedAssocList=(e,index)=>
                     </div>
                     <div></div>
                   </div>
-                  <div className={direction==RTL_DIRECTION ? "modalFooterRTL":"modalFooter"}>
-                    <div className={direction==RTL_DIRECTION ? "modalFooterInnerRTL":"modalFooterInner"}>
+                  <div
+                    className={
+                      direction == RTL_DIRECTION
+                        ? "modalFooterRTL"
+                        : "modalFooter"
+                    }
+                  >
+                    <div
+                      className={
+                        direction == RTL_DIRECTION
+                          ? "modalFooterInnerRTL"
+                          : "modalFooterInner"
+                      }
+                    >
                       <Button
                         id="cancelAssign"
                         className="btn-archive cancelMap"
@@ -1666,7 +1966,9 @@ const checkedAssocList=(e,index)=>
                         className="btn-archive btnMapModal"
                         variant="contained"
                         size="small"
-                        onClick={()=>{assignDataToListInd(indIndex)}}
+                        onClick={() => {
+                          assignDataToListInd(indIndex);
+                        }}
                       >
                         {t("toolbox.sharePointArchive.ok")}
                       </Button>

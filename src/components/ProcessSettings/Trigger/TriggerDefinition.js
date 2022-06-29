@@ -1,3 +1,5 @@
+// #BugID - 109982 (Trigger Bug)
+// #BugDescription - Added a condition to check if description is added or not and prevented trigger from adding.
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, Divider, ClickAwayListener } from "@material-ui/core";
@@ -270,6 +272,9 @@ function TriggerDefinition(props) {
     if (nameInput.trim() === "") {
       alert("Please fill all mandatory fields");
       document.getElementById("trigger_name").focus();
+    } else if (descInput?.trim()?.length === 0) {
+      alert("Please fill all mandatory fields");
+      document.getElementById("trigger_description").focus();
     } else if (
       props[triggerTypeOptions(typeInput)[0]] &&
       !requiredFieldsFilled

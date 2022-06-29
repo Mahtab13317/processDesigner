@@ -58,3 +58,26 @@ export function getTypeByVariable(typeName) {
   }
   return type;
 }
+
+export const getVariableTypeFromMDMType = (mdmType) => {
+  let type;
+  if (mdmType === "1") {
+    type = "10";
+  } else if (mdmType === "4") {
+    type = "6";
+  } else if (mdmType === "2") {
+    type = "3";
+  } else if (mdmType === "3") {
+    type = "4";
+  } else if (mdmType === "5") {
+    type = "8";
+  } else if (mdmType === "8") {
+    type = "12";
+  } else if (mdmType === "9") {
+    type = "15";
+  } else if (mdmType === "10") {
+    type = "18";
+  }
+
+  return type;
+};

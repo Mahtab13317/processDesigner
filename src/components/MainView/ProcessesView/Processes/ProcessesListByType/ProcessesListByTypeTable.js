@@ -65,6 +65,7 @@ function Table(props) {
               }}
             />
             {tileProcess(el.ProcessType)[1]} {tileProcess(el.Type)[1]}{" "}
+            {el.CheckedOut === "Y" ? `(${t("Checked")})` : null}
             <img
               src={tileProcess(el.ProcessType)[5] || tileProcess(el.Type)[5]}
             />

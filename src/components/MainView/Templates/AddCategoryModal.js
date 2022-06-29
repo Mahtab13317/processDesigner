@@ -75,7 +75,8 @@ function AddCategoryModal(props) {
               tempList?.push({
                 CategoryId: maxId + 1,
                 CategoryName: nameInput,
-                CategoryDescription: descriptionInput,
+                // code edited on 20 June 2022 for BugId 110848
+                Description: descriptionInput,
                 Templates: [],
               });
               props.setCategoryList(tempList);

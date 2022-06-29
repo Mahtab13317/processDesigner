@@ -84,12 +84,12 @@ function CategoryHeader(props) {
                     : styles.categoryHeadingDesc
                 }
               >
-                {props.selectedCategoryDetails?.Description.match(/\w+/g)
+                {props.selectedCategoryDetails?.Description?.match(/\w+/g)
                   .length < WORD_LIMIT_DESC ? (
                   <div>{props.selectedCategoryDetails?.Description}</div>
                 ) : (
                   <div>
-                    {props.selectedCategoryDetails?.Description.split(" ")
+                    {props.selectedCategoryDetails?.Description?.split(" ")
                       .splice(0, WORD_LIMIT_DESC)
                       .join(" ")}
                     <TemplateTooltip

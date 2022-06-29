@@ -16,6 +16,7 @@ function UndoCheckoutModal(props) {
       processDefId: +props.processDefId,
       comment: comment,
       projectName: props.projectName,
+      type: 1,
     };
     axios.post(SERVER_URL + ENDPOINT_UNDO_CHECKOUT, json).then((response) => {
       if (response.data.Status === 0) {

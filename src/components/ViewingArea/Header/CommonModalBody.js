@@ -98,6 +98,7 @@ function CommonModalBody(props) {
                 : styles.outlinedButton
             }
             id={`${props.id}_btn2`}
+            onClick={props.buttonTwoFunc}
           >
             {props.buttonTwo}
           </Button>
