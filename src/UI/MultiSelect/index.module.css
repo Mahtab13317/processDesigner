@@ -65,6 +65,8 @@
 
 .multiSelect_listItem label {
   margin-right: 0;
+  width: 110% !important;
+  display: flex;
 }
 
 .multiSelect_checked {

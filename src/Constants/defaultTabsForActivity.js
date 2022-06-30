@@ -203,6 +203,8 @@ export const ActivityPropertyTabs = [
   },
   {
     name: TaskType.processTask,
-    components: [Tab(45), Tab(9), Tab(10), Tab(42), Tab(43)],
+    components: localStorage.getItem("registeredProcessType")
+      ? [Tab(45), Tab(48), Tab(52), Tab(53), Tab(50), Tab(51)]
+      : [Tab(45), Tab(52), Tab(53), Tab(50), Tab(51)],
   },
 ];

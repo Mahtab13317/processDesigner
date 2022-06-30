@@ -1,0 +1,189 @@
+import React from "react";
+import clsx from "clsx";
+import DeleteOutlinedIcon from "@material-ui/icons/DeleteOutlined";
+import CustomizedDropdown from "../../../../../UI/Components_With_ErrrorHandling/Dropdown";
+import { MenuItem } from "@material-ui/core";
+import styles from "./index.module.css";
+import { useTranslation } from "react-i18next";
+
+function FilterString(props) {
+  let { t } = useTranslation();
+  const {
+    operationType,
+    isNested,
+    filterStrDataExchgTable,
+    setFilterStrDataExchgTable,
+    filterStringData,
+    addFilterStringHandler,
+    cancelFilterStringHandler,
+    deleteFilterStringHandler,
+    filterStringValue,
+    filterStringHandler,
+    listOfComplexTables,
+    setFilterStringValue,
+    multiSelectedTableNames,
+  } = props;
+  const disabled = filterStrDataExchgTable === "" || filterStringValue === "";
+
+  return (
+    <div>
+      <p className={styles.subHeader}>{t("filterString")}</p>
+      {isNested && (
+        <div className={clsx(styles.flexColumn, styles.complexTableMargin)}>
+          <div className={styles.flexRow}>
+            {operationType === "1" ? (
+              <p className={styles.fieldTitle}>{t("dataExchangeTable")}</p>
+            ) : (
+              <p className={styles.fieldTitle}>{t("complexTable")}</p>
+            )}
+            <span className={styles.asterisk}>*</span>
+          </div>
+          <CustomizedDropdown
+            //   disabled={isProcessReadOnly}
+            id="FS_Data_Exchg_Dropdown"
+            className={styles.dropdown}
+            value={filterStrDataExchgTable}
+            onChange={(event) => setFilterStrDataExchgTable(event.target.value)}
+            isNotMandatory={true}
+          >
+            {operationType === "1"
+              ? multiSelectedTableNames?.map((element) => {
+                  return (
+                    <MenuItem
+                      className={styles.menuItemStyles}
+                      value={element.TableName}
+                      key={element.TableName}
+                    >
+                      {element.TableName}
+                    </MenuItem>
+                  );
+                })
+              : listOfComplexTables?.map((element) => {
+                  return (
+                    <MenuItem
+                      className={styles.menuItemStyles}
+                      value={element.TableName}
+                      key={element.TableName}
+                    >
+                      {element.TableName}
+                    </MenuItem>
+                  );
+                })}
+          </CustomizedDropdown>
+        </div>
+      )}
+      <div className={styles.flexRow}>
+        <textarea
+          id="FS_Textarea"
+          value={filterStringValue}
+          // disabled={readOnlyProcess}
+          onBlur={(event) => {
+            filterStringHandler(event.target.value);
+          }}
+          onChange={(event) => {
+            setFilterStringValue(event.target.value);
+          }}
+          placeholder="Write Here"
+          className={styles.filterStringInput}
+        />
+        {isNested && (
+          <div className={clsx(styles.flexRow, styles.buttonsDiv)}>
+            <button
+              id="FS_Cancel_Filter_string_data"
+              onClick={cancelFilterStringHandler}
+              className={styles.cancelBtn}
+            >
+              {t("cancel")}
+            </button>
+            <button
+              id="FS_Add_Filter_string_data"
+              disabled={disabled}
+              onClick={addFilterStringHandler}
+              className={clsx(
+                styles.addBtn,
+                disabled && styles.disabledBtnStyles
+              )}
+            >
+              {t("add")}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {isNested && (
+        <div className={styles.filterStringEnclosingDiv}>
+          <div className={styles.filterDataHeader}>
+            <div className={styles.flexRow}>
+              {operationType === "1" ? (
+                <p
+                  className={clsx(
+                    styles.headers,
+                    styles.filterStringDataExchgTable
+                  )}
+                >
+                  {t("dataExchangeTable")}
+                </p>
+              ) : (
+                <p
+                  className={clsx(
+                    styles.headers,
+                    styles.filterStringDataExchgTable
+                  )}
+                >
+                  {t("complexTable")}
+                </p>
+              )}
+
+              <p
+                className={clsx(styles.headers, styles.filterStringTableHeader)}
+              >
+                {t("filterStringPascalCase")}
+              </p>
+            </div>
+            <div
+              className={clsx(
+                styles.flexColumn,
+                styles.filterStringDataMainDiv
+              )}
+            >
+              {filterStringData?.length > 0 &&
+                filterStringData?.map((element, index) => {
+                  return (
+                    <div className={styles.filterStringDataDiv}>
+                      <div className={styles.flexRow}>
+                        <p
+                          className={clsx(
+                            styles.headers,
+                            styles.filterStringDataExchgTable,
+                            styles.filterStringValueDataFont
+                          )}
+                        >
+                          {element.m_sTableName}
+                        </p>
+                        <p
+                          className={clsx(
+                            styles.headers,
+                            styles.filterStringTableHeader,
+                            styles.filterStringValueDataFont
+                          )}
+                        >
+                          {element.m_sFilterStrImpNested}
+                        </p>
+                        <DeleteOutlinedIcon
+                          id="FS_Delete_Filter_String_Data"
+                          onClick={() => deleteFilterStringHandler(index)}
+                          className={styles.deleteIcon}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default FilterString;

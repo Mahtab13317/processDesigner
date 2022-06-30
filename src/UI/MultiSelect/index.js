@@ -14,6 +14,7 @@ import styles from "./index.module.css";
 import arabicStyles from "./arabicStyles.module.css";
 import { DEFAULT, RTL_DIRECTION } from "../../Constants/appConstants";
 import "./index.css";
+import clsx from "clsx";
 
 function MultiSelect(props) {
   let { t } = useTranslation();
@@ -44,7 +45,7 @@ function MultiSelect(props) {
     let tempCheck = {},
       isAllChecked = true;
     props.completeList?.forEach((item) => {
-      if (props.associatedList.includes(item)) {
+      if (props.associatedList?.includes(item)) {
         tempCheck = { ...tempCheck, [item[props.indexKey]]: true };
       } else {
         tempCheck = { ...tempCheck, [item[props.indexKey]]: false };
@@ -156,7 +157,7 @@ function MultiSelect(props) {
       className={
         direction === RTL_DIRECTION
           ? `multiSelectInput_arabicView ${styles.multiSelectInput}`
-          : styles.multiSelectInput
+          : clsx(styles.multiSelectInput)
       }
       style={props.style}
       MenuProps={{

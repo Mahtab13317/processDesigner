@@ -1,6 +1,6 @@
 // Function to get the variable type as per its type number.
 export function getVariableType(type) {
-  let typeName;
+  let typeName = "";
   if (type === "10") {
     typeName = "Text";
   } else if (type === "6") {

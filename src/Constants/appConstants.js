@@ -232,7 +232,7 @@ export const ENDPOINT_ADD_RULES = "/addInterfaceRule"; // Will not be used after
 export const ENDPOINT_MODIFY_RULES = "/modifyInterfaceRule"; // Will not be used after common saving changes are done.
 export const ENDPOINT_DELETE_RULES = "/deleteInterfaceRule"; // Will not be used after common saving changes are done.
 export const ENDPOINT_ADDSYSTEMREQUIREMENTS = "/addSystemRequirement";
-export const ENDPOINT_ADDPROJECTREQUIREMENTS ='/addProjectRequirement';
+export const ENDPOINT_ADDPROJECTREQUIREMENTS = "/addProjectRequirement";
 export const ENDPOINT_ADDPROCESSREQUIREMENTS = "/addProcessRequirement";
 export const ENDPOINT_SAVE_MAJOR = "/saveMajor";
 export const ENDPOINT_GET_GLOBALTASKTEMPLATES = "/globalTemplate";
@@ -322,9 +322,12 @@ export const ENDPOINT_GET_ALLDEPLOYEDPROCESSLIST = "/getprocesslist/R/-1";
 export const ENDPOINT_GET_REGISTER_TEMPLATE = "/registerTemplate";
 export const ENDPOINT_GET_EXISTING_TABLES = "/tableList";
 export const ENDPOINT_GET_COLUMNS = "/columnList";
+export const ENDPOINT_TEST_CONNECTION = "/testConnection";
+export const ENDPOINT_GET_CURRENT_CABINETNAME = "/currentCabinetName";
 
 export const ENDPOINT_UPLOAD_ATTACHMENT = "/attachDoc";
 export const ENDPOINT_DOWNLOAD_ATTACHMENT = "/downloadDoc";
+export const ENDPOINT_SAVE_ATTACHMENT="/attachment";
 export const CONFIG = "/config";
 
 export const ENDPOINT_GET_REGISTER_TRIGGER = "/registerTrigger";

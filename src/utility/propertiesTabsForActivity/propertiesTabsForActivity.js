@@ -42,21 +42,20 @@ const InitialRule = React.lazy(() =>
 const Attachment = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/Attachment/Attachment")
 );
+// const Webservice = React.lazy(() =>
+//   import("../../components/Properties/PropetiesTab/Webservice/index.js")
+// );
 
 const Restful = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/Restful/index.js")
 );
 
-const ResponseConsumerJMS = React.lazy(() =>
-  import(
-    "../../components/Properties/PropetiesTab/ResponseConsumerJMS/index.js"
-  )
+const ResponseConsumerJMS= React.lazy(() =>
+import("../../components/Properties/PropetiesTab/ResponseConsumerJMS/index.js")
 );
 
-const RequestConsumerSoap = React.lazy(() =>
-  import(
-    "../../components/Properties/PropetiesTab/requestConsumerSOAP/index.js"
-  )
+const RequestConsumerSoap= React.lazy(() =>
+import("../../components/Properties/PropetiesTab/requestConsumerSOAP/index.js")
 );
 
 const DataFields = React.lazy(() =>
@@ -101,17 +100,38 @@ const ForwardMapping_Variables = React.lazy(() =>
     "../../components/Properties/PropetiesTab/callActivity/forwardMVariables"
   )
 );
+const ForwardMapping_Variables_ProcessTask = React.lazy(() =>
+  import(
+    "../../components/Properties/PropetiesTab/ProcessTask/forwardMVariables"
+  )
+);
 const ForwardMapping_DocTypes = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/callActivity/forwardMDoc")
 );
+const ForwardMapping_DocTypes_ProcessTask = React.lazy(() =>
+  import("../../components/Properties/PropetiesTab/ProcessTask/forwardMDoc")
+);
+
 const ReverseMapping_Variables = React.lazy(() =>
   import(
     "../../components/Properties/PropetiesTab/callActivity/reverseMVariables"
   )
+); 
+
+const ReverseMapping_Variables_ProcessTask = React.lazy(() =>
+  import(
+    "../../components/Properties/PropetiesTab/ProcessTask/reverseMVariables"
+  )
 );
+
 const ReverseMDoc = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/callActivity/reverseMDoc")
+); 
+
+const ReverseMDoc_ProcessTask = React.lazy(() =>
+  import("../../components/Properties/PropetiesTab/ProcessTask/reverseMDoc")
 );
+
 const Stream = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/Streams/Stream")
 );
@@ -144,14 +164,12 @@ const Sap = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/SAP/Sap")
 );
 
+const Requirements = React.lazy(()=> import("../../components/ViewingArea/ProcessRequirements&Attchments/ProcessRequirements/index.js"))
 // const DataExchange = React.lazy(() =>
 //   import("../../components/Properties/PropetiesTab/DataExchange")
 // );
-
-const Requirements = React.lazy(() =>
-  import(
-    "../../components/ViewingArea/ProcessRequirements&Attchments/ProcessRequirements/index.js"
-  )
+const DataExchange = React.lazy(() =>
+  import("../../components/Properties/PropetiesTab/DataExchange")
 );
 
 const BusinessRules = React.lazy(() =>
@@ -179,14 +197,14 @@ const tabNames = {
     label: propertiesLabel.dataFields,
   },
   3: {
-    name: <InitialRule />,
+    name:<InitialRule />,
     toolTip: "initialRules",
     icon: InitialRulesIcon,
     icon_enabled: InitialRulesIcon_EN,
     label: propertiesLabel.initialRules,
   },
   4: {
-    name: <Requirements />,
+    name: <Requirements/>,
     toolTip: "requirements",
     icon: RequirementsIcon,
     icon_enabled: RequirementsIcon_EN,
@@ -200,8 +218,8 @@ const tabNames = {
     label: propertiesLabel.attachments,
   },
   6: {
-    name: <WorkdeskTab />,
-    //name: "workdesk",
+    //name: <WorkdeskTab />,
+    name: "workdesk",
     toolTip: "workdesk",
     icon: WorkdeskIcon,
     icon_enabled: WorkdeskIcon_EN,
@@ -358,8 +376,7 @@ const tabNames = {
     label: propertiesLabel.initiateWorkstep,
   },
   36: {
-    // name: <DataExchange />,
-    name: <div>Data Exchange to be painted here</div>,
+    name: <DataExchange />,
     toolTip: "dataExchange",
     label: propertiesLabel.dataExchange,
   },
@@ -369,7 +386,7 @@ const tabNames = {
     label: propertiesLabel.sap,
   },
   38: {
-    name: <ResponseConsumerJMS />,
+    name: <ResponseConsumerJMS/>,
     toolTip: "resConsumerJms",
     label: propertiesLabel.resConJMS,
   },
@@ -379,12 +396,12 @@ const tabNames = {
     label: propertiesLabel.resConSOAP,
   },
   40: {
-    name: <RequestConsumerSoap />,
+    name: <RequestConsumerSoap/>,
     toolTip: "reqConsumerSoap",
     label: propertiesLabel.reqConSOAP,
   },
   41: {
-    name: <Restful />,
+    name: <Restful/>,
     toolTip: "Restful",
     label: propertiesLabel.Restful,
   },
@@ -433,6 +450,30 @@ const tabNames = {
     name: <SharePointArchives />,
     toolTip: "Archive",
     label: propertiesLabel.sharePointArchive,
+  },
+  50: {
+    name: <ForwardMapping_DocTypes_ProcessTask tabType="Forward DocType Mapping" />,
+    toolTip: "ForwardDocTypeMapping",
+    icon: ForwardMapping,
+    label: propertiesLabel.fwdDocMappingProcessTask,
+  },
+  51: {
+    name: <ReverseMDoc_ProcessTask tabType="Reverse DocType Mapping" />,
+    toolTip: "ReverseDocTypeMapping",
+    icon: ReverseMapping,
+    label: propertiesLabel.revDocMappingProcessTask,
+  },
+  52: {
+    name: <ForwardMapping_Variables_ProcessTask tabType="Forward Variable Mapping" />,
+    toolTip: "ForwardVariableMapping",
+    icon: ForwardMapping,
+    label: propertiesLabel.fwdVarMappingProcessTask,
+  },
+  53: {
+    name: <ReverseMapping_Variables_ProcessTask tabType="Reverse Variable Mapping" />,
+    toolTip: "ReverseVariableMapping",
+    icon: ReverseMapping,
+    label: propertiesLabel.revVarMappingProcessTask,
   },
 };
 

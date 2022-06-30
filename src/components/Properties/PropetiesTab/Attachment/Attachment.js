@@ -38,7 +38,7 @@ function Attachment(props) {
   const [attachList, setAttachList] = useState([]);
 
   useEffect(() => {
-    if (localLoadedActivityPropertyData?.Status === 0 || !!props.ignoreSpinner) {
+    if (localLoadedActivityPropertyData?.Status === 0) {
       setspinner(false);
     }
     if (
@@ -155,10 +155,7 @@ function Attachment(props) {
       })
     );
 
-    if(props.ignoreSpinner)
-    {
-      props.RAPayload(payload)
-    }
+    
 
     try {
       const response = await axios({

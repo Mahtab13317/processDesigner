@@ -1,0 +1,141 @@
+.flexColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.flexRow {
+  display: flex;
+  flex-direction: row;
+}
+
+.heading {
+  text-align: left;
+  font: normal normal 600 14px/19px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  margin: 10px 0px 0px 12px;
+}
+
+.cabinetDetailsDiv {
+  height: 70vh;
+  background-color: #ffffff;
+  margin-right: 6px;
+}
+
+.loggedInCabinetText {
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  margin-top: 10px;
+}
+
+.cabinetNameDiv {
+  margin-left: 10px;
+}
+
+.menuItemStyles {
+  text-align: left;
+  font: normal normal normal 12px/24px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+}
+
+.cabinetNameInput {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  width: 225px;
+  height: 30px !important;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.cabinetNameDisabled {
+  background: #f8f8f8;
+}
+
+.disabledTestConnectionBtn {
+  background: rgba(0, 0, 0, 0.12) !important;
+  border-radius: 2px !important;
+  border: none !important;
+  font: normal normal 600 12px/17px Open Sans !important;
+  letter-spacing: 0px !important;
+  color: rgba(0, 0, 0, 0.5) !important;
+  text-transform: none !important;
+  cursor: default !important;
+}
+
+.opScroll {
+  overflow-y: scroll;
+  height: 60vh;
+}
+
+.fieldTitle {
+  text-align: left;
+  font: normal normal 600 12px/24px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  opacity: 1;
+}
+
+.dropdown {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  width: 225px;
+  height: 30px;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans !important;
+}
+
+.connectionStatusText {
+  text-align: left;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  opacity: 1;
+  margin-left: auto;
+  margin: 6px 28px 26px auto;
+}
+
+.blueButton {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #0072c5;
+  border-radius: 2px;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #0072c6;
+  cursor: pointer;
+  height: 28px !important;
+}
+
+.testConnectionBtn {
+  width: 120px;
+  margin: 16px 26px 0px auto;
+  padding: 5px 8px 6px 8px;
+}
+
+.addNewOperationBtn {
+  width: 68px;
+  margin: 6px 9px 0px auto;
+}
+
+.cabinetDetailsWidth {
+  width: 20%;
+}
+
+.operationsWidth {
+  width: 22%;
+}
+
+.operationSubDiv {
+  margin-bottom: 0.625rem;
+}
