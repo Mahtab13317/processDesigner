@@ -115,6 +115,15 @@
       "ruleFlow": "Rule Flow",
       "rulePackage": "Rule Package"
     },
+    "dataRights":{
+      "activities":"Activities",
+      "rightsAct":"Rights on activities",
+      "variables":"Variables",
+      "save":"Save Changes",
+      "discard":"Discard",
+      "showing":"Showing"
+    },
+
     "sharePointArchive": {
       "archive": "Archive",
       "serviceUrl": "Service URL",
@@ -159,16 +168,15 @@
       "sapPassword": "SAP Password",
       "configuration": "Configuration"
     },
-    "workdeskSap":{
-      "newDef":"New Definition",
-      "defName":"Definition Name",
-      "sapTcode":"SAP TCode",
-      "mapping":"Mapping",
-      "discard":"Discard",
-      "save":"Save",
-      "sapFieldName":"SAP Field Name",
-      "name":"Name"
-      
+    "workdeskSap": {
+      "newDef": "New Definition",
+      "defName": "Definition Name",
+      "sapTcode": "SAP TCode",
+      "mapping": "Mapping",
+      "discard": "Discard",
+      "save": "Save",
+      "sapFieldName": "SAP Field Name",
+      "name": "Name"
     },
     "intermediateEvents": {
       "head": "Intermediate Events",
@@ -466,6 +474,7 @@
   "userDefinedDataTypes": "User Defined Data Types",
   "constants": "Constants",
   "erDiagram": "ER Diagram",
+  "dataRights":"Data Rights",
   "general": "General",
   "triggers": "Triggers",
   "features": "Features",
@@ -707,7 +716,7 @@
   "rules": "Rules",
   "rightsOnActivities": "Rights on Activities",
   "addDocuments": "Add Documents",
-  "documentTypeName": "Document type name",
+  "documentType": "Document Type",
   "addAnother": "Add Another",
   "add&Close": "Add & Close",
   "exceptionAdd": "+ Exceptions",
@@ -1089,7 +1098,7 @@
   "associatedExp": "Associated Exceptions",
   "associate": "Associate",
   "documents": "Documents",
-  "addAdition": "Add Addition",
+  "allowAddition": "Allow Addition",
   "scanActions": "Scan Action(s)",
   "scanAction": "Scan Action",
   "testData1": "testData1",
@@ -1399,10 +1408,18 @@
   "processExportedFailed": "Failed to export process",
   "validateProcess": "Validate Process",
   "ArchiveDocumentTypes": "Archive Document Types",
-  "GoToCatalog": "Go To Catalog",
-  "Proceed": "Proceed",
+  "basicDataTypes": "BASIC DATA TYPES",
+  "configureDataObjectDirectly": "CONFIGURE DATA OBJECT DIRECTLY",
+  "createDataObject": "Create Data Object",
+  "copyAvailableDataObject": "Copy available Data Object",
+  "uploadFromMyComputer": "Upload from my computer",
+  "importFromDataSource": "Import from Data Source",
+  "useAnAvailableTemplate": "USE AN AVAILABLE TEMPLATE",
+  "new": "+ New",
   "noWebServiceAdded": "No webservices have been added.",
   "AssociatedWebservicesandMethods": "Associated Webservices and Methods",
+  "SelectedTodoAlreadyAssociated": "Selected Todo is already associated with this workstep",
+  "todoItemDetails": "ToDo Item Details",
   "columns": "Columns",
   "column": "Column",
   "mappingValues": "mapping values",
@@ -1437,5 +1454,15 @@
   "isNested": "Is Nested",
   "updateIfExist": "Update if Exist",
   "selectComplex": "Select Complex",
-  "selectTables": "Select Table(s)"
+  "selectTables": "Select Table(s)",
+  "SelectedExpAlreadyAssociated": "Selected Exception is already associated with this workstep",
+  "associateRightsErr": "Please associate rights with exception",
+  "Mobility": "Mobility",
+  "Variables": "Variables",
+  "mandatoryErr": "Please enter all the mandatory field(s)",
+  "docAlreadyExists": "Document Type already exists",
+  "groupAlreadyExists": "Group Name already exists",
+  "todoAlreadyExists": "ToDo Item already exists",
+  "excepAlreadyExists": "Exception Name already exists",
+  "GoToCatalog":"Go to Catalog"
 }
