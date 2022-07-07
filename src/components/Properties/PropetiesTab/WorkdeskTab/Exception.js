@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import styles from "./exception.module.css";
+import styles from "./todo.module.css";
 import { Select, MenuItem, Checkbox } from "@material-ui/core";
 import { store, useGlobalState } from "state-pool";
-import StarRateIcon from "@material-ui/icons/StarRate";
 import AddException from "../../../ViewingArea/Tools/Exception/AddExceptions";
 import Modal from "@material-ui/core/Modal";
 import axios from "axios";
@@ -15,190 +14,283 @@ import {
   SERVER_URL,
 } from "../../../../Constants/appConstants";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
+import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
+import {
+  OpenProcessSliceValue,
+  setOpenProcess,
+} from "../../../../redux-store/slices/OpenProcessSlice";
+import "./index.css";
 
 function Exception(props) {
   let { t } = useTranslation();
   const dispatch = useDispatch();
-  const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
   const [checkException, setCheckException] = useState(false);
-  const [exceptionData, setExceptionData] = useState(
-    loadedProcessData.value ? loadedProcessData.value.ExceptionList : []
-  );
-  const [exceptionItemData, setExceptionItemData] = useState([]);
-  const [viewCheckbox, setviewCheckbox] = useState(false);
-  const [raiseCheckbox, setraiseCheckbox] = useState(false);
-  const [respondCheckbox, setrespondCheckbox] = useState(false);
-  const [clearCheckbox, setclearCheckbox] = useState(false);
+  const [allExpData, setAllExpData] = useState([]);
+  const [exceptionItemData, setExceptionItemData] = useState({});
+  const [viewCheckbox, setViewCheckbox] = useState(false);
+  const [raiseCheckbox, setRaiseCheckbox] = useState(false);
+  const [respondCheckbox, setRespondCheckbox] = useState(false);
+  const [clearCheckbox, setClearCheckbox] = useState(false);
+  const [raiseName, setRaiseName] = useState("");
+  const [respondName, setRespondName] = useState("");
+  const [clearName, setClearName] = useState("");
   const [description, setDescription] = useState("");
   const [expectionListVal, setExpectionListVal] = useState("");
-  const [selectedExpItem, setselectedExpItem] = useState(null);
+  const [selectedExpItem, setSelectedExpItem] = useState(null);
   const [addExpection, setaddException] = useState(false);
-  const [editableField, setEditableField] = useState(false);
+  const [editableField, setEditableField] = useState(true);
+  const [triggerList, setTriggerList] = useState([]);
   const [expData, setExpData] = useState({
     ExceptionGroups: [],
   });
-  const [tempExpItem, settempExpItem] = useState(null);
-
-  const CheckExceptionHandler = () => {
-    setCheckException(!checkException);
-  };
-
-  const definedExpHandler = (e) => {
-    setExpectionListVal(e.target.value);
-    let selectedDesc = [];
-    selectedDesc = exceptionData.filter((val) => {
-      if (val.ExceptionName == e.target.value) {
-        return val;
-      }
-    });
-    if (selectedDesc.length > 0) {
-      setDescription(selectedDesc[0].Description);
-    }
-    settempExpItem(e.target.value);
-  };
+  const openProcessData = useSelector(OpenProcessSliceValue);
+  const [localState, setLocalState] = useState(null);
 
   useEffect(() => {
     let tempList = {
       ...localLoadedActivityPropertyData?.ActivityProperty?.wdeskInfo
         ?.objPMWdeskExceptions?.exceptionMap,
     };
-
-    Object.keys(tempList).forEach((el) => {
+    Object.keys(tempList)?.forEach((el) => {
       tempList[el] = { ...tempList[el], editable: false };
     });
-
     setExceptionItemData(tempList);
-    let tempCheck =
+    setCheckException(
       localLoadedActivityPropertyData?.ActivityProperty?.wdeskInfo
-        ?.objPMWdeskExceptions?.m_bShowExceptions;
-    setCheckException(tempCheck);
+        ?.objPMWdeskExceptions?.m_bShowExceptions
+    );
   }, [localLoadedActivityPropertyData]);
+
+  useEffect(() => {
+    let activityIdString = "";
+    openProcessData.loadedData?.MileStones?.forEach((mileStone) => {
+      mileStone.Activities?.forEach((activity) => {
+        activityIdString = activityIdString + activity.ActivityId + ",";
+      });
+    });
+    setAllExpData(openProcessData.loadedData?.ExceptionList);
+    setLocalState(openProcessData.loadedData);
+    axios
+      .get(
+        SERVER_URL +
+          `/exception/${props.openProcessID}/${props.openProcessType}/${props.openProcessName}/${activityIdString}`
+      )
+      .then((res) => {
+        if (res.status === 200) {
+          let newState = { ...res.data };
+          setExpData(newState);
+          setTriggerList(newState.Trigger);
+        }
+      });
+  }, [openProcessData.loadedData]);
+
+  const CheckExceptionHandler = () => {
+    let val;
+    setCheckException((prev) => {
+      val = !prev;
+      return !prev;
+    });
+    let temp = { ...localLoadedActivityPropertyData };
+    if (temp?.ActivityProperty?.wdeskInfo) {
+      if (temp?.ActivityProperty?.wdeskInfo?.objPMWdeskExceptions) {
+        let valTemp =
+          temp?.ActivityProperty?.wdeskInfo?.objPMWdeskExceptions
+            ?.m_bShowExceptions;
+        if (valTemp === false || valTemp === true) {
+          temp.ActivityProperty.wdeskInfo.objPMWdeskExceptions.m_bShowExceptions =
+            val;
+        } else {
+          temp.ActivityProperty.wdeskInfo.objPMWdeskExceptions = {
+            ...temp.ActivityProperty.wdeskInfo.objPMWdeskExceptions,
+            m_bShowExceptions: val,
+          };
+        }
+      } else {
+        temp.ActivityProperty.wdeskInfo = {
+          ...temp.ActivityProperty.wdeskInfo,
+          objPMWdeskExceptions: {
+            m_bShowExceptions: val,
+          },
+        };
+      }
+    } else {
+      temp.ActivityProperty = {
+        ...temp.ActivityProperty,
+        wdeskInfo: {
+          objPMWdeskExceptions: {
+            m_bShowExceptions: val,
+          },
+        },
+      };
+    }
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.workdesk]: { isModified: true, hasError: false },
+      })
+    );
+  };
+
+  const definedExpHandler = (e) => {
+    setExpectionListVal(e.target.value);
+    setEditableField(true);
+
+    let alreadyPresent = exceptionItemData[e.target.value] ? true : false;
+    if (alreadyPresent) {
+      exceptionItemHandler(e.target.value);
+    } else {
+      let selectedExp = null;
+      expData?.ExceptionGroups?.forEach((group) => {
+        group?.ExceptionList?.forEach((val) => {
+          if (val.ExceptionName === e.target.value) {
+            selectedExp = val;
+          }
+        });
+      });
+      if (selectedExp) {
+        setDescription(selectedExp.Description);
+        let selectedAct = null;
+        selectedExp?.Activities?.forEach((act) => {
+          if (
+            +act.ActivityId ===
+            +localLoadedActivityPropertyData?.ActivityProperty?.actId
+          ) {
+            selectedAct = act;
+          }
+        });
+        if (selectedAct) {
+          setViewCheckbox(selectedAct.View);
+          setRaiseCheckbox(selectedAct.Raise);
+          setRespondCheckbox(selectedAct.Respond);
+          setClearCheckbox(selectedAct.Clear);
+          setRaiseName("");
+          setRespondName("");
+          setClearName("");
+        }
+      } else {
+        setDescription("");
+        setViewCheckbox(false);
+        setRaiseCheckbox(false);
+        setRespondCheckbox(false);
+        setClearCheckbox(false);
+        setEditableField(false);
+        setRaiseName("");
+        setRespondName("");
+        setClearName("");
+      }
+      setSelectedExpItem(null);
+    }
+  };
 
   const descHandler = (e) => {
     setDescription(e.target.value);
   };
 
-  // const deleteHandler = () => {
-  //   setExceptionItemData((prev) => {
-  //     let temp = [...prev];
-  //     temp.splice(selectedExpItem, 1);
-  //     return temp;
-  //   });
-  // };
-
-  // const addHandler = () => {
-  //   let alreadyPresent = exceptionItemData[tempExpItem];
-
-  //   if (!alreadyPresent) {
-  //     setExceptionItemData((prev) => {
-  //       let temp = [...prev];
-
-  //       let selected = [];
-  //       selected = exceptionData.filter((val) => {
-  //         if (val.ExceptionName == tempExpItem) {
-  //           return val;
-  //         }
-  //       });
-  //       if (selected && selected.length > 0) {
-  //         if (exceptionItemData) temp.push({ ...selected[0], editable: true });
-  //       }
-  //       return temp;
-  //     });
-  //   }
-  // };
-
   const addHandler = () => {
-    let alreadyPresent = exceptionItemData[tempExpItem];
-    if (!alreadyPresent) {
-      let selected = null;
-      setExceptionItemData((prev) => {
-        let temp = { ...prev };
-        expData.ExceptionGroups.forEach((group) => {
-          group.ExceptionList.forEach((val) => {
-            if (val.ExceptionName == tempExpItem) {
-              selected = val;
-            }
+    let alreadyPresent = exceptionItemData[expectionListVal] ? true : false;
+    if (!alreadyPresent || alreadyPresent === undefined) {
+      if (viewCheckbox) {
+        let selected = null;
+        setExceptionItemData((prev) => {
+          let temp = { ...prev };
+          expData?.ExceptionGroups?.forEach((group) => {
+            group?.ExceptionList?.forEach((val) => {
+              if (val.ExceptionName === expectionListVal) {
+                selected = val;
+              }
+            });
           });
-        });
-        if (selected) {
-          temp = {
-            ...temp,
-            [tempExpItem]: {
-              editable: true,
-              expTypeInfo: {
-                expTypeDesc: selected.ExceptionDesc,
-                expTypeId: selected.ExceptionId,
-                expTypeName: selected.ExceptionName,
+          if (selected) {
+            temp = {
+              ...temp,
+              [expectionListVal]: {
+                editable: true,
+                expTypeInfo: {
+                  expTypeDesc: selected.ExceptionDesc,
+                  expTypeId: selected.ExceptionId,
+                  expTypeName: selected.ExceptionName,
+                },
+                vTrigFlag: viewCheckbox,
+                vrTrigFlag: raiseCheckbox,
+                vrTrigName: raiseName,
+                vcTrigFlag: clearCheckbox,
+                vcTrigName: clearName,
+                vaTrigFlag: respondCheckbox,
+                vaTrigName: respondName,
               },
-              vTrigFlag: viewCheckbox,
-              vaTrigFlag: raiseCheckbox,
-              vaTrigName: "",
-              vcTrigFlag: clearCheckbox,
-              vcTrigName: "",
-              vrTrigFlag: respondCheckbox,
-              vrTrigName: "",
+            };
+          }
+          return temp;
+        });
+        let tempData = { ...localLoadedActivityPropertyData };
+        let tempdataLocal = tempData?.ActivityProperty?.wdeskInfo
+          ?.objPMWdeskExceptions
+          ? { ...tempData.ActivityProperty.wdeskInfo.objPMWdeskExceptions }
+          : {};
+        if (tempdataLocal?.exceptionMap) {
+          tempData.ActivityProperty.wdeskInfo.objPMWdeskExceptions.exceptionMap =
+            {
+              ...tempdataLocal?.exceptionMap,
+              [expectionListVal]: {
+                expTypeInfo: {
+                  expTypeDesc: selected.ExceptionDesc,
+                  expTypeId: selected.ExceptionId,
+                  expTypeName: selected.ExceptionName,
+                },
+                vTrigFlag: viewCheckbox,
+                vrTrigFlag: raiseCheckbox,
+                vrTrigName: raiseName,
+                vcTrigFlag: clearCheckbox,
+                vcTrigName: clearName,
+                vaTrigFlag: respondCheckbox,
+                vaTrigName: respondName,
+              },
+            };
+        } else {
+          tempData.ActivityProperty.wdeskInfo.objPMWdeskExceptions = {
+            ...tempData.ActivityProperty.wdeskInfo.objPMWdeskExceptions,
+            exceptionMap: {
+              [expectionListVal]: {
+                expTypeInfo: {
+                  expTypeDesc: selected.ExceptionDesc,
+                  expTypeId: selected.ExceptionId,
+                  expTypeName: selected.ExceptionName,
+                },
+                vTrigFlag: viewCheckbox,
+                vrTrigFlag: raiseCheckbox,
+                vrTrigName: raiseName,
+                vcTrigFlag: clearCheckbox,
+                vcTrigName: clearName,
+                vaTrigFlag: respondCheckbox,
+                vaTrigName: respondName,
+              },
             },
           };
         }
-        return temp;
-      });
-
-      let tempData = { ...localLoadedActivityPropertyData };
-
-      let tempdataLocal = tempData?.ActivityProperty?.wdeskInfo
-        ?.objPMWdeskExceptions
-        ? { ...tempData?.ActivityProperty?.wdeskInfo?.objPMWdeskExceptions }
-        : {};
-
-      if (tempdataLocal?.exceptionMap) {
-        tempData.ActivityProperty.wdeskInfo.objPMWdeskExceptions.exceptionMap =
-          {
-            ...tempdataLocal?.exceptionMap,
-            [tempExpItem]: {
-              expTypeInfo: {
-                expTypeDesc: selected.ExceptionDesc,
-                expTypeId: selected.ExceptionId,
-                expTypeName: selected.ExceptionName,
-              },
-              vTrigFlag: viewCheckbox,
-              vaTrigFlag: raiseCheckbox,
-              vaTrigName: "",
-              vcTrigFlag: clearCheckbox,
-              vcTrigName: "",
-              vrTrigFlag: respondCheckbox,
-              vrTrigName: "",
-            },
-          };
+        setlocalLoadedActivityPropertyData(tempData);
+        dispatch(
+          setActivityPropertyChange({
+            [propertiesLabel.workdesk]: { isModified: true, hasError: false },
+          })
+        );
       } else {
-        tempData.ActivityProperty.wdeskInfo.objPMWdeskExceptions = {
-          exceptionMap: {
-            [tempExpItem]: {
-              expTypeInfo: {
-                expTypeDesc: selected.ExceptionDesc,
-                expTypeId: selected.ExceptionId,
-                expTypeName: selected.ExceptionName,
-              },
-              vTrigFlag: viewCheckbox,
-              vaTrigFlag: raiseCheckbox,
-              vaTrigName: "",
-              vcTrigFlag: clearCheckbox,
-              vcTrigName: "",
-              vrTrigFlag: respondCheckbox,
-              vrTrigName: "",
-            },
-          },
-        };
+        dispatch(
+          setToastDataFunc({
+            message: t("associateRightsErr"),
+            severity: "error",
+            open: true,
+          })
+        );
       }
-
-      setlocalLoadedActivityPropertyData(tempData);
-
+    } else {
       dispatch(
-        setActivityPropertyChange({
-          [propertiesLabel.workdesk]: { isModified: true, hasError: false },
+        setToastDataFunc({
+          message: t("SelectedExpAlreadyAssociated"),
+          severity: "error",
+          open: true,
         })
       );
     }
@@ -212,25 +304,32 @@ function Exception(props) {
       }
     });
     setExceptionItemData(temp);
-
+    setDescription("");
+    setViewCheckbox(false);
+    setRaiseCheckbox(false);
+    setRespondCheckbox(false);
+    setClearCheckbox(false);
+    setEditableField(false);
+    setRaiseName("");
+    setRespondName("");
+    setClearName("");
     let tempData = { ...localLoadedActivityPropertyData };
-
     let tempdataLocal =
-      tempData?.ActivityProperty?.wdeskInfo?.objPMWdeskTodoLists?.todoMap;
-
+      tempData?.ActivityProperty?.wdeskInfo?.objPMWdeskExceptions?.exceptionMap;
     let td = {};
-    Object.keys(tempdataLocal).forEach((el) => {
+    Object.keys(tempdataLocal)?.forEach((el) => {
       if (el != selectedExpItem) {
         td = { ...td, [el]: tempdataLocal[el] };
       }
     });
-
-    tempData.ActivityProperty.wdeskInfo.objPMWdeskTodoLists.todoMap = { ...td };
+    tempData.ActivityProperty.wdeskInfo.objPMWdeskExceptions.exceptionMap = {
+      ...td,
+    };
     setlocalLoadedActivityPropertyData(tempData);
-
+    setSelectedExpItem(null);
     dispatch(
       setActivityPropertyChange({
-        Workdesk: { isModified: true, hasError: false },
+        [propertiesLabel.workdesk]: { isModified: true, hasError: false },
       })
     );
   };
@@ -238,35 +337,19 @@ function Exception(props) {
   const defineHandler = () => {
     setaddException(true);
   };
-  const exceptionItemHandler = (val, index) => {
-    setEditableField(exceptionItemData[val].editable);
-    setDescription(exceptionItemData[val].expTypeInfo.expTypeDesc);
-    setviewCheckbox(exceptionItemData[val].vTrigFlag);
-    setclearCheckbox(exceptionItemData[val].vcTrigFlag);
-    setrespondCheckbox(exceptionItemData[val].vrTrigFlag);
-    setraiseCheckbox(exceptionItemData[val].vaTrigFlag);
-  };
 
-  useEffect(() => {
-    let activityIdString = "";
-    localLoadedProcessData &&
-      localLoadedProcessData.MileStones.map((mileStone) => {
-        mileStone.Activities.map((activity, index) => {
-          activityIdString = activityIdString + activity.ActivityId + ",";
-        });
-      });
-    axios
-      .get(
-        SERVER_URL +
-          `/exception/${props.openProcessID}/${props.openProcessType}/${props.openProcessName}/${activityIdString}`
-      )
-      .then((res) => {
-        if (res.status === 200) {
-          let newState = { ...res.data };
-          setExpData(newState);
-        }
-      });
-  }, []);
+  const exceptionItemHandler = (val) => {
+    setSelectedExpItem(val);
+    setEditableField(false);
+    setDescription(exceptionItemData[val].expTypeInfo.expTypeDesc);
+    setViewCheckbox(exceptionItemData[val].vTrigFlag);
+    setClearCheckbox(exceptionItemData[val].vcTrigFlag);
+    setRespondCheckbox(exceptionItemData[val].vaTrigFlag);
+    setRaiseCheckbox(exceptionItemData[val].vrTrigFlag);
+    setRaiseName(exceptionItemData[val].vrTrigName);
+    setRespondName(exceptionItemData[val].vaTrigName);
+    setClearName(exceptionItemData[val].vcTrigName);
+  };
 
   const addExceptionToList = (
     ExceptionToAdd,
@@ -274,56 +357,88 @@ function Exception(props) {
     groupId = "0",
     ExceptionDesc
   ) => {
-    if (ExceptionToAdd != "") {
-      let maxExceptionId = 0;
-      expData.ExceptionGroups.map((group, groupIndex) => {
-        group.ExceptionList.map((listElem) => {
-          if (listElem.ExceptionId > +maxExceptionId) {
-            maxExceptionId = listElem.ExceptionId;
-          }
-        });
+    let exist = false;
+    expData?.ExceptionGroups.map((group) => {
+      group.ExceptionList.map((exception) => {
+        if (
+          exception.ExceptionName.toLowerCase() === ExceptionToAdd.toLowerCase()
+        ) {
+          exist = true;
+        }
       });
-      axios
-        .post(SERVER_URL + ENDPOINT_ADD_EXCEPTION, {
-          groupId: groupId,
-          expTypeId: +maxExceptionId + 1,
-          expTypeName: ExceptionToAdd,
-          expTypeDesc: ExceptionDesc,
-          processDefId: props.openProcessID,
+    });
+    if (exist) {
+      dispatch(
+        setToastDataFunc({
+          message: t("excepAlreadyExists"),
+          severity: "error",
+          open: true,
         })
-        .then((res) => {
-          if (res.data.Status == 0) {
-            let tempData = { ...expData };
-            tempData.ExceptionGroups.map((group) => {
-              if (group.GroupId == groupId) {
-                group.ExceptionList.push({
-                  ExceptionId: maxExceptionId + 1,
-                  ExceptionName: ExceptionToAdd,
-                  Description: ExceptionDesc,
-                  Activities: [],
-                  SetAllChecks: {
-                    Clear: false,
-                    Raise: false,
-                    Respond: false,
-                    View: false,
-                  },
-                });
-              }
-            });
-            setExpData(tempData);
-            setaddException(false);
-          }
+      );
+    } else {
+      if (ExceptionToAdd.trim() !== "") {
+        let maxExceptionId = 0;
+        expData.ExceptionGroups.map((group) => {
+          group.ExceptionList.map((listElem) => {
+            if (+listElem.ExceptionId > +maxExceptionId) {
+              maxExceptionId = +listElem.ExceptionId;
+            }
+          });
         });
-    } else if (ExceptionToAdd.trim() == "") {
-      alert("Please enter Exception Name");
-      document.getElementById("ExceptionNameInput").focus();
-    }
-    if (button_type != "addAnother") {
-      setaddException(false);
-    }
-    if (button_type == "addAnother") {
-      document.getElementById("ExceptionNameInput").value = "";
-      document.getElementById("ExceptionNameInput").focus();
+        axios
+          .post(SERVER_URL + ENDPOINT_ADD_EXCEPTION, {
+            groupId: groupId,
+            expTypeId: +maxExceptionId + 1,
+            expTypeName: ExceptionToAdd,
+            expTypeDesc: ExceptionDesc,
+            processDefId: props.openProcessID,
+          })
+          .then((res) => {
+            if (res.data.Status == 0) {
+              let temp = JSON.parse(JSON.stringify(localState));
+              temp.ExceptionList.push({
+                Description: ExceptionDesc,
+                ExceptionId: +maxExceptionId + 1,
+                ExceptionName: ExceptionToAdd,
+              });
+              dispatch(setOpenProcess({ loadedData: temp }));
+              let tempData = { ...expData };
+              tempData.ExceptionGroups.map((group) => {
+                if (group.GroupId == groupId) {
+                  group.ExceptionList.push({
+                    ExceptionId: maxExceptionId + 1,
+                    ExceptionName: ExceptionToAdd,
+                    Description: ExceptionDesc,
+                    Activities: [],
+                    SetAllChecks: {
+                      Clear: false,
+                      Raise: false,
+                      Respond: false,
+                      View: false,
+                    },
+                  });
+                }
+              });
+              setExpData(tempData);
+              if (button_type != "addAnother") {
+                setaddException(false);
+              }
+              if (button_type == "addAnother") {
+                document.getElementById("ExceptionNameInput").value = "";
+                document.getElementById("ExceptionNameInput").focus();
+              }
+            }
+          });
+      } else if (ExceptionToAdd.trim() === "") {
+        dispatch(
+          setToastDataFunc({
+            message: t("mandatoryErr"),
+            severity: "error",
+            open: true,
+          })
+        );
+        document.getElementById("ExceptionNameInput").focus();
+      }
     }
   };
 
@@ -335,55 +450,63 @@ function Exception(props) {
             <Checkbox
               checked={checkException}
               onChange={() => CheckExceptionHandler()}
-              className={styles.checkBoxCommon}
+              className={styles.mainCheckbox}
+              data-testid="CheckExp"
+              type="checkbox"
             />
             {t("EXCEPTION")}
           </div>
-
-          <div className="row" style={{ marginTop: "1rem" }}>
-            <p className={styles.description}>{t("EXCEPTION")}</p>
-            <Select
-              className="selectDropdown"
-              MenuProps={{
-                anchorOrigin: {
-                  vertical: "bottom",
-                  horizontal: "left",
-                },
-                transformOrigin: {
-                  vertical: "top",
-                  horizontal: "left",
-                },
-                getContentAnchorEl: null,
-              }}
-              id="Dropdown"
-              style={{
-                border: ".1px solid rgba(0, 0, 0, 0.38)",
-                width: "9rem",
-                height: "1.5rem",
-                fontSize: "14px",
-                marginLeft: "1rem",
-              }}
-              disabled={!checkException}
-              value={expectionListVal}
-              onChange={(e) => definedExpHandler(e)}
-            >
-              {exceptionData.map((val) => {
-                return (
-                  <MenuItem
-                    className={styles.menuItemStyles}
-                    key={val.ExceptionName}
-                    value={val.ExceptionName}
-                  >
-                    {val.ExceptionName}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-
-            <div style={{ marginLeft: "2rem" }}>
-              <button
+          <div className="row" style={{ alignItems: "end" }}>
+            <div style={{ flex: "1" }}>
+              <p className={styles.description}>{t("EXCEPTION")}</p>
+              <Select
+                MenuProps={{
+                  anchorOrigin: {
+                    vertical: "bottom",
+                    horizontal: "left",
+                  },
+                  transformOrigin: {
+                    vertical: "top",
+                    horizontal: "left",
+                  },
+                  getContentAnchorEl: null,
+                }}
+                id="Dropdown"
+                className={styles.todoSelect}
                 disabled={!checkException}
-                className={styles.addBtn}
+                value={expectionListVal}
+                onChange={(e) => definedExpHandler(e)}
+              >
+                <MenuItem className={styles.menuItemStyles} value={""}>
+                  {""}
+                </MenuItem>
+                {allExpData?.map((val) => {
+                  return (
+                    <MenuItem
+                      className={styles.menuItemStyles}
+                      key={val.ExceptionName}
+                      value={val.ExceptionName}
+                    >
+                      {val.ExceptionName}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </div>
+            <div style={{ flex: "1", marginLeft: "2rem" }}>
+              <button
+                disabled={
+                  !checkException ||
+                  (checkException && expectionListVal.trim() === "") ||
+                  (checkException && selectedExpItem)
+                }
+                className={
+                  !checkException ||
+                  (checkException && expectionListVal.trim() === "") ||
+                  (checkException && selectedExpItem)
+                    ? styles.disabledBtn
+                    : styles.addBtn
+                }
                 onClick={addHandler}
                 data-testid="associateBtn"
               >
@@ -391,7 +514,7 @@ function Exception(props) {
               </button>
               <button
                 disabled={!checkException}
-                className={styles.definebtn}
+                className={!checkException ? styles.disabledBtn : styles.addBtn}
                 onClick={defineHandler}
                 data-testid="defineBtn"
               >
@@ -399,178 +522,238 @@ function Exception(props) {
               </button>
             </div>
           </div>
-
-          <p className={styles.label}>{t("associatedExp")}</p>
-
-          <div className={styles.expTextarea}>
+          <p className={styles.todoItem}>{t("associatedExp")}</p>
+          <div className={styles.todoTextarea}>
             <ul>
-              {/*exceptionItemData &&
-                exceptionItemData.map((val, index) => {
-                  return (
-                    <li
-                      onClick={() => exceptionItemHandler(val, index)}
-                      className={
-                        selectedExpItem == index ? styles.selectedExp : null
-                      }
-                    >
-                      {val.ExceptionName}
-                    </li>
-                  );
-                })*/}
-
-              {Object.keys(exceptionItemData) &&
-                Object.keys(exceptionItemData).map((val) => {
-                  return (
-                    <li
-                      onClick={() => exceptionItemHandler(val)}
-                      className={
-                        selectedExpItem == val ? styles.selectedExp : null
-                      }
-                    >
-                      {val}
-                    </li>
-                  );
-                })}
+              {Object.keys(exceptionItemData)?.map((val) => {
+                return (
+                  <li
+                    onClick={() => exceptionItemHandler(val)}
+                    className={
+                      selectedExpItem == val
+                        ? styles.selectedTodo
+                        : styles.todoListItem
+                    }
+                  >
+                    {val}
+                  </li>
+                );
+              })}
             </ul>
           </div>
-          <button
-            disabled={!checkException}
-            className={styles.deleteBtn}
-            onClick={deleteHandler}
-            data-testid="deAssociateBtn"
-          >
-            {t("deassociate")}
-          </button>
+          <div className={styles.deassociateDiv}>
+            <button
+              disabled={!checkException || (checkException && !selectedExpItem)}
+              className={
+                !checkException || (checkException && !selectedExpItem)
+                  ? styles.disabledBtn
+                  : styles.deleteBtn
+              }
+              onClick={deleteHandler}
+              data-testid="deAssociateBtn"
+            >
+              {t("deassociate")}
+            </button>
+          </div>
         </div>
         <div style={{ width: "50%" }}>
-          <h5>{t("exceptionDetail")}</h5>
+          <p className={styles.todoItemDetails}>{t("exceptionDetail")}</p>
           <p className={styles.description}>{t("description")}</p>
           <textarea
             className={styles.descriptionTextarea}
             id="descriptionTextBox"
             onChange={(e) => descHandler(e)}
-            disabled={!checkException || (checkException && !editableField)}
+            disabled={true}
             value={description}
           />
-
-          <div className={styles.checklist}>
+          <div className="row expCheckList" style={{ width: "80%" }}>
             <Checkbox
               checked={viewCheckbox}
-              // onChange={() => CheckExceptionHandler()}
-              className={styles.checkBoxCommon}
-              disabled={!checkException || (checkException && !editableField)}
+              onChange={(e) => setViewCheckbox(e.target.checked)}
+              className={styles.mainCheckbox}
+              disabled={
+                !checkException ||
+                (checkException &&
+                  expectionListVal.trim() === "" &&
+                  editableField) ||
+                (checkException && !editableField)
+              }
             />
-            {t("view")}
-            <StarRateIcon
-              style={{
-                height: "8px",
-                width: "8px",
-                color: "red",
-                marginBottom: "5px",
-              }}
-            />
+            <span className={styles.checkboxLabel}>
+              {t("view")}
+              <span className={styles.starIcon}>*</span>
+            </span>
           </div>
-
-          <div className="row" style={{ marginTop: ".5rem" }}>
-            <Checkbox
-              checked={raiseCheckbox}
-              // onChange={() => CheckExceptionHandler()}
-              className={styles.checkBoxCommon}
-              disabled={!checkException || (checkException && !editableField)}
-            />
-            <span className={styles.checkboxLabel}> {t("raise")}</span>
-
-            <Select
-              className="selectDropdown"
-              MenuProps={{
-                anchorOrigin: {
-                  vertical: "bottom",
-                  horizontal: "left",
-                },
-                transformOrigin: {
-                  vertical: "top",
-                  horizontal: "left",
-                },
-                getContentAnchorEl: null,
-              }}
-              id="Dropdown"
-              style={{
-                border: ".1px solid rgba(0, 0, 0, 0.38)",
-                width: "9rem",
-                height: "1.5rem",
-                fontSize: "14px",
-                marginLeft: "5rem",
-              }}
-              disabled={!checkException || (checkException && !editableField)}
-            ></Select>
+          <div className="row expCheckList" style={{ width: "80%" }}>
+            <div style={{ flex: "1" }}>
+              <Checkbox
+                checked={raiseCheckbox}
+                onChange={(e) => setRaiseCheckbox(e.target.checked)}
+                className={styles.mainCheckbox}
+                disabled={
+                  !checkException ||
+                  (checkException && !viewCheckbox && editableField) ||
+                  (checkException && !editableField)
+                }
+              />
+              <span className={styles.checkboxLabel}>{t("raise")}</span>
+            </div>
+            <div style={{ flex: "2" }}>
+              <Select
+                MenuProps={{
+                  anchorOrigin: {
+                    vertical: "bottom",
+                    horizontal: "left",
+                  },
+                  transformOrigin: {
+                    vertical: "top",
+                    horizontal: "left",
+                  },
+                  getContentAnchorEl: null,
+                }}
+                id="Dropdown"
+                style={{ width: "70%" }}
+                className={styles.todoSelect}
+                value={raiseName}
+                onChange={(e) => {
+                  setRaiseName(e.target.value);
+                }}
+                disabled={
+                  !checkException ||
+                  (checkException && !raiseCheckbox && editableField) ||
+                  (checkException && !editableField)
+                }
+              >
+                <MenuItem className={styles.menuItemStyles} value={""}>
+                  {""}
+                </MenuItem>
+                {triggerList?.map((val) => {
+                  return (
+                    <MenuItem
+                      className={styles.menuItemStyles}
+                      key={val.TriggerName}
+                      value={val.TriggerName}
+                    >
+                      {val.TriggerName}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </div>
           </div>
-
-          <div className="row" style={{ marginTop: ".5rem" }}>
-            <Checkbox
-              checked={respondCheckbox}
-              // onChange={() => CheckExceptionHandler()}
-              className={styles.checkBoxCommon}
-              disabled={!checkException || (checkException && !editableField)}
-            />
-            <span className={styles.checkboxLabel}> {t("respond")}</span>
-
-            <Select
-              className="selectDropdown"
-              MenuProps={{
-                anchorOrigin: {
-                  vertical: "bottom",
-                  horizontal: "left",
-                },
-                transformOrigin: {
-                  vertical: "top",
-                  horizontal: "left",
-                },
-                getContentAnchorEl: null,
-              }}
-              id="Dropdown"
-              style={{
-                border: ".1px solid rgba(0, 0, 0, 0.38)",
-                width: "9rem",
-                height: "1.5rem",
-                fontSize: "14px",
-                marginLeft: "5rem",
-              }}
-              disabled={!checkException || (checkException && !editableField)}
-            ></Select>
+          <div className="row expCheckList" style={{ width: "80%" }}>
+            <div style={{ flex: "1" }}>
+              <Checkbox
+                checked={respondCheckbox}
+                onChange={(e) => setRespondCheckbox(e.target.checked)}
+                className={styles.mainCheckbox}
+                disabled={
+                  !checkException ||
+                  (checkException && !viewCheckbox && editableField) ||
+                  (checkException && !editableField)
+                }
+              />
+              <span className={styles.checkboxLabel}>{t("respond")}</span>
+            </div>
+            <div style={{ flex: "2" }}>
+              <Select
+                MenuProps={{
+                  anchorOrigin: {
+                    vertical: "bottom",
+                    horizontal: "left",
+                  },
+                  transformOrigin: {
+                    vertical: "top",
+                    horizontal: "left",
+                  },
+                  getContentAnchorEl: null,
+                }}
+                id="Dropdown"
+                style={{ width: "70%" }}
+                className={styles.todoSelect}
+                value={respondName}
+                onChange={(e) => {
+                  setRespondName(e.target.value);
+                }}
+                disabled={
+                  !checkException ||
+                  (checkException && !respondCheckbox && editableField) ||
+                  (checkException && !editableField)
+                }
+              >
+                <MenuItem className={styles.menuItemStyles} value={""}>
+                  {""}
+                </MenuItem>
+                {triggerList?.map((val) => {
+                  return (
+                    <MenuItem
+                      className={styles.menuItemStyles}
+                      key={val.TriggerName}
+                      value={val.TriggerName}
+                    >
+                      {val.TriggerName}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </div>
           </div>
-
-          <div className="row" style={{ marginTop: ".5rem" }}>
-            <Checkbox
-              checked={clearCheckbox}
-              // onChange={() => CheckExceptionHandler()}
-              className={styles.checkBoxCommon}
-              disabled={!checkException || (checkException && !editableField)}
-            />
-            <span className={styles.checkboxLabel}> {t("clear")}</span>
-
-            <Select
-              className="selectDropdown"
-              MenuProps={{
-                anchorOrigin: {
-                  vertical: "bottom",
-                  horizontal: "left",
-                },
-                transformOrigin: {
-                  vertical: "top",
-                  horizontal: "left",
-                },
-                getContentAnchorEl: null,
-              }}
-              id="Dropdown"
-              style={{
-                border: ".1px solid rgba(0, 0, 0, 0.38)",
-                width: "9rem",
-                height: "1.5rem",
-                fontSize: "14px",
-                marginLeft: "5rem",
-              }}
-              disabled={!checkException || (checkException && !editableField)}
-            ></Select>
+          <div className="row expCheckList" style={{ width: "80%" }}>
+            <div style={{ flex: "1" }}>
+              <Checkbox
+                checked={clearCheckbox}
+                onChange={(e) => setClearCheckbox(e.target.checked)}
+                className={styles.mainCheckbox}
+                disabled={
+                  !checkException ||
+                  (checkException && !viewCheckbox && editableField) ||
+                  (checkException && !editableField)
+                }
+              />
+              <span className={styles.checkboxLabel}>{t("clear")}</span>
+            </div>
+            <div style={{ flex: "2" }}>
+              <Select
+                MenuProps={{
+                  anchorOrigin: {
+                    vertical: "bottom",
+                    horizontal: "left",
+                  },
+                  transformOrigin: {
+                    vertical: "top",
+                    horizontal: "left",
+                  },
+                  getContentAnchorEl: null,
+                }}
+                id="Dropdown"
+                style={{ width: "70%" }}
+                className={styles.todoSelect}
+                value={clearName}
+                onChange={(e) => {
+                  setClearName(e.target.value);
+                }}
+                disabled={
+                  !checkException ||
+                  (checkException && !clearCheckbox && editableField) ||
+                  (checkException && !editableField)
+                }
+              >
+                <MenuItem className={styles.menuItemStyles} value={""}>
+                  {""}
+                </MenuItem>
+                {triggerList?.map((val) => {
+                  return (
+                    <MenuItem
+                      className={styles.menuItemStyles}
+                      key={val.TriggerName}
+                      value={val.TriggerName}
+                    >
+                      {val.TriggerName}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </div>
           </div>
         </div>
       </div>

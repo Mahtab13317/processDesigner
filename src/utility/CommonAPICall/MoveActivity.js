@@ -45,12 +45,13 @@ export const MoveActivity = (
       if (response.data.Status === 0) {
         if (view !== "BPMN") {
           setProcessData((prevData) => {
-            let processObject = { ...prevData };
+            let processObject = JSON.parse(JSON.stringify(prevData));
             processObject.MileStones &&
               processObject.MileStones.forEach((mile, index) => {
                 if (mile.iMileStoneId === milestoneId) {
                   if (mileStoneWidthIncreased) {
-                    mile.Width = mileStoneWidthIncreased.arrMilestoneInfos[index].width;
+                    mile.Width =
+                      mileStoneWidthIncreased.arrMilestoneInfos[index].width;
                   }
                   mile.Activities &&
                     mile.Activities.forEach((act) => {

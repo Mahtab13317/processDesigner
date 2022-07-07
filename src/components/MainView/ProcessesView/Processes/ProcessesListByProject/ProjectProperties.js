@@ -43,6 +43,9 @@ function ProjectProperties(props) {
           setProcessCount(res.data.ProjectProperty.TotalProcessCount);
           setprevDesc(res.data.ProjectProperty.Description);
         }
+      })
+      .catch((err) => {
+        console.log(err);
       });
   }, []);
 
@@ -58,6 +61,9 @@ function ProjectProperties(props) {
       .then((res) => {
         if (res.data.Status === 0) {
         }
+      })
+      .catch((err) => {
+        console.log(err);
       });
   };
 

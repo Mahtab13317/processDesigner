@@ -139,8 +139,8 @@ export function pasteFunction(
       return { ...oldIds, activityId: newActivityId };
     });
     setProcessData((prevProcessData) => {
-      newProcessData = { ...prevProcessData };
-      prevProcessData.MileStones?.forEach((mile) => {
+      newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+      newProcessData.MileStones?.forEach((mile) => {
         mile.Activities?.forEach((act) => {
           if (act.ActivityId === copiedCell.id) {
             activityType = act.ActivityType;
@@ -163,11 +163,13 @@ export function pasteFunction(
 
     setProcessData((prevProcessData) => {
       //do not do shallow copy process Data, else original state will get change
-      let newProcessData = { ...prevProcessData };
+      let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
       processDefId = newProcessData.ProcessDefId;
       processName = newProcessData.ProcessName;
-      newProcessData.MileStones = [...prevProcessData.MileStones];
-      newProcessData.Lanes = [...prevProcessData.Lanes];
+      newProcessData.MileStones = JSON.parse(
+        JSON.stringify(prevProcessData.MileStones)
+      );
+      newProcessData.Lanes = JSON.parse(JSON.stringify(prevProcessData.Lanes));
       newProcessData.MileStones?.forEach((milestone) => {
         if (milestone.iMileStoneId === mileId) {
           milestone?.Activities?.forEach((activity) => {

@@ -120,14 +120,18 @@ function Header(props) {
   useEffect(() => {
     async function getPinned() {
       const res = await axios.get(SERVER_URL_LAUNCHPAD + "/pinnedList/1");
-      if (res.status === 200) {
-        res.data.forEach((data) => {
-          setpinnedProcessDefIdArr((prev) => {
-            let temp = [...prev];
-            temp.push(data.Id + "");
-            return temp;
+      try {
+        if (res.status === 200) {
+          res.data.forEach((data) => {
+            setpinnedProcessDefIdArr((prev) => {
+              let temp = [...prev];
+              temp.push(data.Id + "");
+              return temp;
+            });
           });
-        });
+        }
+      } catch (err) {
+        console.log(err);
       }
     }
     getPinned();

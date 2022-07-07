@@ -1,0 +1,14 @@
+.switch{
+    font-size: 12px !important;
+    color:#606060 !important
+}
+.switch .MuiFormControlLabel-label{
+    font-size: 12px !important;
+    color:#606060 !important
+}
+.btnSave {
+    color: #fff !important;
+    background: #0072c6 !important;
+    border-radius: 1px !important;
+  }
+

@@ -327,14 +327,13 @@ export const ENDPOINT_GET_CURRENT_CABINETNAME = "/currentCabinetName";
 
 export const ENDPOINT_UPLOAD_ATTACHMENT = "/attachDoc";
 export const ENDPOINT_DOWNLOAD_ATTACHMENT = "/downloadDoc";
-export const ENDPOINT_SAVE_ATTACHMENT="/attachment";
+export const ENDPOINT_SAVE_ATTACHMENT = "/attachment";
 export const CONFIG = "/config";
 
 export const ENDPOINT_GET_REGISTER_TRIGGER = "/registerTrigger";
-
 export const ENDPOINT_POST_REGISTER_WINDOW = "/registerWindow";
-
 export const ENDPOINT_GET_FORMASSOCIATIONS = "/formAssociations";
+export const ENDPOINT_ADD_DOC = "/addDocType";
 
 export const FILETYPE_ZIP = "application/x-zip-compressed";
 export const FILETYPE_DOC = "application/msword";
@@ -696,3 +695,15 @@ export const ENDPOINT_UPDATE_GLOBAL_TEMPLATE = "/updateGlobalTemplate";
 export const ENDPOINT_DELETE_GLOBAL_TEMPLATE = "/deleteGlobalTemplate";
 export const STATUS_TYPE_ADDED = "S";
 export const STATUS_TYPE_TEMP = "T";
+
+export const toDoActivities = [
+  { activityId: 1, subActivityId: 1 },
+  { activityId: 1, subActivityId: 3 },
+  { activityId: 11, subActivityId: 1 },
+  { activityId: 10, subActivityId: 3 },
+  { activityId: 10, subActivityId: 7 },
+  { activityId: 3, subActivityId: 1 },
+  { activityId: 2, subActivityId: 1 },
+  { activityId: 2, subActivityId: 2 },
+  { activityId: 32, subActivityId: 1 },
+];

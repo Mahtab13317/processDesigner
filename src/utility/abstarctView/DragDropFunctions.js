@@ -24,7 +24,7 @@ export const handleDragEnd = (result, processData, setProcessData) => {
   } else {
     let activity, mile, prevMile, lastAct;
     let mileWidth = 0;
-    const processObjectData = { ...processData };
+    let processObjectData = JSON.parse(JSON.stringify(processData));
     if (
       // This condition runs when the activity card is dragged and dropped in a different position in the same milestone.
       source.droppableId === destination.droppableId &&
@@ -134,6 +134,9 @@ export const handleDragEnd = (result, processData, setProcessData) => {
             setProcessData(processObjectData);
           }
         }
+      })
+      .catch((err) => {
+        console.log(err);
       });
   }
 };

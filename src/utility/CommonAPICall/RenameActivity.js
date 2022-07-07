@@ -22,41 +22,46 @@ export const renameActivity = (
     processName: processName,
     queueId: queueId,
   };
-  axios.post(SERVER_URL + ENDPOINT_RENAMEACTIVITY, obj).then((response) => {
-    if (response.data.Status == 0) {
-      if (!isBpmn) {
-        //value already set in bpmn view
-        setProcessData((prevProcessData) => {
-          let newProcessData = { ...prevProcessData };
-          newProcessData.MileStones.forEach((milestone) => {
-            milestone.Activities &&
-              milestone.Activities.map((activity) => {
-                if (activity.ActivityId === actId) {
-                  //rename activity name
-                  activity.ActivityName = newActivityName;
-                }
-              });
+  axios
+    .post(SERVER_URL + ENDPOINT_RENAMEACTIVITY, obj)
+    .then((response) => {
+      if (response.data.Status == 0) {
+        if (!isBpmn) {
+          //value already set in bpmn view
+          setProcessData((prevProcessData) => {
+            let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+            newProcessData.MileStones.forEach((milestone) => {
+              milestone.Activities &&
+                milestone.Activities.map((activity) => {
+                  if (activity.ActivityId === actId) {
+                    //rename activity name
+                    activity.ActivityName = newActivityName;
+                  }
+                });
+            });
+            return newProcessData;
           });
-          return newProcessData;
-        });
-      }
-    }else{
-      if(isBpmn){
-        // revert to old activity name if api fails
-        setProcessData((prevProcessData) => {
-          let newProcessData = { ...prevProcessData };
-          newProcessData.MileStones.forEach((milestone) => {
-            milestone.Activities &&
-              milestone.Activities.map((activity) => {
-                if (activity.ActivityId === actId) {
-                  //rename activity name
-                  activity.ActivityName = oldActName;
-                }
-              });
+        }
+      } else {
+        if (isBpmn) {
+          // revert to old activity name if api fails
+          setProcessData((prevProcessData) => {
+            let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+            newProcessData.MileStones.forEach((milestone) => {
+              milestone.Activities &&
+                milestone.Activities.map((activity) => {
+                  if (activity.ActivityId === actId) {
+                    //rename activity name
+                    activity.ActivityName = oldActName;
+                  }
+                });
+            });
+            return newProcessData;
           });
-          return newProcessData;
-        });
+        }
       }
-    }
-  });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };

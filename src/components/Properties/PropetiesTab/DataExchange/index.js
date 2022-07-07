@@ -42,7 +42,7 @@ function DataExchange(props) {
   const [loggedInCabinet, setLoggedInCabinet] = useState(true);
   const [currentCabinetName, setCurrentCabinetName] = useState(""); // State that stores the current cabinet name in which the user is logged in.
   const [cabinetName, setCabinetName] = useState(""); // State that stores the cabinet name which the user fills in the input field.
-  const [operationType, setOperationType] = useState("2"); // State that stores the operation type of the data exchange rule.
+  const [operationType, setOperationType] = useState("1"); // State that stores the operation type of the data exchange rule.
   const [isCabinetConnected, setIsCabinetConnected] = useState(false); // State that stores the boolean for cabinet connection.
   const [opList, setOpList] = useState([]); // State that stores the data exchange operations data.
   const [variables, setVariables] = useState([]); // List of all variables.
@@ -88,14 +88,21 @@ function DataExchange(props) {
       setOpList(
         localActivityPropertyData?.ActivityProperty?.objDataExchange?.dbRules
       );
-      setActivityOpType(
+      if (
         localActivityPropertyData?.ActivityProperty?.objDataExchange
-          ?.m_strSelectedOption
-      );
-      setOperationType(
-        localActivityPropertyData?.ActivityProperty?.objDataExchange
-          ?.m_strSelectedOption
-      );
+          ?.m_strSelectedOption !== ""
+      ) {
+        setOperationType(
+          localActivityPropertyData?.ActivityProperty?.objDataExchange
+            ?.m_strSelectedOption
+        );
+        setActivityOpType(
+          localActivityPropertyData?.ActivityProperty?.objDataExchange
+            ?.m_strSelectedOption
+        );
+      } else {
+        setActivityOpType(operationType);
+      }
       let temp = [...tableDetails];
       localActivityPropertyData?.ActivityProperty?.objDataExchange?.dbRules?.forEach(
         () => {
@@ -231,19 +238,45 @@ function DataExchange(props) {
 
   // Function that runs when the component loads.
   useEffect(() => {
-    getExistingTableData();
+    // getExistingTableData();
     getCurrentCabinetName();
   }, []);
 
   // Function to fetch existing table data by making an API call.
   const getExistingTableData = () => {
-    axios
-      .get(
-        SERVER_URL +
-          ENDPOINT_GET_EXISTING_TABLES +
+    if (cabinetName.trim() !== "") {
+      if (loggedInCabinet) {
+        existingTableAPICall(`/${openProcessID}` + `/${openProcessType}`);
+      } else if (isCabinetConnected) {
+        existingTableAPICall(
           `/${openProcessID}` +
-          `/${openProcessType}`
-      )
+            `/${openProcessType}` +
+            `?cabinetName=${cabinetName}`
+        );
+      } else {
+        dispatch(
+          setToastDataFunc({
+            message: "Kindly test the connection",
+            severity: "error",
+            open: true,
+          })
+        );
+      }
+    } else {
+      dispatch(
+        setToastDataFunc({
+          message: "Kindly enter a cabinet name",
+          severity: "error",
+          open: true,
+        })
+      );
+    }
+  };
+
+  // Function that has the api call for getting existing tables.
+  const existingTableAPICall = (existingTableURL) => {
+    axios
+      .get(SERVER_URL + ENDPOINT_GET_EXISTING_TABLES + existingTableURL)
       .then((res) => {
         if (res.status === 200) {
           let modifiedArray = [];
@@ -315,7 +348,10 @@ function DataExchange(props) {
   const localOpHandler = () => {
     if (checkIfAddNewOpIsValid(operationType)) {
       let obj = getRuleJSON();
-      let temp = [...opList];
+      let temp = [];
+      if (opList?.length > 0) {
+        temp = [...opList];
+      }
       temp.push(obj);
       setOpList(temp);
       setGlobalData(temp);
@@ -458,6 +494,7 @@ function DataExchange(props) {
             checked={loggedInCabinet}
             size="small"
             onChange={() => {
+              setExistingTableData([]);
               setLoggedInCabinet((prevState) => {
                 if (!prevState) {
                   setCabinetName(currentCabinetName);
@@ -479,7 +516,10 @@ function DataExchange(props) {
               styles.cabinetNameInput,
               loggedInCabinet && styles.cabinetNameDisabled
             )}
-            onChange={(event) => setCabinetName(event.target.value)}
+            onChange={(event) => {
+              setCabinetName(event.target.value);
+              setIsCabinetConnected(false);
+            }}
             value={cabinetName}
             disabled={loggedInCabinet || isProcessReadOnly}
           />
@@ -508,7 +548,12 @@ function DataExchange(props) {
             id="DE_Operation_Type_Dropdown"
             className={styles.dropdown}
             value={operationType}
-            onChange={(event) => setOperationType(event.target.value)}
+            onChange={(event) => {
+              setOperationType(event.target.value);
+              if (opList?.length === 0) {
+                setActivityOpType(event.target.value);
+              }
+            }}
             isNotMandatory={true}
           >
             {operationTypes?.map((element) => {
@@ -582,6 +627,7 @@ function DataExchange(props) {
           setGlobalData={setGlobalData}
           tableDetails={tableDetails}
           setTableDetails={setTableDetails}
+          getExistingTableData={getExistingTableData}
         />
       ) : null}
     </div>

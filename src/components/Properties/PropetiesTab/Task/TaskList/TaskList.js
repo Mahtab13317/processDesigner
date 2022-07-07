@@ -4,15 +4,17 @@ import SearchComponent from "../../../../../UI/Search Component/index.js";
 import "./TaskList.css";
 import Button from "@material-ui/core/Button";
 import { store, useGlobalState } from "state-pool";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setActivityPropertyChange } from "../../../../../redux-store/slices/ActivityPropertyChangeSlice.js";
+import { OpenProcessSliceValue, setOpenProcess } from "../../../../../redux-store/slices/OpenProcessSlice.js";
 
 function TaskList(props) {
-  const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcessData, setlocalLoadedProcessData] =
-    useGlobalState(loadedProcessData);
   const [json, setJson] = useState([]);
   const [SelectAllChecked, setSelectAllChecked] = useState(false);
+  const openProcessData = useSelector(OpenProcessSliceValue);
+  const localLoadedProcessData = JSON.parse(
+    JSON.stringify(openProcessData.loadedData)
+  );
   let dispatch = useDispatch();
 
   useEffect(() => {
@@ -27,7 +29,6 @@ function TaskList(props) {
 
   useEffect(() => {
     let temp = JSON.parse(JSON.stringify(localLoadedProcessData.Tasks));
-
     setJson(temp);
   }, [localLoadedProcessData.Tasks]);
 
@@ -49,7 +50,9 @@ function TaskList(props) {
     setJson(temp);
     let temp2 = JSON.parse(JSON.stringify(localLoadedProcessData));
     temp2.Tasks = temp;
-    setlocalLoadedProcessData(temp2);
+    dispatch(
+      setOpenProcess({ loadedData: temp2 })
+    );
     dispatch(
       setActivityPropertyChange({
         Task: { isModified: true, hasError: false },

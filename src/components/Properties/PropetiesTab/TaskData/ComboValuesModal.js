@@ -220,7 +220,12 @@ const Content = ({
   const direction = `${t("HTML_DIR")}`;
 
   const classes = useStyles({ direction });
-
+  /*****************************************************************************************
+     * @author asloob_ali BUG ID : 111440 Description : 111440 -  Task Combo Box IBPS 5 Comparison: the static field does not allow to type, it allows only integer values which is not the case with IBPS 5
+     *  Reason: input type was mapped to the wrong m_iVariableType key not correct.
+     * Resolution : now input type is mapped with m_strVariableType.
+  
+     *  Date : 01/07/2022             ****************/
   return (
     <div className={classes.root}>
       <Grid container direction="column" spacing={1}>
@@ -240,9 +245,9 @@ const Content = ({
                 <Field
                   required={true}
                   type={
-                    editedComboVar.m_iVariableType === 8
+                    editedComboVar.m_strVariableType === "8"
                       ? "date"
-                      : editedComboVar.m_iVariableType === 10
+                      : editedComboVar.m_strVariableType === "10"
                       ? "text"
                       : "number"
                   }

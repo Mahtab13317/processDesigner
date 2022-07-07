@@ -92,9 +92,6 @@ function RequestConsumerSoap(props) {
   const handleChange = (event) => {
     setInvocationType(event.target.value);
   };
-  const [variablesList, setVariablesList] = useState([]);
-  const [checkValue, setCheckValue] = useState(null);
-  const [selectedActivityIcon, setSelectedActivityIcon] = useState();
   const OnReplySelect = (e) => {
     setChosenReply(e.target.value);
   };
@@ -126,19 +123,6 @@ function RequestConsumerSoap(props) {
       });
     }
   }, [replyActivities]);
-
-  useEffect(() => {
-    let activityProps = getActivityProps(
-      props.cellActivityType,
-      props.cellActivitySubType
-    );
-    setSelectedActivityIcon(activityProps[0]);
-  }, [
-    localLoadedProcessData.MileStones,
-    props.cellActivityType,
-    props.cellActivitySubType,
-    props.cellID,
-  ]);
 
   useEffect(() => {
     let tempData = [];

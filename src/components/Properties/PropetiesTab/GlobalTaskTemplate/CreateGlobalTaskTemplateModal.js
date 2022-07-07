@@ -231,6 +231,7 @@ const Content = (props) => {
     <>
       <div>
         <Field
+          id="temNameCreateGTId"
           label="Template Name"
           {...templateName}
           required={true}

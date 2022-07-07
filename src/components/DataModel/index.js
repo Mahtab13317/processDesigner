@@ -14,6 +14,7 @@ import UserDefinedDataTypeIcon from "../../assets/DataModalIcons/DML_UserDefined
 import DataObjectsIcon from "../../assets/DataModalIcons/DML_DtataObjects.svg";
 import ERDiagramIcon from "../../assets/DataModalIcons/DML_ERDiagram.svg";
 import { store, useGlobalState } from "state-pool";
+import DataRights from "./DataRights";
 
 function DataModel(props) {
   let { t } = useTranslation();
@@ -121,7 +122,7 @@ function DataModel(props) {
                 <img style={{ height: "100%" }} src={ERDiagramIcon} />
               </Icon>
             }
-            label={getLabel(t("erDiagram"))}
+            label={getLabel(t("dataRights"))}
           />
         </Tabs>
       </div>
@@ -157,7 +158,7 @@ function DataModel(props) {
           Data Objects section to be painted here.
         </TabPanel>
         <TabPanel style={{ padding: "0.625rem" }} value={value} index={4}>
-          ER Diagram section to be painted here.
+          <DataRights />
         </TabPanel>
       </div>
     </div>

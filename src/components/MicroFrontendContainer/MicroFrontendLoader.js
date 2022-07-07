@@ -8,23 +8,20 @@ const useMicroFrontendLoader = (props) => {
     ProcessDefId,
   } = props;
 
-  window.getMicroApps = (microAppsHandler) => {
-    // debugger;
-    console.log("inside microapps");
-    microAppsHandler(microAppsJSON);
-  };
-
   const loadMicrofrontend = () => {
-    const scriptInt = document.createElement("script");
-
-    scriptInt.type = "text/javascript";
-
-    scriptInt.src = "/integration/integration.js";
-    scriptInt.onload = () => {
-      console.log("inside integration compo");
-    };
-    console.log("inside loadmicro");
-    document.body.appendChild(scriptInt);
+    // const scriptInt = document.createElement("script");
+    // scriptInt.type = "text/javascript";
+    // scriptInt.src = "/integration/integration.js";
+    // scriptInt.onload = () => {
+    //   console.log("inside integration compo");
+    // };
+    // console.log("inside loadmicro");
+    // document.body.appendChild(scriptInt);
+    // if (window && window?.getMicroApps)
+    //   window.getMicroApps = (microAppsHandler) => {
+    //     console.log("inside microapps");
+    //     microAppsHandler(microAppsJSON);
+    //   };
   };
 
   useEffect(() => {

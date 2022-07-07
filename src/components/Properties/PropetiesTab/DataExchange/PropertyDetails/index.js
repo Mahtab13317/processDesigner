@@ -37,6 +37,7 @@ function PropertyDetails(props) {
     setGlobalData,
     tableDetails,
     setTableDetails,
+    getExistingTableData,
   } = props;
   const dispatch = useDispatch();
   let { t } = useTranslation();
@@ -531,6 +532,7 @@ function PropertyDetails(props) {
     setIsNested((prevState) => {
       return !prevState;
     });
+    getExistingTableData();
     setListOfComplexTables([]);
     setOpList((prevData) => {
       const temp = [...prevData];
@@ -1089,6 +1091,9 @@ function PropertyDetails(props) {
                 id="DE_Select_Tables_Dropdown"
                 className={styles.dropdown}
                 value={selectedTableName}
+                onOpen={() => {
+                  getExistingTableData();
+                }}
                 onChange={(event) => {
                   setSelectedTableName(event.target.value);
                   setTableDetails((prevState) => {

@@ -262,7 +262,7 @@ function UserDefinedDataTypes(props) {
             });
             if (type === EDIT_OPTION) {
               //setIsObjEdited to false when dataObj is modified
-              let newData = { ...localLoadedProcessData };
+              let newData = JSON.parse(JSON.stringify(localLoadedProcessData));
               newData?.ComplexVarDefinition?.forEach((dataType) => {
                 if (dataType.TypeId === selectedItem.TypeId) {
                   dataType.TypeName = dataObject.dataObjectName;
@@ -272,7 +272,7 @@ function UserDefinedDataTypes(props) {
               setlocalLoadedProcessData(newData);
               setIsObjEdited(false);
             } else if (type === ADD_OPTION) {
-              let newData = { ...localLoadedProcessData };
+              let newData = JSON.parse(JSON.stringify(localLoadedProcessData));
               newData?.ComplexVarDefinition?.push({
                 TypeId: selectedItem.TypeId,
                 TypeName: dataObject.dataObjectName,
@@ -324,7 +324,7 @@ function UserDefinedDataTypes(props) {
     axios.post(SERVER_URL + ENDPOINT_DELETE_COMPLEX, jsonBody).then((res) => {
       if (res.data.Status === 0) {
         let indexVal;
-        let newData = { ...localLoadedProcessData };
+        let newData = JSON.parse(JSON.stringify(localLoadedProcessData));
         newData.ComplexVarDefinition?.forEach((dataType, idx) => {
           if (dataType.TypeId === selectedItem.TypeId) {
             indexVal = idx;

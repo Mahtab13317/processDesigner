@@ -435,7 +435,7 @@
 .selectedToDoTypeModal {
   display: flex;
   flex-direction: column;
-  margin-left: 50px;
+  flex: 1;
 }
 
 .selectedToDoTypeDiv {
@@ -518,4 +518,14 @@
   opacity: 1;
   margin-bottom: 3px;
   padding-left: 3px;
+}
+
+.addToDo {
+  background-color: white;
+  width: 50vw;
+  position: absolute;
+  top: 21.5%;
+  left: 25%;
+  padding: 0;
+  height: auto;
 }

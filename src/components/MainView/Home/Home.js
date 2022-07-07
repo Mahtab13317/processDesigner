@@ -105,7 +105,7 @@ function Home(props) {
     if (window.loadMicroFrontend) {
       const timeout = setTimeout(() => {
         window.loadActivityStream();
-      }, 500);
+      }, 1000);
       return () => clearTimeout(timeout);
     }
   }, [window.loadMicroFrontend]);

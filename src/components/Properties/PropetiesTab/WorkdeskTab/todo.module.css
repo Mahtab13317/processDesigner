@@ -1,18 +1,58 @@
 .todoTextarea {
   width: 80%;
   height: 12rem;
-  background-color: #f6f5f5;
-  border: 1px solid black;
+  background-color: white;
+  border: 1px solid #cecece;
+}
+
+.todoDocTextarea {
+  width: 90%;
+  min-height: 11rem;
+  max-height: 17rem;
+  overflow-y: auto;
+  background-color: white;
+  border: 1px solid #cecece;
+}
+
+.docTextarea {
+  padding: 0 1vw;
 }
 
 .mainCheckbox {
-  height: "20px";
-  width: "20px";
-  margin-right: "8px";
+  margin-right: 0.25rem !important;
+  margin-left: 0rem !important;
+  padding: 0.5rem 0 !important;
 }
+
+.mainCheckbox span {
+  text-align: left;
+  font: normal normal normal 11px/15px Open Sans;
+  letter-spacing: 0px;
+  /* color: #707070; */
+}
+
+.mainCheckbox span:first-child {
+  height: 1rem;
+  width: 1rem;
+  margin: 0 0.25rem 0 0;
+}
+
+.mainCheckbox svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
 .checklist {
-  font: normal normal 500 12px/17px Open Sans;
+  font: normal normal normal 12px/17px Open Sans;
+  display: flex;
+  align-items: center;
+  margin: 0rem 0 0.5rem;
 }
+
+.checkboxLabel {
+  font: normal normal normal 12px/17px Open Sans;
+}
+
 .label {
   font: normal normal 500 12px/17px Open Sans;
   margin-left: 0.5rem;
@@ -25,37 +65,38 @@
 }
 .todoItem {
   font: normal normal 600 12px/17px Open Sans;
-  /* margin-left: 1rem; */
-  margin-top: 0.75rem;
-  margin-bottom: 0.75rem;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
 }
+
+.todoItemDetails {
+  font: normal normal 600 12px/17px Open Sans;
+  margin-top: 0.25rem;
+  margin-bottom: 1rem;
+}
+
 .descriptionTextarea {
   width: 80%;
   height: 5rem;
-  margin: 0.5rem 0;
-  padding-top: 0 !important;
+  margin: 0;
+  padding: 0.25rem 0.25vw;
   background-color: #f6f5f5;
 }
 .description {
-  font: normal normal 500 12px/17px Open Sans;
-  margin-top: 0.5rem;
-  margin-bottom: 0.3rem;
+  font: normal normal normal 12px/17px Open Sans;
+  margin-bottom: 0.125rem;
 }
 .flexRow {
   display: flex;
   flex-direction: row;
-  margin: 2%;
-  flex-wrap: wrap;
+  padding: 1rem 1.5vw;
+  background-color: white;
 }
 
-/* .radiobtn {
-  font: normal normal normal 10px/14px Open Sans !important;
-  letter-spacing: 0px;
-  color: #000000;
-  opacity: 1;
-  display: flex;
-  flex-direction: row;
-} */
+.documentRow {
+  padding: 1rem 1.5vw;
+  background-color: white;
+}
 
 .radiobtn svg {
   width: 1rem;
@@ -64,15 +105,13 @@
 
 .radiobtn span {
   text-align: left;
-  font: normal normal normal 11px/15px Open Sans;
+  font: normal normal normal 12px/17px Open Sans;
   letter-spacing: 0px;
-  /* color: #707070; */
 }
 
 .radiobtn span:first-child {
-  height: 1rem;
-  width: 1rem;
-  margin: 0 0.25rem 0 0.25rem;
+  height: 1.5rem;
+  padding: 0.5rem 0.25vw 0.5rem 0 !important;
 }
 .radiobtn {
   margin-right: 1rem !important;
@@ -94,50 +133,59 @@ ul {
   list-style-type: none;
 }
 
-ul li {
-  font: normal normal normal 11px/15px Open Sans;
-  padding-left: 1rem;
-}
-
-ul li:hover {
-  background: rgba(0, 114, 198, 0.06);
-}
 .selectedTodo {
   background: rgba(0, 114, 198, 0.06);
+  padding: 0.5rem 0.5vw !important;
+  font: normal normal 500 12px/17px Open Sans;
+  cursor: pointer;
+  border: 1px solid transparent;
 }
 
 .tempList {
   background: rgba(0, 114, 198, 0.06);
 }
+
 .deleteBtn {
-  background: #ffffff 0% 0% no-repeat padding-box !important;
-  border: 1px solid #c4c4c4 !important;
-  border-radius: 1px !important;
-  font: normal normal normal 10px/15px Open Sans !important;
-  letter-spacing: 0px !important;
-  color: #606060 !important;
-  text-transform: none !important;
-  padding: 0.25rem;
-  width: 5rem;
-  margin-left: 67%;
-  margin-top: 0.5rem;
-  cursor: pointer;
-}
-.addBtn {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
-  background: #0072c6 0% 0% no-repeat padding-box;
-  border-radius: 1px;
-  text-align: center;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  font: normal normal 600 12px/17px Open Sans;
   letter-spacing: 0px;
-  color: #ffffff;
-  font: normal normal normal 10px/15px Open Sans;
-  padding: 0 0.25rem;
-  align-items: center;
-  width: 4rem;
+  color: #606060;
+  padding: 0 1vw;
+  text-align: center;
   height: 1.5rem;
   cursor: pointer;
 }
+
+.addBtn {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #0072c5;
+  border-radius: 2px;
+  margin-right: 0.5rem;
+  text-align: center;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #0072c6;
+  padding: 0 1vw;
+  height: 1.5rem;
+  cursor: pointer;
+}
+
+.disabledBtn {
+  background: rgba(0, 0, 0, 0.12);
+  border: none;
+  border-radius: 2px;
+  margin-right: 0.5rem;
+  text-align: center;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: rgba(0, 0, 0, 0.5);
+  padding: 0 1vw;
+  height: 1.5rem;
+  cursor: default;
+}
+
 .definebtn {
   background: #ffffff 0% 0% no-repeat padding-box !important;
   border: 1px solid #c4c4c4 !important;
@@ -149,4 +197,89 @@ ul li:hover {
   padding: 0.25rem;
   width: 4rem;
   cursor: pointer;
+}
+
+.todoSelect {
+  border: 1px solid #cecece;
+  width: 100%;
+  height: 1.5rem;
+  border-radius: 1px;
+  font: normal normal normal 12px/17px Open Sans;
+}
+
+.menuItemStyles {
+  font: normal normal normal 12px/17px Open Sans;
+  width: 100%;
+  height: 1.5rem;
+}
+
+.todoListItem {
+  padding: 0.5rem 0.5vw !important;
+  font: normal normal 500 12px/17px Open Sans;
+  cursor: pointer;
+  border: 1px solid #f8f8f8;
+}
+
+.todoListItem:hover {
+  background-color: transparent;
+}
+
+.todoListItem:nth-child(odd) {
+  background-color: #f8f8f8;
+}
+
+.deassociateDiv {
+  display: flex;
+  justify-content: end;
+  width: 80%;
+  margin-top: 0.5rem;
+}
+
+.starIcon {
+  color: red;
+  margin-left: 0.25vw;
+  font-size: 0.75rem;
+}
+
+.docTableHeader {
+  padding: 0 1vw;
+  border-bottom: 1px solid #cecece;
+}
+
+.docTableHeader .view,
+.docTableHeader .checkboxHeader,
+.docTableHeader .checkboxDownload,
+.docTableHeader .docTypes {
+  font: normal normal 600 13px/18px Open Sans;
+}
+
+.view {
+  flex: 1;
+  font: normal normal 500 12px/17px Open Sans;
+}
+.checkboxHeader {
+  flex: 1;
+  font: normal normal 500 12px/17px Open Sans;
+}
+.checkboxDownload {
+  flex: 1.25;
+  font: normal normal 500 12px/17px Open Sans;
+}
+.docTypes {
+  flex: 2.5;
+  font: normal normal 500 12px/17px Open Sans;
+}
+
+.inputField {
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  padding: 0.25rem 0.25vw;
+  background-color: #f6f5f5;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  margin: 0.5rem 0;
+  display: block;
+  width: 60%;
+  height: 1.5rem;
 }

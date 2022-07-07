@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import StarRateIcon from "@material-ui/icons/StarRate";
-import Button from "@material-ui/core/Button";
-import "../Interfaces.css";
+import "./DocTypes.css";
+import styles from "./index.module.css";
 import { useTranslation } from "react-i18next";
+import { RTL_DIRECTION } from "../../../../Constants/appConstants";
+import CloseIcon from "@material-ui/icons/Close";
+import arabicStyles from "./arabicStyles.module.css";
 
 function AddDoc(props) {
   let { t } = useTranslation();
@@ -36,77 +38,83 @@ function AddDoc(props) {
   }, [props.docDescToModify, props.docNameToModify]);
 
   return (
-    <div className="addDocs" style={{ height: "250px", width: "350px", direction:direction }}>
-      <p className="addDocsHeading">
-        {props.docNameToModify ? docModalHead : t("addDocuments")}
-      </p>
-      <div>
-        <label className="nameInputlabel">
-          {t("documentTypeName")}
-          <StarRateIcon
-            style={{ height: "15px", width: "15px", color: "red" }}
-          />
+    <div className="addDocs">
+      <div className={styles.modalHeader}>
+        <h3
+          className={
+            direction === RTL_DIRECTION
+              ? arabicStyles.modalHeading
+              : styles.modalHeading
+          }
+        >
+          {props.docNameToModify ? docModalHead : t("addDocuments")}
+        </h3>
+        <CloseIcon
+          onClick={() => props.handleClose()}
+          className={styles.closeIcon}
+        />
+      </div>
+      <div className={styles.modalSubHeader}>
+        <label className={styles.modalLabel}>
+          {t("documentType")}
+          <span className={styles.starIcon}>*</span>
         </label>
         <form>
           <input
             id="DocNameInput"
             value={nameInput}
             onChange={(e) => setNameFunc(e)}
-            className="nameInput"
+            className={styles.modalInput}
           />
         </form>
-        <label className="descInputlabel">
-          Doc Description
-          <StarRateIcon
-            style={{ height: "15px", width: "15px", color: "red" }}
-          />
-        </label>
+        <label className={styles.modalLabel}>{t("description")}</label>
         <textarea
           id="DocDescInput"
           value={descInput}
           onChange={(e) => setDescFunc(e)}
-          className="descTextArea"
-        ></textarea>
+          className={styles.modalTextArea}
+        />
       </div>
-      {/* {props.bDocExists ? <p>Name taken!!</p> : null} */}
       <div
-        className="buttons_add"
-        style={{ marginTop: "20px", textAlign: "right" }}
+        className={
+          direction === RTL_DIRECTION
+            ? arabicStyles.modalFooter
+            : styles.modalFooter
+        }
       >
-        <Button
-          variant="outlined"
+        <button
+          className={
+            direction === RTL_DIRECTION
+              ? arabicStyles.cancelButton
+              : styles.cancelButton
+          }
           onClick={() => props.handleClose()}
-          id="close_AddDocModal_Button"
         >
           {t("cancel")}
-        </Button>
+        </button>
         {props.docNameToModify ? null : (
-          <Button
+          <button
             id="addAnotherDocTypes_Button"
             onClick={(e) =>
               props.addDocToList(nameInput, descInput, "addAnother")
             }
-            variant="contained"
-            color="primary"
+            className={styles.okButton}
           >
             {t("addAnother")}
-          </Button>
+          </button>
         )}
-
         {props.docNameToModify ? null : (
-          <Button
+          <button
             id="addNclose_AddDocModal_Button"
-            variant="contained"
             onClick={(e) => props.addDocToList(nameInput, descInput, "add")}
-            color="primary"
+            className={styles.okButton}
           >
             {t("add&Close")}
-          </Button>
+          </button>
         )}
 
         {props.docNameToModify ? (
-          <Button
-            variant="contained"
+          <button
             onClick={(e) => {
               props.modifyDescription(
                 nameInput,
@@ -114,10 +122,10 @@ function AddDoc(props) {
                 props.docIdToModify
               );
             }}
-            color="primary"
+            className={styles.okButton}
           >
-            {"SAVE"}
-          </Button>
+            {"save"}
+          </button>
         ) : null}
       </div>
     </div>

@@ -168,70 +168,45 @@ function BusinessVariables(props) {
     }
   };
 
-  // useEffect(() => {
-  //   if (loadExternalVariablesMFbool) {
-  //     if (window && window?.loadMicroFrontend) {
-  //       window.loadMicroFrontend(props);
-  //     }
-  //   }
-  // }, [loadExternalVariablesMFbool]);
-
-  const [microAppsJSON, setmicroAppsJSON] = useState({});
   useEffect(() => {
-    setmicroAppsJSON({
-      MicroApps: [
+    let microProps = {
+      source: "PD_EXT", //PD_EXT
+      data_object_alias_name: localLoadedProcessData.DataObjectAliasName, // Mandatory in props in PD_EXT
+      data_object_name: localLoadedProcessData.DataObjectName, // Mandatory in props in PD_EXT
+      // default_category_name: "simple", //we cant store
+      data_object_id: localLoadedProcessData.DataObjectId, //object id to save from id in callback
+      object_type: "P", //AP/P/C
+      object_id: localLoadedProcessData.ProcessDefId, //categoryId
+      // object_name: "simple",
+      default_data_fields: [
+        //PD_EXT	// Mandatory
         {
-          AuthData: {
-            authtype: "JWT",
-            JwtToken: JSON.parse(localStorage.getItem("launchpadKey"))?.token,
-            from: "LPWEB",
-          },
-          Module: "MDM",
-          MicroFrontends: [
-            {
-              Component: "DataModelListViewer",
-              Callback: callbackFunction,
-              Props: {
-                source: "PD_EXT", //PD_EXT
-                data_object_alias_name:
-                  localLoadedProcessData.DataObjectAliasName, // Mandatory in props in PD_EXT
-                data_object_name: localLoadedProcessData.DataObjectName, // Mandatory in props in PD_EXT
-                // default_category_name: "simple", //we cant store
-                data_object_id: localLoadedProcessData.DataObjectId, //object id to save from id in callback
-                object_type: "P", //AP/P/C
-                // object_id: 0, //categoryId
-                // object_name: "simple",
-                default_data_fields: [
-                  //PD_EXT	// Mandatory
-                  {
-                    name: "itemindex",
-                    alias: "itemindex",
-                    type: "1",
-                    key_field: true,
-                  },
-                  {
-                    name: "itemtype",
-                    alias: "itemtype",
-                    type: "1",
-                    key_field: true,
-                  },
-                ],
-
-                // "default_data_fields": [ //PD_CMP
-                //     {"name":"map_id", "alias_name": "Map Id", "type":1, "key_field": true},
-                //     {"name":"map_id2", "alias_name": "Map Id", "type":2, "key_field": false}
-                // ],
-
-                //"1" = String, "2" = Integer, "3" = Long, "4" = Float,"5" =Date and Time,"6" = Binary Data, "7" = Currency, "8" = Boolean,"9" = ShortDate, "10" = Ntext, "11" = Text, "12" = Nvarchar,"13" = Phone Number,"14" =Email.Binary,
-                data_types: [1, 2, 3, 4, 5, 8, 9, 10],
-                ContainerId: "appdesignerDiv",
-              },
-            },
-          ],
+          name: "itemindex",
+          alias: "itemindex",
+          type: "1",
+          key_field: true,
+        },
+        {
+          name: "itemtype",
+          alias: "itemtype",
+          type: "1",
+          key_field: true,
         },
       ],
-    });
-  }, [localLoadedProcessData.ProcessDefId]);
+
+      //"1" = String, "2" = Integer, "3" = Long, "4" = Float,"5" =Date and Time,"6" = Binary Data, "7" = Currency, "8" = Boolean,"9" = ShortDate, "10" = Ntext, "11" = Text, "12" = Nvarchar,"13" = Phone Number,"14" =Email.Binary,
+      data_types: [1, 2, 3, 4, 5, 8, 9, 10],
+      ContainerId: "appdesignerDiv",
+      Module: "MDM",
+      Callback: callbackFunction,
+      Component: "DataModelListViewer",
+
+      InFrame: false,
+
+      Renderer: "renderDataModelListViewer",
+    };
+    window.MdmDataModel(microProps);
+  }, []);
 
   return (
     <div className={styles.mainDiv}>
@@ -314,7 +289,7 @@ function BusinessVariables(props) {
           </div>
         </AccordionSummaryStyled>
         <AccordionDetails>
-          <MicroFrontendContainer
+          {/* <MicroFrontendContainer
             styles={{
               width: "100%",
               height: "50vh",
@@ -325,11 +300,11 @@ function BusinessVariables(props) {
             domainUrl=""
             ProcessDefId={localLoadedProcessData.ProcessDefId}
             loadExternalVariablesMFbool={loadExternalVariablesMFbool}
-          />
-          {/* <div
+          /> */}
+          <div
             id="appdesignerDiv"
             style={{ width: "100%", height: "50vh" }}
-          ></div> */}
+          ></div>
           {/* <UserDefined
             isProcessReadOnly={isProcessReadOnly}
             bForInputStrip={userDefinedInputStrip}

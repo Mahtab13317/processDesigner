@@ -71,8 +71,8 @@ function Exception(props) {
   useEffect(() => {
     let arr = [];
     let activityIdString = "";
-    loadedMileStones.map((mileStone) => {
-      mileStone.Activities.map((activity, index) => {
+    localLoadedProcessData?.MileStones?.forEach((mileStone) => {
+      mileStone?.Activities?.forEach((activity) => {
         if (
           !(activity.ActivityType === 18 && activity.ActivitySubType === 1) &&
           !(activity.ActivityType === 1 && activity.ActivitySubType === 2) &&
@@ -102,7 +102,7 @@ function Exception(props) {
     MapAllActivities(activityIdString);
     setSubColumns(arr);
     setSplicedColumns(arr.slice(0, BATCH_COUNT));
-  }, [loadedMileStones]);
+  }, [localLoadedProcessData]);
 
   useEffect(() => {
     if (document.getElementById("oneBoxMatrix")) {
@@ -266,12 +266,11 @@ function Exception(props) {
       setShowDescError(true);
       document.getElementById("ExceptionNameInput").focus();
     }
-    if(ExceptionToAdd.trim() == ""){
+    if (ExceptionToAdd.trim() == "") {
       setShowNameError(true);
     }
 
-
-    if (ExceptionToAdd != "" && ExceptionDesc !="") {
+    if (ExceptionToAdd != "" && ExceptionDesc != "") {
       let maxExceptionId = 0;
       expData.ExceptionGroups.map((group, groupIndex) => {
         group.ExceptionList.map((listElem) => {
@@ -295,11 +294,23 @@ function Exception(props) {
             tempData.ExceptionGroups.map((group) => {
               if (group.GroupId == groupId) {
                 groupName = group.GroupName;
+                let addedActivity = [];
+                if (subColumns.length > 0) {
+                  subColumns?.forEach((activity) => {
+                    addedActivity.push({
+                      ActivityId: activity.ActivityId,
+                      Clear: false,
+                      Raise: false,
+                      Respond: false,
+                      View: false,
+                    });
+                  });
+                }
                 group.ExceptionList.push({
                   ExceptionId: +maxExceptionId + 1,
                   ExceptionName: ExceptionToAdd,
                   Description: ExceptionDesc,
-                  Activities: [],
+                  Activities: addedActivity,
                   SetAllChecks: {
                     Clear: false,
                     Raise: false,
@@ -332,7 +343,9 @@ function Exception(props) {
             setRuleDataArray(temp);
 
             // Updating processData on adding Exception
-            let newProcessData = { ...localLoadedProcessData };
+            let newProcessData = JSON.parse(
+              JSON.stringify(localLoadedProcessData)
+            );
             newProcessData.ExceptionList.push({
               Description: ExceptionDesc,
               ExceptionId: +maxExceptionId + 1,
@@ -450,7 +463,9 @@ function Exception(props) {
           setRuleDataArray(tempRule);
 
           // Updating processData on deleting Exception
-          let newProcessData = { ...localLoadedProcessData };
+          let newProcessData = JSON.parse(
+            JSON.stringify(localLoadedProcessData)
+          );
           let indexValue;
           newProcessData.ExceptionList.forEach((exception, index) => {
             if (exception.ExceptionId == expId) {

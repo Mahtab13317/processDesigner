@@ -237,10 +237,10 @@ const ProcessView = (props) => {
   }, [localLoadedProcessData?.Connections]);
 
   useEffect(() => {
-    let temp = { ...processData };
-    processData.MileStones.map((mile) => {
+    let temp = JSON.parse(JSON.stringify(processData));
+    temp.MileStones.map((mile) => {
       mile.Activities.map((act) => {
-        if (act.ActivityType === 18 && act.ActivitySubType === 1) {
+        if (+act.ActivityType === 18 && +act.ActivitySubType === 1) {
           if (
             act.AssociatedProcess == undefined ||
             act.AssociatedProcess.Associated_ProcessDefId == ""

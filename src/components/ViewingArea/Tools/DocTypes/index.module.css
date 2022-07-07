@@ -1,0 +1,118 @@
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1vw;
+  border-bottom: 1px solid #c4c4c4;
+}
+
+.modalBody {
+  padding: 0.5rem 1vw;
+}
+
+.modalHeading {
+  font: normal normal 600 16px/21px Open Sans;
+  text-align: left;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.modalSubHeader {
+  padding: 1rem 1vw 0.75rem;
+}
+
+.starIcon {
+  color: red;
+  font-size: 0.75rem;
+  margin: 0 0.1vw
+}
+
+.modalLabel {
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  margin-bottom: 0.125rem;
+}
+
+.labelIntervals {
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+}
+
+.modalInput {
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  background-color: #fff;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  margin: 0 0 0.5rem;
+  display: block;
+  width: 75%;
+  padding: 0.125rem 0.5rem;
+  height: 1.5rem;
+}
+
+.modalInput:disabled {
+  background-color: #f8f8f8;
+}
+
+.modalTextArea {
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  background-color: #fff;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  margin: 0 0 0.5rem;
+  display: block;
+  width: 75%;
+  padding: 0.125rem 0.5rem;
+  height: 6rem;
+}
+
+.modalTextArea:disabled {
+  background-color: #f8f8f8;
+}
+
+.cancelButton {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  text-align: center;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: #606060;
+  padding: 0.25rem 1vw;
+  display: flex;
+  cursor: pointer;
+}
+
+.okButton {
+  background: #0072c5 0% 0% no-repeat padding-box;
+  border: 1px solid #0072c5;
+  border-radius: 2px;
+  text-align: center;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+  color: white;
+  padding: 0.25rem 1vw;
+  display: flex;
+  cursor: pointer;
+  margin-left: 0.5vw;
+}
+
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  padding: 0.75rem 1vw;
+  border-top: 1px solid #c4c4c4;
+}
+
+.closeIcon {
+  cursor: pointer;
+  width: 1rem !important;
+  height: 1rem !important;
+}

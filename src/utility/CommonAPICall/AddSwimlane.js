@@ -71,7 +71,7 @@ export function addSwimLane(
           yTopLoc: addLanePostBody.yTopLoc,
         };
         setprocessData((prevProcessData) => {
-          let processObject = { ...prevProcessData };
+          let processObject = JSON.parse(JSON.stringify(prevProcessData));
           processObject.Lanes = [...processObject.Lanes, LaneJson];
           if (view == "abstract") {
             processObject.MileStones[milestoneIndex].Activities[
@@ -90,5 +90,8 @@ export function addSwimLane(
           return processObject;
         });
       }
+    })
+    .catch((err) => {
+      console.log(err);
     });
 }

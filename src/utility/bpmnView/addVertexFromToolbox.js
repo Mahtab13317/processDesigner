@@ -127,8 +127,10 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
 
         setProcessData((oldProcessData) => {
           //deep copy instead of shallow copy
-          let newProcessData = { ...oldProcessData };
-          newProcessData.GroupBoxes = [...oldProcessData.GroupBoxes];
+          let newProcessData = JSON.parse(JSON.stringify(oldProcessData));
+          newProcessData.GroupBoxes = JSON.parse(
+            JSON.stringify(oldProcessData.GroupBoxes)
+          );
 
           newProcessData.GroupBoxes.push({
             GroupBoxId: groupBoxId,
@@ -150,8 +152,10 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
         });
 
         setProcessData((oldProcessData) => {
-          let newProcessData = { ...oldProcessData };
-          newProcessData.Annotations = [...oldProcessData.Annotations];
+          let newProcessData = JSON.parse(JSON.stringify(oldProcessData));
+          newProcessData.Annotations = JSON.parse(
+            JSON.stringify(oldProcessData.Annotations)
+          );
           newProcessData.Annotations.push({
             AnnotationId: annotationId,
             xLeftLoc: xLeftLoc,
@@ -172,9 +176,10 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
         });
 
         setProcessData((oldProcessData) => {
-          let newProcessData = { ...oldProcessData };
-          newProcessData.MSGAFS = [...oldProcessData.MSGAFS];
-
+          let newProcessData = JSON.parse(JSON.stringify(oldProcessData));
+          newProcessData.MSGAFS = JSON.parse(
+            JSON.stringify(oldProcessData.MSGAFS)
+          );
           newProcessData.MSGAFS.push({
             MsgAFId: messageId,
             xLeftLoc: xLeftLoc,
@@ -193,8 +198,10 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
         });
 
         setProcessData((oldProcessData) => {
-          let newProcessData = { ...oldProcessData };
-          newProcessData.DataObjects = [...oldProcessData.DataObjects];
+          let newProcessData = JSON.parse(JSON.stringify(oldProcessData));
+          newProcessData.DataObjects = JSON.parse(
+            JSON.stringify(oldProcessData.DataObjects)
+          );
 
           newProcessData.DataObjects.push({
             DataObjectId: dataObjectId,
@@ -231,7 +238,7 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
       let maxId = 0;
       let processDefId;
       setProcessData((prevProcessData) => {
-        let newProcessData = { ...prevProcessData };
+        let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
         processDefId = newProcessData.ProcessDefId;
         for (let i of newProcessData.Tasks) {
           if (maxId < +i.TaskId) {
@@ -330,7 +337,7 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
         return { ...oldIds, activityId: newActivityId };
       });
       setProcessData((prevProcessData) => {
-        newProcessData = { ...prevProcessData };
+        newProcessData = JSON.parse(JSON.stringify(prevProcessData));
         newProcessData.MileStones?.forEach((mile) => {
           mile.Activities?.forEach((act) => {
             if (
@@ -357,7 +364,7 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
       processName = newProcessData.ProcessName;
 
       setProcessData((prevProcessData) => {
-        let newData = { ...prevProcessData };
+        let newData = JSON.parse(JSON.stringify(prevProcessData));
         newData.MileStones?.forEach((milestone, index) => {
           if (milestone.iMileStoneId === mileId) {
             milestone.Activities?.forEach((activity) => {
@@ -511,7 +518,7 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
         return { ...oldIds, activityId: newActivityId };
       });
       setProcessData((prevProcessData) => {
-        newProcessData = { ...prevProcessData };
+        newProcessData = JSON.parse(JSON.stringify(prevProcessData));
         return prevProcessData;
       });
       queueInfo = getActivityQueueObj(
@@ -536,11 +543,15 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
       }
       setProcessData((prevProcessData) => {
         //do not do shallow copy process Data, else original state will get change
-        let newProcessData = { ...prevProcessData };
+        let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
         processDefId = newProcessData.ProcessDefId;
         processName = newProcessData.ProcessName;
-        newProcessData.MileStones = [...prevProcessData.MileStones];
-        newProcessData.Lanes = [...prevProcessData.Lanes];
+        newProcessData.MileStones = JSON.parse(
+          JSON.stringify(prevProcessData.MileStones)
+        );
+        newProcessData.Lanes = JSON.parse(
+          JSON.stringify(prevProcessData.Lanes)
+        );
         newProcessData.MileStones?.forEach((milestone) => {
           if (milestone.iMileStoneId === mileId) {
             milestone?.Activities?.forEach((activity) => {

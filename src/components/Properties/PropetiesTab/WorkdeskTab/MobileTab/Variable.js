@@ -4,113 +4,164 @@ import styles from "./index.module.css";
 import { Checkbox } from "@material-ui/core";
 import { store, useGlobalState } from "state-pool";
 import arabicStyles from "./ArabicStyles.module.css";
-import { RTL_DIRECTION } from "../../../../../Constants/appConstants";
+import {
+  propertiesLabel,
+  RTL_DIRECTION,
+} from "../../../../../Constants/appConstants";
+import { useDispatch } from "react-redux";
+import { setActivityPropertyChange } from "../../../../../redux-store/slices/ActivityPropertyChangeSlice";
 
-function Variable(props) {
+function Variable() {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
+  const dispatch = useDispatch();
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
-  // const [docItemData, setDocItemData] = useState(
-  //   localLoadedActivityPropertyData.ActivityProperty.wdeskInfo
-  // );
+  const [varItemData, setVarItemData] = useState([]);
+  const [checked, setChecked] = useState({});
+  const [allChecked, setAllChecked] = useState(false);
 
-  const [checkVariable, setcheckVariable] = useState(false);
+  useEffect(() => {
+    let tempCheck = {};
+    let tempList = [
+      ...localLoadedActivityPropertyData?.ActivityProperty
+        ?.m_objDataVarMappingInfo?.dataVarList,
+    ];
+    let tempVarList = {};
+    tempList?.forEach((el) => {
+      let id = el?.processVarInfo?.variableId;
+      tempVarList[id] = { ...el };
+      tempCheck[id] = false;
+    });
+    localLoadedActivityPropertyData?.ActivityProperty?.wdeskInfo?.objPMWdeskPDA?.m_arrAssociatedVar?.forEach(
+      (el) => {
+        tempCheck[el] = true;
+      }
+    );
+    setChecked(tempCheck);
+    let allCheck = Object.keys(tempCheck)?.every((el) => {
+      return tempCheck[el] === true;
+    });
+    setAllChecked(allCheck);
+    setVarItemData(tempVarList);
+  }, [localLoadedActivityPropertyData]);
 
-  const CheckVariableHandler = () => {
-    setcheckVariable(!checkVariable);
+  const CheckVarHandler = (val) => {
+    let tempCheck = { ...checked };
+    tempCheck = { ...tempCheck, [val]: !tempCheck[val] };
+    setChecked(tempCheck);
+    let allCheck = Object.keys(tempCheck)?.every((el) => {
+      return tempCheck[el] === true;
+    });
+    setAllChecked(allCheck);
+
+    let temp = { ...localLoadedActivityPropertyData };
+    if (tempCheck[val]) {
+      if (
+        temp?.ActivityProperty?.wdeskInfo?.objPMWdeskPDA?.m_arrAssociatedVar
+      ) {
+        temp.ActivityProperty.wdeskInfo.objPMWdeskPDA.m_arrAssociatedVar.push(
+          val
+        );
+      } else {
+        temp.ActivityProperty.wdeskInfo.objPMWdeskPDA = {
+          ...temp.ActivityProperty.wdeskInfo.objPMWdeskPDA,
+          m_arrAssociatedVar: [val],
+        };
+      }
+    } else {
+      let idx = null;
+      temp?.ActivityProperty?.wdeskInfo?.objPMWdeskPDA?.m_arrAssociatedVar?.forEach(
+        (el, index) => {
+          if (+el === +val) {
+            idx = index;
+          }
+        }
+      );
+      temp.ActivityProperty.wdeskInfo.objPMWdeskPDA.m_arrAssociatedVar.splice(
+        idx,
+        1
+      );
+    }
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.workdesk]: { isModified: true, hasError: false },
+      })
+    );
   };
 
-  const activityDetails = [
-    {
-      name: "Client Name",
-      aliasName: "Client_Name",
-      bRead: false,
-      bModify: false,
-    },
-    { name: "Client ID", aliasName: "Client_Id", bRead: false, bModify: true },
-    {
-      name: "Client Type",
-      aliasName: "Client_Type",
-      bRead: false,
-      bModify: false,
-    },
-    {
-      name: "Expenditure Date",
-      aliasName: "Expenditure Date",
-      bRead: true,
-      bModify: true,
-    },
-    {
-      name: "Customer Name",
-      aliasName: "Customer_Name",
-      bRead: true,
-      bModify: true,
-    },
-    {
-      name: "Customer Age",
-      aliasName: "Customer_Age",
-      bRead: true,
-      bModify: true,
-    },
-    {
-      name: "Customer Contact Info",
-      aliasName: "Customer_Contact Info",
-      bRead: true,
-      bModify: true,
-    },
-    {
-      name: "Customer Address Info",
-      aliasName: "Customer_Address Info",
-      bRead: true,
-      bModify: true,
-    },
-  ];
+  const allCheckHandler = () => {
+    let allCheck = !allChecked;
+    setAllChecked(allCheck);
+    let tempCheck = { ...checked };
+    Object.keys(tempCheck)?.forEach((val) => {
+      tempCheck = { ...tempCheck, [val]: allCheck };
+    });
+    setChecked(tempCheck);
+    let temp = { ...localLoadedActivityPropertyData };
+    if (allCheck) {
+      let tempList = [];
+      Object.keys(varItemData)?.forEach((val) => {
+        tempList.push(val);
+      });
+      temp.ActivityProperty.wdeskInfo.objPMWdeskPDA.m_arrAssociatedVar =
+        tempList;
+    } else {
+      temp.ActivityProperty.wdeskInfo.objPMWdeskPDA.m_arrAssociatedVar = [];
+    }
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.workdesk]: { isModified: true, hasError: false },
+      })
+    );
+  };
 
   return (
-    <div style={{ margin: "2%" }}>
-      <div className={styles.checklist}>
-        <Checkbox
-          checked={checkVariable}
-          onChange={() => CheckVariableHandler()}
-          className={
-            direction === RTL_DIRECTION
-              ? arabicStyles.titleCheckbox
-              : styles.titleCheckbox
-          }
-          data-testid="CheckVariable"
-        />
-        {t("variable")}
-      </div>
-      <div className="row">
-        <Checkbox
-          className={
-            direction === RTL_DIRECTION
-              ? arabicStyles.checkboxPosition
-              : styles.checkboxPosition
-          }
-        />
-        <h5> {t("variable")}</h5>
-      </div>
-      {checkVariable
-        ? activityDetails.map((val) => {
-            if (val.bRead == true || val.bModify == true) {
+    <div className={styles.documentRow}>
+      {Object.keys(varItemData)?.length > 0 ? (
+        <div>
+          <div className="row">
+            <h5 style={{ flex: "1" }}>{t("Variables")}</h5>
+            <div className="row" style={{ flex: "1" }}>
+              <Checkbox
+                className={
+                  direction === RTL_DIRECTION
+                    ? arabicStyles.mainCheckbox
+                    : styles.mainCheckbox
+                }
+                checked={allChecked}
+                onChange={() => allCheckHandler()}
+              />
+              <h5>{t("Mobility")}</h5>
+            </div>
+          </div>
+          <div style={{ marginTop: "0.5rem" }}>
+            {Object.keys(varItemData)?.map((val) => {
               return (
-                <div className="row" style={{ marginTop: "15px" }}>
-                  <Checkbox
-                    className={
-                      direction === RTL_DIRECTION
-                        ? arabicStyles.checkboxPosition
-                        : styles.checkboxPosition
-                    }
-                  />
-                  <p className={styles.todoList}> {val.name}</p>
+                <div className="row">
+                  <span className={styles.todoList} style={{ flex: "1" }}>
+                    {varItemData[val]?.processVarInfo?.varName}
+                  </span>
+                  <div className="row" style={{ flex: "1" }}>
+                    <Checkbox
+                      className={
+                        direction === RTL_DIRECTION
+                          ? arabicStyles.mainCheckbox
+                          : styles.mainCheckbox
+                      }
+                      checked={checked[val]}
+                      onChange={(e) => CheckVarHandler(val, e.target.checked)}
+                    />
+                  </div>
                 </div>
               );
-            }
-          })
-        : null}
+            })}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -60,7 +60,7 @@ export const addMilestone = (
           yTopLoc: "",
         };
         setProcessData((prevProcessData) => {
-          let newProcessData = { ...prevProcessData };
+          let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
           newProcessData.MileStones = [
             ...newProcessData.MileStones,
             newMilestone,
@@ -93,7 +93,6 @@ export const addMilestoneInBetween = (
   axios
     .post(SERVER_URL + ENDPOINT_ADDMILE, addMilestoneInput)
     .then((response) => {
-      
       if (response.data.Status == 0) {
         let newMilestone = {
           MileStoneName: newMile.milestoneName,
@@ -110,7 +109,7 @@ export const addMilestoneInBetween = (
           yTopLoc: "",
         };
         setProcessData((prevProcessData) => {
-          let newProcessData = { ...prevProcessData };
+          let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
           let newArr = [...newProcessData.MileStones];
           newArr.splice(newMile.seqId - 1, 0, newMilestone);
           newProcessData.MileStones = [...newArr];

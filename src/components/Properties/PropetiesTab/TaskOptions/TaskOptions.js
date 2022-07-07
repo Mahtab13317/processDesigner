@@ -27,6 +27,7 @@ import {
 import Field from "../../../../UI/InputFields/TextField/Field.js";
 import TurnAroundTime from "../../../../UI/InputFields/TurnAroundTime/TurnAroundTime.js";
 import { getSelectedCellType } from "../../../../utility/abstarctView/getSelectedCellType";
+import { OpenProcessSliceValue } from "../../../../redux-store/slices/OpenProcessSlice";
 const makeFieldInputs = (value) => {
   return {
     value: value,
@@ -91,6 +92,7 @@ const useStyles = makeStyles((props) => ({
   },
   disabled: {
     pointerEvents: "none",
+    opacity: 0.5,
   },
 }));
 function TaskOptions(props) {
@@ -101,12 +103,12 @@ function TaskOptions(props) {
   const classes = useStyles({ ...props, direction });
 
   const tabStatus = useSelector(ActivityPropertyChangeValue);
-
-  const loadedProcessData = store.getState("loadedProcessData"); //current processdata clicked
   const localActivityPropertyData = store.getState("activityPropertyData");
-  const [localLoadedProcessData, setlocalLoadedProcessData] =
-    useGlobalState(loadedProcessData);
   const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
+  const openProcessData = useSelector(OpenProcessSliceValue);
+  const localLoadedProcessData = JSON.parse(
+    JSON.stringify(openProcessData.loadedData)
+  );
   const [
     localLoadedActivityPropertyData,
     setlocalLoadedActivityPropertyData,
@@ -120,8 +122,8 @@ function TaskOptions(props) {
   const [actionOnUser, setActionOnUser] = useState(makeFieldInputs(""));
 
   const [trigger, setTrigger] = useState(makeFieldInputs(""));
-  const [expiryType, setExpiryType] = useState();
-  const [actionType, setActionType] = useState();
+  const [expiryType, setExpiryType] = useState("");
+  const [actionType, setActionType] = useState("");
   const [allDateTypeVars, setDateTypeVars] = useState([]);
   const [triggersList, setTriggersList] = useState([]);
 
@@ -146,8 +148,8 @@ function TaskOptions(props) {
   ];
 
   const radioButtonsArrayForAction = [
-    { label: t("revoke"), value: "Revoke" },
-    { label: t("reassignTo"), value: "Reassign" },
+    { label: t("revoke"), value: "1" },
+    { label: t("reassignTo"), value: "2" },
   ];
 
   // Function that runs when the component loads.
@@ -203,8 +205,8 @@ function TaskOptions(props) {
 
       setTATData(newTurnAroundValues);
 
-      setActionType(expiryInfoObj?.expiryOpType || "");
-      if (expiryInfoObj?.expiryOpType === "Reassign") {
+      setActionType(expiryInfoObj?.expiryOperation || "");
+      if (expiryInfoObj?.expiryOperation === "2") {
         setActionOnUser({
           ...actionOnUser,
           value: expiryInfoObj?.userValue || "",
@@ -290,7 +292,6 @@ function TaskOptions(props) {
           value;
         break;
       case "ExpiryType":
-        console.log(value == "1");
         if (value == "1") {
           tempPropData.taskGenPropInfo.m_objOptionsView.m_objOptionInfo.expiryInfo.expFlag = false;
         } else {
@@ -299,9 +300,9 @@ function TaskOptions(props) {
         setExpiryType(value);
         break;
       case "ActionType":
-        tempPropData.taskGenPropInfo.m_objOptionsView.m_objOptionInfo.expiryInfo.expiryOpType =
+        tempPropData.taskGenPropInfo.m_objOptionsView.m_objOptionInfo.expiryInfo.expiryOperation =
           value;
-        if (value === "Revoke") {
+        if (value == "1") {
           tempPropData.taskGenPropInfo.m_objOptionsView.m_objOptionInfo.expiryInfo.m_bUserConst = true;
         }
         break;
@@ -452,6 +453,7 @@ function TaskOptions(props) {
                         xs={props.isDrawerExpanded ? 3 : 12}
                         spacing={1}
                         alignItems={"flex-end"}
+                        className={expiryType == "1" ? classes.disabled : ""}
                       >
                         <Grid item xs>
                           <Field
@@ -483,6 +485,7 @@ function TaskOptions(props) {
                         style={{
                           marginTop: props.isDrawerExpanded ? "1.1rem" : null,
                         }}
+                        className={expiryType == "1" ? classes.disabled : ""}
                       >
                         <TurnAroundTime
                           // days={turnAroundTime.value?.days || 0}
@@ -530,7 +533,10 @@ function TaskOptions(props) {
                       {`${t("action")}`}
                     </Typography>
                   </Grid>
-                  <Grid item>
+                  <Grid
+                    item
+                    className={expiryType == "1" ? classes.disabled : ""}
+                  >
                     <Field
                       radio={true}
                       ButtonsArray={radioButtonsArrayForAction}
@@ -562,7 +568,11 @@ function TaskOptions(props) {
                     </Typography>
                   </Grid>
 
-                  <Grid item xs={props.isDrawerExpanded ? 8 : 12}>
+                  <Grid
+                    item
+                    xs={props.isDrawerExpanded ? 8 : 12}
+                    className={expiryType == "1" ? classes.disabled : ""}
+                  >
                     <Field
                       name="Trigger"
                       dropdown={true}

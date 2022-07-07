@@ -26,11 +26,16 @@ function NoProcessJourney(props) {
     if (props.getTemplatePage === PREVIOUS_PAGE_CREATE_FROM_NO_PROCESS) {
       setCarouselModalClicked(true);
     }
-    axios.get(SERVER_URL + ENDPOINT_FETCH_ALL_TEMPLATES).then((res) => {
-      if (res.data.Status === 0) {
-        setCategoryList(res.data.Category);
-      }
-    });
+    axios
+      .get(SERVER_URL + ENDPOINT_FETCH_ALL_TEMPLATES)
+      .then((res) => {
+        if (res.data.Status === 0) {
+          setCategoryList(res.data.Category);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, []);
 
   //code added on 6 June 2022 for BugId 110139

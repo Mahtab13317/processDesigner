@@ -27,6 +27,14 @@
   padding: 0.25rem 0vw 0.25rem 0.25vw!important;
 }
 
+.webServicePropertiestableEx .MuiTableCell-root:first-child {
+  padding: 0.25rem 0vw 0.25rem 2vw!important;
+}
+
+.webServicePropertiestableEx .MuiTableCell-root:last-child {
+  padding: 0.25rem 2vw 0.25rem 1vw!important;
+}
+
 .select_webService_mapping {
   width: 230px;
   height: 28px;

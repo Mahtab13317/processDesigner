@@ -105,7 +105,7 @@ export function deleteCell(
           .then((response) => {
             if (response.data.Status === 0) {
               setProcessData((prevProcessData) => {
-                let newProcessData = { ...prevProcessData };
+                let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
                 newProcessData.Connections?.forEach((connection, index) => {
                   if (connection.ConnectionId === Number(id)) {
                     newProcessData.Connections.splice(index, 1);
@@ -114,6 +114,9 @@ export function deleteCell(
                 return newProcessData;
               });
             }
+          })
+          .catch((err) => {
+            console.log(err);
           });
       }
     } else {

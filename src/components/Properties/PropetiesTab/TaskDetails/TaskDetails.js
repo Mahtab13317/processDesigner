@@ -3,6 +3,7 @@ import { Divider, Grid, Typography } from "@material-ui/core";
 import DataFields from "../commonTabHeader.js";
 import "../../Properties.css";
 import { useTranslation } from "react-i18next";
+import { Select, MenuItem } from "@material-ui/core";
 
 import { connect, useDispatch, useSelector } from "react-redux";
 import { getActivityProps } from "../../../../utility/abstarctView/getActivityProps";
@@ -11,7 +12,7 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import { store, useGlobalState } from "state-pool";
 import * as actionCreators from "../../../../redux-store/actions/selectedCellActions";
-
+import axios from "axios";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import {
   PROCESSTYPE_LOCAL,
@@ -158,6 +159,31 @@ function TaskDetails(props) {
 
   const [isDisableTab, setisDisableTab] = useState(false);
   const [formHasError, setFormHasError] = useState(false);
+  const [registeredProcessList, setRegisteredProcessList] = useState([]);
+  const [selectedRegisteredProcess, setSelectedRegisteredProcess] =
+    useState(null);
+  const [selectedRegisteredProcessType, setSelectedRegisteredProcessType] =
+    useState(null);
+
+  useEffect(() => {
+    axios.get(SERVER_URL + `/getprocesslist/R/-1`).then((res) => {
+      console.log("MEGHALCHECKING", res.data);
+      if (res.data.Status === 0) {
+        setRegisteredProcessList(res.data.Processes);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    registeredProcessList?.map((list) => {
+      if (
+        list.ProcessName ==
+        localLoadedActivityPropertyData?.m_objPMSubProcess?.importedProcessName
+      ) {
+        setSelectedRegisteredProcess(list.ProcessName);
+      }
+    });
+  }, [registeredProcessList]);
 
   useEffect(() => {
     if (localLoadedActivityPropertyData) {
@@ -204,6 +230,15 @@ function TaskDetails(props) {
         value: taskGenPropInfo?.isNotifyEmail,
       });
 
+      setSelectedRegisteredProcessType(
+        localLoadedActivityPropertyData?.taskGenPropInfo?.m_strSubPrcType
+      );
+
+      console.log(
+        "KAL_TK",
+        localLoadedActivityPropertyData,
+        selectedRegisteredProcess
+      );
       if (saveCancelStatus.SaveClicked) {
         if (!validateFields()) {
           dispatch(
@@ -471,6 +506,25 @@ function TaskDetails(props) {
     setlocalLoadedActivityPropertyData(tempPropertyDataObj);
   };
 
+  const handleChangeInRegisteredProcess = (e) => {
+    console.log('localLoadedActivityPropertyData', localLoadedActivityPropertyData);
+    setSelectedRegisteredProcess(e.target.value);
+    let temp = {...localLoadedActivityPropertyData};
+    temp.m_objPMSubProcess.importedProcessName = e.target.value;
+    temp.m_objPMSubProcess.fwdVarMapping=[];
+    temp.m_objPMSubProcess.fwdDocMapping=[];
+    setlocalLoadedActivityPropertyData(temp);
+  };
+
+  const handleChangeInRegisteredProcessType = (e) => {
+    if (e.target.value != "U") {
+      localStorage.setItem("registeredProcessType", null);
+    } else {
+      localStorage.setItem("registeredProcessType", e.target.value);
+    }
+    setSelectedRegisteredProcessType(e.target.value);
+  };
+
   return (
     <Grid container direction="column">
       <Grid item>
@@ -503,10 +557,105 @@ function TaskDetails(props) {
                       {`${t("task")} ${t("details")}`.toUpperCase()}
                     </Typography>
                   </Grid>
+                  {/* --------------------------------------------- */}
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <p style={{ fontSize: "12px" }}>Type</p>
+                    <Select
+                      className="selectTwo_callActivity"
+                      onChange={(e) => handleChangeInRegisteredProcessType(e)}
+                      style={{
+                        position: "absolute",
+                        right: props.isDrawerExpanded ? "26px" : "25px",
+                        width: props.isDrawerExpanded ? "280px" : "135px",
+                        height: "28px",
+                        background: "#ffffff 0% 0% no-repeat padding-box",
+                        font: "normal normal normal 12px/17px Open Sans !important",
+                        border: "1px solid #c4c4c4",
+                        borderRadius: "2px",
+                        opacity: "1",
+                        fontSize: "12px",
+                      }}
+                      value={selectedRegisteredProcessType}
+                      MenuProps={{
+                        anchorOrigin: {
+                          vertical: "bottom",
+                          horizontal: "left",
+                        },
+                        transformOrigin: {
+                          vertical: "top",
+                          horizontal: "left",
+                        },
+                        getContentAnchorEl: null,
+                      }}
+                    >
+                      <MenuItem className="InputPairDiv_CommonList" value="S">
+                        Synchronous
+                      </MenuItem>
+                      <MenuItem className="InputPairDiv_CommonList" value="A">
+                        Asynchronous
+                      </MenuItem>
+                      <MenuItem className="InputPairDiv_CommonList" value="U">
+                        User Monitored Synchronous
+                      </MenuItem>
+                    </Select>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      marginTop: "20px",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    <p style={{ fontSize: "12px" }}>
+                      Select Registered Process
+                    </p>
+                    <Select
+                      className="selectTwo_callActivity"
+                      onChange={(e) => handleChangeInRegisteredProcess(e)}
+                      style={{
+                        position: "absolute",
+                        right: props.isDrawerExpanded ? "26px" : "25px",
+                        width: props.isDrawerExpanded ? "280px" : "135px",
+                        height: "28px",
+                        background: "#ffffff 0% 0% no-repeat padding-box",
+                        font: "normal normal normal 12px/17px Open Sans !important",
+                        border: "1px solid #c4c4c4",
+                        borderRadius: "2px",
+                        opacity: "1",
+                        fontSize: "12px",
+                      }}
+                      value={selectedRegisteredProcess}
+                      MenuProps={{
+                        anchorOrigin: {
+                          vertical: "bottom",
+                          horizontal: "left",
+                        },
+                        transformOrigin: {
+                          vertical: "top",
+                          horizontal: "left",
+                        },
+                        getContentAnchorEl: null,
+                      }}
+                    >
+                      {registeredProcessList?.map((list) => {
+                        return (
+                          <MenuItem
+                            className="InputPairDiv_CommonList"
+                            value={list.ProcessName}
+                          >
+                            {list.ProcessName}
+                          </MenuItem>
+                        );
+                      })}
+                    </Select>
+                  </div>
+                  {/* ------------------------------------- */}
                   {localLoadedActivityPropertyData?.taskGenPropInfo
                     ?.taskTemplateInfo?.m_bGlobalTemplate && (
                     <Grid item>
                       <Field
+                        id="TaskTemNameTaskDetails"
                         name="TaskTemplateName"
                         required={true}
                         label={`${t("task")} ${t("Template")} ${t("name")}`}
@@ -519,6 +668,7 @@ function TaskDetails(props) {
                   )}
                   <Grid item>
                     <Field
+                      id="descTaskDetails"
                       sunEditor={true}
                       name="Description"
                       label={t("description")}
@@ -530,6 +680,7 @@ function TaskDetails(props) {
 
                   <Grid item xs={props.isDrawerExpanded ? 9 : 12}>
                     <Field
+                      id="goalTaskDetails"
                       name="Goal"
                       required={true}
                       label={t("goal")}
@@ -545,6 +696,7 @@ function TaskDetails(props) {
                   </Grid>
                   <Grid item xs={props.isDrawerExpanded ? 9 : 12}>
                     <Field
+                      id="instructionsTaskDetails"
                       name="Instructions"
                       required={true}
                       label={t("instructions")}
@@ -592,6 +744,7 @@ function TaskDetails(props) {
                   <Grid container direction="column" spacing={2}>
                     <Grid item xs={3}>
                       <Field
+                        id="costTaskDetails"
                         type="number"
                         name="Cost"
                         label={t("cost")}
@@ -613,6 +766,7 @@ function TaskDetails(props) {
                     >
                       <Grid item xs>
                         <Field
+                          id="TaskAdvisorTaskDetails"
                           name="TaskAdvisor"
                           // required={true}
                           label={`${t("task")} ${t("advisor")}`}

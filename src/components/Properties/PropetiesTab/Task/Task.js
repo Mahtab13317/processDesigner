@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { connect, useDispatch } from "react-redux";
-import { getActivityProps } from "../../../../utility/abstarctView/getActivityProps";
+import { connect, useDispatch, useSelector } from "react-redux";
 import AddIcon from "@material-ui/icons/Add";
 import { makeStyles } from "@material-ui/core/styles";
 import classes from "./Task.module.css";
@@ -14,6 +13,7 @@ import AssociateUsers from "./AssociateUsers/AssociateUsers";
 import ManageRules from "./ManageRules/ManageRules";
 import Modal from "../../../../UI/Modal/Modal";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
+import { OpenProcessSliceValue, setOpenProcess } from "../../../../redux-store/slices/OpenProcessSlice";
 
 function Task(props) {
   let { t } = useTranslation();
@@ -21,9 +21,8 @@ function Task(props) {
   const actProperty = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(actProperty);
-  const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcessData, setlocalLoadedProcessData] =
-    useGlobalState(loadedProcessData);
+  const openProcessData = useSelector(OpenProcessSliceValue);
+
   let dispatch = useDispatch();
   const useStyles = makeStyles({
     root: {
@@ -100,7 +99,7 @@ function Task(props) {
   const [tasksToAssociate, settasksToAssociate] = useState([]);
 
   useEffect(() => {
-    let temp = JSON.parse(JSON.stringify(localLoadedProcessData));
+    let temp = JSON.parse(JSON.stringify(openProcessData.loadedData));
     temp.Tasks.map((task1) => {
       localLoadedActivityPropertyData.ActivityProperty?.Interfaces?.TaskTypes?.map(
         (task2) => {
@@ -115,8 +114,7 @@ function Task(props) {
         }
       );
     });
-
-    setlocalLoadedProcessData(temp);
+    dispatch(setOpenProcess({ loadedData: temp }));
     dispatch(
       setActivityPropertyChange({
         Task: { isModified: true, hasError: false },

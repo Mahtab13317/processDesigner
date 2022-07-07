@@ -596,7 +596,7 @@ function Webservice(props) {
                     return prev + 1;
                   });
                 } else {
-                  let temp = { ...localLoadedProcessData };
+                  let temp = JSON.parse(JSON.stringify(localLoadedProcessData));
                   temp.MaxMethodIndex = temp.MaxMethodIndex + 1;
                   setlocalLoadedProcessData(temp);
                 }
@@ -606,7 +606,7 @@ function Webservice(props) {
                     return prev + 1;
                   });
                 } else {
-                  let temp = { ...localLoadedProcessData };
+                  let temp = JSON.parse(JSON.stringify(localLoadedProcessData));
                   temp.MaxRestMethodIndex = temp.MaxRestMethodIndex + 1;
                   setlocalLoadedProcessData(temp);
                 }

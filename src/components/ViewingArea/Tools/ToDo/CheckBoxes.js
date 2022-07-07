@@ -3,7 +3,7 @@ import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import "../Interfaces.css";
 import { useTranslation } from "react-i18next";
-import { DisableCheckBox } from "../../../../utility/Tools/DisableFunc";
+import { disableToDoChecks } from "../../../../utility/Tools/DisableFunc";
 import { PROCESSTYPE_LOCAL } from "../../../../Constants/appConstants";
 
 function CheckBoxes(props) {
@@ -13,48 +13,13 @@ function CheckBoxes(props) {
     View: false,
     Modify: false,
   });
+  const [initialChecks, setInitialChecks] = useState({
+    View: false,
+    Modify: false,
+  });
   const { processType } = props;
-  const isProcessReadOnly=processType !== PROCESSTYPE_LOCAL;
-  const AllRights = [
-    { activityType: 1, subActivity: 2 },
-    { activityType: 26, subActivity: 1 },
-    { activityType: 10, subActivity: 1 },
-    { activityType: 20, subActivity: 1 },
-    { activityType: 22, subActivity: 1 },
-    { activityType: 31, subActivity: 1 },
-    { activityType: 29, subActivity: 1 },
-    { activityType: 10, subActivity: 4 },
-    { activityType: 33, subActivity: 1 },
-    { activityType: 27, subActivity: 1 },
-    { activityType: 19, subActivity: 1 },
-    { activityType: 21, subActivity: 1 },
-    { activityType: 5, subActivity: 1 },
-    { activityType: 6, subActivity: 1 },
-    { activityType: 5, subActivity: 2 },
-    { activityType: 6, subActivity: 2 },
-    { activityType: 7, subActivity: 1 },
-    { activityType: 34, subActivity: 1 },
-    { activityType: 1, subActivity: 1 },
-    { activityType: 1, subActivity: 3 },
-    { activityType: 10, subActivity: 3 },
-    { activityType: 10, subActivity: 7 },
-    { activityType: 3, subActivity: 1 },
-  ];
-  const TempView = [
-    { activityType: 1, subActivity: 1 },
-    { activityType: 1, subActivity: 3 },
-    { activityType: 10, subActivity: 3 },
-    { activityType: 10, subActivity: 7 },
-    { activityType: 3, subActivity: 1 },
-  ];
+  const isProcessReadOnly = processType !== PROCESSTYPE_LOCAL;
 
-  const TempModify = [
-    { activityType: 1, subActivity: 1 },
-    { activityType: 1, subActivity: 3 },
-    { activityType: 10, subActivity: 3 },
-    { activityType: 10, subActivity: 7 },
-    { activityType: 3, subActivity: 1 },
-  ];
   const changeChecks = (check_type) => {
     if (props.type === "set-all") {
       props.updateAllTodoRights(
@@ -82,14 +47,8 @@ function CheckBoxes(props) {
         props.toDoData.TodoGroupLists[props.groupIndex].ToDoList[
           props.activityIndex
         ];
+      let setAll = true;
       activities.Activities.map((activity) => {
-        if (activity.ActivityId == props.activityId) {
-          if (Object.values(activity).includes(false)) {
-            setAllRights(false);
-          } else {
-            setAllRights(true);
-          }
-        }
         if (activity.ActivityId == props.activityId) {
           activityInDocType = true;
           setChecks(() => {
@@ -98,8 +57,28 @@ function CheckBoxes(props) {
               Modify: activity.Modify,
             };
           });
+          for (let property in activity) {
+            if (
+              !disableToDoChecks(props, property) &&
+              activity[property] === false &&
+              property !== "ActivityId"
+            ) {
+              setAll = false;
+            }
+          }
+          if (
+            disableToDoChecks(props, "View") &&
+            disableToDoChecks(props, "Modify")
+          ) {
+            setAll = false;
+          }
         }
       });
+      if (!setAll) {
+        setAllRights(false);
+      } else {
+        setAllRights(true);
+      }
       if (!activityInDocType) {
         setChecks(() => {
           return {
@@ -135,25 +114,99 @@ function CheckBoxes(props) {
     }
   }, [props.toDoData]);
 
-  const handleAllRightsCheck = () => {
-    setAllRights(!allRights);
+  useEffect(() => {
+    // // For each activity checkboxes
+    let activityInDocType = false;
+    if (props.toDoData && props.type == "activity") {
+      let activities =
+        props.toDoData.TodoGroupLists[props.groupIndex].ToDoList[
+          props.activityIndex
+        ];
+      let setAll = true;
+      activities.Activities.map((activity) => {
+        if (activity.ActivityId == props.activityId) {
+          activityInDocType = true;
+          setInitialChecks(() => {
+            return {
+              View: activity.View,
+              Modify: activity.Modify,
+            };
+          });
+          for (let property in activity) {
+            if (
+              !disableToDoChecks(props, property) &&
+              activity[property] === false &&
+              property !== "ActivityId"
+            ) {
+              setAll = false;
+            }
+          }
+          if (
+            disableToDoChecks(props, "View") &&
+            disableToDoChecks(props, "Modify")
+          ) {
+            setAll = false;
+          }
+        }
+      });
+      if (!setAll) {
+        setAllRights(false);
+      } else {
+        setAllRights(true);
+      }
+      if (!activityInDocType) {
+        setInitialChecks(() => {
+          return {
+            View: false,
+            Modify: false,
+          };
+        });
+      }
+    }
+
+    // For setAll checkBoxes
+    if (props.type === "set-all" && props.toDoData) {
+      let setobj =
+        props.toDoData.TodoGroupLists[props.groupIndex].ToDoList[props.docIdx]
+          .AllTodoRights;
+      if (Object.values(setobj).includes(false)) {
+        setAllRights(false);
+      } else {
+        setAllRights(true);
+      }
+      let doc =
+        props.toDoData &&
+        props.toDoData.TodoGroupLists[props.groupIndex].ToDoList[props.docIdx]
+          .AllTodoRights;
+      setInitialChecks(() => {
+        return {
+          View: doc.View,
+          Modify: doc.Modify,
+        };
+      });
+    }
+  }, []);
+
+  const handleAllRightsCheck = (val) => {
+    setAllRights(val);
     if (props.activityId) {
       if (props.handleGroupCheckOneColumn) {
         props.handleGroupCheckOneColumn(
           props.groupIndex,
           props.activityId,
-          !allRights
+          val
         );
       } else {
         props.handleAllChecks(
-          !allRights,
+          val,
           props.groupIndex,
           props.activityIndex,
-          props.activityId
+          props.activityId,
+          props
         );
       }
     } else {
-      props.GiveCompleteRights(props.docIdx, props.groupIndex, !allRights);
+      props.GiveCompleteRights(props.docIdx, props.groupIndex, val);
     }
   };
 
@@ -165,26 +218,32 @@ function CheckBoxes(props) {
           label={"All Rights"}
           checked={allRights}
           disabled={
-            DisableCheckBox(AllRights, props) || isProcessReadOnly
-              ? true
-              : false
+            disableToDoChecks(props, "All") || isProcessReadOnly ? true : false
           }
-          onChange={handleAllRightsCheck}
+          onChange={(e) => {
+            handleAllRightsCheck(e.target.checked);
+          }}
         />
         <FormControlLabel
           control={<Checkbox id="viewRight_exception" name="checkedF" />}
           label={t("view")}
-          checked={checks.View}
+          checked={
+            disableToDoChecks(props, "View") ? initialChecks.View : checks.View
+          }
           disabled={
-            DisableCheckBox(TempView, props) || isProcessReadOnly ? true : false
+            disableToDoChecks(props, "View") || isProcessReadOnly ? true : false
           }
           style={{ marginLeft: "1px" }}
           onChange={() => changeChecks("View")}
         />
         <FormControlLabel
-          checked={checks.Modify}
+          checked={
+            disableToDoChecks(props, "Modify")
+              ? initialChecks.Modify
+              : checks.Modify
+          }
           disabled={
-            DisableCheckBox(TempModify, props) || isProcessReadOnly
+            disableToDoChecks(props, "Modify") || isProcessReadOnly
               ? true
               : false
           }

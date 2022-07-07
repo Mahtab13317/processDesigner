@@ -1,7 +1,6 @@
 import React from "react";
 import RecentActivity from "../../../UI/StickyHeadTable/TabularData";
 import { useTranslation } from "react-i18next";
-import processIcon from "../../../assets/HomePage/HS_Process.svg";
 import ProcessIconTable from "../../../assets/HomePage/HS_Process.svg";
 import { makeStyles } from "@material-ui/core/styles";
 import { tileProcess } from "../../../utility/HomeProcessView/tileProcess";
@@ -48,8 +47,14 @@ function Recent() {
 
   React.useEffect(() => {
     async function fetchRecentsData() {
-      const res = await axios.get(SERVER_URL_LAUNCHPAD + ENDPOINT_FETCHRECENTS);
-      setrecentsData(res.data);
+      try {
+        const res = await axios.get(
+          SERVER_URL_LAUNCHPAD + ENDPOINT_FETCHRECENTS
+        );
+        setrecentsData(res.data);
+      } catch (err) {
+        console.log(err);
+      }
     }
 
     fetchRecentsData();
@@ -74,15 +79,15 @@ function Recent() {
       id: "NM",
       label: t("name"),
       styleTdCell: {
-        minWidth: "26.2vw",
-        width: "26.2vw",
+        minWidth: "24.2vw",
+        width: "24.2vw",
         fontFamily: "Open Sans",
       },
     },
     {
       id: "ST",
       label: t("status"),
-      styleTdCell: { minWidth: "15.1vw", fontFamily: "Open Sans" },
+      styleTdCell: { minWidth: "17.1vw", fontFamily: "Open Sans" },
     },
     {
       id: "LU",

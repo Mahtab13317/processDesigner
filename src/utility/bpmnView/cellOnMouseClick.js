@@ -201,11 +201,12 @@ export function cellOnMouseClick(
   setTaskAssociation,
   setShowDependencyModal
 ) {
+  // code edited on 7 July 2022 for BugId 111719
   //Shows icons if the cell is clicked
-  if (processType !== PROCESSTYPE_LOCAL) {
-    return;
-  } else {
-    graph.addListener(mxEvent.CLICK, function (sender, evt) {
+  graph.addListener(mxEvent.CLICK, function (sender, evt) {
+    if (processType !== PROCESSTYPE_LOCAL) {
+      return;
+    } else {
       var cell_click = evt.getProperty("cell"); // cell may be null
       new mxIconSet(
         graph,
@@ -224,19 +225,12 @@ export function cellOnMouseClick(
         graph.popupMenuHandler?.hideMenu();
       }
       evt.consume();
-    });
-    graph.addListener(mxEvent.DOUBLE_CLICK, function (sender, evt) {
-      var cell_dbl = evt.getProperty("cell"); // cell may be null
-      if (cell_dbl) {
-        if (doNotHoverForTheseCell(graph, cell_dbl)) {
-          return;
-        }
-        if (graph.getModel().isVertex(cell_dbl)) {
-          showDrawer(true);
-        }
-      }
-    });
-    graph.addListener("cellsInserted", function (sender, evt) {
+    }
+  });
+  graph.addListener("cellsInserted", function (sender, evt) {
+    if (processType !== PROCESSTYPE_LOCAL) {
+      return;
+    } else {
       let cell = evt.getProperty("cells"); // cell may be null
       // graph.startEditingAtCell(cellState.cell);
       new mxIconSet(
@@ -252,6 +246,17 @@ export function cellOnMouseClick(
         setShowDependencyModal
       );
       evt.consume();
-    });
-  }
+    }
+  });
+  graph.addListener(mxEvent.DOUBLE_CLICK, function (sender, evt) {
+    var cell_dbl = evt.getProperty("cell"); // cell may be null
+    if (cell_dbl) {
+      if (doNotHoverForTheseCell(graph, cell_dbl)) {
+        return;
+      }
+      if (graph.getModel().isVertex(cell_dbl)) {
+        showDrawer(true);
+      }
+    }
+  });
 }

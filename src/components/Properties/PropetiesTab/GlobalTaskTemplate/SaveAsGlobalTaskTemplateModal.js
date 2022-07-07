@@ -245,6 +245,7 @@ const Content = (props) => {
     <>
       <div>
         <Field
+          id="temNameSaveAsGTId"
           label="Template Name"
           {...templateName}
           required={true}

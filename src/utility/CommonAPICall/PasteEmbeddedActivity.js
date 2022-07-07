@@ -73,7 +73,7 @@ export const PasteEmbeddedActivity = (
             };
           });
           setProcessData((prevProcessData) => {
-            let processObject = { ...prevProcessData };
+            let processObject = JSON.parse(JSON.stringify(prevProcessData));
             if (mileStoneWidthIncreased) {
               processObject.MileStones[milestone.mileIndex].Width =
                 mileStoneWidthIncreased.arrMilestoneInfos[
@@ -106,7 +106,7 @@ export const PasteEmbeddedActivity = (
       } else {
         if (activity.view === "BPMN") {
           setProcessData((prevData) => {
-            let processObject = { ...prevData };
+            let processObject = JSON.parse(JSON.stringify(prevData));
             let newArr = processObject.MileStones[
               milestone.mileIndex
             ].Activities?.map((act, index) => {

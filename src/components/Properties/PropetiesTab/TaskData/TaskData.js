@@ -197,6 +197,12 @@ function TaskData(props) {
     { label: t("Form"), value: "form" },
   ];
 
+  /*****************************************************************************************
+     * @author asloob_ali BUG ID : 111500 Description : 111500 -  Task: Created variables are not saved in data tab
+     *  Reason:there was some mismatch in keys while saving the data.
+     * Resolution : now adding data in proper key in task property object.
+  
+     *  Date : 04/07/2022             ****************/
   useEffect(() => {
     if (localLoadedActivityPropertyData) {
       const formView =

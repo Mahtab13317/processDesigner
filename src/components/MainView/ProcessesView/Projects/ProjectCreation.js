@@ -35,6 +35,8 @@ function ProjectCreation(props) {
         if (response?.data?.Status === 0) {
           cancelHandler();
         }
+      }).catch(err=>{
+        console.log(err)
       });
   };
 

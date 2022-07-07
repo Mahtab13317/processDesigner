@@ -21,19 +21,24 @@ export const deassociateTask = (
     associatedActivityName: activityName,
     associatedActivityId: activityId,
   };
-  axios.post(SERVER_URL + ENDPOINT_DEASSOCIATETASK, obj).then((response) => {
-    if (response.data.Status == 0) {
-      setProcessData((prevProcessData) => {
-        let newProcessData = { ...prevProcessData };
-        const tasks =
-          newProcessData.MileStones[milestoneIndex].Activities[activityindex]
-            .AssociatedTasks;
-        let filteredArray = tasks?.filter((elem) => elem !== taskId);
-        newProcessData.MileStones[milestoneIndex].Activities[
-          activityindex
-        ].AssociatedTasks = [...filteredArray];
-        return newProcessData;
-      });
-    }
-  });
+  axios
+    .post(SERVER_URL + ENDPOINT_DEASSOCIATETASK, obj)
+    .then((response) => {
+      if (response.data.Status == 0) {
+        setProcessData((prevProcessData) => {
+          let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+          const tasks =
+            newProcessData.MileStones[milestoneIndex].Activities[activityindex]
+              .AssociatedTasks;
+          let filteredArray = tasks?.filter((elem) => elem !== taskId);
+          newProcessData.MileStones[milestoneIndex].Activities[
+            activityindex
+          ].AssociatedTasks = [...filteredArray];
+          return newProcessData;
+        });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };

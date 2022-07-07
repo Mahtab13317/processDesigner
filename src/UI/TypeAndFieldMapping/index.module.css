@@ -13,12 +13,33 @@
 .flexRow {
   display: flex;
   flex-direction: row;
+  align-items: center;
+  height: 35px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .iconStyle {
   margin-right: 8px;
+  color: rgba(96, 96, 96, 1)
 }
 
 .menuItemImage {
   height: 100%;
+}
+.typeDiv{
+  width: 680px;
+  height: 180px;
+  border: 1px solid #70707085;
+  display: flex;
+  flex-direction: row;
+}
+.typeInsideDiv{
+  display: flex;
+  flex-direction: column;
+  /* width: 33%; */
+  height: 100%;
+  border-right: 1px solid rgba(112, 112, 112, 0.462);
+  padding: 8px;
 }

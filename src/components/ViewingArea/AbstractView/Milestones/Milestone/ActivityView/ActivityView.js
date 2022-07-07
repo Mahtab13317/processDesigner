@@ -221,11 +221,13 @@ function ActivityView(props) {
   };
 
   const handleClickAway = (evt, mIndex) => {
-    let processObject = { ...props.processData };
-    processObject.MileStones = [...props.processData.MileStones];
-    processObject.MileStones[mIndex].Activities = [
-      ...props.processData.MileStones[mIndex].Activities,
-    ];
+    let processObject = JSON.parse(JSON.stringify(props.processData));
+    processObject.MileStones = JSON.parse(
+      JSON.stringify(props.processData.MileStones)
+    );
+    processObject.MileStones[mIndex].Activities = JSON.parse(
+      JSON.stringify(props.processData.MileStones[mIndex].Activities)
+    );
     processObject.MileStones[mIndex].Activities.forEach((activity) => {
       if (
         activity.ActivityName.trim() === "" ||

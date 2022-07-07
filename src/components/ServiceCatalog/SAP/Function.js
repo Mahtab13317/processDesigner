@@ -196,7 +196,7 @@ function Function(props) {
               return temp;
             });
             //code added on 16 June 2022 for BugId 110949
-            let temp = { ...localLoadedProcessData };
+            let temp = JSON.parse(JSON.stringify(localLoadedProcessData));
             temp.MaxMethodIndex = parseInt(temp.MaxMethodIndex) + 1;
             setlocalLoadedProcessData(temp);
           } else if (statusConstant === MODIFY_CONSTANT) {

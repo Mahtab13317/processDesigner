@@ -32,9 +32,11 @@ import styles from "./taskescalation.module.css";
 import arabicStyles from "./taskescalationarabic.module.css";
 import {
   getAllVariableOptions,
+  getVariableExtObjectIdByName,
   getVariableIdByName,
   getVariablesByScopes,
   getVariableScopeByName,
+  getVariableVarFieldIdByName,
 } from "../../../../utility/CommonFunctionCall/CommonFunctionCall.js";
 import {
   TRIGGER_PRIORITY_HIGH,
@@ -207,7 +209,7 @@ function TaskEscalationRules(props) {
       dateVars = dateVars.map((variable) => ({
         name: getDisplayNameForSysDefVars(variable.VariableName),
         value: variable.VariableName,
-        VariableName: variable.VariableName,
+        ...variable,
       }));
       const hardCodeVars = [
         {
@@ -334,11 +336,13 @@ function TaskEscalationRules(props) {
               ccConstant: "",
               bccConstant: "",
             },
-            param2: "",
-            type2: "S",
-            variableId_2: "0",
-            ruleCalFlag: "Y",
           },
+          param2: "",
+          type2: "S",
+          variableId_2: "0",
+          extObjID2: "0",
+          varFieldId_2: "0",
+          ruleCalFlag: "Y",
         },
       ],
     };
@@ -466,9 +470,15 @@ function TaskEscalationRules(props) {
     const rule = { ...selectedRule };
 
     const operationObj = (rule.ruleOpList && rule.ruleOpList[0]) || {};
+    operationObj["ruleCalFlag"] = TATData.calendarType || "N";
     operationObj["durationInfo"] = {
-      varFieldId_Days: "0",
-      variableId_Seconds: "0",
+      varFieldIdDays: TATData.isDaysConstant
+        ? "0"
+        : getVariableVarFieldIdByName({
+            variables: localLoadedProcessData?.Variable,
+            name: TATData.days,
+          }),
+      variableIdSeconds: "0",
       paramSeconds: "0",
       variableIdDays: TATData.isDaysConstant
         ? "0"
@@ -488,13 +498,23 @@ function TaskEscalationRules(props) {
             variables: localLoadedProcessData?.Variable,
             name: TATData.hours,
           }),
-      varFieldId_Seconds: "0",
-      variableId_Hours: "0",
+      varFieldIdSeconds: "0",
+      varFieldIdHours: TATData.isHoursConstant
+        ? "0"
+        : getVariableVarFieldIdByName({
+            variables: localLoadedProcessData?.Variable,
+            name: TATData.hours,
+          }),
 
       paramDays: TATData.days,
       paramHours: TATData.hours,
       paramMinutes: TATData.minutes,
-      varFieldId_Minutes: "0",
+      varFieldIdMinutes: TATData.isMinutesConstant
+        ? "0"
+        : getVariableVarFieldIdByName({
+            variables: localLoadedProcessData?.Variable,
+            name: TATData.minutes,
+          }),
     };
     operationObj["mailTrigInfo"]["mailInfo"] = {
       varFieldTypeBCC: mailData.isBccConstant
@@ -569,11 +589,45 @@ function TaskEscalationRules(props) {
             variables: localLoadedProcessData?.Variable,
             name: mailData.toInput,
           }),
+      extObjIDFrom: mailData.isFromConstant
+        ? "0"
+        : getVariableExtObjectIdByName({
+            variables: localLoadedProcessData?.Variable,
+            name: mailData.fromInput,
+          }),
+      extObjIDTo: mailData.isToConstant
+        ? "0"
+        : getVariableExtObjectIdByName({
+            variables: localLoadedProcessData?.Variable,
+            name: mailData.toInput,
+          }),
+      extObjIDCC: mailData.isCcConstant
+        ? "0"
+        : getVariableExtObjectIdByName({
+            variables: localLoadedProcessData?.Variable,
+            name: mailData.ccInput,
+          }),
+      extObjIDBCC: mailData.isBccConstant
+        ? "0"
+        : getVariableExtObjectIdByName({
+            variables: localLoadedProcessData?.Variable,
+            name: mailData.bccInput,
+          }),
+      varFieldIdPriority: "0",
+      extObjIDPriority: "0",
     };
 
     operationObj["param2"] = escalateAfter.value?.param2 || "";
     operationObj["type2"] = escalateAfter.value?.type2 || "S";
     operationObj["variableId_2"] = escalateAfter.value?.variableId_2 || "0";
+    operationObj["varFieldId_2"] = getVariableVarFieldIdByName({
+      variables: localLoadedProcessData?.Variable,
+      name: escalateAfter.value?.param2,
+    });
+    operationObj["extObjID2"] = getVariableExtObjectIdByName({
+      variables: localLoadedProcessData?.Variable,
+      name: escalateAfter.value?.param2,
+    });
 
     rule.ruleOpList[0] = { ...operationObj };
 
@@ -592,12 +646,13 @@ function TaskEscalationRules(props) {
     setAllRules(newRules);
     updateLocalProp(newRules);
   };
-  console.log(mailData);
-  console.log(TATData);
+
   const updateLocalProp = (rules) => {
     const newPropObj = { ...localLoadedActivityPropertyData };
-    newPropObj.m_objTaskRulesListInfo.esRuleList = rules;
+
+    newPropObj.taskGenPropInfo.m_objTaskRulesListInfo.esRuleList = rules;
     setlocalLoadedActivityPropertyData(newPropObj);
+    setSelectedRule(null);
   };
   const cancelAddingRuleToRules = () => {
     const newRules = [...allRules];
@@ -635,6 +690,7 @@ function TaskEscalationRules(props) {
       return newData;
     });
   };
+
   const onChangeEscalateAfter = (name, value) => {
     if (typeof value === "object") {
       const newVal = {

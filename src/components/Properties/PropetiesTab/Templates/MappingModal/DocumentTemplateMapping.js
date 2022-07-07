@@ -7,13 +7,17 @@ import "../index.css";
 import { MenuItem, Select } from "@material-ui/core";
 import { useGlobalState, store } from "state-pool";
 import { RTL_DIRECTION } from "../../../../../Constants/appConstants";
+import { useSelector } from "react-redux";
+import { OpenProcessSliceValue } from "../../../../../redux-store/slices/OpenProcessSlice";
 
 function DocumentTemplateMapping(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   let { template, setUpdatedTemplate } = props;
-  const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
+  const openProcessData = useSelector(OpenProcessSliceValue);
+  const localLoadedProcessData = JSON.parse(
+    JSON.stringify(openProcessData.loadedData)
+  );
   const [document, setDocument] = useState(null);
 
   useEffect(() => {
@@ -102,8 +106,8 @@ function DocumentTemplateMapping(props) {
                 });
               }}
             >
-              {localLoadedProcessData.DocumentTypeList?.length > 0 ? (
-                localLoadedProcessData.DocumentTypeList.map((ele) => {
+              {localLoadedProcessData?.DocumentTypeList?.length > 0 ? (
+                localLoadedProcessData?.DocumentTypeList.map((ele) => {
                   return (
                     <MenuItem
                       value={ele.DocName}

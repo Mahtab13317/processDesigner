@@ -50,12 +50,16 @@ const Restful = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/Restful/index.js")
 );
 
-const ResponseConsumerJMS= React.lazy(() =>
-import("../../components/Properties/PropetiesTab/ResponseConsumerJMS/index.js")
+const ResponseConsumerJMS = React.lazy(() =>
+  import(
+    "../../components/Properties/PropetiesTab/ResponseConsumerJMS/index.js"
+  )
 );
 
-const RequestConsumerSoap= React.lazy(() =>
-import("../../components/Properties/PropetiesTab/requestConsumerSOAP/index.js")
+const RequestConsumerSoap = React.lazy(() =>
+  import(
+    "../../components/Properties/PropetiesTab/requestConsumerSOAP/index.js"
+  )
 );
 
 const DataFields = React.lazy(() =>
@@ -116,7 +120,7 @@ const ReverseMapping_Variables = React.lazy(() =>
   import(
     "../../components/Properties/PropetiesTab/callActivity/reverseMVariables"
   )
-); 
+);
 
 const ReverseMapping_Variables_ProcessTask = React.lazy(() =>
   import(
@@ -126,7 +130,7 @@ const ReverseMapping_Variables_ProcessTask = React.lazy(() =>
 
 const ReverseMDoc = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/callActivity/reverseMDoc")
-); 
+);
 
 const ReverseMDoc_ProcessTask = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/ProcessTask/reverseMDoc")
@@ -164,7 +168,11 @@ const Sap = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/SAP/Sap")
 );
 
-const Requirements = React.lazy(()=> import("../../components/ViewingArea/ProcessRequirements&Attchments/ProcessRequirements/index.js"))
+const Requirements = React.lazy(() =>
+  import(
+    "../../components/ViewingArea/ProcessRequirements&Attchments/ProcessRequirements/index.js"
+  )
+);
 // const DataExchange = React.lazy(() =>
 //   import("../../components/Properties/PropetiesTab/DataExchange")
 // );
@@ -197,14 +205,14 @@ const tabNames = {
     label: propertiesLabel.dataFields,
   },
   3: {
-    name:<InitialRule />,
+    name: <InitialRule />,
     toolTip: "initialRules",
     icon: InitialRulesIcon,
     icon_enabled: InitialRulesIcon_EN,
     label: propertiesLabel.initialRules,
   },
   4: {
-    name: <Requirements/>,
+    name: <Requirements />,
     toolTip: "requirements",
     icon: RequirementsIcon,
     icon_enabled: RequirementsIcon_EN,
@@ -218,8 +226,7 @@ const tabNames = {
     label: propertiesLabel.attachments,
   },
   6: {
-    //name: <WorkdeskTab />,
-    name: "workdesk",
+    name: <WorkdeskTab />,
     toolTip: "workdesk",
     icon: WorkdeskIcon,
     icon_enabled: WorkdeskIcon_EN,
@@ -386,7 +393,7 @@ const tabNames = {
     label: propertiesLabel.sap,
   },
   38: {
-    name: <ResponseConsumerJMS/>,
+    name: <ResponseConsumerJMS />,
     toolTip: "resConsumerJms",
     label: propertiesLabel.resConJMS,
   },
@@ -396,12 +403,12 @@ const tabNames = {
     label: propertiesLabel.resConSOAP,
   },
   40: {
-    name: <RequestConsumerSoap/>,
+    name: <RequestConsumerSoap />,
     toolTip: "reqConsumerSoap",
     label: propertiesLabel.reqConSOAP,
   },
   41: {
-    name: <Restful/>,
+    name: <Restful />,
     toolTip: "Restful",
     label: propertiesLabel.Restful,
   },
@@ -452,7 +459,9 @@ const tabNames = {
     label: propertiesLabel.sharePointArchive,
   },
   50: {
-    name: <ForwardMapping_DocTypes_ProcessTask tabType="Forward DocType Mapping" />,
+    name: (
+      <ForwardMapping_DocTypes_ProcessTask tabType="Forward DocType Mapping" />
+    ),
     toolTip: "ForwardDocTypeMapping",
     icon: ForwardMapping,
     label: propertiesLabel.fwdDocMappingProcessTask,
@@ -464,13 +473,17 @@ const tabNames = {
     label: propertiesLabel.revDocMappingProcessTask,
   },
   52: {
-    name: <ForwardMapping_Variables_ProcessTask tabType="Forward Variable Mapping" />,
+    name: (
+      <ForwardMapping_Variables_ProcessTask tabType="Forward Variable Mapping" />
+    ),
     toolTip: "ForwardVariableMapping",
     icon: ForwardMapping,
     label: propertiesLabel.fwdVarMappingProcessTask,
   },
   53: {
-    name: <ReverseMapping_Variables_ProcessTask tabType="Reverse Variable Mapping" />,
+    name: (
+      <ReverseMapping_Variables_ProcessTask tabType="Reverse Variable Mapping" />
+    ),
     toolTip: "ReverseVariableMapping",
     icon: ReverseMapping,
     label: propertiesLabel.revVarMappingProcessTask,

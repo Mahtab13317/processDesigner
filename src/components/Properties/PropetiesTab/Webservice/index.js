@@ -230,7 +230,9 @@ function Webservice(props) {
     setShowCatelogScreen(true);
   };
 
-  {/*code changes on 21 June 2022 for BugId 110907 */}
+  {
+    /*code changes on 21 June 2022 for BugId 110907 */
+  }
   return (
     <div>
       <div
@@ -255,6 +257,7 @@ function Webservice(props) {
                 alignItems: "center",
                 justifyContent: "space-between",
                 marginBottom: "1rem",
+                width: "22vw",
               }}
             >
               <p
@@ -270,7 +273,7 @@ function Webservice(props) {
                 style={{
                   fontSize: "12px",
                   color: "#0072C6",
-                  fontWeight: "700",
+                  fontWeight: "600",
                   cursor: "pointer",
                 }}
                 onClick={() => LandOnCatelogHandler()}
@@ -301,7 +304,7 @@ function Webservice(props) {
                   onChange={(e) => setSelectedWebService(e.target.value)}
                   style={{
                     fontSize: "12px",
-                    width: props.isDrawerExpanded ? "90%" : "100%",
+                    width: props.isDrawerExpanded ? "22vw" : "100%",
                   }}
                   value={selectedWebService}
                   MenuProps={{
@@ -354,7 +357,7 @@ function Webservice(props) {
                       !selectedMethod && associateButtonClicked
                         ? "1px solid red"
                         : "1px solid #CECECE",
-                    width: props.isDrawerExpanded ? "90%" : "100%",
+                    width: props.isDrawerExpanded ? "22vw" : "100%",
                   }}
                   value={selectedMethod}
                   disabled={selectedWebService ? false : true}

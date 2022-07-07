@@ -29,5 +29,8 @@ export const getTaskDependency = (
           deleteTask(taskId, taskName, processDefId, setProcessData);
         }
       }
+    })
+    .catch((err) => {
+      console.log(err);
     });
 };

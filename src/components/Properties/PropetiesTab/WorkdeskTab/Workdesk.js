@@ -23,9 +23,12 @@ function Workdesk(props) {
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const loadedActivityPropertyData = store.getState("activityPropertyData");
-  const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
-    useGlobalState(loadedActivityPropertyData);
+  const [localLoadedActivityPropertyData] = useGlobalState(
+    loadedActivityPropertyData
+  );
   const [bmobile, setbmobile] = useState(false);
+  const [bSap, setbSap] = useState(false);
+  const [bOther, setOther] = useState(false);
 
   useEffect(() => {
     axios
@@ -35,16 +38,67 @@ function Workdesk(props) {
       )
       .then((res) => {
         if (res.status === 200) {
-          let mobileSelected = res.data.GlobalInterfaceData.filter((d) => {
-            if (d.ClientInvocation == "Mobile") {
-              return d.Included;
+          let mobileSelected = false;
+          let sapSelected = false;
+          let othersIncluded = false;
+          res.data.GlobalInterfaceData?.filter((d) => {
+            if (d.InterfaceId == "9" && d.Included) {
+              mobileSelected = true;
+            }
+            if (d.InterfaceId == "10" && d.Included) {
+              sapSelected = true;
+            }
+            if (+d.InterfaceId > 12 && d.Included) {
+              othersIncluded = true;
             }
           });
-
-          setbmobile(mobileSelected[0]);
+          let isMobileEnabled =
+            localLoadedActivityPropertyData?.ActivityProperty?.isMobileEnabled;
+          let isSAPEnabled = localLoadedProcessData?.SAPRequired;
+          if (mobileSelected && isMobileEnabled) {
+            setbmobile(true);
+          }
+          if (sapSelected && isSAPEnabled) {
+            setbSap(true);
+          }
+          setOther(othersIncluded);
         }
       });
   }, []);
+
+  const getTabNames = () => {
+    let arr = [
+      t("todo"),
+      t("actions"),
+      t("exception(s)"),
+      t("document"),
+      t("scan"),
+    ];
+    if (bmobile) {
+      arr.splice(arr?.length - 1, 0, t("mobile"));
+    }
+    if (bOther) {
+      arr.splice(arr?.length - 1, 0, t("others"));
+    }
+    if (bSap) {
+      arr.splice(arr?.length - 1, 0, t("SAP"));
+    }
+    return arr;
+  };
+
+  const getTabElements = () => {
+    let arr = [<Todo />, <Action />, <Exception />, <Document />, <Scan />];
+    if (bmobile) {
+      arr.splice(arr?.length - 1, 0, <Mobile />);
+    }
+    if (bOther) {
+      arr.splice(arr?.length - 1, 0, <Others />);
+    }
+    if (bSap) {
+      arr.splice(arr?.length - 1, 0, <Sap />);
+    }
+    return arr;
+  };
 
   return (
     <React.Fragment>
@@ -56,74 +110,58 @@ function Workdesk(props) {
         tabStyling="processViewTabs"
         tabsStyle="processViewSubTabs"
         TabNames={
-          localLoadedActivityPropertyData.ActivityProperty.actType == 11 &&
-          localLoadedActivityPropertyData.ActivityProperty.actSubType == 1 //query
-            ? [
-                t("todo"),
-                t("exception(s)"),
-                t("document"),
-                t("scan"),
-                t("mobile"),
-              ]
-            : localLoadedActivityPropertyData.ActivityProperty.actType == 4 &&
-              localLoadedActivityPropertyData.ActivityProperty.actSubType == 1 //timer
+          localLoadedActivityPropertyData?.ActivityProperty?.actType == 11 &&
+          localLoadedActivityPropertyData?.ActivityProperty?.actSubType == 1 //query
+            ? bmobile
+              ? [
+                  t("todo"),
+                  t("exception(s)"),
+                  t("document"),
+                  t("scan"),
+                  t("mobile"),
+                ]
+              : [t("todo"), t("exception(s)"), t("document"), t("scan")]
+            : localLoadedActivityPropertyData?.ActivityProperty?.actType == 4 &&
+              localLoadedActivityPropertyData?.ActivityProperty?.actSubType == 1 //timer
             ? [t("document"), t("scan")]
-            : localLoadedActivityPropertyData.ActivityProperty.actType == 2 &&
-              localLoadedActivityPropertyData.ActivityProperty.actSubType == 1 //endevent
+            : (localLoadedActivityPropertyData?.ActivityProperty?.actType ==
+                2 &&
+                localLoadedActivityPropertyData?.ActivityProperty?.actSubType ==
+                  1) ||
+              (localLoadedActivityPropertyData?.ActivityProperty?.actType ==
+                3 &&
+                localLoadedActivityPropertyData?.ActivityProperty?.actSubType ==
+                  1) ||
+              (localLoadedActivityPropertyData?.ActivityProperty?.actType ==
+                2 &&
+                localLoadedActivityPropertyData?.ActivityProperty?.actSubType ==
+                  2) //endevent, terminate, mesageEnd
             ? [t("todo"), t("exception(s)"), t("document")]
-            : localLoadedActivityPropertyData.ActivityProperty.actType == 3 &&
-              localLoadedActivityPropertyData.ActivityProperty.actSubType == 1 // terminate
-            ? [t("todo"), t("exception(s)"), t("document")]
-            : localLoadedActivityPropertyData.ActivityProperty.actType == 2 &&
-              localLoadedActivityPropertyData.ActivityProperty.actSubType == 2 // mesageEnd
-            ? [t("todo"), t("exception(s)"), t("document")]
-            : localLoadedProcessData?.SAPRequired
-            ? [
-                t("todo"),
-                t("actions"),
-                t("exception(s)"),
-                t("document"),
-                t("scan"),
-                t("mobile"),
-                t("others"),
-                t("SAP"),
-              ]
-            : [
-                t("todo"),
-                t("actions"),
-                t("exception(s)"),
-                t("document"),
-                t("scan"),
-                t("mobile"),
-                t("others"),
-              ]
+            : getTabNames()
         }
         TabElement={
-          localLoadedActivityPropertyData.ActivityProperty.actType == 11 &&
-          localLoadedActivityPropertyData.ActivityProperty.actSubType == 1 //query
-            ? [<Todo />, <Exception />, <Document />, <Scan />, <Mobile />]
-            : localLoadedActivityPropertyData.ActivityProperty.actType == 4 &&
-              localLoadedActivityPropertyData.ActivityProperty.actSubType == 1 //timer
+          localLoadedActivityPropertyData?.ActivityProperty?.actType == 11 &&
+          localLoadedActivityPropertyData?.ActivityProperty?.actSubType == 1 //query
+            ? bmobile
+              ? [<Todo />, <Exception />, <Document />, <Scan />, <Mobile />]
+              : [<Todo />, <Exception />, <Document />, <Scan />]
+            : localLoadedActivityPropertyData?.ActivityProperty?.actType == 4 &&
+              localLoadedActivityPropertyData?.ActivityProperty?.actSubType == 1 //timer
             ? [<Document />, <Scan />]
-            : localLoadedActivityPropertyData.ActivityProperty.actType == 2 &&
-              localLoadedActivityPropertyData.ActivityProperty.actSubType == 1 //endevent
+            : (localLoadedActivityPropertyData?.ActivityProperty?.actType ==
+                2 &&
+                localLoadedActivityPropertyData?.ActivityProperty?.actSubType ==
+                  1) ||
+              (localLoadedActivityPropertyData?.ActivityProperty?.actType ==
+                3 &&
+                localLoadedActivityPropertyData?.ActivityProperty?.actSubType ==
+                  1) ||
+              (localLoadedActivityPropertyData?.ActivityProperty?.actType ==
+                2 &&
+                localLoadedActivityPropertyData?.ActivityProperty?.actSubType ==
+                  2) //endevent, terminate, mesageEnd
             ? [<Todo />, <Exception />, <Document />]
-            : localLoadedActivityPropertyData.ActivityProperty.actType == 3 &&
-              localLoadedActivityPropertyData.ActivityProperty.actSubType == 1 // terminate
-            ? [<Todo />, <Exception />, <Document />]
-            : localLoadedActivityPropertyData.ActivityProperty.actType == 2 &&
-              localLoadedActivityPropertyData.ActivityProperty.actSubType == 2 // mesageEnd
-            ? [<Todo />, <Exception />, <Document />]
-            : [
-                <Todo />,
-                <Action />,
-                <Exception />,
-                <Document />,
-                <Scan />,
-                <Mobile />,
-                <Others />,
-                <Sap />,
-              ]
+            : getTabElements()
         }
       />
     </React.Fragment>

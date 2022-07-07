@@ -7,19 +7,24 @@ export const deleteTask = (taskId, taskName, processDefId, setProcessData) => {
     taskId: taskId,
     taskName: taskName,
   };
-  axios.post(SERVER_URL + ENDPOINT_REMOVETASK, obj).then((response) => {
-    // if (response.data.Status == 0) {
-    setProcessData((prevProcessData) => {
-      let newProcessData = { ...prevProcessData };
-      newProcessData.Tasks.forEach((task, index) => {
-        if (task.TaskId === Number(taskId)) {
-          //removes task from Tasks array
-          newProcessData.Tasks.splice(index, 1);
-        }
-      });
+  axios
+    .post(SERVER_URL + ENDPOINT_REMOVETASK, obj)
+    .then((response) => {
+      // if (response.data.Status == 0) {
+      setProcessData((prevProcessData) => {
+        let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+        newProcessData.Tasks.forEach((task, index) => {
+          if (task.TaskId === Number(taskId)) {
+            //removes task from Tasks array
+            newProcessData.Tasks.splice(index, 1);
+          }
+        });
 
-      return newProcessData;
+        return newProcessData;
+      });
+      // }
+    })
+    .catch((err) => {
+      console.log(err);
     });
-    // }
-  });
 };

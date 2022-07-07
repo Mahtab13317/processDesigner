@@ -35,11 +35,8 @@ import Rules from "../Rules/Rules";
 
 function DocType(props) {
   const loadedProcessData = store.getState("loadedProcessData");
-  const [
-    localLoadedProcessData,
-    setlocalLoadedProcessData,
-    updatelocalLoadedProcessData,
-  ] = useGlobalState(loadedProcessData);
+  const [localLoadedProcessData, setlocalLoadedProcessData] =
+    useGlobalState(loadedProcessData);
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const [isLoading, setIsLoading] = useState(true);
@@ -60,16 +57,10 @@ function DocType(props) {
   const [docArray, setDocArray] = useState([]);
   const [docAllRules, setDocAllRules] = useState([]);
   const [selectedTab, setSelectedTab] = useState("screenHeading");
-  const [rulesLength, setRulesLength] = useState(false);
   const [subColumns, setSubColumns] = useState([]);
   const [splicedColumns, setSplicedColumns] = useState([]);
 
   //code added on 8 June 2022 for BugId 110212
-  const handleScreen = (screenType) => {
-    setSelectedTab(screenType);
-    setRulesLength(true);
-  };
-
   const tabChangeHandler = (e, tabName) => {
     setSelectedTab(tabName);
   };
@@ -247,19 +238,18 @@ function DocType(props) {
             setlocalLoadedProcessData(temp);
             let addedActivity = [];
             let tempData = { ...docData };
-            if (tempData.DocumentTypeList.length > 0) {
-              tempData &&
-                tempData.DocumentTypeList[0].Activities.map((activity) => {
-                  addedActivity.push({
-                    ActivityId: activity.ActivityId,
-                    Add: false,
-                    View: false,
-                    Modify: false,
-                    Delete: false,
-                    Download: false,
-                    Print: false,
-                  });
+            if (subColumns.length > 0) {
+              subColumns?.forEach((activity) => {
+                addedActivity.push({
+                  ActivityId: activity.ActivityId,
+                  Add: false,
+                  View: false,
+                  Modify: false,
+                  Delete: false,
+                  Download: false,
+                  Print: false,
                 });
+              });
             }
             tempData &&
               tempData.DocumentTypeList.push({
@@ -465,22 +455,13 @@ function DocType(props) {
         let newState = { ...docData };
         syncViewWithModify(newState, check_type, doc_idx, activity_id);
         fullRights_oneActivity_allDocs(activity_id, newState);
+        let demoOne = true;
         newState.DocumentTypeList[doc_idx].Activities.map((activity) => {
-          if (activity.ActivityId === +activity_id) {
-            activity[check_type] = !activity[check_type];
+          if (!activity[check_type] && demoOne) {
+            demoOne = false;
+            newState.DocumentTypeList[doc_idx].SetAllChecks[check_type] = false;
           }
         });
-        let demoOne = true;
-        newState.DocumentTypeList[doc_idx].Activities.map(
-          (activity, activityIndex) => {
-            if (!activity[check_type] && demoOne) {
-              demoOne = false;
-              newState.DocumentTypeList[doc_idx].SetAllChecks[
-                check_type
-              ] = false;
-            }
-          }
-        );
         if (demoOne) {
           newState.DocumentTypeList[doc_idx].SetAllChecks[check_type] = true;
         }

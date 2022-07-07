@@ -14,12 +14,13 @@ import {
   ENDPOINT_DELETE_GROUP,
   ENDPOINT_MOVETO_OTHERGROUP,
   SCREENTYPE_TODO,
+  ENDPOINT_MODIFY_TODO,
 } from "../../../../Constants/appConstants";
 import axios from "axios";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 import ActivityModal from "./ActivityModal.js";
 import { giveCompleteRights } from "../../../../utility/Tools/giveCompleteRights_toDo";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import DeleteModal from "../../../../UI/ActivityModal/Modal";
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
 import AddToDo from "./AddToDo";
@@ -27,15 +28,21 @@ import CommonInterface from "../CommonInterface";
 import Backdrop from "../../../../UI/Backdrop/Backdrop";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { BATCH_COUNT } from "../../../../Constants/appConstants";
+import {
+  disableToDoChecks,
+  isValidTodoAct,
+} from "../../../../utility/Tools/DisableFunc";
+import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 
 function ToDo(props) {
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData, setLocalLoadedProcessData] =
     useGlobalState(loadedProcessData);
   const [loadedMileStones, setLoadedMileStones] = useState(
-    localLoadedProcessData.MileStones
+    localLoadedProcessData?.MileStones
   );
   let { t } = useTranslation();
+  const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   let [activitySearchTerm, setActivitySearchTerm] = useState("");
   const [addGroupModal, setAddGroupModal] = React.useState(false);
@@ -78,46 +85,25 @@ function ToDo(props) {
 
   useEffect(() => {
     let todoIdString = "";
-    loadedMileStones &&
-      loadedMileStones.map((mileStone) => {
-        mileStone.Activities.map((activity, index) => {
+    localLoadedProcessData?.MileStones?.forEach((mileStone) => {
+      mileStone?.Activities?.forEach((activity) => {
+        if (isValidTodoAct(activity.ActivityType, activity.ActivitySubType)) {
           todoIdString = todoIdString + activity.ActivityId + ",";
-        });
+        }
       });
-
+    });
     MapAllActivities(todoIdString);
     let arr = [];
-    loadedMileStones &&
-      loadedMileStones.map((mileStone) => {
-        mileStone.Activities.map((activity, index) => {
-          if (
-            !(activity.ActivityType === 18 && activity.ActivitySubType === 1) &&
-            !(activity.ActivityType === 1 && activity.ActivitySubType === 2) &&
-            !(activity.ActivityType === 26 && activity.ActivitySubType === 1) &&
-            !(activity.ActivityType === 10 && activity.ActivitySubType === 1) &&
-            !(activity.ActivityType === 20 && activity.ActivitySubType === 1) &&
-            !(activity.ActivityType === 22 && activity.ActivitySubType === 1) &&
-            !(activity.ActivityType === 31 && activity.ActivitySubType === 1) &&
-            !(activity.ActivityType === 29 && activity.ActivitySubType === 1) &&
-            !(activity.ActivityType === 10 && activity.ActivitySubType === 4) &&
-            !(activity.ActivityType === 33 && activity.ActivitySubType === 1) &&
-            !(activity.ActivityType === 27 && activity.ActivitySubType === 1) &&
-            !(activity.ActivityType === 19 && activity.ActivitySubType === 1) &&
-            !(activity.ActivityType === 21 && activity.ActivitySubType === 1) &&
-            !(activity.ActivityType === 5 && activity.ActivitySubType === 1) &&
-            !(activity.ActivityType === 6 && activity.ActivitySubType === 1) &&
-            !(activity.ActivityType === 5 && activity.ActivitySubType === 2) &&
-            !(activity.ActivityType === 6 && activity.ActivitySubType === 2) &&
-            !(activity.ActivityType === 7 && activity.ActivitySubType === 1) &&
-            !(activity.ActivityType === 34 && activity.ActivitySubType === 1)
-          ) {
-            arr.push(activity);
-          }
-        });
+    localLoadedProcessData?.MileStones?.forEach((mileStone) => {
+      mileStone?.Activities?.forEach((activity) => {
+        if (isValidTodoAct(activity.ActivityType, activity.ActivitySubType)) {
+          arr.push(activity);
+        }
       });
+    });
     setSubColumns(arr);
     setSplicedColumns(arr.slice(0, BATCH_COUNT));
-  }, [loadedMileStones]);
+  }, [localLoadedProcessData, props.openProcessID]);
 
   useEffect(() => {
     if (document.getElementById("oneBoxMatrix")) {
@@ -191,23 +177,20 @@ function ToDo(props) {
           setRuleDataArray(array);
           let localActivityArr = [];
           let localActivityIdArr = [];
-          newState &&
-            newState.TodoGroupLists.map((group) => {
-              group.ToDoList &&
-                group.ToDoList.map((todo) => {
-                  todo.Activities &&
-                    todo.Activities.map((activity, act_idx) => {
-                      if (Object.values(activity).includes(false)) {
-                        localActivityArr[act_idx] = false;
-                      } else {
-                        if (localActivityArr[act_idx] != false) {
-                          localActivityArr[act_idx] = true;
-                        }
-                      }
-                      localActivityIdArr[act_idx] = activity.ActivityId;
-                    });
-                });
+          newState?.TodoGroupLists.map((group) => {
+            group.ToDoList?.map((todo) => {
+              todo.Activities?.map((activity, act_idx) => {
+                if (Object.values(activity).includes(false)) {
+                  localActivityArr[act_idx] = false;
+                } else {
+                  if (localActivityArr[act_idx] != false) {
+                    localActivityArr[act_idx] = true;
+                  }
+                }
+                localActivityIdArr[act_idx] = activity.ActivityId;
+              });
             });
+          });
 
           localActivityArr.forEach((activity, activityIndex) => {
             if (activity === false) {
@@ -255,10 +238,8 @@ function ToDo(props) {
     toDoAssociate,
     toDoType,
     mandatoryValue,
-    triggerValue,
-    todo
+    triggerValue
   ) => {
-    console.log("TRIGGERVALUE", toDoType, todo, toDoAssociate);
     handleToDoOpen(groupId);
     setToDoNameToModify(toDoName);
     setToDoDescToModify(toDoDesc);
@@ -281,17 +262,160 @@ function ToDo(props) {
 
   const addToDoToList = (ToDoToAdd, button_type, groupId, ToDoDesc) => {
     let exist = false;
-    toDoData.TodoGroupLists.map((group, groupIndex) => {
-      group.ToDoList.map((todo) => {
+    toDoData?.TodoGroupLists?.forEach((group) => {
+      group?.ToDoList?.forEach((todo) => {
         if (todo.ToDoName.toLowerCase() == ToDoToAdd.toLowerCase()) {
-          setbToDoExists(true);
           exist = true;
         }
       });
     });
     if (exist) {
-      return;
+      dispatch(
+        setToastDataFunc({
+          message: t("todoAlreadyExists"),
+          severity: "error",
+          open: true,
+        })
+      );
+    } else {
+      if (ToDoDesc.trim() === "") {
+        setShowDescError(true);
+        document.getElementById("ToDoDescInput").focus();
+      }
+      if (ToDoToAdd.trim() === "") {
+        setShowNameError(true);
+        document.getElementById("ToDoNameInput").focus();
+      }
+
+      if (ToDoToAdd.trim() !== "" && ToDoDesc.trim() !== "") {
+        if (toDoType == "T" && !selectedTrigger) {
+          setShowTriggerError(true);
+        } else {
+          let maxToDoId = 0;
+          toDoData.TodoGroupLists.map((group, groupIndex) => {
+            group.ToDoList.map((listElem) => {
+              if (+listElem.ToDoId > +maxToDoId) {
+                maxToDoId = listElem.ToDoId;
+              }
+            });
+          });
+
+          axios
+            .post(SERVER_URL + ENDPOINT_ADD_TODO, {
+              processDefId: props.openProcessID,
+              todoName: ToDoToAdd,
+              todoId: `${+maxToDoId + 1}`,
+              groupId: groupId,
+              todoDesc: ToDoDesc,
+              viewType: toDoType,
+              mandatory: mandatoryCheck,
+              extObjID: "0",
+              associatedField: associateField ? associateField : "", //code added on 27 June 2022 for the issue-- todo cannot be added
+              variableId: associateField == "CalendarName" ? "10001" : "42",
+              varFieldId: "0",
+              associatedWS: "",
+              triggerName: selectedTrigger ? selectedTrigger : "",
+              pickList: [...pickList],
+            })
+            .then((res) => {
+              if (res.data.Status == 0) {
+                let tempData = { ...toDoData };
+                let groupName;
+                let addedActivity = [];
+                if (subColumns.length > 0) {
+                  subColumns?.forEach((activity) => {
+                    addedActivity.push({
+                      ActivityId: activity.ActivityId,
+                      View: false,
+                      Modify: false,
+                    });
+                  });
+                }
+                tempData.TodoGroupLists.map((group) => {
+                  if (group.GroupId == groupId) {
+                    groupName = group.GroupName;
+                    group.ToDoList.push({
+                      Activities: addedActivity,
+                      Description: ToDoDesc,
+                      Type: toDoType,
+                      TriggerName: selectedTrigger,
+                      Mandatory: mandatoryCheck,
+                      ToDoId: +maxToDoId + 1,
+                      ToDoName: ToDoToAdd,
+                      PickListItems: [...pickList],
+                      AllTodoRights: {
+                        Modify: false,
+                        View: false,
+                      },
+                      ExtObjID: "0",
+                      FieldName: associateField,
+                      VarFieldId: "0",
+                      VarId: associateField === "CalendarName" ? "10001" : "42",
+                    });
+                  }
+                });
+                setToDoData(tempData);
+                //code added on 8 June 2022 for BugId 110197
+                //Updating ruleDataArray
+                let temp = [...ruleDataArray];
+                temp.push({
+                  Name: ToDoToAdd,
+                  NameId: +maxToDoId + 1,
+                  Group: groupName,
+                  GroupId: groupId,
+                });
+                setRuleDataArray(temp);
+
+                // Updating processData on adding ToDo
+                let newProcessData = JSON.parse(
+                  JSON.stringify(localLoadedProcessData)
+                );
+                let maxList = 0;
+                newProcessData.ToDoList?.forEach((el) => {
+                  if (+el.ListId > +maxList) {
+                    maxList = +el.ListId;
+                  }
+                });
+                newProcessData.ToDoList?.push({
+                  AssociatedFieldName: associateField ? associateField : "",
+                  AssociatedWorksteps: ",",
+                  Description: ToDoDesc,
+                  ExtObjID: "0",
+                  ListId: `${maxList + 1}`,
+                  ToDoName: ToDoToAdd,
+                  Type: toDoType,
+                  VarFieldId: "0",
+                  VariableId:
+                    associateField === "CalendarName" ? "10001" : "42",
+                });
+                setLocalLoadedProcessData(newProcessData);
+                if (button_type != "addAnother") {
+                  handleToDoClose();
+                } else if (button_type == "addAnother") {
+                  // document.getElementById("ToDoNameInput").value = "";
+                  setTodoName("");
+                  document.getElementById("ToDoNameInput").focus();
+                }
+              }
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        }
+      }
     }
+  };
+
+  // code added on 4 July 2022 for BugId 111567
+  const modifyToDoFromList = (ToDoToAdd, button_type, groupId, ToDoDesc) => {
+    let toDoId = null;
+    toDoData?.TodoGroupLists?.forEach((group) => {
+      group?.ToDoList?.forEach((todo) => {
+        if (todo.ToDoName.toLowerCase() == ToDoToAdd.toLowerCase()) {
+          toDoId = +todo.ToDoId;
+        }
+      });
+    });
 
     if (ToDoDesc.trim() == "") {
       setShowDescError(true);
@@ -299,33 +423,25 @@ function ToDo(props) {
     }
     if (ToDoToAdd.trim() == "") {
       setShowNameError(true);
+      document.getElementById("ToDoNameInput").focus();
     }
 
-    if (ToDoToAdd != "" && ToDoDesc != "") {
+    if (ToDoToAdd.trim() !== "" && ToDoDesc.trim() !== "") {
       if (toDoType == "T" && !selectedTrigger) {
         setShowTriggerError(true);
       } else {
-        let maxToDoId = 0;
-        toDoData.TodoGroupLists.map((group, groupIndex) => {
-          group.ToDoList.map((listElem) => {
-            if (+listElem.ToDoId > +maxToDoId) {
-              maxToDoId = listElem.ToDoId;
-            }
-          });
-        });
-
         axios
-          .post(SERVER_URL + ENDPOINT_ADD_TODO, {
+          .post(SERVER_URL + ENDPOINT_MODIFY_TODO, {
             processDefId: props.openProcessID,
             todoName: ToDoToAdd,
-            todoId: `${+maxToDoId + 1}`,
+            todoId: toDoId,
             groupId: groupId,
             todoDesc: ToDoDesc,
             viewType: toDoType,
             mandatory: mandatoryCheck,
             extObjID: "0",
             associatedField: associateField ? associateField : "", //code added on 27 June 2022 for the issue-- todo cannot be added
-            variableId: associateField == "CalenderName" ? "10001" : "42",
+            variableId: associateField == "CalendarName" ? "10001" : "42",
             varFieldId: "0",
             associatedWS: "",
             triggerName: selectedTrigger ? selectedTrigger : "",
@@ -334,63 +450,50 @@ function ToDo(props) {
           .then((res) => {
             if (res.data.Status == 0) {
               let tempData = { ...toDoData };
-              let groupName;
-              tempData.TodoGroupLists.map((group) => {
-                if (group.GroupId == groupId) {
-                  groupName = group.GroupName;
-                  group.ToDoList.push({
-                    Activities: [{}],
-                    Description: ToDoDesc,
-                    Type: toDoType,
-                    TriggerName: selectedTrigger,
-                    Mandatory: mandatoryCheck,
-                    ToDoId: +maxToDoId + 1,
-                    ToDoName: ToDoToAdd,
-                    PickListItems: [],
-                    AllTodoRights: {
-                      Modify: false,
-                      View: false,
-                    },
-                  });
-                }
+              tempData?.TodoGroupLists?.map((group) => {
+                group?.ToDoList?.map((todo) => {
+                  if (todo.ToDoName.toLowerCase() == ToDoToAdd.toLowerCase()) {
+                    todo.Description = ToDoDesc;
+                    todo.Type = toDoType;
+                    todo.TriggerName = selectedTrigger;
+                    todo.Mandatory = mandatoryCheck;
+                    todo.PickListItems = [...pickList];
+                    todo.FieldName = associateField;
+                    todo.VarId =
+                      associateField === "CalendarName" ? "10001" : "42";
+                  }
+                });
               });
               setToDoData(tempData);
-              //code added on 8 June 2022 for BugId 110197
-              //Updating ruleDataArray
-              let temp = [...ruleDataArray];
-              temp.push({
-                Name: ToDoToAdd,
-                NameId: +maxToDoId + 1,
-                Group: groupName,
-                GroupId: groupId,
-              });
-              setRuleDataArray(temp);
 
               // Updating processData on adding ToDo
-              let newProcessData = { ...localLoadedProcessData };
-              newProcessData.ToDoList.push({
-                Description: ToDoDesc,
-                ExtObjID: "0",
-                ListId: "1",
-                ToDoName: ToDoToAdd,
-                Type: toDoType,
-                VarFieldId: 0,
-                VariableId: associateField == "CalenderName" ? 10001 : 42,
+              let newProcessData = JSON.parse(
+                JSON.stringify(localLoadedProcessData)
+              );
+              let maxList = 0;
+              newProcessData.ToDoList?.map((el) => {
+                if (el.ToDoName > ToDoToAdd) {
+                  el.AssociatedFieldName = associateField ? associateField : "";
+                  el.Description = ToDoDesc;
+                  el.Type = toDoType;
+                  el.VariableId =
+                    associateField === "CalendarName" ? "10001" : "42";
+                }
               });
               setLocalLoadedProcessData(newProcessData);
+              if (button_type != "addAnother") {
+                handleToDoClose();
+              } else if (button_type == "addAnother") {
+                // document.getElementById("ToDoNameInput").value = "";
+                setTodoName("");
+                document.getElementById("ToDoNameInput").focus();
+              }
             }
+          })
+          .catch((err) => {
+            console.log(err);
           });
-        if (button_type != "addAnother") {
-          handleToDoClose();
-        } else if (button_type == "addAnother") {
-          // document.getElementById("ToDoNameInput").value = "";
-          setTodoName("");
-          document.getElementById("ToDoNameInput").focus();
-        }
       }
-    } else if (ToDoToAdd.trim() == "") {
-      setShowNameError(true);
-      document.getElementById("ToDoNameInput").focus();
     }
   };
 
@@ -446,7 +549,11 @@ function ToDo(props) {
               );
             }
           }
+        })
+        .catch((err) => {
+          console.log(err);
         });
+
       if (button_type != "addAnother") {
         handleToDoClose();
       } else if (button_type == "addAnother") {
@@ -502,16 +609,21 @@ function ToDo(props) {
           handleClose();
 
           // Updating processData on deleting ToDo
-          let newProcessData = { ...localLoadedProcessData };
+          let newProcessData = JSON.parse(
+            JSON.stringify(localLoadedProcessData)
+          );
           let indexValue;
-          newProcessData.ToDoList.map((todo, index) => {
-            if (todo.ToDoId == todoId) {
+          newProcessData.ToDoList.forEach((todo, index) => {
+            if (todo.ToDoName === todoName) {
               indexValue = index;
             }
           });
           newProcessData.ToDoList.splice(indexValue, 1);
           setLocalLoadedProcessData(newProcessData);
         }
+      })
+      .catch((err) => {
+        console.log(err);
       });
   };
 
@@ -536,6 +648,9 @@ function ToDo(props) {
           setToDoData(tempData);
           handleToDoClose();
         }
+      })
+      .catch((err) => {
+        console.log(err);
       });
   };
 
@@ -1130,13 +1245,17 @@ function ToDo(props) {
     setFullRightCheckOneActivityArr(arr);
   };
 
-  const handleAllRights = (checkedVal, grpIdx, todoIdx, actId) => {
+  const handleAllRights = (checkedVal, grpIdx, todoIdx, actId, props) => {
     let newState = { ...toDoData };
     newState.TodoGroupLists[grpIdx].ToDoList[todoIdx].Activities.map(
       (activity) => {
         if (activity.ActivityId == actId) {
-          activity["View"] = checkedVal;
-          activity["Modify"] = checkedVal;
+          if (!disableToDoChecks(props, "View")) {
+            activity["View"] = checkedVal;
+          }
+          if (!disableToDoChecks(props, "Modify")) {
+            activity["Modify"] = checkedVal;
+          }
         }
       }
     );
@@ -1149,7 +1268,7 @@ function ToDo(props) {
     newState.TodoGroupLists[grpIdx].ToDoList[todoIdx].Activities.map(
       (activity) => {
         for (let property in activity) {
-          if (activity[property] === false && property != "ActivityId") {
+          if (activity[property] === false && property !== "ActivityId") {
             setall_obj[property] = false;
           }
         }
@@ -1199,45 +1318,43 @@ function ToDo(props) {
 
   const GetActivities = () => {
     let display = [];
-    splicedColumns.map((activity, activityIndex) => {
+    splicedColumns?.forEach((activity, activityIndex) => {
       let data = [];
-      toDoData.TodoGroupLists &&
-        toDoData.TodoGroupLists.map((group, groupIndex) => {
-          data.push(<p style={{ height: "34px" }}></p>);
-          group.ToDoList &&
-            group.ToDoList.map((todo, todoIndex) => {
-              data.push(
-                <div>
-                  <div
-                    className="oneActivityColumn"
-                    style={{
-                      backgroundColor: "#EEF4FCC4",
-                      height: compact ? "38px" : "89px",
-                      padding: "10px",
-                      borderBottom: "1px solid #DAD0C2",
-                      padding: "10px 10px 6px 10px",
-                    }}
-                  >
-                    <CheckBoxes //activity CheckBoxes
-                      groupIndex={groupIndex}
-                      activityIndex={todoIndex}
-                      docIdx={todoIndex}
-                      activityId={activity.ActivityId}
-                      toDoData={toDoData}
-                      activityType={activity.ActivityType}
-                      processType={props.openProcessType}
-                      subActivity={activity.ActivitySubType}
-                      toDoIsMandatory={todo.Mandatory}
-                      GiveCompleteRights={GiveCompleteRights}
-                      toggleSingleChecks={toggleSingleChecks}
-                      handleAllChecks={handleAllRights}
-                      type={"activity"}
-                    />
-                  </div>
-                </div>
-              );
-            });
+      toDoData.TodoGroupLists?.forEach((group, groupIndex) => {
+        data.push(<p style={{ height: "34px" }}></p>);
+        group.ToDoList?.forEach((todo, todoIndex) => {
+          data.push(
+            <div>
+              <div
+                className="oneActivityColumn"
+                style={{
+                  backgroundColor: "#EEF4FCC4",
+                  height: compact ? "38px" : "89px",
+                  padding: "10px",
+                  borderBottom: "1px solid #DAD0C2",
+                  padding: "10px 10px 6px 10px",
+                }}
+              >
+                <CheckBoxes //activity CheckBoxes
+                  groupIndex={groupIndex}
+                  activityIndex={todoIndex}
+                  docIdx={todoIndex}
+                  activityId={activity.ActivityId}
+                  toDoData={toDoData}
+                  activityType={activity.ActivityType}
+                  processType={props.openProcessType}
+                  subActivity={activity.ActivitySubType}
+                  toDoIsMandatory={todo.Mandatory}
+                  GiveCompleteRights={GiveCompleteRights}
+                  toggleSingleChecks={toggleSingleChecks}
+                  handleAllChecks={handleAllRights}
+                  type={"activity"}
+                />
+              </div>
+            </div>
+          );
         });
+      });
       display.push(
         <div className="activities">
           <div className="activityHeaderToDo">
@@ -1296,30 +1413,6 @@ function ToDo(props) {
 
   const handleToDoSelection = (selectedToDoType) => {
     setToDoType(selectedToDoType);
-  };
-
-  const modifyDescription = (expName, groupId, expDesc, expId) => {
-    // axios
-    //   .post(SERVER_URL + ENDPOINT_MODIFY_TODO, {
-    //     expTypeId: expId,
-    //     expTypeName: expName,
-    //     expTypeDesc: expDesc,
-    //     processDefId: props.openProcessID,
-    //   })
-    //   .then((res) => {
-    //     let tempData = { ...expData };
-    //     tempData.ExceptionGroups.map((group) => {
-    //       if (group.GroupId === groupId) {
-    //         group.ExceptionList.map((exp) => {
-    //           if (exp.ExceptionId === expId) {
-    //             exp.Description = expDesc;
-    //           }
-    //         });
-    //       }
-    //     });
-    //     setToDoData(tempData);
-    //     handleToDoClose();
-    //   });
   };
 
   const MoveToOtherGroup = (
@@ -1383,6 +1476,9 @@ function ToDo(props) {
           });
           setToDoData(tempData);
         }
+      })
+      .catch((err) => {
+        console.log(err);
       });
   };
 
@@ -1497,7 +1593,7 @@ function ToDo(props) {
                 setShowDescError={setShowDescError}
                 showTriggerError={showTriggerError}
                 setShowTriggerError={setShowTriggerError}
-                modifyDescription={modifyDescription}
+                modifyToDoFromList={modifyToDoFromList}
               />
             </Modal>
           </>

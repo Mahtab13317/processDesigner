@@ -15,26 +15,26 @@ import thunk from "redux-thunk";
 import theme from "./assets/theme/theme";
 import { ThemeProvider, CssBaseline } from "@material-ui/core";
 
-import processTypesReducer from "./redux-store/reducers/processView/processTypesReducer";
-import axios from "axios";
-
-// const rootReducer = combineReducers({
-//   processTypesReducer: processTypesReducer,
-// })
-
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const store = createStore(reducers, applyMiddleware(thunk));
 
 window.loadIntegrator = function () {
-  const path = "/integration/integration.js";
-  const script = document.createElement("script");
-  script.type = "text/javascript";
-  script.src = path;
-  script.onload = () => {
-    console.log("integration file loaded");
+  const scriptInt = document.createElement("script");
+
+  scriptInt.type = "text/javascript";
+
+  scriptInt.src = "/integration/integration.js";
+  scriptInt.onload = () => {
+    console.log("inside integration compo");
   };
-  document.body.appendChild(script);
+
+  document.body.appendChild(scriptInt);
+};
+window.MdmDataModel = function (props) {
+  if (window && window?.loadMicroFrontend) {
+    window.loadMicroFrontend(props);
+  }
 };
 
 window.loadActivityStream = function () {
@@ -45,12 +45,15 @@ window.loadActivityStream = function () {
     InFrame: false,
     ContainerId: "mf_activitystream_lpweb",
     Callback: null,
-    passedData: null,
+    passedData: { componentId: "PMWEB" },
     Renderer: "renderActivityStream",
   };
-
-  if (window && window?.loadMicroFrontend) {
-    window.loadMicroFrontend(props);
+  try {
+    if (window && window?.loadMicroFrontend) {
+      window.loadMicroFrontend(props);
+    }
+  } catch (err) {
+    console.log(err);
   }
 };
 
@@ -78,7 +81,7 @@ window.loadForm_INT_DES = function (callback) {
     Component: "forms",
     InFrame: false,
     ContainerId: "mf_formsOtherProcesses",
-    Callback: callback,
+    Callback: null,
     passedData: null,
     isMF: true,
     Renderer: "renderForms",
@@ -98,7 +101,7 @@ window.loadForm_DesignerPreview = function (passedData, containerId) {
     // "Component": "Interface",
     InFrame: false,
     ContainerId: containerId || "process_form_opening_mf",
-    Callback: "onReportLoad",
+    Callback: null,
     passedData: { ...passedData, device: "Mobile", activePage: undefined },
   };
   if (window && window?.loadMicroFrontend) {
@@ -114,7 +117,7 @@ window.loadFormBuilder = function (containerId, passedData) {
     Component: "App",
     InFrame: false,
     ContainerId: containerId,
-    Callback: (val) => console.log(val),
+    Callback: null,
     passedData: { ...passedData, activePage: undefined },
   };
   if (window && window?.loadMicroFrontend) {
@@ -129,7 +132,7 @@ window.loadFormBuilderPreview = function (passedData, containerId) {
     // "Component": "Interface",
     InFrame: false,
     ContainerId: containerId,
-    Callback: "onReportLoad",
+    Callback: null,
     passedData: { ...passedData, device: "Mobile", activePage: undefined },
   };
 
@@ -137,22 +140,14 @@ window.loadFormBuilderPreview = function (passedData, containerId) {
     window.loadMicroFrontend(props);
   }
 };
-const launchpadKey = JSON.parse(localStorage.getItem("launchpadKey"));
-const token = launchpadKey?.token;
-if (token) {
-  axios.interceptors.request.use(function (config) {
-    config.headers.Authorization = token;
-    return config;
-  });
-}
 
 ReactDOM.render(
   <React.StrictMode>
     <Suspense fallback={<div>Loading...</div>}>
       <Provider store={store}>
         <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <App />
+          <CssBaseline />
+          <App />
         </ThemeProvider>
       </Provider>
     </Suspense>

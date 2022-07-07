@@ -12,12 +12,6 @@ function CheckOutModal(props) {
   const [comment, setComment] = useState("");
 
   const checkoutProcess = () => {
-    // let json = {
-    //   m_strProcessDefId: +props.processDefId,
-    //   m_strComment: comment,
-    //   m_strProjectName: props.projectName,
-    //   m_strValidateFlag: "N",
-    // };
     let json = 
       {
         processDefId: +props.processDefId,

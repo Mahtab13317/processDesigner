@@ -27,7 +27,7 @@ export const ChangeActivityType = (
     .then((response) => {
       if (response.data.Status == 0) {
         setProcessData((prev) => {
-          let newObj = { ...prev };
+          let newObj = JSON.parse(JSON.stringify(prev));
           newObj.MileStones[mileIndex].Activities[activityIndex].ActivityType =
             actType;
           newObj.MileStones[mileIndex].Activities[
@@ -36,5 +36,8 @@ export const ChangeActivityType = (
           return newObj;
         });
       }
+    })
+    .catch((err) => {
+      console.log(err);
     });
 };

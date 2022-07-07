@@ -78,7 +78,7 @@ function Activity(props) {
   const [actNameValue, setActNameValue] = useState(props.activityName);
   const { embeddedActivities, setEmbeddedActivities } = props;
   const [OpenProcessCallActivity, setOpenProcessCallActivity] = useState(false);
-   //code added on 3 June 2022 for BugId 110210
+  //code added on 3 June 2022 for BugId 110210
   const [searchedVal, setSearchedVal] = useState("");
   const laneId =
     props.processData.MileStones[props.milestoneIndex].Activities[
@@ -542,19 +542,27 @@ function Activity(props) {
                       .Activities[props.activityindex]
                   );
                   props.setprocessData((prev) => {
-                    let newObj = { ...prev };
+                    let newObj = JSON.parse(JSON.stringify(prev));
                     newObj.MileStones.forEach((mile, mileIndex) => {
                       mile.Activities.forEach((act, actIndex) => {
-                        if (act.clicked) {
-                          newObj.MileStones[mileIndex].Activities[
-                            actIndex
-                          ].clicked = false;
+                        if (act?.clicked) {
+                          newObj.MileStones[mileIndex].Activities[actIndex] = {
+                            ...newObj.MileStones[mileIndex].Activities[
+                              actIndex
+                            ],
+                            clicked: false,
+                          };
                         }
                       });
                     });
                     newObj.MileStones[props.milestoneIndex].Activities[
                       props.activityindex
-                    ].clicked = true;
+                    ] = {
+                      ...newObj.MileStones[props.milestoneIndex].Activities[
+                        props.activityindex
+                      ],
+                      clicked: true,
+                    };
                     return newObj;
                   });
                 }}
@@ -861,7 +869,7 @@ function Activity(props) {
                     toolTypeContainerExpanded="activity_dropdown"
                     expandedList="activityDropdown_List"
                     search={true}
-                    selectedActivityName={selectedActivityName} 
+                    selectedActivityName={selectedActivityName}
                     searchedVal={searchedVal} //code added on 3 June 2022 for BugId 110210
                     setSearchedVal={setSearchedVal} //code added on 3 June 2022 for BugId 110210
                     view={view.abstract.langKey}

@@ -65,11 +65,11 @@ export const TaskInActivity = (props) => {
     let mileWidth = swimlaneTitleWidth,
       lanesInfo = {};
 
-    let newProcessData = { ...props.processData };
-    props.processData.MileStones?.forEach((mile) => {
+    let newProcessData = JSON.parse(JSON.stringify(props.processData));
+    newProcessData.MileStones?.forEach((mile) => {
       mileWidth = mileWidth + +mile.Width;
     });
-    for (let i of props.processData.Tasks) {
+    for (let i of newProcessData.Tasks) {
       if (+i.xLeftLoc > maxXLeftLoc) {
         maxXLeftLoc = +i.xLeftLoc;
       }

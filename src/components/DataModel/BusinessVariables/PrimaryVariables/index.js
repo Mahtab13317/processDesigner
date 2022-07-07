@@ -6,7 +6,7 @@ import {
   dataInputs,
   getVariableIdFromSysDefinedName,
 } from "./TypeAndFieldMapping";
-import { RTL_DIRECTION } from "../../../../Constants/appConstants";
+import { BASE_URL, RTL_DIRECTION } from "../../../../Constants/appConstants";
 import { Checkbox, MenuItem } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 import DeleteOutlinedIcon from "@material-ui/icons/DeleteOutlined";
@@ -109,7 +109,7 @@ function PrimaryVariables(props) {
   );
   const [aliasName, setAliasName] = useState("");
   const [variableType, setVariableType] = useState("");
-
+  const [complexDataJSON, setcomplexDataJSON] = useState({});
   const [dataField, setDataField] = useState("");
   const [dataType, setDataType] = useState([]);
   const [userDefinedVariables, setUserDefinedVariables] = useState([]);
@@ -118,10 +118,15 @@ function PrimaryVariables(props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isComplexTypeSelected, setIsComplexTypeSelected] = useState(false);
   const [isComplexSelected, setIsComplexSelected] = useState(false);
-  console.log("xxxxxxxxxdata", dataType);
+
   // Function to make a variable array type.
-  const handleArrayType = () => {
-    setArrayType(!arrayType);
+  const handleArrayType = (e) => {
+    setArrayType(e.target.checked);
+    setcomplexDataJSON((prev) => {
+      let temp = { ...prev };
+      temp.unbounded = e.target.checked ? "Y" : "N";
+      return temp;
+    });
   };
 
   // Function that closes the modal.
@@ -136,9 +141,30 @@ function PrimaryVariables(props) {
 
   // Function that runs when the component loads.
   useEffect(() => {
+    getUserDefinedVariables(localLoadedProcessData);
+  }, []);
+
+  useEffect(() => {
+    getComplexTemplates();
+  }, []);
+
+  const getComplexTemplates = async () => {
+    const res = await axios({
+      method: "post",
+      url: "/mdm-rest/app/templates",
+      data: {
+        sort_order: "A",
+        filter: "",
+        order_by: "2",
+      },
+    });
+    console.log("vvvvvvvvvvvvvvvvvres", res.data);
+  };
+  console.log("vvvvvvvvvvvvvvvmodata", complexDataJSON);
+  const getUserDefinedVariables = (processData) => {
     let temp = [];
-    localLoadedProcessData &&
-      localLoadedProcessData.Variable.map((variable) => {
+    processData &&
+      processData.Variable.map((variable) => {
         if (
           variable.VariableScope === "U" ||
           (variable.VariableScope === "I" && variable.ExtObjectId !== "1")
@@ -146,7 +172,7 @@ function PrimaryVariables(props) {
           temp.push({
             aliasName: variable.VariableName,
             dataField: variable.SystemDefinedName,
-            isArrayType: variable.Unbounded === "N" ? false : true,
+            arrayType: variable.Unbounded === "Y" ? true : false,
             variableType: variable.VariableType,
             defaultValue: variable.DefaultValue,
             variableLength: variable.VariableLength,
@@ -158,9 +184,9 @@ function PrimaryVariables(props) {
         }
       });
     setUserDefinedVariables(temp);
-    removeUsedDataFields(temp);
+    //removeUsedDataFields(temp);
     setPrimaryVariableCount(temp.length);
-  }, []);
+  };
 
   // Function to remove the already used data fields.
   const removeUsedDataFields = (dataArr) => {
@@ -212,14 +238,15 @@ function PrimaryVariables(props) {
       varName: selectedVariable.aliasName,
       variableId: selectedVariable.variableId,
       varType: selectedVariable.variableType,
+      sysDefName: selectedVariable.dataField,
     };
 
     axios.post(SERVER_URL + `/deleteVariable`, postBody).then((res) => {
-      if (res.status === 200) {
+      if (res.status === 200 && res.data.Status === 0) {
         const temp = [...userDefinedVariables];
         const [removedElement] = temp.splice(index, 1);
         // Updating processData on deleting Variable
-        let newProcessData = { ...localLoadedProcessData };
+        let newProcessData = JSON.parse(JSON.stringify(localLoadedProcessData));
         let indexValue;
         newProcessData.Variable.map((variable, index) => {
           if (variable.VariableId == selectedVariable.variableId) {
@@ -269,33 +296,47 @@ function PrimaryVariables(props) {
 
   // Function that gets the values for the data fields in the input data field.
   const getDataFields = (variableType) => {
-    const [dataInputObj] = dataInputs?.filter(
-      (d) => d.variableType === variableType
-    );
-    setDataType([...dataInputObj.dataFields]);
-    setDataField(dataInputObj && dataInputObj.dataFields[0]);
+    let temp = [];
+    dataInputs.forEach((data) => {
+      if (data.variableType === variableType) {
+        temp = data.dataFields;
+      }
+    });
+    localLoadedProcessData.Variable.forEach((_var) => {
+      const index = temp.indexOf(_var.SystemDefinedName);
+      if (index > -1) {
+        temp.splice(index, 1);
+      }
+    });
+    setDataType(variableType);
+    // setDataField(temp);
   };
 
   // Function that sets the variable type when the user selects a value from the dropdown.
-  const handleVariableType = (event) => {
-    setVariableType(event.target.value);
-    if (
-      event.target.value !== "" &&
-      event.target.value.includes("C") === false
-    ) {
-      getDataFields(event.target.value);
-      setIsComplexSelected(false);
-    } else if (event.target.value.includes("C") === true) {
-      setDataField("");
-      setIsComplexSelected(true);
+  const handleVariableType = (event, complexDataFields) => {
+    setcomplexDataJSON(complexDataFields);
+    if (event === "11") {
+      setDataField(complexDataFields?.name);
     }
+    setVariableType(event);
+    // if (
+    //   event !== "" &&
+    //   event.includes("C") === false
+    // ) {
+    // getDataFields(event);
+
+    //   setIsComplexSelected(false);
+    // } else if (event.target.value.includes("C") === true) {
+    //   setDataField("");
+    //   setIsComplexSelected(true);
+    // }
   };
 
   // Function that runs when the user tries to change the variable type of an existing variable.
-  const handleVariableTypeData = (event, index) => {
-    if (!event.target.value.includes("C")) {
+  const handleVariableTypeData = (event, index, complexDataFields) => {
+    if (!event.includes("C")) {
       const oldVariableType = userDefinedVariables[index].variableType;
-      userDefinedVariables[index].variableType = event.target.value;
+      userDefinedVariables[index].variableType = event;
       setUserDefinedVariables([...userDefinedVariables]);
       const selectedDataType = userDefinedVariables[index].dataField;
       if (selectedDataType !== "") {
@@ -311,28 +352,32 @@ function PrimaryVariables(props) {
         });
       }
       const [dataInputObj] = dataInputs?.filter(
-        (d) => d.variableType === event.target.value
+        (d) => d.variableType === event
       );
-      setDataTypeData([...dataInputObj.dataFields]);
-      let temp = [...userDefinedVariables];
-      temp[index].dataField = dataInputObj.dataFields[0];
-      const availableDataFields = dataInputObj.dataFields?.filter(
-        (q) => q !== dataInputObj.dataFields[0]
-      );
-      dataInputs.forEach((element) => {
-        if (element.variableType === event.target.value) {
-          element.dataFields = availableDataFields;
-        }
-      });
-      setUserDefinedVariables(temp);
-      updateIsDisabledDataType();
+      if (event === "11") {
+        setDataTypeData([...complexDataFields.map((el) => el.alias)]);
+      } else {
+        setDataTypeData([...dataInputObj.dataFields]);
+        let temp = [...userDefinedVariables];
+        temp[index].dataField = dataInputObj.dataFields[0];
+        const availableDataFields = dataInputObj.dataFields?.filter(
+          (q) => q !== dataInputObj.dataFields[0]
+        );
+        // dataInputs.forEach((element) => {
+        //   if (element.variableType === event) {
+        //     element.dataFields = availableDataFields;
+        //   }
+        // });
+        setUserDefinedVariables(temp);
+        updateIsDisabledDataType();
+      }
     } else {
       let temp = [...userDefinedVariables];
       temp[index].dataField = "";
       setUserDefinedVariables(temp);
     }
     let temp = [...userDefinedVariables];
-    temp[index].variableType = event.target.value;
+    temp[index].variableType = event;
     setUserDefinedVariables(temp);
   };
 
@@ -347,7 +392,7 @@ function PrimaryVariables(props) {
   };
 
   // Function that runs when a user creates a variable using the create variable button.
-  const handleCreateVariable = () => {
+  const handleCreateVariable = async () => {
     const userDefinedObj = {
       aliasName: aliasName,
       variableType: variableType,
@@ -364,52 +409,88 @@ function PrimaryVariables(props) {
       defaultValue: "",
       varLength: "0",
       varPrecision: "0",
-      unbounded: "N",
+      unbounded: arrayType ? "Y" : "N",
       extObjectId: "0",
     };
-
-    axios.post(SERVER_URL + `/addVariable`, postBody).then((res) => {
-      if (res.status === 200) {
-        let temp = [...userDefinedVariables];
-        temp.splice(0, 0, userDefinedObj);
-        setUserDefinedVariables(temp);
-        setPrimaryVariableCount(temp.length);
-        // Updating processData on adding Variable
-        let newProcessData = { ...localLoadedProcessData };
-        newProcessData.Variable.push({
-          DefaultValue: "",
-          ExtObjectId: "0",
-          SystemDefinedName: dataField,
-          Unbounded: "N",
-          VarFieldId: "0",
-          VarPrecision: "0",
-          VariableId: getVariableIdFromSysDefinedName(dataField, variableType),
-          VariableLength: "0",
-          VariableName: aliasName,
-          VariableScope: "U",
-          VariableType: variableType,
-        });
-        setLocalLoadedProcessData(newProcessData);
-      }
-    });
-    if (!isComplexSelected) {
-      const [dataInputObj] = dataInputs?.filter(
-        (d) => d.variableType === variableType
-      );
-      const availableDataFields = dataInputObj.dataFields?.filter(
-        (q) => q !== dataField
-      );
-      dataInputs.forEach((element) => {
-        if (element.variableType === variableType) {
-          element.dataFields = availableDataFields;
+    if (variableType !== "11") {
+      axios.post(SERVER_URL + `/addVariable`, postBody).then((res) => {
+        if (res.status === 200 && res.data.Status === 0) {
+          let temp = [...userDefinedVariables];
+          temp.splice(0, 0, userDefinedObj);
+          setUserDefinedVariables(temp);
+          setPrimaryVariableCount(temp.length);
+          // Updating processData on adding Variable
+          let newProcessData = JSON.parse(
+            JSON.stringify(localLoadedProcessData)
+          );
+          newProcessData.Variable.push({
+            DefaultValue: "",
+            ExtObjectId: "0",
+            SystemDefinedName: dataField,
+            Unbounded: arrayType ? "Y" : "N",
+            VarFieldId: "0",
+            VarPrecision: "0",
+            VariableId: getVariableIdFromSysDefinedName(
+              dataField,
+              variableType
+            ),
+            VariableLength: "0",
+            VariableName: aliasName,
+            VariableScope: "U",
+            VariableType: variableType,
+          });
+          setLocalLoadedProcessData(newProcessData);
         }
       });
-      updateIsDisabledDataType();
+      if (!isComplexSelected) {
+        const [dataInputObj] = dataInputs?.filter(
+          (d) => d.variableType === variableType
+        );
+        const availableDataFields = dataInputObj.dataFields?.filter(
+          (q) => q !== dataField
+        );
+        // dataInputs.forEach((element) => {
+        //   if (element.variableType === variableType) {
+        //     element.dataFields = availableDataFields;
+        //   }
+        // });
+        updateIsDisabledDataType();
+      }
+      setAliasName("");
+      setVariableType("");
+      setDataField("");
+      setArrayType(false);
+    } else {
+      const formData = new FormData();
+      let mystring = JSON.stringify(complexDataJSON);
+      let myBlob = new Blob([mystring], {
+        type: "text/plain",
+      });
+      formData.append("file", myBlob);
+
+      if (complexDataJSON.hasOwnProperty("id")) {
+        const response = await axios({
+          method: "post",
+          url: `/pmweb/saveVariable/${localLoadedProcessData.ProcessDefId}`,
+          data: formData,
+          headers: {
+            "Content-Type": "multipart/form-data",
+            // type: "application/json",
+          },
+        });
+        if (response.data.Status === 0 && response.data.Variable.length !== 0) {
+          let temp = JSON.parse(JSON.stringify(localLoadedProcessData));
+          temp.Variable = [];
+          temp.Variable = [...response.data.Variable];
+          setLocalLoadedProcessData(temp);
+          getUserDefinedVariables(temp);
+          setAliasName("");
+          setVariableType("");
+          setDataField("");
+          setArrayType(false);
+        }
+      }
     }
-    setAliasName("");
-    setVariableType("");
-    setDataField("");
-    setArrayType(false);
   };
 
   // Function that sets the data field value when the user sets a data field value while creating a variable.
@@ -427,6 +508,29 @@ function PrimaryVariables(props) {
     } else {
       setDataType([]);
     }
+  };
+
+  const getDataFieldsForType = (type, isNewVar, dataField) => {
+    let temp = [];
+    dataInputs.forEach((data) => {
+      if (data.variableType === type) {
+        temp = data.dataFields;
+      }
+    });
+
+    localLoadedProcessData.Variable.forEach((_var) => {
+      const index = temp.indexOf(_var.SystemDefinedName);
+      if (index > -1) {
+        temp.splice(index, 1);
+      }
+    });
+
+    if (dataField !== "") {
+      temp.push(dataField);
+    }
+
+    if (type === "11" || type === "") return [];
+    else return temp;
   };
 
   // Function that runs and sets the value of the data field that a user selects while creating a variable.
@@ -454,6 +558,18 @@ function PrimaryVariables(props) {
     userDefinedVariables[index].dataField = event.target.value;
     setUserDefinedVariables([...userDefinedVariables]);
     updateIsDisabledDataType();
+  };
+
+  const changeUnboundedType = (e, varObj, index) => {
+    let temp = JSON.parse(JSON.stringify(localLoadedProcessData));
+    temp?.Variable.forEach((_var) => {
+      if (_var.VariableId === varObj.variableId) {
+        _var.Unbounded = e.target.checked ? "Y" : "N";
+      }
+    });
+    setLocalLoadedProcessData(temp);
+    userDefinedVariables[index].arrayType = e.target.checked;
+    setUserDefinedVariables([...userDefinedVariables]);
   };
 
   return (
@@ -495,7 +611,7 @@ function PrimaryVariables(props) {
         >
           {t("dataField")}
         </p>
-        {/* <p
+        <p
           className={
             direction === RTL_DIRECTION
               ? arabicStyles.arrayHeader
@@ -503,7 +619,7 @@ function PrimaryVariables(props) {
           }
         >
           {t("allowMultipleEntries")}
-        </p> */}
+        </p>
       </div>
       {bForInputStrip ? (
         <div className={styles.inputsDiv}>
@@ -514,27 +630,33 @@ function PrimaryVariables(props) {
             aliasName={aliasName}
             variableType={variableType}
             variableTypeOnOpen={updateIsDisabledDataType}
-            handleVariableType={handleVariableType}
+            handleVariableType={(e, complexDataFields) =>
+              handleVariableType(e, complexDataFields)
+            }
             isDisabledDataType={isDisabledDataType}
             dataField={dataField}
             dataTypeOnOpen={handleDataTypeOnOpen}
             handleDataType={handleDataType}
-            dataTypeOptions={dataType}
+            dataTypeOptions={getDataFieldsForType(
+              variableType,
+              true,
+              dataField
+            )}
             arrayType={arrayType}
-            handleArrayType={handleArrayType}
+            setarrayType={(e) => handleArrayType(e)}
             localLoadedProcessData={localLoadedProcessData}
           />
           <div>
             {arrayType ? (
               <div className={styles.infoDiv}>
-                <InfoOutlinedIcon
+                {/* <InfoOutlinedIcon
                   className={
                     direction === RTL_DIRECTION
                       ? arabicStyles.infoIcon
                       : styles.infoIcon
                   }
                   fontSize="small"
-                />
+                /> */}
                 <p
                   className={
                     direction === RTL_DIRECTION
@@ -542,8 +664,8 @@ function PrimaryVariables(props) {
                       : styles.infoText
                   }
                 >
-                  {t("tableAndMapping")}
-                  <br /> {t("autoCreated")}.
+                  {/* {t("tableAndMapping")}
+                  <br /> {t("autoCreated")}. */}
                   <span
                     id="view_or_edit_mapping"
                     className={styles.viewAndEdit}
@@ -637,25 +759,31 @@ function PrimaryVariables(props) {
                 aliasName={d.aliasName}
                 variableType={d.variableType}
                 variableLength={d.variableLength}
-                handleVariableType={(event) =>
-                  handleVariableTypeData(event, index)
+                handleVariableType={(event, complexDataFields) =>
+                  handleVariableTypeData(event, index, complexDataFields)
                 }
                 isDisabledDataType={isDisabledDataType}
                 dataField={d.dataField}
                 defaultValue={d.defaultValue}
                 dataTypeOnOpen={() => handleDataFieldData(index)}
                 handleDataType={(event) => handleDataFieldChange(event, index)}
-                dataTypeOptions={dataTypeData}
-                selectDataTypeOption={
-                  <MenuItem
-                    className={menuStyles.menuItemStyles}
-                    value={d.dataField}
-                  >
-                    {d.dataField}
-                  </MenuItem>
-                }
-                arrayType={d.isArrayType}
+                dataTypeOptions={getDataFieldsForType(
+                  d.variableType,
+                  false,
+                  d.dataField
+                )}
+                isNonEditable={true}
+                // selectDataTypeOption={
+                //   <MenuItem
+                //     className={menuStyles.menuItemStyles}
+                //     value={d.dataField}
+                //   >
+                //     {d.dataField}
+                //   </MenuItem>
+                // }
+                arrayType={d.arrayType}
                 localLoadedProcessData={localLoadedProcessData}
+                setarrayType={(e) => changeUnboundedType(e, d, index)}
               />
               <RelationshipMappingModal
                 openProcessID={openProcessID}

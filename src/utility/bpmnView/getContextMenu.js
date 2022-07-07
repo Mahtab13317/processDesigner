@@ -13,8 +13,8 @@ const convertActivity = (cell, setProcessData) => {
   cell.style = caseWorkdesk.styleName;
   let processDefId, milestoneIndex, ActivityIndex;
   setProcessData((prev) => {
-    let newObj = { ...prev };
-    processDefId = prev.ProcessDefId;
+    let newObj = JSON.parse(JSON.stringify(prev));
+    processDefId = newObj.ProcessDefId;
     newObj.MileStones.forEach((mile, index) => {
       mile.Activities.forEach((activity, subIndex) => {
         if (activity.ActivityId === cell.id) {
@@ -100,7 +100,7 @@ const openProcess = (cell, setProcessData, setOpenDeployedProcess) => {
   let localActivity;
 
   setProcessData((prev) => {
-    let newObj = { ...prev };
+    let newObj = JSON.parse(JSON.stringify(prev));
     newObj.MileStones.forEach((mile) => {
       mile.Activities.forEach((act) => {
         if (act.ActivityId === cell.id) {

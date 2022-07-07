@@ -746,6 +746,9 @@ export const cellRepositioned = (graph, setProcessData, caseEnabled) => {
         if (res.data.Status === 0) {
           return 0;
         }
+      })
+      .catch((err) => {
+        console.log(err);
       });
   };
 

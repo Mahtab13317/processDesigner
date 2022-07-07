@@ -35,34 +35,39 @@ export const addTaskAPI = (
   if (milestoneWidthIncreased) {
     obj = { ...obj, ...milestoneWidthIncreased };
   }
-  axios.post(SERVER_URL + ENDPOINT_ADDTASK, obj).then((response) => {
-    if (response.data.Status === 0) {
-      if (view !== "BPMN") {
-        setProcessData((prevProcessData) => {
-          let newProcessData = { ...prevProcessData };
-          let taskObj = {
-            CheckedOut: "N",
-            Description: "",
-            Goal: "",
-            Instructions: "",
-            NotifyEmail: "N",
-            Repeatable: "N",
-            TaskId: obj.taskId,
-            TaskName: obj.taskName,
-            TaskType:
-              taskType === 1 ? TaskType.globalTask : TaskType.processTask,
-            TemplateId: -1,
-            isActive: "true",
-            xLeftLoc: obj.xLeftLoc,
-            yTopLoc: obj.yTopLoc + "",
-          };
-          newProcessData.Tasks.splice(0, 0, taskObj);
-          newProcessData.MileStones[milestoneIndex].Activities[
-            activityindex
-          ].AssociatedTasks.push(taskId);
-          return newProcessData;
-        });
+  axios
+    .post(SERVER_URL + ENDPOINT_ADDTASK, obj)
+    .then((response) => {
+      if (response.data.Status === 0) {
+        if (view !== "BPMN") {
+          setProcessData((prevProcessData) => {
+            let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+            let taskObj = {
+              CheckedOut: "N",
+              Description: "",
+              Goal: "",
+              Instructions: "",
+              NotifyEmail: "N",
+              Repeatable: "N",
+              TaskId: obj.taskId,
+              TaskName: obj.taskName,
+              TaskType:
+                taskType === 1 ? TaskType.globalTask : TaskType.processTask,
+              TemplateId: -1,
+              isActive: "true",
+              xLeftLoc: obj.xLeftLoc,
+              yTopLoc: obj.yTopLoc + "",
+            };
+            newProcessData.Tasks.splice(0, 0, taskObj);
+            newProcessData.MileStones[milestoneIndex].Activities[
+              activityindex
+            ].AssociatedTasks.push(taskId);
+            return newProcessData;
+          });
+        }
       }
-    }
-  });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };

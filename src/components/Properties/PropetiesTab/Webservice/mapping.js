@@ -19,19 +19,23 @@ import {
   ActivityPropertySaveCancelValue,
   setSave,
 } from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked";
+import { OpenProcessSliceValue } from "../../../../redux-store/slices/OpenProcessSlice";
 
 function Mapping(props) {
   const dispatch = useDispatch();
-  const loadedProcessData = store.getState("loadedProcessData");
   const [selectedService, setSelectedService] = useState(null);
-  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
+  const openProcessData = useSelector(OpenProcessSliceValue);
+  const localLoadedProcessData = JSON.parse(
+    JSON.stringify(openProcessData.loadedData)
+  );
   const [invocationType, setInvocationType] = useState(null);
   const [value, setValue] = useState(0); // Function to handle tab change.
   const [forwardMappingList, setForwardMappingList] = useState([]);
   const [reverseMappingList, setReverseMappingList] = useState([]);
   const [reverseDropdownOptions, setReverseDropdownOptions] = useState([]);
   const [dropDownActivities, setDropDownActivities] = useState([]);
-  const [selectedDropDownActivity, setSelectedDropDownActivity] = useState(null);
+  const [selectedDropDownActivity, setSelectedDropDownActivity] =
+    useState(null);
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
@@ -492,7 +496,7 @@ function Mapping(props) {
                       fontSize: "12px",
                       padding: "4px",
                     }}
-                    value= {activity.ActivityName}
+                    value={activity.ActivityName}
                   >
                     {activity.ActivityName}
                   </MenuItem>

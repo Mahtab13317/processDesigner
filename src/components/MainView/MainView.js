@@ -14,7 +14,6 @@ import {
   SERVER_URL,
 } from "../../Constants/appConstants";
 import { store, useGlobalState } from "state-pool";
-import axios from "axios";
 import * as actionCreators from "../../redux-store/actions/processView/actions.js";
 import { useHistory } from "react-router-dom";
 

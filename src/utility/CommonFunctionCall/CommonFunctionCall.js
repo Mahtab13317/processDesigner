@@ -144,6 +144,23 @@ export const getVariableIdByName = function GetVariableId({ variables, name }) {
   const variable = allVars.find((item) => name === item.VariableName);
   return variable?.VariableId || "0";
 };
+
+export const getVariableExtObjectIdByName = function GetVariableExtObjectId({
+  variables,
+  name,
+}) {
+  const allVars = variables || [];
+  const variable = allVars.find((item) => name === item.VariableName);
+  return variable?.ExtObjectId || "0";
+};
+export const getVariableVarFieldIdByName = function GetVariableVarFieldId({
+  variables,
+  name,
+}) {
+  const allVars = variables || [];
+  const variable = allVars.find((item) => name === item.VariableName);
+  return variable?.VarFieldId || "0";
+};
 export const getVariableScopeByName = function GetVariableScope({
   variables,
   name,

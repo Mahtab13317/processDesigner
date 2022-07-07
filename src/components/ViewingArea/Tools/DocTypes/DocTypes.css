@@ -1,61 +1,65 @@
-.DocTypes{
-    display: flex; 
-    align-items:center;
+.DocTypes {
+  display: flex;
+  align-items: center;
 }
 
-.DocTypes .MuiSvgIcon-root{
+.DocTypes .MuiSvgIcon-root {
   font-size: 1rem !important;
 }
 
-.DocTypes .MuiFormControlLabel-root span{
+.DocTypes .MuiFormControlLabel-root span {
   font-size: 0.625rem !important;
   margin-bottom: -0.3125rem !important;
 }
 
-.DocTypes #searchBoxId{
+.DocTypes #searchBoxId {
   width: 12.8125rem !important;
 }
 
-.DocTypes .oneBox{
+.DocTypes .oneBox {
   display: flex;
   flex-direction: column;
   height: 100vh;
 }
 
-.oneBox .checkBoxes{
+.oneBox .checkBoxes {
   transform: translate(1.5rem, 1.5625rem);
 }
 
-.DocTypes .MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary{
+.DocTypes
+  .MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary {
   text-transform: none !important;
 }
-.addDocs{
-  background-color:white ;
-  width: 20.125rem; 
-  height: 11.5rem ;
-  position:absolute; 
-  top:40%; 
-  left:40% ;
-  padding:0.625rem;
+
+.addDocs {
+  background-color: white;
+  width: 40vw;
+  position: absolute;
+  top: 21.5%;
+  left: 30%;
+  padding: 0;
+  height: auto;
 }
-.addDocsHeading{
-  font-size:1rem ;
-  margin-bottom:0.625rem;
+.addDocsHeading {
+  font-size: 1rem;
+  margin-bottom: 0.625rem;
   font: normal normal 600 16px/22px Open Sans;
 }
-.addDocs .buttons_add .MuiButtonBase-root.MuiButton-root.MuiButton-outlined{
+.addDocs .buttons_add .MuiButtonBase-root.MuiButton-root.MuiButton-outlined {
   width: 3.8125rem !important;
   height: 1.75rem !important;
-  background: #FFFFFF 0% 0% no-repeat padding-box !important;
-  border: 1px solid #C4C4C4 !important;
+  background: #ffffff 0% 0% no-repeat padding-box !important;
+  border: 1px solid #c4c4c4 !important;
   border-radius: 2px !important;
   opacity: 1 !important;
-  font-size:0.625rem ;
+  font-size: 0.625rem;
   text-transform: none !important;
   margin-right: 0.4375rem;
 }
 
-.addDocs .buttons_add .MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary{
+.addDocs
+  .buttons_add
+  .MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary {
   width: 5.9375rem;
   height: 1.75rem;
   text-align: left;
@@ -63,127 +67,123 @@
   letter-spacing: 0px;
   color: white;
   opacity: 1;
-  font-size:0.625rem ;
+  font-size: 0.625rem;
   margin-right: 0.4375rem;
   text-transform: none !important;
   border-radius: 0px !important;
 }
 
-.nameInput{
-  width: 100%; 
-  height: 1.5rem; 
-  margin-bottom: 0.625rem; 
-  background: #F8F8F8 0% 0% no-repeat padding-box;
-    border: 1px solid #E6E6E6;
-    border-radius: 2px;
-    padding-left:5px;
-    opacity: 1,
+.nameInput {
+  width: 100%;
+  height: 1.5rem;
+  margin-bottom: 0.625rem;
+  background: #f8f8f8 0% 0% no-repeat padding-box;
+  border: 1px solid #e6e6e6;
+  border-radius: 2px;
+  padding-left: 5px;
+  opacity: 1;
 }
 
-.nameInputlabel{
-  font-size: 0.875rem; 
-  margin-bottom:0.625rem;
+.nameInputlabel {
+  font-size: 0.875rem;
+  margin-bottom: 0.625rem;
 }
 
-.activities{
-    width:12.5rem;
-    border-right: 1px solid rgb(218, 208, 194);
-    font-size: 0.8125rem;
-    text-align: center;
+.activities {
+  width: 12.5rem;
+  border-right: 1px solid rgb(218, 208, 194);
+  font-size: 0.8125rem;
+  text-align: center;
 }
 
-.oneActivityColumn{
-    width: 12.51875rem;
-    border-right: 1px solid #DAD0C2;
-    text-align: center;
-    height: 8.5rem;
+.oneActivityColumn {
+  width: 12.51875rem;
+  border-right: 1px solid #dad0c2;
+  text-align: center;
+  height: 8.5rem;
 }
 
-.checkBoxesThree{
-  display: flex; 
-  flex-direction: column; 
+.checkBoxesThree {
+  display: flex;
+  flex-direction: column;
   align-items: left;
-
 }
-.screenHeading{
-    margin-right: 1.875rem;
-    font-size: 1rem;
-    font: normal normal 600 16px/22px Open Sans;
+.screenHeading {
+  margin-right: 1.875rem;
+  font-size: 1rem;
+  font: normal normal 600 16px/22px Open Sans;
 }
-.actvitySearchDiv{
-    display: flex;
-    align-items: center;
+.actvitySearchDiv {
+  display: flex;
+  align-items: center;
 }
-.docSearchBar{
+.docSearchBar {
   margin-right: 0.625rem;
 }
 
-.activityNameDiv{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.activityNameDiv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-.checkBoxesStyling{
- margin-top: -0.625rem;
- margin-left: 0.625rem;
-
-}
-
-.docNameDiv{
-    display: flex;
-    margin-bottom: 0.5rem;
-    padding: 0.25rem 0rem;
+.checkBoxesStyling {
+  margin-top: -0.625rem;
+  margin-left: 0.625rem;
 }
 
-.docName{
-    font-size: 0.75rem; 
-    font-weight: 700;
-
-  }
-
-.oneDocDiv{
-    height: 80vh;
-    width: 17.4375rem;
-    background-color: white;
-    margin-top: 0.625rem;
-    display: flex;
-    flex-direction: column;
+.docNameDiv {
+  display: flex;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0rem;
 }
 
-.Rules{
-    color: grey; 
-    font-size: 1rem;
+.docName {
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
-.docSearchDiv{
-  display: flex; 
-  padding: 0.3125rem 0.3125rem 0rem 0.625rem; 
+.oneDocDiv {
+  height: 80vh;
+  width: 17.4375rem;
+  background-color: white;
+  margin-top: 0.625rem;
+  display: flex;
+  flex-direction: column;
 }
 
-.activityName{
-    font-size: 0.75rem; 
-    font-weight: 700; 
+.Rules {
+  color: grey;
+  font-size: 1rem;
 }
 
-.activitySideDiv{
-    height: 80vh;
-    width: 80%;
-    background-color: white;
-    margin-top: 0.625rem;
-    margin-left: 0.1875rem;
-    border-left: 1px solid rgb(218, 208, 194);
+.docSearchDiv {
+  display: flex;
+  padding: 0.3125rem 0.3125rem 0rem 0.625rem;
 }
 
-.activityHeadingDiv{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.48125rem;
-    border-bottom: 1px solid #DAD0C2;
-}
-.activitySideHeading{
-    margin-right: 1.875rem;
-    font-size: 1rem;
-    font: normal normal 600 16px/22px Open Sans;
+.activityName {
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
+.activitySideDiv {
+  height: 80vh;
+  width: 80%;
+  background-color: white;
+  margin-top: 0.625rem;
+  margin-left: 0.1875rem;
+  border-left: 1px solid rgb(218, 208, 194);
+}
+
+.activityHeadingDiv {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.48125rem;
+  border-bottom: 1px solid #dad0c2;
+}
+.activitySideHeading {
+  margin-right: 1.875rem;
+  font-size: 1rem;
+  font: normal normal 600 16px/22px Open Sans;
+}

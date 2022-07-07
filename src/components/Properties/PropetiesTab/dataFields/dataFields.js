@@ -272,12 +272,6 @@ function ExpenseInitiation(props) {
     );
   };
 
-  console.log(
-    "vvvvvvvvvvvvvvvvvvvvvvvv",
-    localLoadedActivityPropertyData.ActivityProperty.m_objDataVarMappingInfo
-      .dataVarList
-  );
-
   return (
     <div>
       {showCreateSection ? (

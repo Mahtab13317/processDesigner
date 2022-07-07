@@ -9,6 +9,7 @@ function CustomizedDropdown(props) {
     disabled,
     className,
     value,
+    onOpen,
     onChange,
     children,
     validationBoolean,
@@ -90,6 +91,7 @@ function CustomizedDropdown(props) {
           styles.height,
           showError && styles.showRedBorder
         )}
+        onOpen={onOpen}
         MenuProps={menuProps}
         value={value}
         onChange={(event) => onChangeHandler(event)}

@@ -20,6 +20,7 @@ import {
   ActivityPropertySaveCancelValue,
   setSave,
 } from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked.js";
+import { OpenProcessSliceValue } from "../../../../redux-store/slices/OpenProcessSlice";
 
 function Collect(props) {
   let { t } = useTranslation();
@@ -29,6 +30,7 @@ function Collect(props) {
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedProcessData] = useGlobalState("loadedProcessData");
   const [localVariableDefinition] = useGlobalState("variableDefinition");
+  const openProcessData = useSelector(OpenProcessSliceValue);
 
   const [isDisableTab, setisDisableTab] = useState(false);
 
@@ -73,7 +75,7 @@ function Collect(props) {
 
   //create distributeworkstep dropdown
   useEffect(() => {
-    localLoadedProcessData.MileStones.forEach((mileStone) => {
+    openProcessData.loadedData?.MileStones.forEach((mileStone) => {
       mileStone.Activities.forEach((activity, index) => {
         if (!isParallelCollect) {
           if (activity.ActivityType === 5 && activity.ActivitySubType === 1) {
@@ -92,12 +94,12 @@ function Collect(props) {
         }
       });
     });
-  }, [isParallelCollect]);
+  }, [isParallelCollect, openProcessData.loadedData]);
 
   //create primaryworkstep dropdown
   useEffect(() => {
     function createPrimaryWorkstepActivityList() {
-      localLoadedProcessData.MileStones.forEach((mileStone) => {
+      openProcessData.loadedData?.MileStones.forEach((mileStone) => {
         mileStone.Activities.forEach((activity, index) => {
           if (activity["Target WorkStep"][0] == props.cellName) {
             setPrimaryActivityList((prevState) => [...prevState, activity]);
@@ -106,7 +108,7 @@ function Collect(props) {
       });
     }
     createPrimaryWorkstepActivityList();
-  }, []);
+  }, [openProcessData.loadedData]);
 
   useEffect(() => {
     if (localLoadedProcessData.ProcessType !== PROCESSTYPE_LOCAL)

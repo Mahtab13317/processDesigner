@@ -59,18 +59,27 @@ const App = (props) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // if (window.loadIntegrator) {
-    //   window.loadIntegrator();
-    // }
+    window.getMicroApps = function (microAppsHandler) {
+      let microAppsJSON = {
+        MicroApps: [
+          {
+            AuthData: {
+              authtype: "JWT",
+              JwtToken: JSON.parse(localStorage.getItem("launchpadKey"))?.token,
+              from: "LPWEB",
+            },
+
+            Module: "MDM",
+          },
+        ],
+      };
+
+      microAppsHandler({ ...microAppsJSON });
+    };
+    if (window.loadIntegrator) {
+      window.loadIntegrator();
+    }
     const ApiMethod = async () => {
-      // const res2 = await axios.get(
-      //   SERVER_URL + "/setSession/" + launchpadKey?.token
-      // );
-
-      // if (res2.data === "Done") {
-      //   // dispatch(setLaunchpadToken(launchpadKey?.token));
-
-      // }
       const res = await axios.get(SERVER_URL + "/fetchSavedData/PMWEB");
       if (res.data !== "" && res.data) {
         setlocalinMemoryDB(res?.data);
@@ -79,6 +88,29 @@ const App = (props) => {
     };
     ApiMethod();
   }, []);
+
+  const token = launchpadKey?.token;
+  if (token) {
+    axios.interceptors.request.use(function (config) {
+      config.headers.Authorization = token;
+      return config;
+    });
+    axios.interceptors.response.use(
+      function (response) {
+        // Do something with response data
+        return response;
+      },
+      function (error) {
+        dispatch(
+          setToastDataFunc({
+            message: error.response.data.error,
+            severity: "error",
+            open: true,
+          })
+        );
+      }
+    );
+  }
 
   const setDisplayMessage = (message, toShow) => {
     if (

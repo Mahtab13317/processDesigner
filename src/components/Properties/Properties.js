@@ -16,7 +16,6 @@ import { store, useGlobalState } from "state-pool";
 import axios from "axios";
 import taskTemplateIcon from "../../assets/bpmnViewIcons/TaskTemplate.svg";
 import {
-  activityType,
   SERVER_URL,
   ENDPOINT_SAVEPROPERTY,
   ENDPOINT_GET_ACTIVITY_PROPERTY,
@@ -49,6 +48,10 @@ import { createInstance } from "../../utility/CommonFunctionCall/CommonFunctionC
 import SaveAsGlobalTaskTemplateModal from "./PropetiesTab/GlobalTaskTemplate/SaveAsGlobalTaskTemplateModal";
 import { setToastDataFunc } from "../../redux-store/slices/ToastDataHandlerSlice";
 import { setGlobalTaskTemplates } from "../../redux-store/actions/Properties/globalTaskTemplateAction";
+import {
+  OpenProcessSliceValue,
+  setOpenProcess,
+} from "../../redux-store/slices/OpenProcessSlice";
 
 function PropertiesTab(props) {
   const { isDrawerExpanded, direction } = props;
@@ -61,7 +64,8 @@ function PropertiesTab(props) {
   const loadedProcessData = store.getState("loadedProcessData");
   const originalProcess = store.getState("originalProcessData");
   const loadedActivityPropertyData = store.getState("activityPropertyData"); //current processdata clicked
-  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
+  const [localLoadedProcessData, setLocalLoadedProcessData] =
+    useGlobalState(loadedProcessData);
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
   const [originalProcessData, setoriginalProcessData] =
@@ -78,6 +82,7 @@ function PropertiesTab(props) {
   const globalTemplates = useSelector(
     (state) => state.globalTaskTemplate.globalTemplates
   );
+  const openProcessData = useSelector(OpenProcessSliceValue);
 
   // to call getActivityProperty API
   useEffect(() => {
@@ -94,8 +99,9 @@ function PropertiesTab(props) {
           getActivityProps(props.cellActivityType, props.cellActivitySubType)[0]
         );
       }
+      dispatch(setOpenProcess({ loadedData: { ...localLoadedProcessData } }));
     }
-  }, [props.cellID, localLoadedProcessData, props.showDrawer]);
+  }, [props.cellID, props.showDrawer]);
 
   //to get global task templates
   const getGlobalTemplates = async () => {
@@ -118,6 +124,7 @@ function PropertiesTab(props) {
       props.cellType === getSelectedCellType("TASKTEMPLATE")
     ) {
       let activityName = props.cellTaskType;
+
       ActivityPropertyTabs.forEach((item) => {
         if (item.name === activityName) {
           let tabs = [...item.components];
@@ -131,6 +138,7 @@ function PropertiesTab(props) {
             };
             tempComp.push(tabEl.name);
           });
+
           setTabComponents(tempComp);
           dispatch(setActivityPropertyValues(tabList));
         }
@@ -213,6 +221,9 @@ function PropertiesTab(props) {
           setlocalLoadedActivityPropertyData(res.data);
           setoriginalProcessData(res.data);
         }
+      })
+      .catch((err) => {
+        console.log(err);
       });
   };
 
@@ -231,6 +242,9 @@ function PropertiesTab(props) {
             res.data && res.data.length > 0 && res.data[0]
           );
         }
+      })
+      .catch((err) => {
+        console.log(err);
       });
   };
 
@@ -320,6 +334,7 @@ function PropertiesTab(props) {
       }
     }
   };
+
   const handleDeleteGlobalTemplate = async () => {
     const axiosInstance = createInstance();
     try {
@@ -385,12 +400,18 @@ function PropertiesTab(props) {
             dispatch(setSave({ CloseClicked: false }));
           }
         }
+      })
+      .catch((err) => {
+        console.log(err);
       });
   };
 
   const handleSaveChanges = () => {
     setShowConfirmationAlert(false);
     dispatch(setSave({ SaveClicked: true }));
+    setLocalLoadedProcessData(
+      JSON.parse(JSON.stringify(openProcessData.loadedData))
+    );
     let errorTabs = handleTabError();
     if (errorTabs.length === 0) {
       if (
@@ -424,6 +445,7 @@ function PropertiesTab(props) {
     setShowConfirmationAlert(false);
     setTabsWithError([]);
     setDefaultTabValue(null);
+    setLocalLoadedProcessData(openProcessData.loadedData);
     dispatch(setSave({ SaveClicked: false, CancelClicked: true }));
     dispatch(setActivityPropertyToDefault());
     setsaveCancelDisabled(true);

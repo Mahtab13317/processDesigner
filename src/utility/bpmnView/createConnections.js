@@ -64,8 +64,12 @@ export const createConnections = (
               edges = graph.addCell(edge, parent, index, source, target);
               setProcessData((prevProcessData) => {
                 //do not do shallow copy process Data, else original state will get change
-                let newProcessData = { ...prevProcessData };
-                newProcessData.Connections = [...prevProcessData.Connections];
+                let newProcessData = JSON.parse(
+                  JSON.stringify(prevProcessData)
+                );
+                newProcessData.Connections = JSON.parse(
+                  JSON.stringify(prevProcessData.Connections)
+                );
                 newProcessData.Connections.push({
                   ConnectionId: Number(newEdgeId),
                   Type: "D",
@@ -78,6 +82,9 @@ export const createConnections = (
               });
               return edges;
             }
+          })
+          .catch((err) => {
+            console.log(err);
           });
       }
     }
@@ -109,8 +116,10 @@ export const createConnections = (
       //setProcessData will update state, to show new edge terminal is changed
       setProcessData((prevProcessData) => {
         //do not do shallow copy process Data, else original state will get change
-        let newProcessData = { ...prevProcessData };
-        newProcessData.Connections = [...prevProcessData.Connections];
+        let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+        newProcessData.Connections = JSON.parse(
+          JSON.stringify(prevProcessData.Connections)
+        );
 
         newProcessData.Connections.forEach((connection) => {
           if (connection.ConnectionId === Number(edgeId)) {

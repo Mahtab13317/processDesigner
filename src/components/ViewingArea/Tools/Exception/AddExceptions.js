@@ -65,14 +65,14 @@ function AddException(props) {
 
   const setNameFunc = (e) => {
     setNameInput(e.target.value);
-    if (e.target.value !== "") {
+    if (e.target.value !== "" && props.setShowNameError) {
       props.setShowNameError(false);
     }
   };
 
   const setDescriptionFunc = (e) => {
     setDescriptionInput(e.target.value);
-    if (e.target.value !== "") {
+    if (e.target.value !== "" && props.setShowDescError) {
       props.setShowDescError(false);
     }
   };
@@ -251,12 +251,10 @@ function AddException(props) {
           />
         </form>
         {props.showNameError ? (
-            <span
-              style={{ color: "red", fontSize: "10px", marginBottom: "7px" }}
-            >
-              Please fill the Name.
-            </span>
-          ) : null}
+          <span style={{ color: "red", fontSize: "10px", marginBottom: "7px" }}>
+            Please fill the Name.
+          </span>
+        ) : null}
       </div>
       <div>
         <label className="nameInputlabel">
@@ -273,12 +271,10 @@ function AddException(props) {
           />
         </form>
         {props.showDescError ? (
-            <span
-              style={{ color: "red", fontSize: "10px", marginBottom: "7px" }}
-            >
-              Please fill the Description.
-            </span>
-          ) : null}
+          <span style={{ color: "red", fontSize: "10px", marginBottom: "7px" }}>
+            Please fill the Description.
+          </span>
+        ) : null}
       </div>
       <div
         className="buttons_add"

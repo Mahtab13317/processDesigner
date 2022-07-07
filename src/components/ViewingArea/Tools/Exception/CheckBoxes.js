@@ -302,38 +302,6 @@ function CheckBoxes(props) {
             disabled={isProcessReadOnly ? true : false}
             onChange={() => changeChecks("View")}
           />
-          <span>
-            {checks.View && props.type == "activity" ? (
-              <FormControl sx={{ m: 1 }} variant="standard">
-                <Select
-                  className="selectTrigger"
-                  style={{
-                    width: view ? "100px" : "18px",
-                    fontSize: "11px",
-                  }}
-                  labelId="demo-customized-select-label"
-                  id="demo-customized-select"
-                  value={view}
-                  onChange={(e) => handleChange(e, "view")}
-                >
-                  <MenuItem value="" style={{ fontSize: "12px" }}>
-                    <em>{t("processView.noneWord")}</em>
-                  </MenuItem>
-                  {props.expData.Trigger &&
-                    props.expData.Trigger.map((trigger) => {
-                      return (
-                        <MenuItem
-                          value={trigger.TriggerName}
-                          style={{ fontSize: "12px" }}
-                        >
-                          {trigger.TriggerName}
-                        </MenuItem>
-                      );
-                    })}
-                </Select>
-              </FormControl>
-            ) : null}
-          </span>
         </div>
         <div
           style={{ display: "flex", alignItems: "center", marginLeft: "8px" }}

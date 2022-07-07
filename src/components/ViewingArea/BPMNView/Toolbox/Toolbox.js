@@ -599,7 +599,7 @@ function Toolbox(props) {
             <img
               style={{
                 position: "absolute",
-                bottom: expandedView ? "3rem" : "0",
+                top: expandedView ? "28.5rem" : "31rem",
                 left: expandedView ? "18.5vw" : "5.2vw",
                 height: "1.5rem",
                 width: "1.5rem",

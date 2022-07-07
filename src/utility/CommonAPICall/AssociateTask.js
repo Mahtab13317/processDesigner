@@ -1,4 +1,7 @@
-import { SERVER_URL, ENDPOINT_ASSOCIATETASK } from "../../Constants/appConstants";
+import {
+  SERVER_URL,
+  ENDPOINT_ASSOCIATETASK,
+} from "../../Constants/appConstants";
 import axios from "axios";
 
 export const associateTask = (
@@ -18,15 +21,20 @@ export const associateTask = (
     associatedActivityId: activityId,
     processDefId: processDefId,
   };
-  axios.post(SERVER_URL + ENDPOINT_ASSOCIATETASK, obj).then((response) => {
-    if (response.data.Status == 0) {
-      setProcessData((prevProcessData) => {
-        let newProcessData = { ...prevProcessData };
-        newProcessData.MileStones[milestoneIndex].Activities[
-          activityindex
-        ].AssociatedTasks.push(taskId);
-        return newProcessData;
-      });
-    }
-  });
+  axios
+    .post(SERVER_URL + ENDPOINT_ASSOCIATETASK, obj)
+    .then((response) => {
+      if (response.data.Status == 0) {
+        setProcessData((prevProcessData) => {
+          let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+          newProcessData.MileStones[milestoneIndex].Activities[
+            activityindex
+          ].AssociatedTasks.push(taskId);
+          return newProcessData;
+        });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };

@@ -13,19 +13,24 @@ export const ResizeSwimlane = (
     swimlanes: swimlaneArray,
   };
 
-  axios.post(SERVER_URL + ENDPOINT_RESIZELANE, obj).then((response) => {
-    if (response.data.Status === 0) {
-      return 0;
-    } else {
-      setProcessData((prevProcessData) => {
-        let newProcessData = { ...prevProcessData };
-        newProcessData.Lanes.forEach((lane) => {
-          if (lane.LaneId === laneId) {
-            lane.Height = oldLaneHeight + "";
-          }
+  axios
+    .post(SERVER_URL + ENDPOINT_RESIZELANE, obj)
+    .then((response) => {
+      if (response.data.Status === 0) {
+        return 0;
+      } else {
+        setProcessData((prevProcessData) => {
+          let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+          newProcessData.Lanes.forEach((lane) => {
+            if (lane.LaneId === laneId) {
+              lane.Height = oldLaneHeight + "";
+            }
+          });
+          return newProcessData;
         });
-        return newProcessData;
-      });
-    }
-  });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };

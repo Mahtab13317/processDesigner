@@ -20,6 +20,7 @@ import ImportExportSliceReducer from "../slices/ImportExportSlice";
 import ToastDataHandlerReducer from "../slices/ToastDataHandlerSlice";
 import LaunchpadTokenReducer from "../slices/LaunchpadTokenSlice";
 import globalTaskTemplateReducer from "./Properties/GlobalTaskTemplateReducer";
+import OpenProcessSliceReducer from "../slices/OpenProcessSlice";
 
 export default combineReducers({
   processTypesReducer: processTypesReducer,
@@ -40,6 +41,7 @@ export default combineReducers({
   activityPropertyChange: ActivityPropertyChangeReducer,
   activityPropertySaveCancel: ActivityPropertySaveCancelReducer,
   importExportSlice: ImportExportSliceReducer,
+  openProcessSlice: OpenProcessSliceReducer,
   toastDataHandlerSlice: ToastDataHandlerReducer,
   launchpadTokenSlice: LaunchpadTokenReducer,
   globalTaskTemplate: globalTaskTemplateReducer,

@@ -56,7 +56,7 @@ export const PasteActivity = (
       if (response.data.Status === 0) {
         if (activity.view !== "BPMN") {
           setProcessData((prevData) => {
-            let processObject = { ...prevData };
+            let processObject = JSON.parse(JSON.stringify(prevData));
             if (mileStoneWidthIncreased) {
               processObject.MileStones[milestone.mileIndex].Width =
                 mileStoneWidthIncreased.arrMilestoneInfos[
@@ -89,7 +89,7 @@ export const PasteActivity = (
       } else {
         if (activity.view === "BPMN") {
           setProcessData((prevData) => {
-            let processObject = { ...prevData };
+            let processObject = JSON.parse(JSON.stringify(prevData));
             let newArr = processObject.MileStones[
               milestone.mileIndex
             ].Activities?.map((act, index) => {

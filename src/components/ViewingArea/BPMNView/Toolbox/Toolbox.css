@@ -175,6 +175,7 @@ input:focus::-webkit-input-placeholder {
   left: 6.1vw;
   width: 13.5vw;
   height: 28px;
+  z-index: 100;
   background: #ffffff 0% 0% no-repeat padding-box;
   box-shadow: 0px 3px 6px #0072c629;
   border: 1px solid #dadada;
@@ -186,6 +187,7 @@ input:focus::-webkit-input-placeholder {
   width: 20px;
   position: absolute;
   top: 92px;
+  z-index: 100;
   left: 17.5vw;
   display: none;
   cursor: pointer;

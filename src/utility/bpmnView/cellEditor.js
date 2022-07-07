@@ -39,7 +39,6 @@ export function cellEditor(graph, displayMessage, setProcessData, translation) {
   //overwrites resize function to enable inplace editting for swimlane
   graph.cellEditor.resize = function () {
     var state = this.graph.getView().getState(this.editingCell);
-
     if (state == null) {
       this.stopEditing(true);
     } else if (this.textarea != null) {
@@ -367,13 +366,21 @@ export function cellEditor(graph, displayMessage, setProcessData, translation) {
                 : " translate(" + m.x * 100 + "%," + m.y * 100 + "%)")
           );
         }
-
         if (
           this.textarea.innerHTML != this.getEmptyLabelText() &&
           this.textarea.innerHTML.length >= maxLabelCharacter &&
           this.editingCell.value.length < maxLabelCharacter
         ) {
-          this.stopEditing();
+          // code added on 17 June 2022 for BugId 110065
+          if (this.textarea.innerHTML.length > maxLabelCharacter) {
+            const timeout = setTimeout(() => {
+              this.textarea.innerHTML = this.editingCell.value;
+              this.stopEditing();
+            }, 500);
+            return () => clearTimeout(timeout);
+          } else {
+            this.stopEditing();
+          }
         }
       }
     }
@@ -437,11 +444,11 @@ export function cellEditor(graph, displayMessage, setProcessData, translation) {
               //cell edited is milestone
               let oldMilestoneName, processDefId;
               setProcessData((prevProcessData) => {
-                let newProcessData = { ...prevProcessData };
-                newProcessData.MileStones.forEach((milestone) => {
+                let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+                newProcessData.MileStones.forEach((milestone, idx) => {
                   if (milestone.iMileStoneId === id) {
                     oldMilestoneName = milestone.MileStoneName;
-                    milestone.MileStoneName = value;
+                    newProcessData.MileStones[idx].MileStoneName = value;
                   }
                 });
                 processDefId = newProcessData.ProcessDefId;
@@ -459,12 +466,12 @@ export function cellEditor(graph, displayMessage, setProcessData, translation) {
               //cell edited is swimlane
               let oldLaneName, queueId, processDefId, processName;
               setProcessData((prevProcessData) => {
-                let newProcessData = { ...prevProcessData };
-                newProcessData.Lanes.forEach((swimlane) => {
+                let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+                newProcessData.Lanes.forEach((swimlane, idx) => {
                   if (swimlane.LaneId === id) {
                     oldLaneName = swimlane.LaneName;
                     queueId = swimlane.QueueId;
-                    swimlane.LaneName = value;
+                    newProcessData.Lanes[idx].LaneName = value;
                   }
                 });
                 processDefId = newProcessData.ProcessDefId;
@@ -492,11 +499,11 @@ export function cellEditor(graph, displayMessage, setProcessData, translation) {
               //cell edited is task
               let oldTaskName, processDefId;
               setProcessData((prevProcessData) => {
-                let newProcessData = { ...prevProcessData };
-                newProcessData.Tasks.forEach((task) => {
+                let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+                newProcessData.Tasks.forEach((task, idx) => {
                   if (task.TaskId === id) {
                     oldTaskName = task.TaskName;
-                    task.TaskName = value;
+                    newProcessData.Tasks[idx].TaskName = value;
                   }
                 });
                 processDefId = prevProcessData.ProcessDefId;
@@ -511,13 +518,15 @@ export function cellEditor(graph, displayMessage, setProcessData, translation) {
               //cell edited is activity
               let oldActName, queueId, processDefId, processName;
               setProcessData((prevProcessData) => {
-                let newProcessData = { ...prevProcessData };
-                newProcessData.MileStones.forEach((milestone) => {
-                  milestone.Activities.forEach((activity) => {
+                let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+                newProcessData.MileStones.forEach((milestone, idx) => {
+                  milestone.Activities.forEach((activity, actidx) => {
                     if (activity.ActivityId === id) {
                       oldActName = activity.ActivityName;
                       queueId = activity.queueId;
-                      activity.ActivityName = value;
+                      newProcessData.MileStones[idx].Activities[
+                        actidx
+                      ].ActivityName = value;
                     }
                   });
                 });
@@ -533,7 +542,8 @@ export function cellEditor(graph, displayMessage, setProcessData, translation) {
                 processDefId,
                 processName,
                 queueId,
-                true
+                true,
+                state
               );
             }
           }

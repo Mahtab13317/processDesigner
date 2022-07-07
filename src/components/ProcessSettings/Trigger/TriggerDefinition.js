@@ -337,7 +337,7 @@ function TriggerDefinition(props) {
             if (type === EDIT_OPTION) {
               //setTriggerEdited to false when trigger is modified
               props.setTriggerEdited(false);
-              let newData = { ...localLoadedProcessData };
+              let newData = JSON.parse(JSON.stringify(localLoadedProcessData));
               newData.TriggerList?.forEach((trigger) => {
                 if (trigger.TriggerId === selectedField.id) {
                   trigger.Description = descInput;
@@ -347,7 +347,7 @@ function TriggerDefinition(props) {
               });
               setlocalLoadedProcessData(newData);
             } else if (type === ADD_OPTION) {
-              let newData = { ...localLoadedProcessData };
+              let newData = JSON.parse(JSON.stringify(localLoadedProcessData));
               newData.TriggerList.push({
                 Description: descInput,
                 TriggerId: selectedField.id,
@@ -402,7 +402,7 @@ function TriggerDefinition(props) {
     axios.post(SERVER_URL + ENDPOINT_REMOVETRIGGER, jsonBody).then((res) => {
       if (res.data.Status === 0) {
         cancelAddTriggerFunc();
-        let newData = { ...localLoadedProcessData };
+        let newData = JSON.parse(JSON.stringify(localLoadedProcessData));
         let indexVal;
         newData.TriggerList?.forEach((trigEl, index) => {
           if (trigEl.TriggerId === selectedField.id) {

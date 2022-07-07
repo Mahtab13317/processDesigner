@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
   },
   tableHeader: {
     fontWeight: 600,
-    fontSize: 14,
+    fontSize: 13,
     backgroundColor: theme.palette.action.hover,
     color: "black",
   },
@@ -62,7 +62,7 @@ export default function CustomizedTables(props) {
     <TableContainer component={Paper} className={classes.tableContainer}>
       {/*code changes on 21 June 2022 for BugId 110907 */}
       <Table
-        className={`${classes.table} webServicePropertiestable`} /*code added on 22 June 2022 for BugId 111065 and BugId 110846*/
+        className={`${classes.table} ${props.isDrawerExpanded ? "webServicePropertiestableEx":"webServicePropertiestableCo"} webServicePropertiestable`} /*code added on 22 June 2022 for BugId 111065 and BugId 110846*/
         style={{ width: "100%" }}
         aria-label="customized table"
         stickyHeader

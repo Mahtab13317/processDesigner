@@ -149,13 +149,7 @@ function SetProperties(props) {
           </div>
           {!readOnlyProcess ? (
             <button
-              className={
-                direction === RTL_DIRECTION
-                  ? {
-                      /*arabicStyles.addSetTrigger*/
-                    }
-                  : styles.addSetTrigger
-              }
+              className={styles.addSetTrigger}
               onClick={addNewField}
               id="trigger_set_add_btn"
             >
