@@ -453,53 +453,55 @@ function REST_Manual(props) {
             {t("ResponseBody")} {t("definition")}
           </button>
         </div>
-        <label
-          className={
-            direction === RTL_DIRECTION
-              ? arabicStyles.webSLabel
-              : styles.webSLabel
-          }
-        >
-          {t("AuthenticationType")}
-        </label>
-        <div className="flex alignCenter">
-          <Select
-            className={`webSSelect ${
-              direction === RTL_DIRECTION
-                ? arabicStyles.webSSelect
-                : styles.webSSelect
-            }`}
-            MenuProps={{
-              anchorOrigin: {
-                vertical: "bottom",
-                horizontal: "left",
-              },
-              transformOrigin: {
-                vertical: "top",
-                horizontal: "left",
-              },
-              getContentAnchorEl: null,
-            }}
-            name="authType"
-            value={webServiceObj.authType}
-            onChange={onChange}
-            id="webS_authType_REST"
-          >
-            {AUTH_TYPE_DROPDOWN.map((option) => {
-              return (
-                <MenuItem
-                  className={
-                    direction === RTL_DIRECTION
-                      ? arabicStyles.webSDropdownData
-                      : styles.webSDropdownData
-                  }
-                  value={option}
-                >
-                  {t(option)}
-                </MenuItem>
-              );
-            })}
-          </Select>
+        <div className="flex alignEnd">
+          <div className="flexColumn">
+            <label
+              className={
+                direction === RTL_DIRECTION
+                  ? arabicStyles.webSLabel
+                  : styles.webSLabel
+              }
+            >
+              {t("AuthenticationType")}
+            </label>
+            <Select
+              className={`webSSelect ${
+                direction === RTL_DIRECTION
+                  ? arabicStyles.webSSelect
+                  : styles.webSSelect
+              }`}
+              MenuProps={{
+                anchorOrigin: {
+                  vertical: "bottom",
+                  horizontal: "left",
+                },
+                transformOrigin: {
+                  vertical: "top",
+                  horizontal: "left",
+                },
+                getContentAnchorEl: null,
+              }}
+              name="authType"
+              value={webServiceObj.authType}
+              onChange={onChange}
+              id="webS_authType_REST"
+            >
+              {AUTH_TYPE_DROPDOWN.map((option) => {
+                return (
+                  <MenuItem
+                    className={
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.webSDropdownData
+                        : styles.webSDropdownData
+                    }
+                    value={option}
+                  >
+                    {t(option)}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </div>
           <button
             className={`${
               webServiceObj.authType === NO_AUTH
@@ -509,6 +511,7 @@ function REST_Manual(props) {
             onClick={() => setOpenModal(DEFINE_AUTH_DETAILS)}
             disabled={webServiceObj.authType === NO_AUTH}
             id={`webs_authenDetails_${props.scope}`}
+            style={{ height: "auto", minHeight: "1.5rem" }}
           >
             {t("Define")} {t("AuthenticationDetails")}
           </button>

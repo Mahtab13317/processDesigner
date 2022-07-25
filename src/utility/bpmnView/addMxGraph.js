@@ -295,6 +295,7 @@ export function addMxGraph(
       maxTaskXLeft = 0,
       isLaneFound = false,
       isTaskLast = false,
+      mileWidth = 0,
       laneHeight = milestoneTitleWidth;
     let lastAct, lastTopAct, lastActLane;
     setProcessData((prevProcessData) => {
@@ -319,6 +320,7 @@ export function addMxGraph(
               lastAct = activity;
             }
           });
+          maxXLeft = maxXLeft + mileWidth;
         }
         // to get min height of lane as per max yTopLoc of activities present in it
         mile.Activities?.forEach((activity) => {
@@ -336,7 +338,9 @@ export function addMxGraph(
               lastActLane = activity;
             }
           });
+          maxXLeftlane = maxXLeftlane + mileWidth;
         }
+        mileWidth = mileWidth + +mile.Width;
       });
       prevProcessData.Tasks?.forEach((task) => {
         if (+task.xLeftLoc > +maxTaskXLeft) {
@@ -522,9 +526,16 @@ export function addMxGraph(
           let prevMileWidth;
           setProcessData((prevProcessData) => {
             //do not shallow copy process Data, else original state will get change
-            let newProcessData = { ...prevProcessData };
-            newProcessData.MileStones = [...prevProcessData.MileStones];
-            newProcessData.Lanes = [...prevProcessData.Lanes];
+            let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+            newProcessData.MileStones = JSON.parse(
+              JSON.stringify(prevProcessData.MileStones)
+            );
+            newProcessData.Lanes = JSON.parse(
+              JSON.stringify(prevProcessData.Lanes)
+            );
+            newProcessData.Connections = JSON.parse(
+              JSON.stringify(prevProcessData.Connections)
+            );
             //assumption that each milestone have unique iMilestoneId
             let mIndex;
             newArray = newProcessData.MileStones?.map((mile, index) => {
@@ -582,7 +593,7 @@ export function addMxGraph(
                 };
               }
             });
-            newProcessData.MileStones?.map((mile, index) => {
+            newProcessData.MileStones?.forEach((mile, index) => {
               if (mile.iMileStoneId === cellId) {
                 newProcessData.MileStones[index].Width = cell.geometry.width;
               }
@@ -608,38 +619,55 @@ export function addMxGraph(
           let ProcessDefId;
           setProcessData((prevProcessData) => {
             //do not do shallow copy process Data, else original state will get change
-            let newProcessData = { ...prevProcessData };
-            newProcessData.Lanes = [...prevProcessData.Lanes];
+            let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+            newProcessData.Lanes = JSON.parse(
+              JSON.stringify(prevProcessData.Lanes)
+            );
+            let totalMileWidth = newProcessData.MileStones?.reduce(
+              (acc, el) => {
+                acc = acc + +el.Width;
+                return acc;
+              },
+              0
+            );
             newArray = newProcessData.Lanes?.map((lane, index) => {
               if (selectedLaneIdx !== null) {
                 nextLanes.push(lane.LaneId);
               }
               if (+lane.LaneId === cell.id) {
                 selectedLaneIdx = index;
-                oldHeight = +lane.Height;
+                oldHeight = +newProcessData.Lanes[index].Height;
                 newProcessData.Lanes[index].Height = cell.geometry.height;
               }
               return {
                 laneId: lane.LaneId,
-                laneSeqId: index + 1,
+                laneSeqId: lane.LaneSeqId,
                 laneName: lane.LaneName,
-                width: lane.Width + "",
-                oldWidth: lane.Width,
+                width:
+                  +lane.LaneId === cell.id
+                    ? cell.geometry.width - swimlaneTitleSize + ""
+                    : totalMileWidth + "",
+                oldWidth: totalMileWidth + "",
                 height: lane.Height + "",
                 oldHeight:
                   +lane.LaneId === cell.id ? oldHeight + "" : lane.Height,
               };
             });
-
             newProcessData.MileStones?.forEach((mile, mileIdx) => {
               mile.Activities.forEach((act, actidx) => {
                 if (nextLanes.includes(act.LaneId)) {
                   newProcessData.MileStones[mileIdx].Activities[
                     actidx
-                  ].yTopLoc = +act.yTopLoc + +cell.geometry.height - oldHeight;
+                  ].yTopLoc = +act.yTopLoc + +cell.geometry.height - +oldHeight;
                 }
               });
             });
+            newProcessData.MileStones[
+              newProcessData.MileStones.length - 1
+            ].Width =
+              +newProcessData.MileStones[newProcessData.MileStones.length - 1]
+                .Width +
+              (cell.geometry.width - +swimlaneTitleSize - +totalMileWidth);
             ProcessDefId = newProcessData.ProcessDefId;
             return newProcessData;
           });

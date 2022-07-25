@@ -115,15 +115,6 @@
       "ruleFlow": "Rule Flow",
       "rulePackage": "Rule Package"
     },
-    "dataRights":{
-      "activities":"Activities",
-      "rightsAct":"Rights on activities",
-      "variables":"Variables",
-      "save":"Save Changes",
-      "discard":"Discard",
-      "showing":"Showing"
-    },
-
     "sharePointArchive": {
       "archive": "Archive",
       "serviceUrl": "Service URL",
@@ -167,6 +158,14 @@
       "sapClientName": "SAP Client Name",
       "sapPassword": "SAP Password",
       "configuration": "Configuration"
+    },
+    "dataRights":{
+      "activities":"Activities",
+      "rightsAct":"Rights on activities",
+      "variables":"Variables",
+      "save":"Save Changes",
+      "discard":"Discard",
+      "showing":"Showing"
     },
     "workdeskSap": {
       "newDef": "New Definition",
@@ -316,6 +315,7 @@
     "processes": "Processes",
     "AUDIT_TRAIL": "AUDIT TRAIL",
     "PROJECT_SETTINGS": "PROJECT SETTINGS",
+    "requirements": "REQUIREMENTS",
     "All": "All",
     "No": "No",
     "Drafts": "Drafts",
@@ -468,13 +468,13 @@
   "constantName": "Constant Name",
   "auditHistory": "Audit History",
   "dataObjects": "Data Objects",
+  "dataRights":"Data Rights",
   "addDataObject": "+ Add",
   "businessVariablesTab": "Business variables",
   "businessVariables": "Business Variables",
   "userDefinedDataTypes": "User Defined Data Types",
   "constants": "Constants",
   "erDiagram": "ER Diagram",
-  "dataRights":"Data Rights",
   "general": "General",
   "triggers": "Triggers",
   "features": "Features",
@@ -997,8 +997,8 @@
   "producerIpPort": "Producer IP Port",
   "domainName": "Domain Name",
   "holdUntil": "Hold Until",
-  "workingDays": "Working Days",
-  "calenderDays": "Calender Days",
+  "workingDays": "Working Day(s)",
+  "calenderDays": "Calender Day(s)",
   "onExpiry": "On Expiry",
   "previousStage": "PreviousStage",
   "turnAroundTime": "TurnAround Time",
@@ -1455,6 +1455,12 @@
   "updateIfExist": "Update if Exist",
   "selectComplex": "Select Complex",
   "selectTables": "Select Table(s)",
+  "setAsDefaultStart": "Set as Default Start",
+  "associatedQueue": "Associated Queue",
+  "accInitiativeQueue": "Account Initiative Queue",
+  "registeredProcessName": "Registered Process Name",
+  "useSwimlaneQueue": "Use Swimlane Queue",
+  "useWorkstepQueue": "Use Workstep Queue",
   "SelectedExpAlreadyAssociated": "Selected Exception is already associated with this workstep",
   "associateRightsErr": "Please associate rights with exception",
   "Mobility": "Mobility",
@@ -1464,5 +1470,15 @@
   "groupAlreadyExists": "Group Name already exists",
   "todoAlreadyExists": "ToDo Item already exists",
   "excepAlreadyExists": "Exception Name already exists",
-  "GoToCatalog":"Go to Catalog"
+  "GoToCatalog": "Go to Catalog",
+  "FireAndForget": "Fire And Forget",
+  "Asynchronous": "Asynchronous",
+  "JMS/SOAPTarget": "JMS/SOAP Target",
+  "TimeOut": "Time Out",
+  "SOAPInputParameters": "SOAP Input Parameters",
+  "SOAPOutputParameters": "SOAP Output Parameters",
+  "CombAlreadyExists": "This combination already exists",
+  "RESTInputParameters": "REST Input Parameters",
+  "RESTOutputParameters": "REST Output Parameters",
+  "PleaseDefineAtleastOneReverseMapping": "Please Define Atleast One Reverse Mapping"
 }

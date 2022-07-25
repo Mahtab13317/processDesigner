@@ -14,8 +14,10 @@ import reducers from "./redux-store/reducers/reducers";
 import thunk from "redux-thunk";
 import theme from "./assets/theme/theme";
 import { ThemeProvider, CssBaseline } from "@material-ui/core";
+import axios from "axios";
+// import processTypesReducer from "./redux-store/reducers/processView/processTypesReducer";
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+// const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const store = createStore(reducers, applyMiddleware(thunk));
 
@@ -140,6 +142,35 @@ window.loadFormBuilderPreview = function (passedData, containerId) {
     window.loadMicroFrontend(props);
   }
 };
+
+// Function that gets called when maker checker option is selected from more options dropdown.
+window.loadInboxMC = function () {
+  // window.lpweb_containerId_mf = "mf_inbox_oapweb";
+
+  let props = {
+    Module: "WCL",
+    Component: "Inbox",
+    InFrame: false,
+    ContainerId: "mf_inbox_oapweb",
+    Callback: null,
+    passedData: null,
+    Renderer: "renderInbox",
+  };
+
+  if (window && window?.loadMicroFrontend) {
+    console.log("inside function");
+    window.loadMicroFrontend(props);
+  }
+};
+
+const launchpadKey = JSON.parse(localStorage.getItem("launchpadKey"));
+const token = launchpadKey?.token;
+if (token) {
+  axios.interceptors.request.use(function (config) {
+    config.headers.Authorization = token;
+    return config;
+  });
+}
 
 ReactDOM.render(
   <React.StrictMode>

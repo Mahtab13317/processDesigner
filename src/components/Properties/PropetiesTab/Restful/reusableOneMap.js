@@ -1,42 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { Select, MenuItem } from "@material-ui/core";
-import { store, useGlobalState } from "state-pool";
-import { RoomSharp } from "@material-ui/icons";
 
 function ReusableOneMap(props) {
-  const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [selectedMappingField, setSelectedMappingField] = useState(null);
-  const loadedActivityPropertyData = store.getState("activityPropertyData");
-  const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
-    useGlobalState(loadedActivityPropertyData);
-const handleFieldMapping=(e)=>{
-  setSelectedMappingField(e.target.value);
-  props.handleFieldMapping(e.target.value);
-}
 
-useEffect(() => {
-  let temp = localLoadedActivityPropertyData?.ActivityProperty?.restFullInfo
-        ?.assocMethodList?.filter(el=> {return el.methodIndex == props.methodIndex})[0]?.mappingInfoList?.filter(tb=>{
-          return (tb.parameterName == props.mapField)
-        })
-  console.log('CHALHUT', props.selectedVariable);
+  const handleFieldMapping = (e) => {
+    setSelectedMappingField(e.target.value);
+    props.handleFieldMapping(e.target.value);
+  };
 
-  setSelectedMappingField(temp[0]?.varName)
-}, [props.methodClicked, props.methodIndex, props.mapField])
+  useEffect(() => {
+    setSelectedMappingField(props.varField);
+  }, [props.varField]);
 
   return (
-    <div style={{ display: "flex", marginBottom:'8px'}}>
+    <div style={{ display: "flex", marginBottom: "8px" }}>
       <div
         style={{
-          width: "220px",
+          flex: "1",
           height: "30px",
           border: "1px solid #F3F3F3",
           borderRadius: "2px",
           opacity: "1",
           marginRight: "10px",
-          fontSize:'12px', 
-          padding:'7px'
+          fontSize: "12px",
+          padding: "7px",
+          textOverflow: "ellipsis",
+          overflow: "hidden",
         }}
       >
         {props.mapField}
@@ -51,15 +41,14 @@ useEffect(() => {
       <Select
         onChange={(e) => handleFieldMapping(e)}
         style={{
-          width: "220px",
+          flex: "1",
           height: "30px",
           border: "1px solid #F3F3F3",
           borderRadius: "2px",
-          opacity: "1",
-          padding:'7px',
-          fontSize:'12px'
+          padding: "7px",
+          fontSize: "12px",
+          overflow: "hidden"
         }}
-        disabled={props.invocationType == 'F'? true:false}
         value={selectedMappingField}
         MenuProps={{
           anchorOrigin: {
@@ -71,6 +60,11 @@ useEffect(() => {
             horizontal: "left",
           },
           getContentAnchorEl: null,
+          PaperProps: {
+            style: {
+              maxHeight: "10rem",
+            },
+          },
         }}
       >
         {props.dropDownOptions.map((loadedVar) => {
@@ -80,7 +74,7 @@ useEffect(() => {
               value={loadedVar}
               style={{
                 fontSize: "12px",
-                padding: "4px"
+                padding: "4px",
               }}
             >
               {loadedVar[props.dropDownKey]}

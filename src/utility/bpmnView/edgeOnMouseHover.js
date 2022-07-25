@@ -344,7 +344,7 @@ export function edgeOnMouseHover(graph, setProcessData) {
             .then((res) => {
               if (res.data.Status === 0) {
                 setProcessData((prev) => {
-                  let newProcessData = { ...prev };
+                  let newProcessData = JSON.parse(JSON.stringify(prev));
                   newProcessData.Connections?.forEach((con, index) => {
                     if (cell.id === con.ConnectionId) {
                       newProcessData.Connections[index].xLeft = sourceArr;
@@ -354,6 +354,9 @@ export function edgeOnMouseHover(graph, setProcessData) {
                   return newProcessData;
                 });
               }
+            })
+            .catch((err) => {
+              console.log(err);
             });
         }
       }

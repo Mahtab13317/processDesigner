@@ -8,17 +8,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { store, useGlobalState } from "state-pool";
 import arabicStyles from "./ArabicStyles.module.css";
 import { RTL_DIRECTION } from "../../../../Constants/appConstants";
+import { OpenProcessSliceValue } from "../../../../redux-store/slices/OpenProcessSlice";
 
 function Print(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
-  const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
   const [varDocSelected, setVarDocSelected] = useState("");
   const [checked, setChecked] = useState({});
+  const openProcessData = useSelector(OpenProcessSliceValue);
 
   let DropdownOptions = ["Status"];
 
@@ -60,22 +60,21 @@ function Print(props) {
 
   useEffect(() => {
     let temp = {};
-
-    localLoadedProcessData &&
-      localLoadedProcessData.DocumentTypeList.forEach((el) => {
-        temp = {
-          ...temp,
-          [`d_${el.DocTypeId}`]: {
-            createDoc: "N",
-            docTypeId: el.DocTypeId,
-            m_bCreateCheckbox: false,
-            m_bPrint: true,
-            varFieldId: "0",
-            variableId: "0",
-            DocName: el.DocName,
-          },
-        };
-      });
+    let tempLocal = JSON.parse(JSON.stringify(openProcessData.loadedData));
+    tempLocal?.DocumentTypeList.forEach((el) => {
+      temp = {
+        ...temp,
+        [`d_${el.DocTypeId}`]: {
+          createDoc: "N",
+          docTypeId: el.DocTypeId,
+          m_bCreateCheckbox: false,
+          m_bPrint: true,
+          varFieldId: "0",
+          variableId: "0",
+          DocName: el.DocName,
+        },
+      };
+    });
     setAllData(temp);
 
     let tempList =
@@ -96,7 +95,7 @@ function Print(props) {
       };
     });
     setChecked(tempCheck);
-  }, []);
+  }, [openProcessData.loadedData]);
 
   const CheckHandler = (e, el) => {
     let tempCheck = { ...checked };

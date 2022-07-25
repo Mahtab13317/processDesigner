@@ -5,7 +5,7 @@ import Header from "./Header/Header";
 import ViewingArea from "./ViewingArea";
 import Tabs from "../../UI/Tab/Tab.js";
 import "./ProcessView.css";
-import { connect } from "react-redux";
+import { connect, useSelector } from "react-redux";
 import ProcessSettings from "../ProcessSettings";
 import DocTypes from "./Tools/DocTypes/DocTypes";
 import Exception from "./Tools/Exception/Exception.js";
@@ -18,13 +18,17 @@ import {
   SERVER_URL,
   ENDPOINT_OPENTEMPLATE,
   ENDPOINT_OPENPROCESS,
+  userRightsMenuNames,
 } from "../../Constants/appConstants";
 import axios from "axios";
 import Requirements from "../ViewingArea/ProcessRequirements&Attchments/index.js";
 import ViewsForms from "../ViewsForms/ViewsForms";
+import { UserRightsValue } from "../../redux-store/slices/UserRightsSlice";
+import { getMenuNameFlag } from "../../utility/UserRightsFunctions";
 
 const ProcessView = (props) => {
   let { t } = useTranslation();
+  const userRightsValue = useSelector(UserRightsValue);
   const { openProcessID, openProcessName, openProcessType } = props;
   const arrProcessesData = store.getState("arrProcessesData");
   const loadedProcessData = store.getState("loadedProcessData");
@@ -39,6 +43,7 @@ const ProcessView = (props) => {
     useGlobalState(loadedProcessData);
   const [localOpenProcessesArr, setLocalOpenProcessesArr] =
     useGlobalState(openProcessesArr);
+  const [tabsArray, setTabsArray] = useState([]);
   const [processData, setProcessData] = useState({
     Connections: [],
     MileStones: [
@@ -111,6 +116,202 @@ const ProcessView = (props) => {
   });
   const [initialRender, setInitialRender] = useState(true);
   const [tableName, setTableName] = useState("");
+
+  // Boolean that decides whether todos tab will be shown or not.
+  const toDosFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.todoList
+  );
+
+  // Boolean that decides whether doc types tab will be shown or not.
+  const docTypesFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.documents
+  );
+
+  // Boolean that decides whether service catalog tab will be shown or not.
+  const catalogDefinitionFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.catalogDefinition
+  );
+
+  // Boolean that decides whether exception tab will be shown or not.
+  const exceptionFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.exception
+  );
+
+  // Boolean that decides whether trigger tab will be shown or not.
+  const triggerFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.trigger
+  );
+
+  // Boolean that decides whether form tab will be shown or not.
+  const formsFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.manageForm
+  );
+
+  const arr = [
+    {
+      label: t("navigationPanel.requirements"),
+      component: (
+        <div
+          style={{
+            position: "absolute",
+            top: "13%",
+            height: "90%",
+            width: "100%",
+            color: "black",
+            fontStyle: "italic",
+          }}
+        >
+          <Requirements />
+        </div>
+      ),
+    },
+    {
+      label: t("navigationPanel.dataModel"),
+      component: (
+        <DataModel
+          localLoadedProcessData={localLoadedProcessData}
+          openProcessID={openProcessID}
+          openProcessType={openProcessType}
+          tableName={tableName}
+        />
+      ),
+    },
+    {
+      label: t("navigationPanel.forms"),
+      component: <ViewsForms />,
+    },
+    {
+      label: t("navigationPanel.exceptions"),
+      component: <Exception />,
+    },
+    {
+      label: t("navigationPanel.docTypes"),
+      component: <DocTypes processType={openProcessType} />,
+    },
+    {
+      label: t("navigationPanel.toDos"),
+      component: <ToDo />,
+    },
+    {
+      label: t("triggers"),
+      component: <TriggerDefinition spinner={spinner} />,
+    },
+    {
+      label: t("navigationPanel.serviceCatelog"),
+      component: <ServiceCatalog />,
+    },
+    {
+      label: t("navigationPanel.settings"),
+      component: (
+        <div>
+          <ProcessSettings
+            openProcessID={openProcessID}
+            openProcessName={openProcessName}
+            openProcessType={openProcessType}
+          />
+        </div>
+      ),
+    },
+    {
+      label: t("navigationPanel.helpSection"),
+      component: (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "35%",
+            color: "black",
+            fontStyle: "italic",
+          }}
+        >
+          <p style={{ color: "black" }}>
+            Help Section Section to be painted here.
+          </p>
+        </div>
+      ),
+    },
+  ];
+
+  useEffect(() => {
+    let tempArr = [...arr];
+    if (!toDosFlag) {
+      let toDosIndex;
+      tempArr.forEach((element, index) => {
+        if (element.label === t("navigationPanel.toDos")) {
+          toDosIndex = index;
+        }
+      });
+      tempArr.splice(toDosIndex, 1);
+    }
+    if (!docTypesFlag) {
+      let docTypeIndex;
+      tempArr.forEach((element, index) => {
+        if (element.label === t("navigationPanel.docTypes")) {
+          docTypeIndex = index;
+        }
+      });
+      tempArr.splice(docTypeIndex, 1);
+    }
+    if (!catalogDefinitionFlag) {
+      let catalogDefinitionIndex;
+      tempArr.forEach((element, index) => {
+        if (element.label === t("navigationPanel.serviceCatelog")) {
+          catalogDefinitionIndex = index;
+        }
+      });
+      tempArr.splice(catalogDefinitionIndex, 1);
+    }
+    if (!exceptionFlag) {
+      let exceptionIndex;
+      tempArr.forEach((element, index) => {
+        if (element.label === t("navigationPanel.exceptions")) {
+          exceptionIndex = index;
+        }
+      });
+      tempArr.splice(exceptionIndex, 1);
+    }
+    if (!triggerFlag) {
+      let triggerIndex;
+      tempArr.forEach((element, index) => {
+        if (element.label === t("triggers")) {
+          triggerIndex = index;
+        }
+      });
+      tempArr.splice(triggerIndex, 1);
+    }
+    if (!formsFlag) {
+      let formIndex;
+      tempArr.forEach((element, index) => {
+        if (element.label === t("navigationPanel.forms")) {
+          formIndex = index;
+        }
+      });
+      tempArr.splice(formIndex, 1);
+    }
+    setTabsArray(tempArr);
+  }, []);
+
+  // Function that gives elements based on type
+  const getElementAccToType = (array, type) => {
+    console.log("555", "ARRAY", array, type);
+    let tempArr = [];
+    array.forEach((element) => {
+      if (type === "tabs") {
+        tempArr.push(element.label);
+      } else if (type === "components") {
+        tempArr.push(element.component);
+      }
+    });
+    console.log("555", "ARRAY", array, type, tempArr);
+
+    return tempArr;
+  };
 
   //fetch processData from openProcess API
   useEffect(() => {
@@ -193,9 +394,11 @@ const ProcessView = (props) => {
                   localOpenProcessesArr.includes(
                     `${newProcessData.ProcessDefId}#${newProcessData.ProcessType}`
                   )
-                )
+                ) {
+                  setspinner(false);
                   setLocalArrProcessesData(localArrProcessesData);
-                else {
+                } else {
+                  setspinner(false);
                   setLocalArrProcessesData([
                     ...localArrProcessesData,
                     {
@@ -254,7 +457,6 @@ const ProcessView = (props) => {
   }, []);
 
   useEffect(() => {
-    setspinner(true);
     setInitialRender(true);
   }, [props.openProcessID]);
 
@@ -271,16 +473,7 @@ const ProcessView = (props) => {
           tabsStyle="processViewSubTabs"
           TabNames={[
             t("navigationPanel.processFlow"),
-            t("navigationPanel.requirements"),
-            t("navigationPanel.dataModel"),
-            t("navigationPanel.forms"),
-            t("navigationPanel.exceptions"),
-            t("navigationPanel.docTypes"),
-            t("navigationPanel.toDos"),
-            t("triggers"),
-            t("navigationPanel.serviceCatelog"),
-            t("navigationPanel.settings"),
-            t("navigationPanel.helpSection"),
+            ...getElementAccToType(tabsArray, "tabs"),
           ]}
           TabElement={[
             <div className={cx("pmviewingArea")} style={{ marginTop: "0" }}>
@@ -294,63 +487,7 @@ const ProcessView = (props) => {
                 spinner={spinner}
               />
             </div>,
-            <div
-              style={{
-                position: "absolute",
-                top: "13%",
-                height: "90%",
-                width: "100%",
-                color: "black",
-                fontStyle: "italic",
-              }}
-            >
-              <Requirements />
-            </div>,
-            <DataModel
-              localLoadedProcessData={localLoadedProcessData}
-              openProcessID={openProcessID}
-              openProcessType={openProcessType}
-              tableName={tableName}
-            />,
-            <ViewsForms />,
-            <Exception />,
-            <DocTypes processType={openProcessType} />,
-            <ToDo />,
-            <TriggerDefinition spinner={spinner} />,
-            <ServiceCatalog />,
-            <div>
-              <ProcessSettings
-                openProcessID={openProcessID}
-                openProcessName={openProcessName}
-                openProcessType={openProcessType}
-              />
-            </div>,
-            <div
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "35%",
-                color: "black",
-                fontStyle: "italic",
-              }}
-            >
-              <p style={{ color: "black" }}>
-                Help Section Section to be painted here.
-              </p>
-            </div>,
-            <div
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "35%",
-                color: "black",
-                fontStyle: "italic",
-              }}
-            >
-              <p style={{ color: "black" }}>
-                Validation Log Section to be painted here.
-              </p>
-            </div>,
+            ...getElementAccToType(tabsArray, "components"),
           ]}
         />
       </td>

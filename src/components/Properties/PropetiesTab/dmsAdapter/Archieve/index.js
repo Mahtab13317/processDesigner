@@ -17,6 +17,7 @@ import FieldMapping from "./FieldMapping.js";
 import {
   SERVER_URL,
   ARCHIEVE_CONNECT,
+  ARCHIEVE_DISCONNECT,
   ASSOCIATE_DATACLASS_MAPPING,
   FOLDERNAME_ARCHIEVE,
   propertiesLabel,
@@ -35,6 +36,8 @@ import Button from "@material-ui/core/Button";
 import { ClickAwayListener } from "@material-ui/core";
 import ButtonDropdown from "../../../../../UI/ButtonDropdown/index";
 import { useDispatch, useSelector } from "react-redux";
+import { OpenProcessSliceValue } from "../../../../../redux-store/slices/OpenProcessSlice";
+import { drop } from "lodash";
 
 function DMSAdapter(props) {
   let { t } = useTranslation();
@@ -45,7 +48,7 @@ function DMSAdapter(props) {
   const [loadedVariables] = useGlobalState("variableDefinition");
   const [userName, setUserName] = useState();
   const [password, setPassword] = useState();
-  const [cabinet, setCabinet] = useState();
+  const [cabinet, setCabinet] = useState(null);
   const [disabledBeforeConnect, setDisabledBeforeConnect] = useState(true);
   const [associateDataClass, setAssociateDataClass] = useState(null);
   const [associateDataClassList, setAssociateDataClassList] = useState([]);
@@ -53,15 +56,14 @@ function DMSAdapter(props) {
   const [archieveDataClass, setArchieveDataClass] = useState();
   const [archieveDataClassList, setArchieveDataClassList] = useState([]);
   const [workItemCheck, setWorkItemCheck] = useState(
-    localLoadedActivityPropertyData.ActivityProperty.archiveInfo
-      .m_bDeleteWorkitemAudit
+    localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo
+      ?.m_bDeleteWorkitemAudit
   );
   const [showAssDataClassMapping, setShowAssDataClassMapping] = useState(false);
   const [folderNameInput, setFolderNameInput] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
-  const [docCheck, setDocCheck] = useState(false);
   const [selectedDocIndex, setSelectedDocIndex] = useState();
   const [tempData, setTempData] = useState({
     cabinet: "",
@@ -100,14 +102,33 @@ function DMSAdapter(props) {
   });
   const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
   const [showRedBorder, setShowRedBorder] = useState(false);
+  const [mapType, setMapType] = useState(null);
   const ActivityPropertyBoolean = useSelector(ActivityPropertyChangeValue);
+  const [selectedDoc, setSelectedDoc] = useState(null);
+  const [docCheck, setDocCheck] = useState({});
+  let defaultDocList = [
+    {
+      DocName: "Conversation",
+      DocTypeId: "-998",
+    },
+    {
+      DocName: "Audit Trail",
+      DocTypeId: "-999",
+    },
+  ];
+  const [docList, setDocList] = useState(defaultDocList);
+  const [disconnectBody, setDisconnectBody] = useState(null);
 
   useEffect(() => {
     if (saveCancelStatus.SaveClicked) {
       // selectedVariableList &&
       //   selectedVariableList.map((el) => {
-      if (userName.trim() == "" || password.trim() == "") {
-        // setErrorToast(true);
+      if (
+        localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo?.userName?.trim() ==
+          "" ||
+        localLoadedActivityPropertyData?.ActivityProperty?.DMSArchive?.Cabinet?.Password?.trim() ==
+          ""
+      ) {
         setShowRedBorder(true);
         dispatch(
           setActivityPropertyChange({
@@ -128,85 +149,107 @@ function DMSAdapter(props) {
 
   useEffect(() => {
     setUserName(
-      localLoadedActivityPropertyData.ActivityProperty.archiveInfo.userName
+      localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo?.userName
     );
-    setPassword(
-      // localLoadedActivityPropertyData.ActivityProperty.DMSArchive.Cabinet
-      //   .Password
-      "system123#"
-    );
+    let dropList = [];
+    // setPassword(
+    //   // localLoadedActivityPropertyData.ActivityProperty.DMSArchive.Cabinet
+    //   //   .Password
+    //   "system123#"
+    // );
     // setWorkItemCheck(
     //   localLoadedActivityPropertyData.ActivityProperty.archiveInfo
     // .m_bDeleteWorkitemAudit
     // );
 
-    setAssociateDataClassList((prev) => {
-      return [
-        ...prev,
-        {
-          dataDefName:
-            localLoadedActivityPropertyData.ActivityProperty.archiveInfo
-              .folderInfo.assoDataClsName,
-        },
-      ];
+    dropList.push({
+      dataDefName:
+        localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo
+          ?.folderInfo.assoDataClsName,
+      dataDefIndex:
+        localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo
+          ?.folderInfo.assoDataClsId,
     });
 
     setCabinet(
-      localLoadedActivityPropertyData.ActivityProperty.archiveInfo.cabinetName
+      localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo
+        ?.cabinetName
     );
     setFolderNameInput(
-      localLoadedActivityPropertyData.ActivityProperty.archiveInfo.folderInfo
-        .folderName
+      localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo?.folderInfo
+        ?.folderName
     );
     setAssociateDataClass(
-      localLoadedActivityPropertyData.ActivityProperty.archiveInfo.folderInfo
-        .assoDataClsName
+      localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo?.folderInfo
+        ?.assoDataClsName
     );
-  }, [props.cellActivityType, props.cellActivitySubType, props.cellID]);
 
-  // useEffect(() => {
-  //   if (ActivityPropertyBoolean.Archieve.hasError) {
-  //     setShowRedBorder(true);
-  //   } else {
-  //     setShowRedBorder(false);
-  //   }
-  // }, [ActivityPropertyBoolean.Archieve.hasError]);
+    let checkObj = {};
+    docList?.map((el) => {
+      checkObj = {
+        ...checkObj,
+        [el.DocTypeId]: { check: false, selectedVal: null },
+      };
+    });
+    localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo?.docTypeInfo?.docTypeDCMapList?.forEach(
+      (el) => {
+        checkObj = {
+          ...checkObj,
+          [el.docTypeId]: { check: true, selectedVal: el.assocDCId },
+        };
+        dropList.push({
+          dataDefName: el.assocDCName,
+          dataDefIndex: el.assocDCId,
+        });
+      }
+    );
+    if (disabledBeforeConnect) {
+      setAssociateDataClassList(dropList);
+    }
+    setDocCheck(checkObj);
+  }, [localLoadedActivityPropertyData]);
 
   const handleFolderSelection = (value) => {
-    setShowDropdown(false);
-    setTempData((prevState) => {
-      return { ...prevState, folderName: value.VariableName };
-    });
     setFolderNameInput((prev) => {
       return addConstantsToString(prev, value.VariableName);
     });
-
-    let jsonBody = {
-      processDefId: props.openProcessID,
-      activityId: props.cellID,
-      cabinetName:
-        localLoadedActivityPropertyData.ActivityProperty.archiveInfo
-          .cabinetName,
-      appServerIP: "127.0.0.1",
-      appServerPort: "8080",
-      appServerType: "JBossEAP",
-      userName: userName,
-      m_strAuthCred: password,
-      folderInfo: {
-        folderName: `${folderNameInput}&${value.VariableName}&`,
-      },
-    };
-
-    axios.post(SERVER_URL + FOLDERNAME_ARCHIEVE, jsonBody).then((res) => {
-      if (res.data.Status === 0) {
-      }
-    });
-
+    let temp = { ...localLoadedActivityPropertyData };
+    temp.ActivityProperty.archiveInfo.folderInfo.folderName =
+      addConstantsToString(folderNameInput, value.VariableName);
+    setlocalLoadedActivityPropertyData(temp);
     dispatch(
       setActivityPropertyChange({
         [propertiesLabel.archive]: { isModified: true, hasError: false },
       })
     );
+    // setShowDropdown(false);
+    // setTempData((prevState) => {
+    //   return { ...prevState, folderName: value.VariableName };
+    // });
+    // setFolderNameInput((prev) => {
+    //   return addConstantsToString(prev, value.VariableName);
+    // });
+
+    // let jsonBody = {
+    //   processDefId: props.openProcessID,
+    //   activityId: props.cellID,
+    //   cabinetName:
+    //     localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo
+    //       ?.cabinetName,
+    //   appServerIP: "127.0.0.1",
+    //   appServerPort: "8080",
+    //   appServerType: "JBossEAP",
+    //   userName: userName,
+    //   m_strAuthCred: password,
+    //   folderInfo: {
+    //     folderName: `${folderNameInput}&${value.VariableName}&`,
+    //   },
+    // };
+
+    // axios.post(SERVER_URL + FOLDERNAME_ARCHIEVE, jsonBody).then((res) => {
+    //   if (res.data.Status === 0) {
+    //   }
+    // });
   };
 
   const handleConnectClick = () => {
@@ -214,42 +257,73 @@ function DMSAdapter(props) {
       username: userName,
       authcode: password,
     };
+
     axios.post(SERVER_URL + ARCHIEVE_CONNECT, jsonBody).then((res) => {
       if (res.data.Status === 0) {
+        setDisconnectBody({ DMSAuthentication: res.data.DMSAuthentication });
+        var x = document.getElementById("trigger_laInsert_Btn");
+        if (x.innerHTML === "Connect") {
+          x.innerHTML = "Disconnect";
+        } else {
+          x.innerHTML = "Connect";
+        }
+        let temp = { ...localLoadedActivityPropertyData };
+        temp.ActivityProperty.archiveInfo.dmsAuthentication =
+          res.data.DMSAuthentication;
+        setlocalLoadedActivityPropertyData(temp);
         setDisabledBeforeConnect(false);
-        res.data.DataDefinitions.map((data) => {
-          setAssociateDataClassList((prev) => {
-            return [
-              ...prev,
-              {
-                dataDefName: data.DataDefName,
-                dataDefIndex: data.DataDefIndex,
-              },
-            ];
+        let arrList = [];
+        res?.data?.DataDefinitions?.map((data) => {
+          arrList.push({
+            dataDefName: data.DataDefName,
+            dataDefIndex: data.DataDefIndex,
           });
         });
+        setAssociateDataClassList(arrList);
       }
     });
   };
 
-  const handleAssDataClassMapping = (associateDataClass, type) => {
-    if (!associateDataClass && type == "associate") {
-      setShowRedBorder(true);
-      setAssociateDataClass(null);
-    } else if (!associateDataClass && type == "archeive") {
-      setShowRedBorder(true);
-      // setAssociateDataClass(null);
+  const handleDisconnectClick = () => {
+    axios.post(SERVER_URL + ARCHIEVE_DISCONNECT, disconnectBody).then(() => {
+      var x = document.getElementById("trigger_laInsert_Btn");
+      if (x.innerHTML === "Connect") {
+        x.innerHTML = "Disconnect";
+      } else {
+        x.innerHTML = "Connect";
+      }
+      console.log("SUCCESS");
+    });
+  };
+
+  const handleAssDataClassMapping = (associateDataClass, type, document) => {
+    setMapType(type);
+    // if (!associateDataClass && type == "associate") {
+    //   setShowRedBorder(true);
+    //   setAssociateDataClass(null);
+    // } else if (!associateDataClass && type == "archeive") {
+    //   setShowRedBorder(true);
+    //   // setAssociateDataClass(null);
+    // }
+
+    if (type == "archeive") {
+      setSelectedDoc(document);
     }
-    let dataDefIndex;
-    associateDataClassList &&
-      associateDataClassList.map((assDataClass) => {
-        if (
-          assDataClass.dataDefName == associateDataClass ||
-          assDataClass.dataDefIndex == associateDataClass
-        ) {
-          dataDefIndex = assDataClass.dataDefIndex;
-        }
-      });
+    console.log("ashii", associateDataClass);
+    let dataDefIndex =
+      type == "associate"
+        ? localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo
+            ?.folderInfo?.assoDataClsId
+        : associateDataClass;
+    // associateDataClassList &&
+    //   associateDataClassList.map((assDataClass) => {
+    //     if (
+    //       assDataClass.dataDefName == associateDataClass ||
+    //       assDataClass.dataDefIndex == associateDataClass
+    //     ) {
+    //       dataDefIndex = assDataClass.dataDefIndex;
+    //     }
+    //   });
     axios
       .get(SERVER_URL + ASSOCIATE_DATACLASS_MAPPING + `/${dataDefIndex}`)
       .then((res) => {
@@ -265,76 +339,187 @@ function DMSAdapter(props) {
       });
   };
 
-  const handleDocCheck = (index) => {
-    setDocCheck(!docCheck);
+  const handleDocCheck = (id, index) => {
+    let tempCheck = { ...docCheck };
+    tempCheck[id].check = !tempCheck[id].check;
+    if (!tempCheck[id].check) {
+      tempCheck[id].selectedVal = null;
+      let temp = { ...localLoadedActivityPropertyData };
+      let tempDocList = [
+        ...temp?.ActivityProperty?.archiveInfo?.docTypeInfo?.docTypeDCMapList,
+      ];
+      let newIdx = null;
+      tempDocList?.forEach((doc, idx) => {
+        if (doc.docTypeId === id) {
+          newIdx = idx;
+        }
+      });
+      temp.ActivityProperty.archiveInfo.docTypeInfo.docTypeDCMapList.splice(
+        newIdx,
+        1
+      );
+      setlocalLoadedActivityPropertyData(temp);
+    }
+    setDocCheck(tempCheck);
     setSelectedDocIndex(index);
   };
+
+  const handleCabinetChange = (value) => {
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.archieve]: { isModified: true, hasError: false },
+      })
+    );
+    let temp = { ...localLoadedActivityPropertyData };
+    temp.ActivityProperty.archiveInfo.cabinetName = value;
+    setlocalLoadedActivityPropertyData(temp);
+  };
+
+  const handlePasswordChange = (event) => {
+    let temp = { ...localLoadedActivityPropertyData };
+    temp.ActivityProperty.archiveInfo.authCred = event.target.value;
+    setlocalLoadedActivityPropertyData(temp);
+    setPassword(event.target.value);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.archive]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
+  };
+
+  const handleAssociateClassChange = (e) => {
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.archive]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
+    let tempIndex;
+    associateDataClassList.map((el) => {
+      if (el.dataDefName == e.target.value) {
+        tempIndex = el.dataDefIndex;
+      }
+    });
+    setAssociateDataClass(e.target.value);
+    let temp = { ...localLoadedActivityPropertyData };
+    temp.ActivityProperty.archiveInfo.folderInfo.assoDataClsName =
+      e.target.value;
+    temp.ActivityProperty.archiveInfo.folderInfo.assoDataClsId = tempIndex;
+    setlocalLoadedActivityPropertyData(temp);
+  };
+
+  const handleCheckBoxChange = (e) => {
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.archive]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
+    setWorkItemCheck(!workItemCheck);
+    let temp = { ...localLoadedActivityPropertyData };
+    temp.ActivityProperty.archiveInfo.m_bDeleteWorkitemAudit = !workItemCheck;
+    setlocalLoadedActivityPropertyData(temp);
+  };
+
+  const handleUserChange = (e) => {
+    setUserName(e.target.value);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.archive]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
+    let temp = { ...localLoadedActivityPropertyData };
+    temp.ActivityProperty.archiveInfo.userName = e.target.value;
+    setlocalLoadedActivityPropertyData(temp);
+  };
+
   return (
     <div className="archieveScreen">
       <div
         className={
           props.isDrawerExpanded
             ? "dropDownSelectLabel_expanded"
-            : "dropDownSelectLabel"
+            : "dropDownSelectLabelDMS"
         }
       >
         <p id="archieve_cabinet">Cabinet</p>
-        <Select
-          className={
-            props.isDrawerExpanded
-              ? "dropDownSelect_expanded"
-              : "dropDownSelect"
-          }
-          style={{ marginRight: "10px" }}
-          MenuProps={{
-            anchorOrigin: {
-              vertical: "bottom",
-              horizontal: "left",
-            },
-            transformOrigin: {
-              vertical: "top",
-              horizontal: "left",
-            },
-            getContentAnchorEl: null,
-          }}
-          value={cabinet}
-          onChange={(event) => setCabinet(event.target.value)}
-        >
-          <MenuItem className="statusSelect">
-            {
-              localLoadedActivityPropertyData.ActivityProperty.archiveInfo
-                .cabinetName
+        <div>
+          <Select
+            className={
+              props.isDrawerExpanded
+                ? "dropDownSelect_expandeddms"
+                : "dropDownSelect"
             }
-          </MenuItem>
-          );
-        </Select>
+            style={{
+              marginRight: "10px",
+              marginLeft: props.isDrawerExpanded ? "200px" : null,
+            }}
+            MenuProps={{
+              anchorOrigin: {
+                vertical: "bottom",
+                horizontal: "left",
+              },
+              transformOrigin: {
+                vertical: "top",
+                horizontal: "left",
+              },
+              getContentAnchorEl: null,
+            }}
+            value={cabinet}
+            onChange={(event) => handleCabinetChange(event.target.value)}
+          >
+            {localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo?.m_strCabList?.map(
+              (el) => {
+                return (
+                  <MenuItem
+                    className="statusSelect"
+                    value={el}
+                    style={{ fontSize: "12px" }}
+                  >
+                    {el}
+                  </MenuItem>
+                );
+              }
+            )}
+          </Select>
+        </div>
       </div>
       <div
         className={
           props.isDrawerExpanded
             ? "dropDownSelectLabel_expanded"
-            : "dropDownSelectLabel"
+            : "dropDownSelectLabelDMS"
         }
       >
         <p id="archieve_userName">UserName</p>
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <span
+          style={{
+            color: "red",
+            padding: "0.35rem",
+            marginLeft: "-0.375rem",
+            marginTop: "-0.4rem",
+          }}
+        >
+          *
+        </span>
+        <div style={{ marginLeft: props.isDrawerExpanded ? "167px" : null }}>
           <input
             value={userName}
             className="userNameInput"
             onChange={(event) => {
-              setUserName(event.target.value);
-              dispatch(
-                setActivityPropertyChange({
-                  [propertiesLabel.archive]: {
-                    isModified: true,
-                    hasError: false,
-                  },
-                })
-              );
+              handleUserChange(event);
             }}
             style={{
-              position: props.isDrawerExpanded ? "absolute" : null,
-              left: props.isDrawerExpanded ? "45%" : null,
               border:
                 !userName && showRedBorder == true ? "1px solid red" : null,
             }}
@@ -350,29 +535,29 @@ function DMSAdapter(props) {
         className={
           props.isDrawerExpanded
             ? "dropDownSelectLabel_expanded"
-            : "dropDownSelectLabel"
+            : "dropDownSelectLabelDMS"
         }
       >
         <p id="archieve_password">Password</p>
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <span
+          style={{
+            color: "red",
+            padding: "0.35rem",
+            marginLeft: "-0.375rem",
+            marginTop: "-0.4rem",
+          }}
+        >
+          *
+        </span>
+        <div style={{ marginLeft: props.isDrawerExpanded ? "174px" : null }}>
           <input
             value={password}
             className="passwordInput"
             type="password"
             onChange={(event) => {
-              setPassword(event.target.value);
-              dispatch(
-                setActivityPropertyChange({
-                  [propertiesLabel.archive]: {
-                    isModified: true,
-                    hasError: false,
-                  },
-                })
-              );
+              handlePasswordChange(event);
             }}
             style={{
-              position: props.isDrawerExpanded ? "absolute" : null,
-              left: props.isDrawerExpanded ? "45%" : null,
               border:
                 !password && showRedBorder == true ? "1px solid red" : null,
             }}
@@ -385,16 +570,31 @@ function DMSAdapter(props) {
         </div>
       </div>
       <button
-        className="triggerButton propertiesAddButton_connect"
-        onClick={handleConnectClick}
-        // disabled={readOnlyProcess}
         id="trigger_laInsert_Btn"
+        className="triggerButton propertiesAddButton_connect"
+        onClick={
+          document.getElementById("trigger_laInsert_Btn")?.innerHTML ==
+          "Connect"
+            ? handleConnectClick
+            : handleDisconnectClick
+        }
+        // disabled={readOnlyProcess}
       >
         {"Connect"}
       </button>
       <div style={{ display: "flex" }}>
         <p id="archieve_folderName">FolderName</p>
-        <div style={{ marginLeft: props.isDrawerExpanded ? "490px" : "36px" }}>
+        <span
+          style={{
+            color: "red",
+            padding: "0.35rem",
+            marginLeft: "-0.375rem",
+            marginTop: "-0.4rem",
+          }}
+        >
+          *
+        </span>
+        <div style={{ marginLeft: props.isDrawerExpanded ? "157px" : "36px" }}>
           <ClickAwayListener onClickAway={() => setShowDropdown(false)}>
             <div className="relative inlineBlock">
               <button
@@ -423,6 +623,12 @@ function DMSAdapter(props) {
               value={folderNameInput}
               onChange={(event) => setFolderNameInput(event.target.value)}
               className="argStringBodyInput"
+              style={{
+                border:
+                  !folderNameInput && showRedBorder == true
+                    ? "1px solid red"
+                    : null,
+              }}
             />
           </div>
         </div>
@@ -431,7 +637,7 @@ function DMSAdapter(props) {
         className={
           props.isDrawerExpanded
             ? "dropDownSelectLabel_expanded"
-            : "dropDownSelectLabel"
+            : "dropDownSelectLabelDMS"
         }
       >
         <p id="archieve_dataClass">Associate Data Class</p>
@@ -439,15 +645,16 @@ function DMSAdapter(props) {
           <Select
             className={
               props.isDrawerExpanded
-                ? "dropDownSelect_expanded"
+                ? "dropDownSelect_expandeddms"
                 : "dropDownSelect"
             }
-            style={{
-              border:
-                !associateDataClass && showRedBorder == true
-                  ? "1px solid red"
-                  : null,
-            }}
+            style={{ marginLeft: props.isDrawerExpanded ? "119px" : null }}
+            // style={{
+            //   border:
+            //     !associateDataClass && showRedBorder == true
+            //       ? "1px solid red"
+            //       : null,
+            // }}
             MenuProps={{
               anchorOrigin: {
                 vertical: "bottom",
@@ -461,26 +668,26 @@ function DMSAdapter(props) {
             }}
             disabled={disabledBeforeConnect}
             value={associateDataClass}
-            onChange={(e) => setAssociateDataClass(e.target.value)}
+            onChange={(e) => handleAssociateClassChange(e)}
           >
-            <div>SHIVANI</div>
             {associateDataClassList &&
               associateDataClassList.map((dataClass) => {
                 return (
                   <MenuItem
                     className="statusSelect"
                     value={dataClass.dataDefName}
+                    style={{fontSize:'12px'}}
                   >
                     {dataClass.dataDefName}
                   </MenuItem>
                 );
               })}
           </Select>
-          {!associateDataClass && showRedBorder == true ? (
+          {/* {!associateDataClass && showRedBorder == true ? (
             <span style={{ color: "red", fontSize: "10px" }}>
               Please select Data Class
             </span>
-          ) : null}
+          ) : null} */}
         </div>
         <CheckCircleIcon
           style={{ marginRight: "5px", marginTop: "5px", cursor: "pointer" }}
@@ -494,9 +701,10 @@ function DMSAdapter(props) {
             style={{
               opacity: "1",
               width: "23.5vw",
-              height: "auto",
+              overflow: "scroll",
+              height: "358px",
               top: "15%",
-              padding: "4%",
+              padding: "1%",
               left: "9%",
               position: "absolute",
               marginLeft: "10px",
@@ -506,11 +714,14 @@ function DMSAdapter(props) {
               <FieldMapping
                 userName={userName}
                 password={password}
+                mapType={mapType}
+                selectedDoc={selectedDoc}
                 folderNameInput={folderNameInput}
                 associateDataClass={associateDataClass}
                 associateDataClassList={associateDataClassList}
                 assDataClassMappingList={assDataClassMappingList}
                 setShowAssDataClassMapping={setShowAssDataClassMapping}
+                docCheckList={docCheck}
               />
             }
           ></Modal>
@@ -527,7 +738,7 @@ function DMSAdapter(props) {
           control={
             <Checkbox
               checked={workItemCheck}
-              onChange={() => setWorkItemCheck(!workItemCheck)}
+              onChange={(e) => handleCheckBoxChange(e)}
               size="small"
               style={{
                 fontSize: "10px",
@@ -544,76 +755,103 @@ function DMSAdapter(props) {
         <p id="archieve_docTypes">{t("ArchiveDocumentTypes")}</p>
         <table className="table">
           <tr>
-            <th>
+            <th style={{ width: "10vw" }}>
               <Checkbox
                 size="small"
+                disabled={disabledBeforeConnect}
                 //   checked={props.docTypes.setAllCreate_Email}
               />
             </th>
-            <th style={{ display: "flex", alignItems: "center" }}>
+            <th
+              style={{ display: "flex", alignItems: "center", width: "30vw" }}
+            >
               {"Document(s)"}
             </th>
-            <th>{"Associated Class"}</th>
-            <th> </th>
+            <th style={{ width: "50vw" }}>{"Associated Class"}</th>
+            <th style={{ width: "10vw" }}> </th>
           </tr>
-          {loadedProcessData.value.DocumentTypeList.map((value, index) => {
+          {docList?.map((value, index) => {
             return (
               <tr>
-                <td>
+                <td style={{ width: "10vw" }}>
                   {" "}
                   <Checkbox
                     size="small"
-                    check={docCheck}
-                    onChange={() => handleDocCheck(index)}
+                    checked={
+                      docCheck[value.DocTypeId]?.check
+                        ? docCheck[value.DocTypeId]?.check
+                        : false
+                    }
+                    onChange={() => handleDocCheck(value.DocTypeId, index)}
+                    disabled={disabledBeforeConnect}
                   />
                 </td>
-                <td>{value.DocName}</td>
-                <Select
-                  className={
-                    props.isDrawerExpanded
-                      ? "dropDownSelect_expanded"
-                      : "dropDownSelect"
-                  }
-                  MenuProps={{
-                    anchorOrigin: {
-                      vertical: "bottom",
-                      horizontal: "left",
-                    },
-                    transformOrigin: {
-                      vertical: "top",
-                      horizontal: "left",
-                    },
-                    getContentAnchorEl: null,
-                  }}
-                  disabled={
-                    selectedDocIndex
-                      ? selectedDocIndex == index && !docCheck
-                      : !docCheck
-                  }
-                  value={archieveDataClass}
-                  onChange={(event) => setArchieveDataClass(event.target.value)}
-                  style={{
-                    border:
-                      !archieveDataClass && showRedBorder == true
-                        ? "1px solid red"
-                        : null,
-                  }}
-                >
-                  {associateDataClassList.map((dataClass) => {
-                    return (
-                      <MenuItem
-                        className="statusSelect"
-                        value={dataClass.dataDefIndex}
-                      >
-                        {dataClass.dataDefName}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
+                <td style={{ width: "30vw" }}>{value.DocName}</td>
+                <td style={{ width: "50vw" }}>
+                  <Select
+                    className={
+                      props.isDrawerExpanded
+                        ? "dropDownSelect_expandeddms"
+                        : "dropDownSelect"
+                    }
+                    MenuProps={{
+                      anchorOrigin: {
+                        vertical: "bottom",
+                        horizontal: "left",
+                      },
+                      transformOrigin: {
+                        vertical: "top",
+                        horizontal: "left",
+                      },
+                      getContentAnchorEl: null,
+                    }}
+                    disabled={
+                      selectedDocIndex
+                        ? selectedDocIndex == index &&
+                          !docCheck[value.DocTypeId]?.check
+                        : !docCheck[value.DocTypeId]?.check
+                    }
+                    value={
+                      docCheck[value.DocTypeId]?.selectedVal
+                        ? docCheck[value.DocTypeId]?.selectedVal
+                        : ""
+                    }
+                    onChange={(event) => {
+                      setArchieveDataClass(event.target.value);
+                      let tempCheck = { ...docCheck };
+                      tempCheck[value.DocTypeId].selectedVal =
+                        event.target.value;
+                      setDocCheck(tempCheck);
+                    }}
+                    style={{
+                      border:
+                        !archieveDataClass && showRedBorder == true
+                          ? "1px solid red"
+                          : null,
+                    }}
+                  >
+                    {associateDataClassList?.map((dataClass) => {
+                      return (
+                        <MenuItem
+                          className="statusSelect"
+                          value={dataClass.dataDefIndex}
+                          style={{ fontSize: "12px" }}
+                        >
+                          {dataClass.dataDefName}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </td>
                 <td
                   onClick={() =>
-                    handleAssDataClassMapping(archieveDataClass, "archeive")
+                    handleAssDataClassMapping(
+                      docCheck[value.DocTypeId]?.selectedVal,
+                      "archeive",
+                      value
+                    )
                   }
+                  style={{ width: "10vw" }}
                 >
                   <CheckCircleIcon
                     style={{

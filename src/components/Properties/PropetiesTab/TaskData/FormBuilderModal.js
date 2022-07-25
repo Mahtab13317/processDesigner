@@ -111,7 +111,7 @@ const Content = (props) => {
         templateId: props.cellID,
 
         component: "app",
-        processDefId: props.localLoadedProcessData.ProcessDefId,
+        //processDefId: props.localLoadedProcessData.ProcessDefId,
 
         formName: "Taskform Test",
 

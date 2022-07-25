@@ -8,24 +8,28 @@ import {
 } from "../../../../Constants/appConstants";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
+import { store, useGlobalState } from "state-pool";
 
 function DeleteDraftProcess(props) {
   let { t } = useTranslation();
-
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData, setlocalLoadedProcessData] =
+    useGlobalState(loadedProcessData);
   const history = useHistory();
   const deleteProcess = () => {
     let postBody = {
       m_strProjectId: props.projectId,
       m_strProcessDefId: props.processDefId,
       allVersion: "N",
+      m_strProcessType: localLoadedProcessData.ProcessType,
     };
 
     axios
       .post(SERVER_URL + ENDPOINT_DELETE_PROCESS, postBody)
       .then((response) => {
-         if (response.data.Status === 0) {
-        history.push("/");
-         }
+        if (response.data.Status === 0) {
+          history.push("/");
+        }
       })
       .catch((err) => console.log(err));
   };
@@ -39,9 +43,9 @@ function DeleteDraftProcess(props) {
     axios
       .post(SERVER_URL + ENDPOINT_DELETE_PROCESS, postBody)
       .then((response) => {
-         if (response.data.Status === 0) {
-        history.push("/");
-         }
+        if (response.data.Status === 0) {
+          history.push("/");
+        }
       })
       .catch((err) => console.log(err));
   };
@@ -60,7 +64,7 @@ function DeleteDraftProcess(props) {
       </p>
       <div className={styles.noteDiv}>
         <p>
-          {props.versionList && props.versionList.length > 1
+          {props.versionList.length > 1
             ? t("noRecoveryNote")
             : t("noRecoveryPermanent")}
         </p>
@@ -73,7 +77,7 @@ function DeleteDraftProcess(props) {
         >
           {t("cancel")}
         </Button>
-        {props.versionList && props.versionList.length > 1 ? (
+        {props.versionList.length > 1 ? (
           <React.Fragment>
             <Button
               className={styles.outlinedButton}

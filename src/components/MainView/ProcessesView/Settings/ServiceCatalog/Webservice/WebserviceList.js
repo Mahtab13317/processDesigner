@@ -12,7 +12,14 @@ function WebserviceList(props) {
   return (
     <div
       className={styles.webS_ListDiv}
-      style={{ height: scope === GLOBAL_SCOPE ? "26rem" : "24rem" }}
+      style={{
+        height:
+          scope === GLOBAL_SCOPE
+            ? "26rem"
+            : props.callLocation === "webServicePropTab"
+            ? "19rem"
+            : "24rem",
+      }}
     >
       {list?.map((item) => {
         return (

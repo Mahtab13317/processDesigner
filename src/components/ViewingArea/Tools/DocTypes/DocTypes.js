@@ -562,7 +562,7 @@ function DocType(props) {
     setDocData(newState);
   };
 
-  const updateSetAllChecks = (check_type, doc_idx, activity_id, checkvalue) => {
+  const updateSetAllChecks = (check_type, doc_idx, checkvalue) => {
     // CASE:3 - Giving a particular right (eg: Modify) for a Single Doc, for all Activities
     let localActivity;
 
@@ -596,7 +596,12 @@ function DocType(props) {
                   actId: 0,
                   add: check_type == "Add" ? "Y" : localActivity.Add,
                   delete: check_type == "Delete" ? "Y" : localActivity.Delete,
-                  view: check_type == "View" ? "Y" : localActivity.View,
+                  view:
+                    check_type == "View"
+                      ? "Y"
+                      : check_type == "Modify"
+                      ? "Y"
+                      : localActivity.View,
                   modify: check_type == "Modify" ? "Y" : localActivity.Modify,
                   download:
                     check_type == "Download" ? "Y" : localActivity.Download,
@@ -619,7 +624,12 @@ function DocType(props) {
                   add: check_type == "Add" ? "N" : localActivity.Add,
                   delete: check_type == "Delete" ? "N" : localActivity.Delete,
                   view: check_type == "View" ? "N" : localActivity.View,
-                  modify: check_type == "Modify" ? "N" : localActivity.Modify,
+                  modify:
+                    check_type == "Modify"
+                      ? "N"
+                      : check_type == "View"
+                      ? "N"
+                      : localActivity.Modify,
                   download:
                     check_type == "Download" ? "N" : localActivity.Download,
                   print: check_type == "Print" ? "N" : localActivity.Print,

@@ -75,7 +75,10 @@ function Collect(props) {
 
   //create distributeworkstep dropdown
   useEffect(() => {
-    openProcessData.loadedData?.MileStones.forEach((mileStone) => {
+    let tempOpenProcess = JSON.parse(
+      JSON.stringify(openProcessData.loadedData)
+    );
+    tempOpenProcess?.MileStones.forEach((mileStone) => {
       mileStone.Activities.forEach((activity, index) => {
         if (!isParallelCollect) {
           if (activity.ActivityType === 5 && activity.ActivitySubType === 1) {
@@ -99,7 +102,10 @@ function Collect(props) {
   //create primaryworkstep dropdown
   useEffect(() => {
     function createPrimaryWorkstepActivityList() {
-      openProcessData.loadedData?.MileStones.forEach((mileStone) => {
+      let tempOpenProcess = JSON.parse(
+        JSON.stringify(openProcessData.loadedData)
+      );
+      tempOpenProcess?.MileStones.forEach((mileStone) => {
         mileStone.Activities.forEach((activity, index) => {
           if (activity["Target WorkStep"][0] == props.cellName) {
             setPrimaryActivityList((prevState) => [...prevState, activity]);

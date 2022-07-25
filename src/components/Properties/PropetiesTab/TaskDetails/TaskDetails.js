@@ -36,6 +36,8 @@ import {
   AddPlusIcon,
   DeleteIcon,
 } from "../../../../utility/AllImages/AllImages.js";
+import { setProcessTaskType } from "../../../../redux-store/slices/ProcessTaskTypeSlice.js";
+
 const makeFieldInputs = (value) => {
   return {
     value: value,
@@ -165,6 +167,9 @@ function TaskDetails(props) {
   const [selectedRegisteredProcessType, setSelectedRegisteredProcessType] =
     useState(null);
 
+  const [selectedRegisteredProcessID, setSelectedRegisteredProcessID] =
+    useState(null);
+
   useEffect(() => {
     axios.get(SERVER_URL + `/getprocesslist/R/-1`).then((res) => {
       console.log("MEGHALCHECKING", res.data);
@@ -175,15 +180,21 @@ function TaskDetails(props) {
   }, []);
 
   useEffect(() => {
+    console.log(
+      "PARROT",
+      registeredProcessList,
+      localLoadedActivityPropertyData?.m_objPMSubProcess?.importedProcessName
+    );
     registeredProcessList?.map((list) => {
       if (
         list.ProcessName ==
         localLoadedActivityPropertyData?.m_objPMSubProcess?.importedProcessName
       ) {
-        setSelectedRegisteredProcess(list.ProcessName);
+        // setSelectedRegisteredProcess(list.ProcessName);
+        setSelectedRegisteredProcessID(list.ProcessDefId);
       }
     });
-  }, [registeredProcessList]);
+  }, [selectedRegisteredProcess, localLoadedActivityPropertyData]);
 
   useEffect(() => {
     if (localLoadedActivityPropertyData) {
@@ -269,7 +280,7 @@ function TaskDetails(props) {
   }, [saveCancelStatus.SaveClicked, saveCancelStatus.CancelClicked]);
 
   const handleChange = (e) => {
-    const tempPropertyDataObj = { ...localLoadedActivityPropertyData };
+    let tempPropertyDataObj = { ...localLoadedActivityPropertyData };
 
     const { name, value, checked } = e.target;
     switch (name) {
@@ -507,22 +518,72 @@ function TaskDetails(props) {
   };
 
   const handleChangeInRegisteredProcess = (e) => {
-    console.log('localLoadedActivityPropertyData', localLoadedActivityPropertyData);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.taskDetails]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
     setSelectedRegisteredProcess(e.target.value);
-    let temp = {...localLoadedActivityPropertyData};
+    let temp = { ...localLoadedActivityPropertyData };
     temp.m_objPMSubProcess.importedProcessName = e.target.value;
-    temp.m_objPMSubProcess.fwdVarMapping=[];
-    temp.m_objPMSubProcess.fwdDocMapping=[];
+    registeredProcessList?.map((list) => {
+      if (list.ProcessName == e.target.value) {
+        // setSelectedRegisteredProcess(list.ProcessName);
+        // setSelectedRegisteredProcessID(list.ProcessDefId);
+        temp.m_objPMSubProcess.importedProcessDefId = list.ProcessDefId;
+      }
+    });
+    temp.m_objPMSubProcess.fwdVarMapping = [];
+    temp.m_objPMSubProcess.fwdDocMapping = [];
     setlocalLoadedActivityPropertyData(temp);
   };
 
   const handleChangeInRegisteredProcessType = (e) => {
-    if (e.target.value != "U") {
-      localStorage.setItem("registeredProcessType", null);
-    } else {
-      localStorage.setItem("registeredProcessType", e.target.value);
-    }
+    console.log('PROCESSTYPE', e.target.value);
+dispatch(setProcessTaskType(e.target.value))
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.taskDetails]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
     setSelectedRegisteredProcessType(e.target.value);
+    let temp = { ...localLoadedActivityPropertyData };
+    temp.taskGenPropInfo.m_strSubPrcType = e.target.value;
+    setlocalLoadedActivityPropertyData(temp);
+  };
+
+  const handleChangeGoal = (event) => {
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.taskDetails]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
+    let temp = { ...localLoadedActivityPropertyData };
+    temp.taskGenPropInfo.m_strGoal = event.target.value;
+    setlocalLoadedActivityPropertyData(temp);
+  };
+
+  const handleChangeInstructions = (event) => {
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.taskDetails]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
+    let temp = { ...localLoadedActivityPropertyData };
+    temp.taskGenPropInfo.m_strInstructions = event.target.value;
+    setlocalLoadedActivityPropertyData(temp);
   };
 
   return (
@@ -558,14 +619,20 @@ function TaskDetails(props) {
                     </Typography>
                   </Grid>
                   {/* --------------------------------------------- */}
-                  <div style={{ display: "flex", flexDirection: "column" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                    }}
+                  >
                     <p style={{ fontSize: "12px" }}>Type</p>
                     <Select
                       className="selectTwo_callActivity"
                       onChange={(e) => handleChangeInRegisteredProcessType(e)}
                       style={{
-                        position: "absolute",
-                        right: props.isDrawerExpanded ? "26px" : "25px",
+                        // position: "absolute",
+                        // right: props.isDrawerExpanded ? "26px" : "25px",
                         width: props.isDrawerExpanded ? "280px" : "135px",
                         height: "28px",
                         background: "#ffffff 0% 0% no-repeat padding-box",
@@ -588,23 +655,25 @@ function TaskDetails(props) {
                         getContentAnchorEl: null,
                       }}
                     >
-                      <MenuItem className="InputPairDiv_CommonList" value="S">
+                      <MenuItem className="InputPairDiv_CommonList" value="S" style={{fontSize:'12px'}}>
                         Synchronous
                       </MenuItem>
-                      <MenuItem className="InputPairDiv_CommonList" value="A">
+                      <MenuItem className="InputPairDiv_CommonList" value="A" style={{fontSize:'12px'}}>
                         Asynchronous
                       </MenuItem>
-                      <MenuItem className="InputPairDiv_CommonList" value="U">
+                      <MenuItem className="InputPairDiv_CommonList" value="U" style={{fontSize:'12px'}}>
                         User Monitored Synchronous
                       </MenuItem>
                     </Select>
                   </div>
+                  {/* --------------------------------------- */}
                   <div
                     style={{
                       display: "flex",
-                      flexDirection: "column",
+                      flexDirection: "row",
                       marginTop: "20px",
                       marginBottom: "5px",
+                      justifyContent: "space-between",
                     }}
                   >
                     <p style={{ fontSize: "12px" }}>
@@ -614,8 +683,8 @@ function TaskDetails(props) {
                       className="selectTwo_callActivity"
                       onChange={(e) => handleChangeInRegisteredProcess(e)}
                       style={{
-                        position: "absolute",
-                        right: props.isDrawerExpanded ? "26px" : "25px",
+                        // position: "absolute",
+                        // right: props.isDrawerExpanded ? "26px" : "25px",
                         width: props.isDrawerExpanded ? "280px" : "135px",
                         height: "28px",
                         background: "#ffffff 0% 0% no-repeat padding-box",
@@ -643,6 +712,7 @@ function TaskDetails(props) {
                           <MenuItem
                             className="InputPairDiv_CommonList"
                             value={list.ProcessName}
+                            style={{fontSize:'12px'}}
                           >
                             {list.ProcessName}
                           </MenuItem>
@@ -689,7 +759,7 @@ function TaskDetails(props) {
                         localLoadedActivityPropertyData?.taskGenPropInfo
                           ?.m_strGoal
                       }*/
-                      onChange={handleChange}
+                      onChange={(e) => handleChangeGoal(e)}
                       error={goal.error}
                       helperText={goal.helperText}
                     />
@@ -701,7 +771,7 @@ function TaskDetails(props) {
                       required={true}
                       label={t("instructions")}
                       value={instructions.value}
-                      onChange={handleChange}
+                      onChange={(e) => handleChangeInstructions(e)}
                       error={instructions.error}
                       helperText={instructions.helperText}
                     />

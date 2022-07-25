@@ -4,7 +4,10 @@ import { Droppable } from "react-beautiful-dnd";
 import { ClickAwayListener } from "@material-ui/core";
 import "./Activities.css";
 import Activities from "./Activities";
-import { PROCESSTYPE_LOCAL } from "../../../../../../Constants/appConstants";
+import {
+  PROCESSTYPE_LOCAL,
+  userRightsMenuNames,
+} from "../../../../../../Constants/appConstants";
 import {
   onDragEnter,
   onDragLeave,
@@ -23,12 +26,22 @@ import {
 import { getActivityQueueObj } from "../../../../../../utility/abstarctView/getActivityQueueObj";
 import { AddEmbeddedActivity } from "../../../../../../utility/CommonAPICall/AddEmbeddedActivity";
 import { getActivityProps } from "../../../../../../utility/abstarctView/getActivityProps";
+import { UserRightsValue } from "../../../../../../redux-store/slices/UserRightsSlice";
+import { useSelector } from "react-redux";
+import { getMenuNameFlag } from "../../../../../../utility/UserRightsFunctions";
 
 function ActivityView(props) {
   let { t } = useTranslation();
+  const userRightsValue = useSelector(UserRightsValue);
   const { embeddedActivities, setEmbeddedActivities, caseEnabled } = props;
   let iActivityId = 10;
   let iSubActivityId = 3;
+
+  // Boolean that decides whether add activity button will be visible or not.
+  const addActivityRightsFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.addActivity
+  );
 
   // Function to add a new activity in a milestone and
   // to add a new card with an activity type that has been dropped on the add workstep button.
@@ -298,17 +311,19 @@ function ActivityView(props) {
                 </div>
               )}
             </Droppable>
-            <div
-              className="newActivityDiv"
-              // class="addNewWorkstepButton"
-              style={{
-                display: props.processType !== PROCESSTYPE_LOCAL ? "none" : "",
-              }}
-              onClick={() => addNewActivity()}
-            >
-              {t("milestone.newStep")}
-            </div>
-
+            {addActivityRightsFlag && (
+              <div
+                className="newActivityDiv"
+                // class="addNewWorkstepButton"
+                style={{
+                  display:
+                    props.processType !== PROCESSTYPE_LOCAL ? "none" : "",
+                }}
+                onClick={() => addNewActivity()}
+              >
+                {t("milestone.newStep")}
+              </div>
+            )}
             <div style={{ height: "20vh" }}></div>
           </div>
         </React.Fragment>

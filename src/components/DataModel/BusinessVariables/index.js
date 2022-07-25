@@ -6,6 +6,7 @@ import {
   OPTION_USER_DEFINED,
   OPTION_SYSTEM_DEFINED,
   PROCESSTYPE_LOCAL,
+  userRightsMenuNames,
 } from "../../../Constants/appConstants";
 import arabicStyles from "./ArabicStyles.module.css";
 import SystemDefined from "./SystemDefined";
@@ -24,6 +25,9 @@ import UserDefined from "./UserDefined";
 import MicroFrontendContainer from "../../MicroFrontendContainer";
 import axios from "axios";
 import { getVariableTypeFromMDMType } from "../../../utility/ProcessSettings/Triggers/getVariableType";
+import { UserRightsValue } from "../../../redux-store/slices/UserRightsSlice";
+import { useSelector } from "react-redux";
+import { getMenuNameFlag } from "../../../utility/UserRightsFunctions";
 
 function BusinessVariables(props) {
   const { openProcessType, tableName, openProcessID } = props;
@@ -32,6 +36,7 @@ function BusinessVariables(props) {
     (e) => e.VariableScope === "M" || e.VariableScope === "S"
   )?.length;
   let { t } = useTranslation();
+  const userRightsValue = useSelector(UserRightsValue);
   const direction = `${t("HTML_DIR")}`;
   const [expanded, setExpanded] = useState(2);
   const [primaryInputStrip, setPrimaryInputStrip] = useState(false);
@@ -47,6 +52,18 @@ function BusinessVariables(props) {
   const [loadExternalVariablesMFbool, setloadExternalVariablesMFbool] =
     useState(false);
 
+  // Boolean that decides whether add queue variables button will be visible or not.
+  const queueVariablesFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.queueVariables
+  );
+
+  // Boolean that decides whether extended variables accordion can be opened or not.
+  const extendedVariablesFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.externalVariable
+  );
+
   // Function that runs when the component mounts.
   useEffect(() => {
     if (openProcessType !== PROCESSTYPE_LOCAL) {
@@ -56,7 +73,6 @@ function BusinessVariables(props) {
 
   // Function that handles change for accordion.
   const handleChange = (panel) => (event, newExpanded) => {
-    console.log("mmmmmmmmmmm", newExpanded);
     setloadExternalVariablesMFbool(newExpanded);
     setExpanded(newExpanded ? panel : false);
     if (expanded === 0 && primaryInputStrip === true) {
@@ -87,9 +103,18 @@ function BusinessVariables(props) {
   };
 
   // function that tells the length of userdefine
-  const totalUserDefineVariable = (val) => {
-    setLengthUserDefine(val);
+  const getExtVarCount = (varList) => {
+    let temp = [];
+    varList.forEach((_var) => {
+      if (_var.ExtObjectId === "1" && _var.VariableScope === "I") {
+        temp.push(_var);
+      }
+    });
+    setLengthUserDefine(temp.length);
   };
+  useEffect(() => {
+    getExtVarCount(localLoadedProcessData.Variable);
+  }, []);
 
   const callbackFunction = async (data) => {
     data.id = data.id + "";
@@ -121,7 +146,7 @@ function BusinessVariables(props) {
       )
         delete data?.constraints.Unique;
     }
-    console.log("kkkkkkkkkkkkkk", data);
+
     const formData = new FormData();
     let mystring = JSON.stringify(data);
     let myBlob = new Blob([mystring], {
@@ -138,32 +163,14 @@ function BusinessVariables(props) {
         // type: "application/json",
       },
     });
-    if (response?.status === 200) {
+    if (response?.data.Status === 0) {
       let temp = JSON.parse(JSON.stringify(localLoadedProcessData));
-
-      data.columns.forEach((_var) => {
-        if (_var.id !== 1 && _var.id !== 2) {
-          temp.Variable.push({
-            DefaultValue: "",
-            ExtObjectId: "1",
-            SystemDefinedName: _var.name,
-            Unbounded: "N",
-            VarFieldId: "0",
-            VarPrecision: "0",
-            VariableId: "",
-            VariableLength: _var.length + "",
-            VariableName: _var.alias,
-            VariableScope: "I",
-            VariableType: getVariableTypeFromMDMType(_var.type + ""),
-          });
-        }
-      });
-      const unique = [
-        ...new Map(
-          temp.Variable.map((item) => [item.SystemDefinedName, item])
-        ).values(),
-      ];
-      temp.Variable = [...unique];
+      temp.DataObjectId = data.id;
+      temp.DataObjectAliasName = data.alias_name;
+      temp.DataObjectName = data.name;
+      temp.Variable = [];
+      temp.Variable = [...response.data.Variable];
+      getExtVarCount([...response.data.Variable]);
       setlocalLoadedProcessData(temp);
     }
   };
@@ -243,7 +250,7 @@ function BusinessVariables(props) {
             </Typography>
             <Divider className={styles.accordianHeaderDivider} />
           </div>
-          {!primaryInputStrip && !isProcessReadOnly ? (
+          {queueVariablesFlag && !primaryInputStrip && !isProcessReadOnly && (
             <p
               id="primary_variables_add_variable_button"
               className={styles.accordionHeaderButton}
@@ -251,7 +258,7 @@ function BusinessVariables(props) {
             >
               {t("add").toUpperCase()}
             </p>
-          ) : null}
+          )}
         </AccordionSummaryStyled>
         <AccordionDetails className={styles.accordianContent}>
           <PrimaryVariables
@@ -267,7 +274,7 @@ function BusinessVariables(props) {
       <Accordion
         id="business_variables_second_accordion"
         expanded={expanded === OPTION_USER_DEFINED}
-        onChange={handleChange(OPTION_USER_DEFINED)}
+        onChange={extendedVariablesFlag && handleChange(OPTION_USER_DEFINED)}
         className={classes.MuiAccordionroot}
       >
         <AccordionSummaryStyled>

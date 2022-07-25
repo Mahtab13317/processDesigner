@@ -23,76 +23,94 @@ const StyledTableCell = withStyles((theme) => ({
 
 const StyledTableRow = withStyles((theme) => ({
   root: {
-    "&:nth-of-type(odd)": {
-      backgroundColor: theme.palette.action.hover,
+    "&:nth-of-type(even)": {
+      backgroundColor: "#fff",
     },
   },
 }))(TableRow);
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   table: {
-    // width: props.isDrawerExpanded? '100%': 324,
     height: 40,
+    borderSpacing: "0 0.125rem",
   },
   tableContainer: {
-    padding: 5,
+    padding: "0.5rem 1vw",
+    height: 270,
   },
   tableRow: {
     height: 40,
   },
   tableHeader: {
     fontWeight: 600,
-    fontSize: 14,
+    fontSize: 13,
+    backgroundColor: "#f8f8f8",
+    borderTop: "1px solid #f8f8f8",
+    borderBottom: "1px solid #f8f8f8",
+    borderRadius: "0.125rem",
+    color: "black",
   },
   tableBodyCell: {
     fontSize: 12,
   },
-});
+}));
 
 export default function CustomizedTables(props) {
   const classes = useStyles();
-  console.log("associations", props.associations);
   const mappingHandler = (method) => {
     props.setShowMapping(true);
     props.setMethodClicked(method);
-    console.log("method", method);
   };
 
   return (
     <TableContainer component={Paper} className={classes.tableContainer}>
       <Table
-        className={classes.table}
-        style={{ width: props.isDrawerExpanded ? "100%" : "324px" }}
+        className={`${classes.table} ${
+          props.isDrawerExpanded
+            ? "webServicePropertiestableEx"
+            : "webServicePropertiestableCo"
+        } webServicePropertiestable`}
+        style={{ width: "100%" }}
         aria-label="customized table"
+        stickyHeader
       >
-        <TableBody>
-        <StyledTableRow className={classes.tableRow}>
-            <StyledTableCell className={classes.tableHeader}>
+        <TableHead>
+          <StyledTableRow className={classes.tableRow}>
+            <StyledTableCell
+              className={classes.tableHeader}
+              style={{ width: "95vw" }}
+            >
               Method
             </StyledTableCell>
-            {/* <StyledTableCell className={classes.tableHeader} align="right">
-              Method
-            </StyledTableCell> */}
-            <StyledTableCell></StyledTableCell>
-            <StyledTableCell align="right"></StyledTableCell>
+            <StyledTableCell
+              className={classes.tableHeader}
+              style={{ width: "2.5vw" }}
+            ></StyledTableCell>
+            <StyledTableCell
+              className={classes.tableHeader}
+              align="right"
+              style={{ width: "2.5vw" }}
+            ></StyledTableCell>
           </StyledTableRow>
-          {/* --------- */}
+        </TableHead>
+        <TableBody className="associatedTemplateDiv">
           {props.associations.map((row) => (
             <StyledTableRow key={row.method} className={classes.tableRow}>
               {row.method ? (
                 <StyledTableCell
                   className={classes.tableBodyCell}
-                  component="th"
-                  scope="row"
+                  style={{ width: "95vw" }}
                 >
                   {row.method}
                 </StyledTableCell>
               ) : null}
-              <StyledTableCell align="right">
+              <StyledTableCell align="right" style={{ width: "2.5vw" }}>
                 <SwapHorizIcon onClick={() => mappingHandler(row)} />
               </StyledTableCell>
-              <StyledTableCell align="right">
-                <DeleteIcon />
+              <StyledTableCell align="right" style={{ width: "2.5vw" }}>
+                <DeleteIcon
+                  onClick={() => props.handleAssociationDelete(row)}
+                />
               </StyledTableCell>
             </StyledTableRow>
           ))}

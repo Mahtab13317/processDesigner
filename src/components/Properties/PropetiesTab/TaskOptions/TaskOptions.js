@@ -106,9 +106,8 @@ function TaskOptions(props) {
   const localActivityPropertyData = store.getState("activityPropertyData");
   const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
   const openProcessData = useSelector(OpenProcessSliceValue);
-  const localLoadedProcessData = JSON.parse(
-    JSON.stringify(openProcessData.loadedData)
-  );
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [
     localLoadedActivityPropertyData,
     setlocalLoadedActivityPropertyData,
@@ -154,19 +153,18 @@ function TaskOptions(props) {
 
   // Function that runs when the component loads.
   useEffect(() => {
-    if (localLoadedProcessData) {
+    if (openProcessData.loadedData) {
+      let temp = JSON.parse(JSON.stringify(openProcessData.loadedData));
       let triggerList = [];
-      localLoadedProcessData &&
-        localLoadedProcessData.TriggerList &&
-        localLoadedProcessData.TriggerList.forEach((element) => {
-          triggerList.push({
-            name: element.TriggerName,
-            value: element.TriggerId,
-          });
+      temp?.TriggerList?.forEach((element) => {
+        triggerList.push({
+          name: element.TriggerName,
+          value: element.TriggerId,
         });
+      });
       setTriggersList(triggerList);
     }
-  }, [localLoadedProcessData]);
+  }, [openProcessData.loadedData]);
 
   useEffect(() => {
     if (localLoadedActivityPropertyData) {

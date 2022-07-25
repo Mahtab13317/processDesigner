@@ -15,16 +15,19 @@ function DocumentTemplateMapping(props) {
   const direction = `${t("HTML_DIR")}`;
   let { template, setUpdatedTemplate } = props;
   const openProcessData = useSelector(OpenProcessSliceValue);
-  const localLoadedProcessData = JSON.parse(
-    JSON.stringify(openProcessData.loadedData)
-  );
   const [document, setDocument] = useState(null);
+  const [docListOptions, setDocListOptions] = useState([]);
 
   useEffect(() => {
     if (template.DocType) {
       setDocument(template.DocType);
     }
   }, [template]);
+
+  useEffect(() => {
+    let temp = JSON.parse(JSON.stringify(openProcessData.loadedData));
+    setDocListOptions(temp?.DocumentTypeList);
+  }, [openProcessData.loadedData]);
 
   return (
     <div className={styles.mainDiv}>
@@ -106,8 +109,8 @@ function DocumentTemplateMapping(props) {
                 });
               }}
             >
-              {localLoadedProcessData?.DocumentTypeList?.length > 0 ? (
-                localLoadedProcessData?.DocumentTypeList.map((ele) => {
+              {docListOptions?.length > 0 ? (
+                docListOptions.map((ele) => {
                   return (
                     <MenuItem
                       value={ele.DocName}

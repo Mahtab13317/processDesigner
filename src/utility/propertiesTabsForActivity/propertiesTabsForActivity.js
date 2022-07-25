@@ -106,14 +106,14 @@ const ForwardMapping_Variables = React.lazy(() =>
 );
 const ForwardMapping_Variables_ProcessTask = React.lazy(() =>
   import(
-    "../../components/Properties/PropetiesTab/ProcessTask/forwardMVariables"
+    "../../components/Properties/PropetiesTab/ProcessTask/MappingFiles/forwardMVariables"
   )
 );
 const ForwardMapping_DocTypes = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/callActivity/forwardMDoc")
 );
 const ForwardMapping_DocTypes_ProcessTask = React.lazy(() =>
-  import("../../components/Properties/PropetiesTab/ProcessTask/forwardMDoc")
+  import("../../components/Properties/PropetiesTab/ProcessTask/MappingFiles/forwardMDocs")
 );
 
 const ReverseMapping_Variables = React.lazy(() =>
@@ -124,7 +124,7 @@ const ReverseMapping_Variables = React.lazy(() =>
 
 const ReverseMapping_Variables_ProcessTask = React.lazy(() =>
   import(
-    "../../components/Properties/PropetiesTab/ProcessTask/reverseMVariables"
+    "../../components/Properties/PropetiesTab/ProcessTask/MappingFiles/reverseMVariables"
   )
 );
 
@@ -133,7 +133,7 @@ const ReverseMDoc = React.lazy(() =>
 );
 
 const ReverseMDoc_ProcessTask = React.lazy(() =>
-  import("../../components/Properties/PropetiesTab/ProcessTask/reverseMDoc")
+  import("../../components/Properties/PropetiesTab/ProcessTask/MappingFiles/reverseMDocs")
 );
 
 const Stream = React.lazy(() =>

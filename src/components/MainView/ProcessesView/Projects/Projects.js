@@ -10,12 +10,15 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import OnHoverList from "./onHoverProcesslistPerProject";
 import NoProjectScreen from "../Processes/NoProjectsOrProcesses/NoProjectScreen";
 import SortButton from "../../../../UI/SortingModal/Modal.js";
-import { connect } from "react-redux";
+import { connect, useSelector } from "react-redux";
 import Tooltip from "@material-ui/core/Tooltip";
 import FilterImage from "../../../../assets/ProcessView/PT_Sorting.svg";
 import { tileProcess } from "../../../../utility/HomeProcessView/tileProcess.js";
 import Modal from "../../../../UI/Modal/Modal.js";
 import ProjectCreation from "./ProjectCreation.js";
+import { getMenuNameFlag } from "../../../../utility/UserRightsFunctions";
+import { userRightsMenuNames } from "../../../../Constants/appConstants";
+import { UserRightsValue } from "../../../../redux-store/slices/UserRightsSlice";
 
 let useStyles = makeStyles({
   root: {
@@ -32,6 +35,7 @@ let useStyles = makeStyles({
 });
 
 function Projects(props) {
+  const userRightsValue = useSelector(UserRightsValue);
   let selectedTileFromHome = props.selectedTile;
   const classes = useStyles();
   let projectHeadRef = useRef(null);
@@ -46,6 +50,12 @@ function Projects(props) {
   const [showModal, setShowModal] = useState(null);
   // const [bshowDesc, setbshowDesc] = useState(false);
   // const [modalHeight, setmodalHeight] = useState({ height: "40vh" });
+
+  // Boolean that decides whether create project button will be visible or not.
+  const createProjectRightsFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.createProject
+  );
 
   const CreateProjectHandler = () => {
     setShowModal(true);
@@ -225,12 +235,14 @@ function Projects(props) {
             {t("projectList.ProjectHeading")}{" "}
             {`(${props.projectList ? props.projectList.length : 0})`}
           </h4>
-          <h1
-            style={{ color: "#0072C6" }}
-            onClick={() => CreateProjectHandler()}
-          >
-            +
-          </h1>
+          {createProjectRightsFlag && (
+            <h1
+              style={{ color: "#0072C6" }}
+              onClick={() => CreateProjectHandler()}
+            >
+              +
+            </h1>
+          )}
         </div>
         <div className="searchBarNFilter">
           <div style={{ marginRight: "0.5rem" }}>

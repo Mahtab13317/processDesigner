@@ -4,6 +4,10 @@ import styles from "./index.module.css";
 import arabicStyles from "./ArabicStyles.module.css";
 import { RTL_DIRECTION } from "../../Constants/appConstants";
 import {
+  dataInputs,
+  getDropdownOptions,
+} from "../../components/DataModel/BusinessVariables/PrimaryVariables/TypeAndFieldMapping";
+import {
   Checkbox,
   InputBase,
   Select,
@@ -29,6 +33,10 @@ function TypeAndFieldMapping(props) {
   const [variableTypeOptions, setVariableTypeOptions] = useState([]);
   const [isComplexTypeSelected, setIsComplexTypeSelected] = useState(false);
   const {
+    varData,
+    microProps,
+    modifyVariableData,
+    setmicroProps,
     bForDisabled,
     autofocusInput,
     componentStyles,
@@ -46,7 +54,7 @@ function TypeAndFieldMapping(props) {
     // arrayType,
     // handleArrayType,
     localLoadedProcessData,
-    isNonEditable,
+    isEditable,
     // isComplexTypeSelected,
   } = props;
 
@@ -61,6 +69,16 @@ function TypeAndFieldMapping(props) {
     },
     getContentAnchorEl: null,
   };
+  const [DataFieldsOptions, setDataFieldsOptions] = useState([]);
+
+  useEffect(() => {
+    console.log("ccccccccccccccc", dataInputs);
+    dataInputs.forEach((d) => {
+      if (d.variableType === variableType) {
+        setDataFieldsOptions(d.dataFields);
+      }
+    });
+  }, [variableType]);
 
   useEffect(() => {
     let complexVariableTypes = [];
@@ -91,6 +109,8 @@ function TypeAndFieldMapping(props) {
     setVariableTypeOptions(finalVariableTypes);
   }, []);
 
+  const [open, setopen] = useState(false);
+
   useEffect(() => {
     if (variableType.includes("C") === true) {
       setIsComplexTypeSelected(true);
@@ -99,76 +119,137 @@ function TypeAndFieldMapping(props) {
     }
   }, [variableType]);
 
-  const variableTypeOnChange = (event, complexDataFields) => {};
-  const [anchorEl, setAnchorEl] = React.useState(null);
-
-  const handleTypeChange = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
   const handleClose = () => {
-    setAnchorEl(null);
+    setAnchorElMF(null);
+    setopen(false);
   };
   const [anchorElMF, setAnchorElMF] = React.useState(null);
 
   const handleTypeChangeMF = (event) => {
-    setAnchorElMF(event.currentTarget);
+    setopen(true);
+    setAnchorElMF(event?.currentTarget);
   };
 
-  const handleCloseMF = () => {
-    setAnchorElMF(null);
-  };
-
-  const callbackMethod = async (data) => {
-    let varData = {
-      variableType: "11",
-      variableName: aliasName,
-      unbounded: props.arrayType ? "Y" : "N",
-    };
-    let modData = { ...data, ...varData };
-
-    handleVariableType("11", modData);
-    //}
-  };
   const microAppsHandler = (e, param) => {
-    handleTypeChangeMF(e);
+    let temp = { ...microProps };
+    if (param === "Y" || param === "N") {
+      temp.use_existing = param;
+    } else if (param === "data_source" || param === "system") {
+      temp.upload = param; // data_source/system
 
-    let microProps = {
-      source: "PD_CMP", //PD_EXT
-      data_object_alias_name: localLoadedProcessData.DataObjectAliasName, // Mandatory in props in PD_EXT
-      data_object_name: localLoadedProcessData.DataObjectName, // Mandatory in props in PD_EXT
-      data_object_id: localLoadedProcessData.DataObjectId,
-      // default_category_name: "a_puneet",
-      object_type: "P", //AP/P/C
-      object_id: localLoadedProcessData.ProcessDefId,
-      // object_name: "a_puneet",
-      parent_do: [
-        {
-          name: "WFINSTRUMENTTABLE",
-          rel_do_id: "-1",
-          relations: [
-            {
-              mapped_do_field: "ProcessInstanceId",
-              base_do_field: "mapid",
-              base_do_field_id: 0,
-            },
-          ],
-          status: 4,
-        },
-      ],
-      default_data_fields: [
+      temp.use_existing = "N";
+    } else if (param === "template") {
+      temp.new_template = true;
+      temp.Component = "TemplateMF";
+      temp.use_existing = "N";
+      temp.Renderer = "renderTemplateMF";
+    } else if (param === "primitiveArray") {
+      temp.source = "PD_ARR";
+      temp.Component = "DataModelDesignerViewer";
+      temp.Renderer = "renderDataModelDesignerViewer";
+      let tempArr = [
         {
           name: "mapid",
           alias: "mapid",
           type: "1",
-          key_field: true,
+          key_field: false,
           id: 0,
         },
-      ],
+        {
+          name: aliasName.split(" ").join("_"),
+          alias: aliasName,
+          type: "1",
+          key_field: false,
+        },
+        {
+          name: "insertionorderid",
+          alias: "insertionorderid",
+          type: "3",
+          key_field: true,
+          auto_generated_enabled: true,
+          identity: true,
+        },
+      ];
+      temp.default_data_fields = [];
+      temp.default_data_fields = [...tempArr];
+      temp.arr_type_do = "Y";
+    }
+    if (props.arrayType) {
+      let tempArr = [
+        {
+          name: "mapid",
+          alias: "mapid",
+          type: "1",
+          key_field: false,
+          id: 0,
+        },
 
-      //"1" = String, "2" = Integer, "3" = Long, "4" = Float,"5" =Date and Time,"6" = Binary Data, "7" = Currency, "8" = Boolean,"9" = ShortDate, "10" = Ntext, "11" = Text, "12" = Nvarchar,"13" = Phone Number,"14" =Email.Binary,
+        {
+          name: "insertionorderid",
+          alias: "insertionorderid",
+          type: "3",
+          key_field: true,
+          auto_generated_enabled: true,
+          identity: true,
+        },
+      ];
+      temp.default_data_fields = [];
+      temp.default_data_fields = [...tempArr];
+      temp.arr_type_do = "Y";
+    }
+    // else {
+    //   microProps.unbounded = "N";
+    // }
 
-      ContainerId: "dataObjectContainer",
+    // setmicroProps(temp);
+
+    window.MdmDataModel(temp);
+    handleClose();
+  };
+
+  const modifyMethod = (data) => {
+    modifyVariableData(data);
+  };
+
+  const openModifyMF = () => {
+    let microMFProps = {
+      source: "PD_CMP", //PD_EXT
+      template_id: "",
+      // "use_existing":"Y",
+      data_object_alias_name: varData?.dataField.split("_").join(" "), // Mandatory in props in PD_EXT
+      data_object_name: varData?.dataField, // Mandatory in props in PD_EXT
+      data_object_id: +varData?.dataObjectId,
+
+      object_type: "P", //AP/P/C
+
+      // parent_do: [
+      //   {
+      //     name: "WFINSTRUMENTTABLE",
+      //     rel_do_id: "-1",
+      //     relations: [
+      //       {
+      //         mapped_do_field: "ProcessInstanceID",
+      //         base_do_field_id: 1,
+      //         base_do_field: "itemindex",
+      //       },
+      //     ],
+      //     status: 4,
+      //   },
+      // ],
+      // default_data_fields: [
+      //   //PD_EXT    // Mandatory
+      //   {
+      //     name: "itemindex",
+      //     id: 1,
+      //     alias: "itemindex",
+      //     type: "2",
+      //     key_field: true,
+      //     auto_generated_enabled: true,
+      //     identity: true,
+      //   },
+      // ],
+
+      ContainerId: "dataModifyContainer",
       Module: "MDM",
 
       Component: "DataModelListViewer",
@@ -177,43 +258,14 @@ function TypeAndFieldMapping(props) {
 
       Renderer: "renderDataModelListViewer",
 
-      Callback: callbackMethod,
+      Callback: modifyMethod,
 
       // auto_generate_table: true,
 
       data_types: [1, 2, 3, 4, 5, 8, 9, 10],
     };
-    if (param === "Y" || param === "N") {
-      microProps.use_existing = param;
-    } else if (param === "data_source" || param === "system") {
-      microProps.upload = param; // data_source/system
-
-      microProps.use_existing = "N";
-    } else if (param === "template") {
-      microProps.new_template = true;
-      microProps.Component = "TemplateMF";
-      microProps.use_existing = "N";
-      microProps.Renderer = "renderTemplateMF";
-    }
-    if (props.arrayType) {
-      microProps.default_data_fields.push({
-        name: "insertionorderid",
-        alias: "insertionorderid",
-        type: "3",
-        key_field: false,
-        auto_generated_enabled: true,
-        identity: true,
-      });
-      microProps.arr_type_do = "Y";
-      microProps.unbounded = "Y";
-    } else {
-      microProps.unbounded = "N";
-    }
-
-    console.log("vvvvvvvvvvvvvv", microProps);
-
-    window.MdmDataModel(microProps);
-    handleClose();
+    console.log("mmmmmmmmmmmmmmmicro", microMFProps);
+    window.MdmDataModel(microMFProps);
   };
 
   const getVariableTypeFromVarNumber = (num) => {
@@ -224,11 +276,6 @@ function TypeAndFieldMapping(props) {
     return temp;
   };
 
-  const open = Boolean(anchorEl);
-  const id = open ? "simple-popover" : undefined;
-  const openMF = Boolean(anchorElMF);
-  const idMF = openMF ? "simple-popover" : undefined;
-
   const complexOptions = [
     { paramType: "N", label: t("createDataObject") },
     { paramType: "Y", label: t("copyAvailableDataObject") },
@@ -237,16 +284,25 @@ function TypeAndFieldMapping(props) {
   ];
 
   return (
-    <div className={componentStyles.mainDiv}>
+    <div
+      className={componentStyles.mainDiv}
+      style={{ background: isEditable ? "#0072C61A" : "" }}
+    >
       <div
         style={{
           display: "none",
         }}
         id="dataObjectContainer"
       ></div>
+      <div
+        style={{
+          display: "none",
+        }}
+        id="dataModifyContainer"
+      ></div>
       <InputBase
         disabled={bForDisabled}
-        readOnly={isNonEditable}
+        readOnly={props?.newField ? !props.newField : !isEditable}
         id="type_field_mapping_alias_name_input"
         className={
           direction === RTL_DIRECTION
@@ -277,14 +333,22 @@ function TypeAndFieldMapping(props) {
             ? arabicStyles.menuItemStyles
             : styles.menuItemStyles
         }
-        onClick={!isNonEditable && handleTypeChange}
+        onClick={(e) => {
+          if (isEditable) {
+            if (
+              varData?.hasOwnProperty("dataObjectId") &&
+              varData?.dataObjectId !== ""
+            ) {
+              openModifyMF();
+            } else handleTypeChangeMF(e);
+          }
+        }}
       >
         {getVariableTypeFromVarNumber(variableType)}
       </div>
       <Popover
-        id={id}
         open={open}
-        anchorEl={anchorEl}
+        anchorEl={anchorElMF}
         onClose={handleClose}
         anchorOrigin={{
           vertical: "bottom",
@@ -376,7 +440,7 @@ function TypeAndFieldMapping(props) {
           </div>
         </div>
       </Popover>
-      {variableType === "11" ? (
+      {variableType === "11" || (variableType !== 11 && props.arrayType) ? (
         <div
           style={{
             width: "174px",
@@ -401,7 +465,7 @@ function TypeAndFieldMapping(props) {
         </div>
       ) : (
         <Select
-          disabled={bForDisabled || isComplexTypeSelected || isNonEditable}
+          disabled={bForDisabled || isComplexTypeSelected || !isEditable}
           id="type_field_mapping_data_type_dropdown"
           className={
             direction === RTL_DIRECTION
@@ -414,28 +478,29 @@ function TypeAndFieldMapping(props) {
           onChange={handleDataType}
         >
           {/* {selectDataTypeOption} */}
-          {dataTypeOptions &&
-            dataTypeOptions.map((element) => {
-              return (
-                <MenuItem
-                  className={
-                    direction === RTL_DIRECTION
-                      ? arabicStyles.menuItemStyles
-                      : styles.menuItemStyles
-                  }
-                  value={element + ""}
-                >
-                  {element}
-                </MenuItem>
-              );
-            })}
+          {dataTypeOptions?.map((element) => {
+            return (
+              <MenuItem
+                className={
+                  direction === RTL_DIRECTION
+                    ? arabicStyles.menuItemStyles
+                    : styles.menuItemStyles
+                }
+                value={element + ""}
+              >
+                {element}
+              </MenuItem>
+            );
+          })}
         </Select>
       )}
 
       <Checkbox
         id="type_field_mapping_array_type_checkbox"
         disabled={
-          (aliasName.trim().length === 0 && bForDisabled) || isNonEditable
+          (aliasName.trim().length === 0 && bForDisabled) ||
+          !isEditable ||
+          variableType === "11"
         }
         className={
           direction === RTL_DIRECTION
@@ -443,10 +508,19 @@ function TypeAndFieldMapping(props) {
             : componentStyles.arrayCheckboxLtr
         }
         checked={props.arrayType}
-        onChange={(e) => props.setarrayType(e)}
+        onChange={(e) => {
+          if (
+            variableType !== "11" &&
+            variableType !== "" &&
+            e.target.checked
+          ) {
+            microAppsHandler(e, "primitiveArray");
+          }
+          props.setarrayType(e);
+        }}
         size="small"
       />
-      <MoreHorizOutlinedIcon
+      {/* <MoreHorizOutlinedIcon
         id="type_field_mapping_more_options"
         className={
           direction === RTL_DIRECTION
@@ -454,8 +528,8 @@ function TypeAndFieldMapping(props) {
             : componentStyles.moreOptionsLtr
         }
         fontSize="small"
-        onClick={() => !isNonEditable && setShowPropertiesModal(true)}
-      />
+        onClick={() => isEditable && setShowPropertiesModal(true)}
+      /> */}
       {showPropertiesModal ? (
         <Modal
           show={showPropertiesModal}

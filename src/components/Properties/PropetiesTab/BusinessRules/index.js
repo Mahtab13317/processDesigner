@@ -1,24 +1,14 @@
-// #BugID - 111907 (Archive Tab Bug)
-//Date:6th July 2022
-// #BugDescription - Changes different parametrs and function to populate the Forwarding mapping and Reverse Mapping.
+// #BugID - 112016(Save changes button is not working)
+//Date:7th July 2022
+// #BugDescription - Handled the checks for submitting the save changes button.
 
 import React, { useState, useEffect } from "react";
-import CommonTabHeader from "../commonTabHeader";
-import { connect, useDispatch, useSelector } from "react-redux";
-import { getActivityProps } from "../../../../utility/abstarctView/getActivityProps";
+import { connect, useDispatch } from "react-redux";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import CustomizedDropdown from "../../../../UI/Components_With_ErrrorHandling/Dropdown";
-import {
-  FormControl,
-  FormHelperText,
-  Button,
-  Box,
-  TextField,
-} from "@material-ui/core";
-import Grid from "@material-ui/core/Grid";
-import Select from "@material-ui/core/Select";
+import { FormControl, FormHelperText, Button, Box } from "@material-ui/core";
 import MenuItem from "@material-ui/core/MenuItem";
 import Tab from "@material-ui/core/Tab";
 import TabContext from "@material-ui/lab/TabContext";
@@ -26,7 +16,6 @@ import TabList from "@material-ui/lab/TabList";
 import TabPanel from "@material-ui/lab/TabPanel";
 import { useTranslation } from "react-i18next";
 import {
-  activityType,
   activityType_label,
   ENDPOINT_GET_RULE_MEMBER_LIST,
   ENDPOINT_REST_PACKAGE,
@@ -35,6 +24,8 @@ import {
   ENDPOINT_RULE_PACKAGE_VERSION,
   SERVER_URL,
   ENDPOINT_SOAP_PACKAGE,
+  propertiesLabel,
+  COMPLEX_VARTYPE,
 } from "../../../../Constants/appConstants";
 import "./index.css";
 import Table from "@material-ui/core/Table";
@@ -51,8 +42,6 @@ import axios from "axios";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import Toast from "../../../../UI/ErrorToast";
 
-
-
 function BusinessRules(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
@@ -60,64 +49,106 @@ function BusinessRules(props) {
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
-
   const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcessData, setLocalLoadedProcessData] =
-    useGlobalState(loadedProcessData);
-
-  const [selectedActivityIcon, setSelectedActivityIcon] = useState();
-
-  useEffect(() => {
-    let activityProps = getActivityProps(
-      props.cellActivityType,
-      props.cellActivitySubType
-    );
-    setSelectedActivityIcon(activityProps[0]);
-  }, [props.cellActivityType, props.cellActivitySubType, props.cellID]);
-
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [ruleFlow, setRuleFlow] = useState({ id: "", name: "" });
   const [ruleVersion, setRuleVersion] = useState("");
   const [rulePackage, setRulePackage] = useState({ id: "", name: "" });
   const [packageVersion, setPackageVersion] = useState("");
   const [mapping, setMapping] = useState(false);
-
   const [ruleFlowItems, setRuleFlowItems] = useState([]);
-
   const [rulePackageItems, setrulePackageItems] = useState([]);
-
   const [flowVersionItems, setRuleVersionItem] = useState([]);
   const [packageVersionItems, setPackageVersionItem] = useState([]);
-
   const [associateList, setAssociateList] = useState([]);
-
   const [mappedSelectedRule, setMappedSelectedRule] = useState("");
-
   const [serviceType, setServiceType] = useState(
     localLoadedActivityPropertyData?.ActivityProperty?.m_objBusinessRule?.m_bIsRestService.toString()
   );
-
   const [isError, setIsError] = useState(false);
   const [errorMsg, setErrorMsg] = useState({ severity: "", msg: "" });
+  const timeslot = [];
+  const [defaultTime, setDefaultTime] = useState("10");
+  const [brtProcess, setBrtProcess] = useState([]);
+  const [brtFwdInputs, setFwdBrtInputs] = useState([]);
+  const [revInputs, setRevInputs] = useState([]);
+  const [brtRevInputs, setBrtRevInputs] = useState([]);
+  const [value, setValue] = React.useState("1");
 
+  for (let i = 0; i < 100; i++) {
+    timeslot.push(i);
+  }
+
+  useEffect(() => {
+    const mappedData =
+      localLoadedActivityPropertyData?.ActivityProperty?.m_objBusinessRule
+        .m_arrAssocBRMSRuleSetList;
+    axios
+      .get(
+        SERVER_URL +
+          ENDPOINT_REST_PACKAGE +
+          `?restService=${serviceType == "true"}`
+      )
+      .then((response) => {
+        setRuleFlowItems(
+          response.data?.m_arrBRMSRuleFlowList?.map((item) => ({
+            id: item.m_strRSetId,
+            value: item.m_strRSetName,
+          }))
+        );
+        setrulePackageItems(
+          response?.data.m_arrBRMSRuleSetList?.map((item) => ({
+            id: item.m_strRSetId,
+            value: item.m_strRSetName,
+          }))
+        );
+        setAssociateList(
+          mappedData.map((item, i) => ({
+            id: getId(
+              item.m_strRSetName,
+              item.m_strRuleType == "F"
+                ? response.data.m_arrBRMSRuleFlowList
+                : response.data.m_arrBRMSRuleSetList
+            ),
+            name: item.m_strRSetName,
+            version: item.m_strRSetVersion,
+            type: item.m_strRuleType,
+            time: item.m_strTimeOutInterval,
+            mapInfo: item.m_arrMappingInfo,
+          }))
+        );
+        setRuleFlow({ id: "", name: "" });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+    let tempVarList = [];
+    localLoadedProcessData?.Variable?.forEach((_var) => {
+      if (_var.VariableType === COMPLEX_VARTYPE) {
+        let tempList = getComplex(_var);
+        tempList?.forEach((el) => {
+          tempVarList.push(el);
+        });
+      } else {
+        tempVarList.push(_var);
+      }
+    });
+    setBrtProcess(tempVarList);
+  }, []);
 
   //function for data association
-
   function associateData(type) {
-
-
-
     let data;
 
-
     if (type == "ruleflow") {
-
-
       if (ruleFlow.id == "" && ruleFlow.name == "") {
-
-        setIsError(true)
-        setErrorMsg({ msg: t("toolbox.businessRules.errormsg1"), severity: "error" })
+        setIsError(true);
+        setErrorMsg({
+          msg: t("toolbox.businessRules.errormsg1"),
+          severity: "error",
+        });
         return false;
-
       }
 
       data = {
@@ -128,13 +159,13 @@ function BusinessRules(props) {
         time: "10",
         mapInfo: null,
       };
-
-
     } else {
       if (rulePackage.id == "" && rulePackage.name == "") {
-
-        setIsError(true)
-        setErrorMsg({ msg: t("toolbox.businessRules.errormsg2"), severity: "error" })
+        setIsError(true);
+        setErrorMsg({
+          msg: t("toolbox.businessRules.errormsg2"),
+          severity: "error",
+        });
         return false;
       }
 
@@ -155,15 +186,21 @@ function BusinessRules(props) {
       }
     });
     if (isStack == true) {
-
-      setIsError(true)
-      setErrorMsg({ msg: `This ${data.name} and version ${data.version} are already mapped`, severity: "error" })
+      setIsError(true);
+      setErrorMsg({
+        msg: `This ${data.name} and version ${data.version} are already mapped`,
+        severity: "error",
+      });
       return false;
     } else {
       setAssociateList([...associateList, data]);
 
-      let tempLocalState = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
-      let lastIndex = localLoadedActivityPropertyData?.ActivityProperty?.m_objBusinessRule?.m_arrAssocBRMSRuleSetList.length;
+      let tempLocalState = JSON.parse(
+        JSON.stringify(localLoadedActivityPropertyData)
+      );
+      let lastIndex =
+        localLoadedActivityPropertyData?.ActivityProperty?.m_objBusinessRule
+          ?.m_arrAssocBRMSRuleSetList.length;
       const nameVersion = data.name + "(" + data.version + ")";
 
       const activityData = {
@@ -179,112 +216,51 @@ function BusinessRules(props) {
         m_strVersionTitle: nameVersion,
       };
 
+      tempLocalState?.ActivityProperty?.m_objBusinessRule?.m_arrAssocBRMSRuleSetList.push(
+        activityData
+      );
 
-
-      tempLocalState?.ActivityProperty?.m_objBusinessRule?.m_arrAssocBRMSRuleSetList.push(activityData)
-
-
-
-
-
-
-
-
-
-
-
-
-      setlocalLoadedActivityPropertyData(tempLocalState)
-
+      setlocalLoadedActivityPropertyData(tempLocalState);
     }
   }
 
-  const timeslot = [];
-  const [defaultTime, setDefaultTime] = useState("10");
-
-  const [brtProcess, setBrtProcess] = useState([]);
-
-  for (let i = 0; i < 100; i++) {
-    timeslot.push(i);
-  }
-
-  useEffect(() => {
-    const mappedData =
-      localLoadedActivityPropertyData?.ActivityProperty?.m_objBusinessRule
-        .m_arrAssocBRMSRuleSetList;
-
-    if (serviceType == "true") {
-      var url = SERVER_URL + ENDPOINT_REST_PACKAGE + "?restService=true";
-    } else {
-      var url = SERVER_URL + ENDPOINT_SOAP_PACKAGE + "?restService=false";
-    }
-
-    axios
-      .get(url)
-      .then(function (response) {
-
-        setRuleFlowItems(
-          response.data?.m_arrBRMSRuleFlowList?.map((item) => ({
-            id: item.m_strRSetId,
-            value: item.m_strRSetName,
-          }))
-        );
-        setrulePackageItems(
-          response?.data.m_arrBRMSRuleSetList?.map((item) => ({
-            id: item.m_strRSetId,
-            value: item.m_strRSetName,
-          }))
-        );
-
-        setAssociateList(
-          mappedData.map((item, i) => ({
-            id: getId(
-              item.m_strRSetName,
-              item.m_strRuleType == "F"
-                ? response.data.m_arrBRMSRuleFlowList
-                : response.data.m_arrBRMSRuleSetList
-            ),
-            name: item.m_strRSetName,
-            version: item.m_strRSetVersion,
-            type: item.m_strRuleType,
-            time: item.m_strTimeOutInterval,
-            mapInfo: item.m_arrMappingInfo,
-          }))
-        );
-
-
-        setRuleFlow({ id: "", name: "" });
-
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-
-
-    setBrtProcess(
-      localLoadedProcessData?.Variable?.map((item) => ({
-        DefaultValue: item.DefaultValue,
-        ExtObjectId: item.ExtObjectId,
-        SystemDefinedName: item.SystemDefinedName,
-        Unbounded: item.Unbounded,
-        VarFieldId: item.VarFieldId,
-        VarPrecision: item.VarPrecision,
-        VariableId: item.VariableId,
-        VariableLength: item.VariableLength,
-        VariableName: item.VariableName,
-        VariableScope: item.VariableScope,
-        VariableType: item.VariableType,
-      }))
-    );
-  }, []);
-
-
-
-  const [brtFwdInputs, setFwdBrtInputs] = useState([]);
-  const [brtRevInputs, setRevBrtInputs] = useState([]);
+  const getComplex = (variable) => {
+    let varList = [];
+    let varRelationMapArr = variable?.RelationAndMapping
+      ? variable.RelationAndMapping
+      : variable["Relation&Mapping"];
+    varRelationMapArr?.Mappings?.Mapping?.forEach((el) => {
+      if (el.VariableType === "11") {
+        let tempList = getComplex(el);
+        tempList.forEach((ell) => {
+          varList.push({
+            ...ell,
+            SystemDefinedName: `${variable.VariableName}.${ell.VariableName}`,
+            VariableName: `${variable.VariableName}.${ell.VariableName}`,
+          });
+        });
+      } else {
+        varList.push({
+          DefaultValue: "",
+          ExtObjectId: el.ExtObjectId ? el.ExtObjectId : variable.ExtObjectId,
+          SystemDefinedName: `${variable.VariableName}.${el.VariableName}`,
+          Unbounded: el.Unbounded,
+          VarFieldId: el.VarFieldId,
+          VarPrecision: el.VarPrecision,
+          VariableId: el.VariableId,
+          VariableLength: el.VariableLength,
+          VariableName: `${variable.VariableName}.${el.VariableName}`,
+          VariableScope: el.VariableScope
+            ? el.VariableScope
+            : variable.VariableScope,
+          VariableType: el.VariableType,
+        });
+      }
+    });
+    return varList;
+  };
 
   function mapData(id, version, type, mapInfo, time, name) {
-
     setMappedSelectedRule(name);
     setMapping(true);
     setDefaultTime(time);
@@ -307,66 +283,103 @@ function BusinessRules(props) {
     axios
       .post(SERVER_URL + ENDPOINT_GET_RULE_MEMBER_LIST, postData)
       .then((res) => {
-
         const fwdList = res?.data?.m_arrFwdMappingList?.filter(
           (data) =>
             data.m_strEntityArgType == "IN/OUT" ||
             data.m_strEntityArgType == "IN"
         );
 
-        const revList = res?.data?.m_arrRvrMappingList;
-       
-       
-
         setFwdBrtInputs(
           fwdList?.map((item, i) => ({
             input: item.m_strParameterName,
+            fullName: item.m_strParemterFullName,
             process: "",
             type: item.m_strParameterDataType,
             varType: item.m_strVarDataType,
             varFieldId: item.m_strVarFieldId,
             varId: item.m_strVariableId,
             name: item.m_strVarName,
+            parentIsArray: item.m_strParentIsArray,
             info:
               fwdInfo != null
                 ? fwdInfo?.some(
-                  (data) =>
-                    data.m_strParameterDataType ==
-                    item.m_strParameterDataType &&
-                    data.m_strParameterName == item.m_strParameterName
-                )
+                    (data) =>
+                      data.m_strParameterDataType ==
+                        item.m_strParameterDataType &&
+                      data.m_strParameterName == item.m_strParameterName
+                  )
                 : null,
           }))
         );
 
-         {/*code updated on 6 July 2022 for BugId 111907*/}
-        localLoadedProcessData?.Variable?.forEach((item, i) => {
-          if ((item.VariableScope === "U" && checkForModifyRights(item)) || (item.VariableScope === "I" && checkForModifyRights(item))) {
-           setRevBrtInputs(prev=>[...prev,item])
-          }
+        const revList = res?.data?.m_arrFwdMappingList?.filter(
+          (data) =>
+            data.m_strEntityArgType == "IN/OUT" ||
+            data.m_strEntityArgType == "OUT"
+        );
 
-        })
-   
+        setRevInputs(
+          revList?.map((item, i) => ({
+            input: item.m_strParameterName,
+            fullName: item.m_strParemterFullName,
+            process: "",
+            type: item.m_strParameterDataType,
+            varType: item.m_strVarDataType,
+            varFieldId: item.m_strVarFieldId,
+            varId: item.m_strVariableId,
+            name: item.m_strVarName,
+            parentIsArray: item.m_strParentIsArray,
+            info:
+              fwdInfo != null
+                ? fwdInfo?.some(
+                    (data) =>
+                      data.m_strParameterDataType ==
+                        item.m_strParameterDataType &&
+                      data.m_strParameterName == item.m_strParameterName
+                  )
+                : null,
+          }))
+        );
+
+        {
+          /*code updated on 6 July 2022 for BugId 111907*/
+        }
+        let tempRevVarLIst = [];
+        localLoadedProcessData?.Variable?.forEach((item, i) => {
+          if (
+            (item.VariableScope === "U" && checkForModifyRights(item)) ||
+            (item.VariableScope === "I" && checkForModifyRights(item))
+          ) {
+            if (item.VariableType === "11") {
+              let tempList = getComplex(item);
+              tempList?.forEach((el) => {
+                tempRevVarLIst.push(el);
+              });
+            } else {
+              tempRevVarLIst.push(item);
+            }
+          }
+        });
+        setBrtRevInputs(tempRevVarLIst);
       })
       .catch((err) => {
-        console.log("AXIOS ERROR: ", err);
+        console.log(err);
       });
   }
 
   const checkForModifyRights = (data) => {
     let temp = false;
-    localLoadedActivityPropertyData?.ActivityProperty?.m_objDataVarMappingInfo?.dataVarList?.forEach((item, i) => {
-      if (item?.processVarInfo?.variableId === data.VariableId) {
-        if (item?.m_strFetchedRights === "O") {
-          temp = true
+    localLoadedActivityPropertyData?.ActivityProperty?.m_objDataVarMappingInfo?.dataVarList?.forEach(
+      (item, i) => {
+        if (item?.processVarInfo?.variableId === data.VariableId) {
+          if (item?.m_strFetchedRights === "O") {
+            temp = true;
+          }
         }
       }
-
-    })
+    );
     return temp;
-  }
-
-  const [value, setValue] = React.useState("1");
+  };
 
   const handleChange = (e, newValue) => {
     setValue(newValue);
@@ -379,14 +392,17 @@ function BusinessRules(props) {
     axios
       .get(
         SERVER_URL +
-        ENDPOINT_RULE_FLOW_VERSION + "?m_strSelectedRuleSetId=" +
-        e.target.value
+          ENDPOINT_RULE_FLOW_VERSION +
+          "?m_strSelectedRuleSetId=" +
+          e.target.value
       )
       .then(function (response) {
-
         setRuleVersion(response?.data?.versions[0]);
         setRuleVersionItem(
-          response?.data?.versions?.map((data) => ({ label: data, value: data }))
+          response?.data?.versions?.map((data) => ({
+            label: data,
+            value: data,
+          }))
         );
       })
       .catch(function (error) {
@@ -401,14 +417,17 @@ function BusinessRules(props) {
     axios
       .get(
         SERVER_URL +
-        ENDPOINT_RULE_PACKAGE_VERSION + "?m_strSelectedRuleSetId=" +
-        e.target.value
+          ENDPOINT_RULE_PACKAGE_VERSION +
+          "?m_strSelectedRuleSetId=" +
+          e.target.value
       )
       .then(function (response) {
-
         setPackageVersion(response.data.versions[0]);
         setPackageVersionItem(
-          response?.data?.versions?.map((data) => ({ label: data, value: data }))
+          response?.data?.versions?.map((data) => ({
+            label: data,
+            value: data,
+          }))
         );
       })
       .catch(function (error) {
@@ -416,11 +435,7 @@ function BusinessRules(props) {
       });
   }
 
-
-
-
   const getId = (name, arr) => {
-
     const ruleList = [...arr];
 
     const rule = ruleList?.find((data) => data.m_strRSetName == name);
@@ -432,71 +447,79 @@ function BusinessRules(props) {
     }
   };
 
-
-
   function deleteData(id, i) {
     setMapping(false);
     setAssociateList(associateList?.filter((item) => item.id !== id));
-    let tempLocalState = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
-    tempLocalState?.ActivityProperty?.m_objBusinessRule?.m_arrAssocBRMSRuleSetList?.splice(i, 1)
-    setlocalLoadedActivityPropertyData(tempLocalState)
+    let tempLocalState = JSON.parse(
+      JSON.stringify(localLoadedActivityPropertyData)
+    );
+    tempLocalState?.ActivityProperty?.m_objBusinessRule?.m_arrAssocBRMSRuleSetList?.splice(
+      i,
+      1
+    );
+    setlocalLoadedActivityPropertyData(tempLocalState);
   }
 
-  {/*code updated on 6 July 2022 for BugId 111907*/}
+  /*code updated on 6 July 2022 for BugId 111907*/
   const getFilteredVarList = (item) => {
     let temp = [];
 
-
     brtProcess.forEach((_var) => {
-      if (_var.VariableScope === "M" || _var.VariableScope === "S" || (_var.VariableScope === "U" && checkForVarRights(_var)) || (_var.VariableScope === "I" && checkForVarRights(_var))) {
+      if (
+        _var.VariableScope === "M" ||
+        _var.VariableScope === "S" ||
+        (_var.VariableScope === "U" && checkForVarRights(_var)) ||
+        (_var.VariableScope === "I" && checkForVarRights(_var))
+      ) {
         if (_var.VariableType == item.varType) {
-
           temp.push(_var);
         }
       }
-
     });
     return temp;
   };
 
-  {/*code added on 6 July 2022 for BugId 111907*/}
+  /*code added on 6 July 2022 for BugId 111907*/
   const checkForVarRights = (data) => {
     let temp = false;
-    localLoadedActivityPropertyData?.ActivityProperty?.m_objDataVarMappingInfo?.dataVarList?.forEach((item, i) => {
-      if (item?.processVarInfo?.variableId === data.VariableId) {
-        if (item?.m_strFetchedRights === "O" || item?.m_strFetchedRights === "R") {
-          temp = true
+    localLoadedActivityPropertyData?.ActivityProperty?.m_objDataVarMappingInfo?.dataVarList?.forEach(
+      (item, i) => {
+        if (item?.processVarInfo?.variableId === data.VariableId) {
+          if (
+            item?.m_strFetchedRights === "O" ||
+            item?.m_strFetchedRights === "R"
+          ) {
+            temp = true;
+          }
         }
       }
-
-    })
+    );
     return temp;
-  }
+  };
 
   const getSelectedMappingData = (item) => {
     let temp = "0";
     localLoadedActivityPropertyData?.ActivityProperty?.m_objBusinessRule?.m_arrAssocBRMSRuleSetList?.forEach(
       (ruleName) => {
         if (ruleName.m_strRSetName === mappedSelectedRule) {
-          ruleName?.m_arrMappingInfo?.filter(d => d.m_strMappingType === "F").forEach((rule) => {
-            if (rule.m_strParameterName === item.input) {
-              temp = rule.m_strVariableId;
-            }
-          });
+          ruleName?.m_arrMappingInfo
+            ?.filter((d) => d.m_strMappingType === "F")
+            .forEach((rule) => {
+              if (item.input == rule.m_strParameterName) {
+                temp = rule.m_strVarName;
+              }
+            });
         }
       }
     );
 
-
     return temp;
   };
 
-
-  const getRevMapName = (id) => {
-    
+  const getRevMapId = (id) => {
     let temp = {};
     brtProcess?.forEach((item) => {
-      if (item.VariableId == id) {
+      if (item.VariableName == id) {
         temp = item;
       }
     });
@@ -504,64 +527,85 @@ function BusinessRules(props) {
     return temp;
   };
 
-  const getFilteredInputList = (id) => {
+  const getFilteredInputList = (id, fieldId) => {
     let temp = [];
     let allInput = "";
     let type = "";
-
-
     brtProcess?.forEach((item) => {
-      if (item.VariableId == id) {
+      if (item.VariableId == id && item.VarFieldId == fieldId) {
         type = item.VariableType;
       }
     });
-
-
-    allInput = brtFwdInputs?.filter((data) => data.type == type);
-
-
+    allInput = revInputs?.filter((data) => data.type == type);
     return allInput;
   };
 
-  const getSelectedOutputData = (item) => {
+  const getSelectedOutputData = (varName) => {
     let temp = "0";
     localLoadedActivityPropertyData?.ActivityProperty?.m_objBusinessRule?.m_arrAssocBRMSRuleSetList?.forEach(
       (ruleName) => {
         if (ruleName.m_strRSetName === mappedSelectedRule) {
-          ruleName?.m_arrMappingInfo?.filter(d => d.m_strMappingType === "R").forEach((rule) => {
-
-            if (rule.m_strVariableId === item) {
-              temp = rule.m_strParameterName;
-            }
-          });
+          ruleName?.m_arrMappingInfo
+            ?.filter((d) => d.m_strMappingType === "R")
+            .forEach((rule) => {
+              if (rule.m_strVarName === varName) {
+                temp = rule.m_strParameterName;
+              }
+            });
         }
       }
     );
-
-
     return temp;
   };
 
-{/*code updated on 6 July 2022 for BugId 111907*/}
-
+  /*code updated on 7th July 2022 for BugId 112016*/
   const selectedOutputVal = (value, item, mapType) => {
-
     let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
-
-    temp?.ActivityProperty?.m_objBusinessRule?.m_arrAssocBRMSRuleSetList?.some(
+    temp?.ActivityProperty?.m_objBusinessRule?.m_arrAssocBRMSRuleSetList?.map(
       (ruleName) => {
-
         if (ruleName.m_strRSetName === mappedSelectedRule) {
-
-          if (ruleName.m_arrMappingInfo.length) {
-            ruleName?.m_arrMappingInfo?.map((rule) => {
-
+          if (
+            Array.isArray(ruleName.m_arrMappingInfo) &&
+            ruleName.m_arrMappingInfo.length > 0
+          ) {
+            let isFExist = false,
+              fIndex = null;
+            let isRExist = false,
+              rIndex = null;
+            ruleName?.m_arrMappingInfo?.map((rule, index) => {
               if (mapType === "F") {
-
-                if (rule.m_strParameterName === item.input) {
-                  rule.m_strVariableId = value;
-                  return true;
+                if (
+                  rule.m_strParameterName === item.input &&
+                  rule.m_strMappingType === mapType
+                ) {
+                  fIndex = index;
+                  isFExist = true;
+                }
+              } else if (mapType === "R") {
+                if (
+                  rule.m_strVarName === item.VariableName &&
+                  rule.m_strMappingType === mapType
+                ) {
+                  rIndex = index;
+                  isRExist = true;
+                }
+              }
+            });
+            if (mapType === "F") {
+              if (isFExist) {
+                if (value === "0") {
+                  ruleName.m_arrMappingInfo.splice(fIndex, 1);
                 } else {
+                  ruleName.m_arrMappingInfo[fIndex].m_strVariableId =
+                    getRevMapId(value).VariableId;
+                  ruleName.m_arrMappingInfo[fIndex].m_strVarName = value;
+                  ruleName.m_arrMappingInfo[fIndex].m_strVarScope =
+                    getRevMapId(value).VariableScope;
+                  ruleName.m_arrMappingInfo[fIndex].m_strVarFieldId =
+                    getRevMapId(value).VarFieldId;
+                }
+              } else {
+                if (value !== "0") {
                   ruleName.m_arrMappingInfo.push({
                     m_arrMappingList: [],
                     m_bChk: true,
@@ -572,24 +616,32 @@ function BusinessRules(props) {
                     m_strMappingType: "F",
                     m_strParameterDataType: item.varType,
                     m_strParameterName: item.input,
-                    m_strParemterFullName: "",
-                    m_strParentIsArray: "F",
+                    m_strParemterFullName: item.fullName,
+                    m_strParentIsArray: item.parentIsArray,
                     m_strUnbounded: "N",
                     m_strVarDataType: "",
-                    m_strVarFieldId: "0",
-                    m_strVarName: getRevMapName(value).VariableName,
-                    m_strVarScope: getRevMapName(value).VariableScope,
-                    m_strVariableId: value,
+                    m_strVarFieldId: getRevMapId(value).VarFieldId,
+                    m_strVarName: value,
+                    m_strVarScope: getRevMapId(value).VariableScope,
+                    m_strVariableId: getRevMapId(value).VariableId,
                   });
-                  return true;
+                }
+              }
+            } else if (mapType === "R") {
+              if (isRExist) {
+                if (value === "0") {
+                  ruleName.m_arrMappingInfo.splice(rIndex, 1);
+                } else {
+                  ruleName.m_arrMappingInfo[rIndex].m_strParameterName = value;
                 }
               } else {
-
-                if (rule.m_strVariableId === item.VariableId) {
-                  rule.m_strParameterName = value;
-                  return true;
-                }
-                else {
+                if (value !== "0") {
+                  let fullName = "";
+                  revInputs?.forEach((el) => {
+                    if (el.varId === item.VariableId) {
+                      fullName = el.fullName;
+                    }
+                  });
                   ruleName.m_arrMappingInfo.push({
                     m_arrMappingList: [],
                     m_bChk: true,
@@ -598,87 +650,85 @@ function BusinessRules(props) {
                     m_strConstValue: "",
                     m_strEntityArgType: "",
                     m_strMappingType: "R",
-                    m_strParameterDataType: getRevMapName(item.VariableId).VariableType,
+                    m_strParameterDataType: getRevMapId(item.VariableName)
+                      .VariableType,
                     m_strParameterName: value,
-                    m_strParemterFullName: "",
+                    m_strParemterFullName: fullName,
                     m_strParentIsArray: "R",
                     m_strUnbounded: "N",
                     m_strVarDataType: "",
-                    m_strVarFieldId: "0",
-                    m_strVarName: getRevMapName(item.VariableId).VariableName,
-                    m_strVarScope: getRevMapName(item.VariableId).VariableScope,
-                    m_strVariableId: item.VariableId,
+                    m_strVarFieldId: getRevMapId(item.VariableName).VarFieldId,
+                    m_strVarName: item.VariableName,
+                    m_strVarScope: getRevMapId(item.VariableName).VariableScope,
+                    m_strVariableId: getRevMapId(item.VariableName).VariableId,
                   });
-                  return true;
                 }
               }
-            });
-
-          }
-          else {
-
-            if (mapType === "F") {
-              ruleName.m_arrMappingInfo.push({
-                m_arrMappingList: [],
-                m_bChk: true,
-                m_bConstantFlag: false,
-                m_bDisableFlag: true,
-                m_strConstValue: "",
-                m_strEntityArgType: "",
-                m_strMappingType: "F",
-                m_strParameterDataType: item.varType,
-                m_strParameterName: item.input,
-                m_strParemterFullName: "",
-                m_strParentIsArray: "F",
-                m_strUnbounded: "N",
-                m_strVarDataType: "",
-                m_strVarFieldId: "0",
-                m_strVarName: getRevMapName(value).VariableName,
-                m_strVarScope: getRevMapName(value).VariableScope,
-                m_strVariableId: value,
-              });
             }
-            else {
-              ruleName.m_arrMappingInfo.push({
-                m_arrMappingList: [],
-                m_bChk: true,
-                m_bConstantFlag: false,
-                m_bDisableFlag: true,
-                m_strConstValue: "",
-                m_strEntityArgType: "",
-                m_strMappingType: "R",
-                m_strParameterDataType: getRevMapName(item.VariableId).VariableType,
-                m_strParameterName: value,
-                m_strParemterFullName: "",
-                m_strParentIsArray: "R",
-                m_strUnbounded: "N",
-                m_strVarDataType: "",
-                m_strVarFieldId: "0",
-                m_strVarName: getRevMapName(item.VariableId).VariableName,
-                m_strVarScope: getRevMapName(item.VariableId).VariableScope,
-                m_strVariableId: item.VariableId,
-              });
+          } else {
+            if (value !== "0") {
+              if (mapType === "F") {
+                ruleName.m_arrMappingInfo.push({
+                  m_arrMappingList: [],
+                  m_bChk: true,
+                  m_bConstantFlag: false,
+                  m_bDisableFlag: true,
+                  m_strConstValue: "",
+                  m_strEntityArgType: "",
+                  m_strMappingType: "F",
+                  m_strParameterDataType: item.varType,
+                  m_strParameterName: item.input,
+                  m_strParemterFullName: item.fullName,
+                  m_strParentIsArray: item.parentIsArray,
+                  m_strUnbounded: "N",
+                  m_strVarDataType: "",
+                  m_strVarFieldId: getRevMapId(value).VarFieldId,
+                  m_strVarName: value,
+                  m_strVarScope: getRevMapId(value).VariableScope,
+                  m_strVariableId: getRevMapId(value).VariableId,
+                });
+              } else {
+                let fullName = "";
+                revInputs?.forEach((el) => {
+                  if (el.varId === item.VariableId) {
+                    fullName = el.fullName;
+                  }
+                });
+                ruleName.m_arrMappingInfo.push({
+                  m_arrMappingList: [],
+                  m_bChk: true,
+                  m_bConstantFlag: false,
+                  m_bDisableFlag: true,
+                  m_strConstValue: "",
+                  m_strEntityArgType: "",
+                  m_strMappingType: "R",
+                  m_strParameterDataType: getRevMapId(item.VariableName)
+                    .VariableType,
+                  m_strParameterName: value,
+                  m_strParemterFullName: fullName,
+                  m_strParentIsArray: "R",
+                  m_strUnbounded: "N",
+                  m_strVarDataType: "",
+                  m_strVarFieldId: getRevMapId(item.VariableName).VarFieldId,
+                  m_strVarName: item.VariableName,
+                  m_strVarScope: getRevMapId(item.VariableName).VariableScope,
+                  m_strVariableId: getRevMapId(item.VariableName).VariableId,
+                });
+              }
             }
-
           }
-
         }
       }
     );
-
+    setlocalLoadedActivityPropertyData(temp);
     dispatch(
       setActivityPropertyChange({
-        BusinessRules: { isModified: true, hasError: false },
+        [propertiesLabel.businessRule]: { isModified: true, hasError: false },
       })
     );
-    setlocalLoadedActivityPropertyData(temp);
   };
 
-
-  
   const changeService = (e) => {
-
-
     setServiceType(e.target.value);
 
     if (serviceType == "true") {
@@ -690,7 +740,6 @@ function BusinessRules(props) {
     axios
       .get(url)
       .then(function (response) {
-
         setRuleFlowItems(
           response?.data?.m_arrBRMSRuleFlowList?.map((item) => ({
             id: item.m_strRSetId,
@@ -703,8 +752,6 @@ function BusinessRules(props) {
             value: item.m_strRSetName,
           }))
         );
-
-
       })
       .catch(function (error) {
         console.log(error);
@@ -712,49 +759,50 @@ function BusinessRules(props) {
 
     setAssociateList([]);
 
-    let tempLocalState = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
-    tempLocalState.ActivityProperty.m_objBusinessRule.m_bIsRestService = e.target.value;
-    tempLocalState.ActivityProperty.m_objBusinessRule.m_arrAssocBRMSRuleSetList = [];
+    let tempLocalState = JSON.parse(
+      JSON.stringify(localLoadedActivityPropertyData)
+    );
+    tempLocalState.ActivityProperty.m_objBusinessRule.m_bIsRestService =
+      e.target.value;
+    tempLocalState.ActivityProperty.m_objBusinessRule.m_arrAssocBRMSRuleSetList =
+      [];
 
     setlocalLoadedActivityPropertyData(tempLocalState);
-
-  }
+  };
 
   const setTime = (val, name) => {
     setDefaultTime(val);
 
-    let tempLocalState = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
-    tempLocalState?.ActivityProperty?.m_objBusinessRule?.m_arrAssocBRMSRuleSetList?.forEach((data, i) => {
-      if (data.m_strRSetName === name) {
-        tempLocalState.ActivityProperty.m_objBusinessRule.m_arrAssocBRMSRuleSetList[i].m_strTimeOutInterval = val;
+    let tempLocalState = JSON.parse(
+      JSON.stringify(localLoadedActivityPropertyData)
+    );
+    tempLocalState?.ActivityProperty?.m_objBusinessRule?.m_arrAssocBRMSRuleSetList?.forEach(
+      (data, i) => {
+        if (data.m_strRSetName === name) {
+          tempLocalState.ActivityProperty.m_objBusinessRule.m_arrAssocBRMSRuleSetList[
+            i
+          ].m_strTimeOutInterval = val;
+        }
       }
-    })
+    );
     setlocalLoadedActivityPropertyData(tempLocalState);
-  }
-
-  
+  };
 
   return (
     <div>
-
-      {
-
-        isError ?
-          <Toast
-            open={isError != false}
-            closeToast={() => setIsError(false)}
-            message={errorMsg.msg}
-            severity={errorMsg.severity}
-          />
-          :
-          null
-      }
+      {isError ? (
+        <Toast
+          open={isError != false}
+          closeToast={() => setIsError(false)}
+          message={errorMsg.msg}
+          severity={errorMsg.severity}
+        />
+      ) : null}
       <div
         className={
           props.isDrawerExpanded ? "brtContainerExpand" : "brtContainer"
         }
       >
-
         <Box
           className={
             props.isDrawerExpanded ? "label-heading-expand" : "label-heading"
@@ -815,7 +863,6 @@ function BusinessRules(props) {
                     id="ruleflow-selectbox"
                     isNotMandatory={true}
                   >
-
                     {ruleFlowItems?.map((item, i) => (
                       <MenuItem value={item.id}>{item.value}</MenuItem>
                     ))}
@@ -957,12 +1004,15 @@ function BusinessRules(props) {
                   : "associate-list"
               }
             >
-
               <table
                 className={
                   props.isDrawerExpanded
-                    ? direction == RTL_DIRECTION ? "associate-tbl-expand-rtl" : "associate-tbl-expand"
-                    : direction == RTL_DIRECTION ? "associate-tbl-rtl" : "associate-tbl"
+                    ? direction == RTL_DIRECTION
+                      ? "associate-tbl-expand-rtl"
+                      : "associate-tbl-expand"
+                    : direction == RTL_DIRECTION
+                    ? "associate-tbl-rtl"
+                    : "associate-tbl"
                 }
                 direction
               >
@@ -972,43 +1022,43 @@ function BusinessRules(props) {
                   <th>{t("toolbox.businessRules.type")}</th>
                   {props.isDrawerExpanded ? <th></th> : ""}
                 </tr>
-                {
-                  associateList?.map((item, i) => (
-                    <tr key={i}>
-                      <td align="center">{item.name}</td>
-                      <td align="center">{item.version}</td>
-                      <td align="center">
-                        {item.type == "P" ? t("toolbox.businessRules.ruleFlow") : t("toolbox.businessRules.rulePackage")}
+                {associateList?.map((item, i) => (
+                  <tr key={i}>
+                    <td align="center">{item.name}</td>
+                    <td align="center">{item.version}</td>
+                    <td align="center">
+                      {item.type == "P"
+                        ? t("toolbox.businessRules.ruleFlow")
+                        : t("toolbox.businessRules.rulePackage")}
+                    </td>
+                    {props.isDrawerExpanded ? (
+                      <td>
+                        <div style={{ display: "flex" }}>
+                          <CompareArrowsIcon
+                            onClick={() => {
+                              mapData(
+                                item.id,
+                                item.version,
+                                item.type,
+                                item.mapInfo,
+                                item.time,
+                                item.name
+                              );
+                            }}
+                          />
+                          <DeleteIcon
+                            onClick={() => {
+                              deleteData(item.id, i);
+                            }}
+                            style={{ color: "#D53D3D" }}
+                          />
+                        </div>
                       </td>
-                      {props.isDrawerExpanded ? (
-                        <td>
-                          <div style={{ display: "flex" }}>
-                            <CompareArrowsIcon
-                              onClick={() => {
-                                mapData(
-                                  item.id,
-                                  item.version,
-                                  item.type,
-                                  item.mapInfo,
-                                  item.time,
-                                  item.name
-                                );
-                              }}
-                            />
-                            <DeleteIcon
-                              onClick={() => {
-                                deleteData(item.id, i);
-                              }}
-                              style={{ color: "#D53D3D" }}
-                            />
-                          </div>
-                        </td>
-                      ) : (
-                        ""
-                      )}
-                    </tr>
-                  ))
-                }
+                    ) : (
+                      ""
+                    )}
+                  </tr>
+                ))}
               </table>
             </Box>
           </div>
@@ -1030,7 +1080,6 @@ function BusinessRules(props) {
                         <td>
                           <CustomizedDropdown
                             id="demo-select-small"
-
                             value={defaultTime}
                             onChange={(e) => {
                               setTime(e.target.value, mappedSelectedRule);
@@ -1052,23 +1101,35 @@ function BusinessRules(props) {
               <Box className="mappingTab" sx={{ width: "100%" }}>
                 <TabContext value={value}>
                   <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                    <TabList
-                      onChange={handleChange}
-
-                      className="tabList"
-                    >
-                      <Tab label={
-                        <React.Fragment>
-                          {t("toolbox.businessRules.forwardMapping")}
-                          <span style={{ fontSize: "smaller", color: "#D53D3D" }}>*</span>
-                        </React.Fragment>
-                      } className="tab" value="1" />
-                      <Tab label={
-                        <React.Fragment>
-                          {t("toolbox.businessRules.reverseMapping")}
-                          <span style={{ fontSize: "smaller", color: "#D53D3D" }}>*</span>
-                        </React.Fragment>
-                      } className="tab" value="2" />
+                    <TabList onChange={handleChange} className="tabList">
+                      <Tab
+                        label={
+                          <React.Fragment>
+                            {t("toolbox.businessRules.forwardMapping")}
+                            <span
+                              style={{ fontSize: "smaller", color: "#D53D3D" }}
+                            >
+                              *
+                            </span>
+                          </React.Fragment>
+                        }
+                        className="tab"
+                        value="1"
+                      />
+                      <Tab
+                        label={
+                          <React.Fragment>
+                            {t("toolbox.businessRules.reverseMapping")}
+                            <span
+                              style={{ fontSize: "smaller", color: "#D53D3D" }}
+                            >
+                              *
+                            </span>
+                          </React.Fragment>
+                        }
+                        className="tab"
+                        value="2"
+                      />
                     </TabList>
                   </Box>
                   <TabPanel value="1">
@@ -1104,20 +1165,22 @@ function BusinessRules(props) {
                                     value={getSelectedMappingData(item)}
                                     id="mapping-list"
                                     onChange={(e) => {
-                                      selectedOutputVal(e.target.value, item, "F");
+                                      selectedOutputVal(
+                                        e.target.value,
+                                        item,
+                                        "F"
+                                      );
                                     }}
                                     isNotMandatory={true}
                                   >
                                     {
                                       <MenuItem value="0">
-
                                         {t("toolbox.businessRules.selVar")}
-
                                       </MenuItem>
                                     }
                                     {getFilteredVarList(item).map(
                                       (process, j) => (
-                                        <MenuItem value={process.VariableId}>
+                                        <MenuItem value={process.VariableName}>
                                           {process.VariableName}
                                         </MenuItem>
                                       )
@@ -1130,7 +1193,6 @@ function BusinessRules(props) {
                         </Table>
                       </TableContainer>
                     }
-
                   </TabPanel>
                   <TabPanel value="2">
                     <TableContainer
@@ -1157,36 +1219,39 @@ function BusinessRules(props) {
                                   {
                                     //getRevMapName(item?.varId)?.VariableName
                                     item.VariableName
-
                                   }
-
                                 </p>
                               </TableCell>
                               <TableCell>=</TableCell>
                               <TableCell>
                                 <CustomizedDropdown
-                                  value={getSelectedOutputData(item?.VariableId)}
+                                  value={getSelectedOutputData(
+                                    item?.VariableName
+                                  )}
                                   id="mapped-output-list"
                                   onChange={(e) => {
-                                    selectedOutputVal(e.target.value, item, "R");
+                                    selectedOutputVal(
+                                      e.target.value,
+                                      item,
+                                      "R"
+                                    );
                                   }}
                                   labelId="demo-select-small"
                                   isNotMandatory={true}
                                 >
                                   {
                                     <MenuItem value="0">
-
                                       {t("toolbox.businessRules.selVar")}
-
                                     </MenuItem>
                                   }
-                                  {getFilteredInputList(item?.VariableId).map(
-                                    (data, j) => (
-                                      <MenuItem value={data?.input}>
-                                        {data?.input}
-                                      </MenuItem>
-                                    )
-                                  )}
+                                  {getFilteredInputList(
+                                    item?.VariableId,
+                                    item?.VarFieldId
+                                  )?.map((data, j) => (
+                                    <MenuItem value={data?.input}>
+                                      {data?.input}
+                                    </MenuItem>
+                                  ))}
                                 </CustomizedDropdown>
                               </TableCell>
                             </TableRow>
@@ -1197,7 +1262,6 @@ function BusinessRules(props) {
                   </TabPanel>
                 </TabContext>
               </Box>
-
             </div>
           ) : (
             ""
@@ -1210,12 +1274,6 @@ function BusinessRules(props) {
 
 const mapStateToProps = (state) => {
   return {
-    showDrawer: state.showDrawerReducer.showDrawer,
-    cellID: state.selectedCellReducer.selectedId,
-    cellName: state.selectedCellReducer.selectedName,
-    cellType: state.selectedCellReducer.selectedType,
-    cellActivityType: state.selectedCellReducer.selectedActivityType,
-    cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
   };
 };

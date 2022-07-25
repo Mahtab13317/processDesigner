@@ -24,7 +24,7 @@ const StyledTableCell = withStyles((theme) => ({
 const StyledTableRow = withStyles((theme) => ({
   root: {
     "&:nth-of-type(even)": {
-      backgroundColor: theme.palette.action.hover,
+      backgroundColor: "#fff",
     },
   },
 }))(TableRow);
@@ -32,6 +32,7 @@ const StyledTableRow = withStyles((theme) => ({
 const useStyles = makeStyles((theme) => ({
   table: {
     height: 40,
+    borderSpacing: "0 0.125rem",
   },
   tableContainer: {
     padding: "0.5rem 1vw",
@@ -43,7 +44,10 @@ const useStyles = makeStyles((theme) => ({
   tableHeader: {
     fontWeight: 600,
     fontSize: 13,
-    backgroundColor: theme.palette.action.hover,
+    backgroundColor: "#f8f8f8",
+    borderTop: "1px solid #f8f8f8",
+    borderBottom: "1px solid #f8f8f8",
+    borderRadius: "0.125rem",
     color: "black",
   },
   tableBodyCell: {
@@ -62,7 +66,11 @@ export default function CustomizedTables(props) {
     <TableContainer component={Paper} className={classes.tableContainer}>
       {/*code changes on 21 June 2022 for BugId 110907 */}
       <Table
-        className={`${classes.table} ${props.isDrawerExpanded ? "webServicePropertiestableEx":"webServicePropertiestableCo"} webServicePropertiestable`} /*code added on 22 June 2022 for BugId 111065 and BugId 110846*/
+        className={`${classes.table} ${
+          props.isDrawerExpanded
+            ? "webServicePropertiestableEx"
+            : "webServicePropertiestableCo"
+        } webServicePropertiestable`} /*code added on 22 June 2022 for BugId 111065 and BugId 110846*/
         style={{ width: "100%" }}
         aria-label="customized table"
         stickyHeader
@@ -115,7 +123,7 @@ export default function CustomizedTables(props) {
                 <SwapHorizIcon onClick={() => mappingHandler(row)} />
               </StyledTableCell>
               <StyledTableCell align="right" style={{ width: "2.5vw" }}>
-                <DeleteIcon />
+                <DeleteIcon onClick={()=>props.handleAssociationDelete(row)}/>
               </StyledTableCell>
             </StyledTableRow>
           ))}

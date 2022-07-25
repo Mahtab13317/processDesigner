@@ -97,7 +97,7 @@
   /* Firefox */
   padding-top: 10px;
   height: 100%;
-  width: 100%;
+  width: 71.8vw;
   overflow: auto;
 }
 
@@ -119,7 +119,7 @@
 
 .middleDivContainer {
   height: 100%;
-  /* width: 94.8vw !important; */
+  width: 94.8vw !important;
   background-color: #f8f8f8;
 }
 

@@ -107,30 +107,30 @@ const CreateGlobalTaskTemplateModal = (props) => {
     }
     const axiosInstance = createInstance();
     setIsCreating(true);
-
+    const ids = globalTemplates.map((variable) => +variable.m_iTemplateId);
+    let maxId = Math.max(...ids);
+    if (maxId === -1) maxId = 0;
+    if (globalTemplates.length === 0) {
+      maxId = 0;
+    }
     try {
       var res = await axiosInstance.post(`${ENDPOINT_ADD_GLOBAL_TEMPLATE}`, {
         m_strTemplateName: templateName.value,
         m_strStatus: "I",
         processDefId: localLoadedProcessData.ProcessDefId,
+        m_iTemplateId: maxId + 1,
       });
 
       if (res.data?.Status === 0) {
-        const ids = globalTemplates.map((variable) => +variable.m_iTemplateId);
-        let maxId = Math.max(...ids);
-        if (globalTemplates.length === 0) {
-          maxId = 0;
-        }
         const templateData = {
+          m_arrTaskTemplateVarList: [],
+          m_bGlobalTemplate: true,
+          m_bGlobalTemplateFormCreated: true,
+          m_bCustomFormAssoc: true,
+          m_strTemplateName: templateName.value,
+          m_iTemplateId: maxId + 1,
+
           taskGenPropInfo: {
-            taskTemplateInfo: {
-              m_arrTaskTemplateVarList: [],
-              m_bGlobalTemplate: true,
-              m_bGlobalTemplateFormCreated: true,
-              m_bCustomFormAssoc: true,
-              m_strTemplateName: templateName.value,
-              m_iTemplateId: `${maxId + 1}`,
-            },
             isRepeatable: false,
             genPropInfo: {
               cost: "0.00",
@@ -170,6 +170,7 @@ const CreateGlobalTaskTemplateModal = (props) => {
             },
           },
         };
+
         const newGts = [...globalTemplates, templateData];
         dispatch(setGlobalTaskTemplates(newGts));
 

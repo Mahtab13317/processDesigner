@@ -166,7 +166,7 @@ export function getActivityQueueObj(
       }
     }
   } else {
-    processData.Lanes.forEach((lane) => {
+    processData?.Lanes?.forEach((lane) => {
       if (lane.LaneId === laneId) {
         queueObj = {
           queueId: lane.QueueId,

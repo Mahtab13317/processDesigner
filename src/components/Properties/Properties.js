@@ -52,6 +52,8 @@ import {
   OpenProcessSliceValue,
   setOpenProcess,
 } from "../../redux-store/slices/OpenProcessSlice";
+import { ProcessTaskTypeValue } from "../../redux-store/slices/ProcessTaskTypeSlice";
+import { propertiesTabsForActivities as Tab } from "../../utility/propertiesTabsForActivity/propertiesTabsForActivity";
 
 function PropertiesTab(props) {
   const { isDrawerExpanded, direction } = props;
@@ -83,6 +85,10 @@ function PropertiesTab(props) {
     (state) => state.globalTaskTemplate.globalTemplates
   );
   const openProcessData = useSelector(OpenProcessSliceValue);
+
+  const ProcessTaskType = useSelector(ProcessTaskTypeValue);
+
+  console.log("PROCESSTYPESelector", ProcessTaskType);
 
   // to call getActivityProperty API
   useEffect(() => {
@@ -130,7 +136,12 @@ function PropertiesTab(props) {
           let tabs = [...item.components];
           let tempComp = [];
           let tabList = {};
+          if (ProcessTaskType === "U") {
+            //tab 48 for data tab push for user monitored synchronous
+            tabs.splice(1, 0, Tab(48));
+          }
           setTabsForActivity(tabs);
+          console.log("TABCONSOLE", tabs);
           tabs.forEach((tabEl) => {
             tabList = {
               ...tabList,
@@ -154,6 +165,7 @@ function PropertiesTab(props) {
       ActivityPropertyTabs.forEach((item) => {
         if (item.name === activityName) {
           let tabs = [...item.components];
+
           let tempComp = [];
           let tabList = {};
           setTabsForActivity(tabs);
@@ -169,7 +181,12 @@ function PropertiesTab(props) {
         }
       });
     }
-  }, [props.cellID, props.cellActivityType, props.cellActivitySubType]);
+  }, [
+    props.cellID,
+    props.cellActivityType,
+    props.cellActivitySubType,
+    ProcessTaskType,
+  ]);
 
   useEffect(() => {
     let isModified = false;
@@ -218,8 +235,18 @@ function PropertiesTab(props) {
       )
       .then((res) => {
         if (res.data.Status === 0) {
-          setlocalLoadedActivityPropertyData(res.data);
-          setoriginalProcessData(res.data);
+          // code added on 6 July 2022 for BugId 111910
+          let localActProperty = { ...res.data };
+          localLoadedProcessData?.Connections?.forEach((conn) => {
+            if (conn.SourceId == localActProperty?.ActivityProperty?.actId) {
+              localActProperty.ActivityProperty = {
+                ...localActProperty?.ActivityProperty,
+                targetId: conn.TargetId + "",
+              };
+            }
+          });
+          setlocalLoadedActivityPropertyData(localActProperty);
+          setoriginalProcessData(localActProperty);
         }
       })
       .catch((err) => {
@@ -386,24 +413,27 @@ function PropertiesTab(props) {
 
   const postDataForCallActivity = () => {
     let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
-    temp.ActivityProperty["processDefId"] = localLoadedProcessData.ProcessDefId;
-    axios
-      .post(SERVER_URL + ENDPOINT_SAVEPROPERTY, temp.ActivityProperty)
-      .then((response) => {
-        if (response.data.Status === 0) {
-          dispatch(setActivityPropertyToDefault());
-          setIsModified(false);
-          setoriginalProcessData(localLoadedActivityPropertyData);
-          setsaveCancelDisabled(true);
-          if (saveCancelStatus.CloseClicked) {
-            props.setShowDrawer(false);
-            dispatch(setSave({ CloseClicked: false }));
+    if (temp) {
+      temp.ActivityProperty["processDefId"] =
+        localLoadedProcessData.ProcessDefId;
+      axios
+        .post(SERVER_URL + ENDPOINT_SAVEPROPERTY, temp.ActivityProperty)
+        .then((response) => {
+          if (response.data.Status === 0) {
+            dispatch(setActivityPropertyToDefault());
+            setIsModified(false);
+            setoriginalProcessData(localLoadedActivityPropertyData);
+            setsaveCancelDisabled(true);
+            if (saveCancelStatus.CloseClicked) {
+              props.setShowDrawer(false);
+              dispatch(setSave({ CloseClicked: false }));
+            }
           }
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
   };
 
   const handleSaveChanges = () => {

@@ -1,17 +1,3 @@
-.sapContainer{
-
-    background-color: white;
-    height: 25rem;
-    overflow-y: auto;
-}
-
-.defSection{
-    display: flex;
-    gap:10px !important;
-    background: #0072C626;
-    margin-top: 0.5rem;
-    padding: 0 1rem 1.5rem 1rem;
-  }
 .todo_checklist .MuiCheckbox-colorSecondary.Mui-disabled {
   color: rgba(0, 0, 0, 0.26) !important;
 }

@@ -21,6 +21,8 @@ import ToastDataHandlerReducer from "../slices/ToastDataHandlerSlice";
 import LaunchpadTokenReducer from "../slices/LaunchpadTokenSlice";
 import globalTaskTemplateReducer from "./Properties/GlobalTaskTemplateReducer";
 import OpenProcessSliceReducer from "../slices/OpenProcessSlice";
+import UserRightsDataHandlerReducer from "../slices/UserRightsSlice";
+import ProcessTaskTypeReducer from "../slices/ProcessTaskTypeSlice"
 
 export default combineReducers({
   processTypesReducer: processTypesReducer,
@@ -45,4 +47,6 @@ export default combineReducers({
   toastDataHandlerSlice: ToastDataHandlerReducer,
   launchpadTokenSlice: LaunchpadTokenReducer,
   globalTaskTemplate: globalTaskTemplateReducer,
+  userRightsDataHandlerSlice: UserRightsDataHandlerReducer,
+  processTaskTypeSlice: ProcessTaskTypeReducer,
 });

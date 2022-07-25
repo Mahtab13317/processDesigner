@@ -27,15 +27,13 @@ function Scan(props) {
       ...localLoadedActivityPropertyData?.ActivityProperty?.wdeskInfo
         ?.objPMWdeskScanTool?.scanToolMap,
     };
-    let temp = JSON.parse(
-      JSON.stringify(openProcessData.loadedData?.DocumentTypeList)
-    );
+    let temp = JSON.parse(JSON.stringify(openProcessData.loadedData));
     let docList = [];
     let localDocs = {
       ...localLoadedActivityPropertyData?.ActivityProperty?.wdeskInfo
         ?.objPMWdeskDocuments?.documentMap,
     };
-    temp?.forEach((doc) => {
+    temp?.DocumentTypeList?.forEach((doc) => {
       if (localDocs[doc.DocName]?.isAdd === true) {
         docList.push(doc);
       }

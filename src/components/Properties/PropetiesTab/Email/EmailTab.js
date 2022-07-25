@@ -19,6 +19,7 @@ import {
   setSave,
 } from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
+import { OpenProcessSliceValue } from "../../../../redux-store/slices/OpenProcessSlice";
 
 function EmailTab(props) {
   let { t } = useTranslation();
@@ -46,6 +47,7 @@ function EmailTab(props) {
     "Medium",
     "High",
   ]);
+  const openProcessData = useSelector(OpenProcessSliceValue);
   const menuProps = {
     anchorOrigin: {
       vertical: "bottom",
@@ -84,7 +86,7 @@ function EmailTab(props) {
 
   useEffect(() => {
     let temp = {};
-    localLoadedProcessData?.DocumentTypeList.forEach((el) => {
+    openProcessData.loadedData?.DocumentTypeList.forEach((el) => {
       temp = {
         ...temp,
         [`d_${el.DocTypeId}`]: {
@@ -187,7 +189,7 @@ function EmailTab(props) {
     }
     setcontentSubject(mailInfo.subject);
     setcontentMessage(mailInfo.message);
-  }, []);
+  }, [openProcessData.loadedData]);
 
   useEffect(() => {
     setActivityData(data);
@@ -535,15 +537,16 @@ function EmailTab(props) {
           MenuProps={menuProps}
           id="varUsedForDocType_email"
         >
+          {/*code edited on 20 June 2022 for BugId 110972 */}
           {dropdown &&
             dropdown.map((element) => {
               return (
                 <MenuItem
                   className="menuItemStylesDropdown"
-                  key={element}
-                  value={element}
+                  key={element.VariableName}
+                  value={element.VariableName}
                 >
-                  {element}
+                  {element.VariableName}
                 </MenuItem>
               );
             })}

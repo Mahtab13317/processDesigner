@@ -266,9 +266,9 @@ function PropertyDetails(props) {
       if (element.TableName !== "") {
         complexTablesArr.push(element.TableName);
       }
-      if (element.hasOwnProperty("Relation&Mapping")) {
-        if (element["Relation&Mapping"].hasOwnProperty("Mappings")) {
-          element["Relation&Mapping"].Mappings?.Mapping.forEach((elem) => {
+      if (element.hasOwnProperty("RelationAndMapping")) {
+        if (element["RelationAndMapping"].hasOwnProperty("Mappings")) {
+          element["RelationAndMapping"].Mappings?.Mapping.forEach((elem) => {
             recursiveRelationAndMappingFunc(elem, complexVarName);
           });
         }
@@ -316,8 +316,8 @@ function PropertyDetails(props) {
           let isNestedComplex = false;
           mappings.length > 0 &&
             mappings?.forEach((elem) => {
-              if (elem.hasOwnProperty("Relation&Mapping")) {
-                if (elem["Relation&Mapping"]?.hasOwnProperty("Mappings")) {
+              if (elem.hasOwnProperty("RelationAndMapping")) {
+                if (elem["RelationAndMapping"]?.hasOwnProperty("Mappings")) {
                   isNestedComplex = isNestedComplex || true;
                 } else {
                   isNestedComplex = isNestedComplex || false;

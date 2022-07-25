@@ -24,17 +24,35 @@ function FieldMapping(props) {
       props.assDataClassMappingList.length > 0
     ) {
       let tempData = {};
-      localLoadedActivityPropertyData.ActivityProperty.archiveInfo.folderInfo.fieldMappingInfoList.map(
-        (list) => {
-          let test = props.assDataClassMappingList.filter(
-            (d) => d.IndexName == list.assoFieldMapList[0].fieldName
-          );
-          if (test.length >= 1) {
-            tempData[list.assoFieldMapList[0].fieldName] =
-              list.assoFieldMapList[0].assocVarName;
+      if (props.mapType == "archeive") {
+        localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo?.docTypeInfo?.docTypeDCMapList?.map(
+          (el) => {
+            if (el.docTypeId === props.selectedDoc.DocTypeId) {
+              el.m_arrFieldMappingInfo?.map((list) => {
+                let test = props.assDataClassMappingList.filter(
+                  (d) => d.IndexName == list.assoFieldMapList[0].fieldName
+                );
+                if (test.length >= 1) {
+                  tempData[list.assoFieldMapList[0].fieldName] =
+                    list.assoFieldMapList[0].assocVarName;
+                }
+              });
+            }
           }
-        }
-      );
+        );
+      } else {
+        localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo?.folderInfo?.fieldMappingInfoList?.map(
+          (list) => {
+            let test = props.assDataClassMappingList.filter(
+              (d) => d.IndexName == list.assoFieldMapList[0].fieldName
+            );
+            if (test.length >= 1) {
+              tempData[list.assoFieldMapList[0].fieldName] =
+                list.assoFieldMapList[0].assocVarName;
+            }
+          }
+        );
+      }
       setData(tempData);
       setAssDataClassMappingList(props.assDataClassMappingList);
     }
@@ -50,12 +68,7 @@ function FieldMapping(props) {
 
   const handleMappingSave = () => {
     let assoFieldMapListTemp = [];
-    let assoFieldIdTemp;
-    props.associateDataClassList.map((clas) => {
-      if (clas.dataDefName == props.associateDataClass) {
-        assoFieldIdTemp = clas.dataDefIndex;
-      }
-    });
+    let tempAssociatedDataClass;
     Object.keys(data).map((d) => {
       let assTempData = assDataClassMappingList.filter(
         (assoData) => assoData.IndexName == d
@@ -64,75 +77,83 @@ function FieldMapping(props) {
       loadedVariables.map((list) => {
         if (list.VariableName == data[d]) {
           assoFieldMapListTemp.push({
-            fieldName: d,
-            dataFieldId: assTempData[0].IndexId,
-            // m_strDataFieldType: assTempData[0].IndexType,
-            m_strDataFieldType: list.VariableType,
-            assocVarName: list.VariableName,
-            assocVarId: list.VariableId,
-            assocVarFieldId: list.VarFieldId,
-            assocExtObjId: list.ExtObjectId,
+            assoFieldMapList: [
+              {
+                fieldName: d,
+                dataFieldId: assTempData[0].IndexId,
+                // m_strDataFieldType: assTempData[0].IndexType,
+                dataFieldType: list.VariableType,
+                assocVarName: list.VariableName,
+                assocVarId: list.VariableId,
+                assocVarFieldId: list.VarFieldId,
+                assocExtObjId: list.ExtObjectId,
+              },
+            ],
           });
         }
       });
     });
 
-    const jsonBody = {
-      processDefId: props.openProcessID,
-      activityId: props.cellID,
-      cabinetName:
-        localLoadedActivityPropertyData.ActivityProperty.archiveInfo
-          .cabinetName,
-      appServerIP: "127.0.0.1",
-      appServerPort: "8080",
-      appServerType: "JBossEAP",
-      userName: props.userName,
-      m_strAuthCred: props.password,
-      m_bDeleteWorkitemAudit: false,
-      folderInfo: {
-        folderName: props.folderNameInput,
-        assoDataClsId: assoFieldIdTemp,
-        assoDataClsName: props.associateDataClass,
-        m_arrFieldMappingInfo: [
+    console.log("assoFieldMapListTemp", props.selectedDoc);
+    let temp = { ...localLoadedActivityPropertyData };
+    if (props.mapType == "archeive") {
+      let assoFieldIdTemp =
+        props.docCheckList[props.selectedDoc.DocTypeId].selectedVal;
+      props.associateDataClassList.map((clas) => {
+        if (clas.dataDefIndex == assoFieldIdTemp) {
+          tempAssociatedDataClass = clas.dataDefName;
+        }
+      });
+      let docList =
+        temp?.ActivityProperty?.archiveInfo?.docTypeInfo?.docTypeDCMapList;
+      if (docList?.length > 0) {
+        let isDocFound = false;
+        docList.map((el, index) => {
+          if (el.docTypeId == props.selectedDoc.DocTypeId) {
+            isDocFound = true;
+            temp.ActivityProperty.archiveInfo.docTypeInfo.docTypeDCMapList[
+              index
+            ].m_arrFieldMappingInfo = assoFieldMapListTemp;
+            temp.ActivityProperty.archiveInfo.docTypeInfo.docTypeDCMapList[
+              index
+            ].assocDCId = assoFieldIdTemp;
+            temp.ActivityProperty.archiveInfo.docTypeInfo.docTypeDCMapList[
+              index
+            ].assocDCName = tempAssociatedDataClass;
+          }
+        });
+        if (!isDocFound) {
+          temp.ActivityProperty.archiveInfo.docTypeInfo.docTypeDCMapList = [
+            ...temp.ActivityProperty.archiveInfo.docTypeInfo.docTypeDCMapList,
+            {
+              m_arrFieldMappingInfo: assoFieldMapListTemp,
+              docTypeId: props.selectedDoc.DocTypeId,
+              assocDCId: assoFieldIdTemp,
+              assocDCName: tempAssociatedDataClass,
+              docTypeName: props.selectedDoc.DocName,
+            },
+          ];
+        }
+      } else {
+        temp.ActivityProperty.archiveInfo.docTypeInfo.docTypeDCMapList = [
           {
-            assoFieldMapList: [...assoFieldMapListTemp],
+            m_arrFieldMappingInfo: assoFieldMapListTemp,
+            docTypeId: props.selectedDoc.DocTypeId,
+            assocDCId: assoFieldIdTemp,
+            assocDCName: tempAssociatedDataClass,
+            docTypeName: props.selectedDoc.DocName,
           },
-        ],
-      },
-
-      // docTypeInfo: {
-      //   docTypeDCMapList: [
-      //     {
-      //       docTypeName: "",
-      //       docTypeId: "",
-      //       assocDCName: "",
-      //       assocDCId: "",
-      //       selectedDoc: true,
-      //       m_arrFieldMappingInfo: [
-      //         {
-      //           assoFieldMapList: [
-      //             {
-      //               fieldName: "",
-      //               dataFieldId: "",
-      //               m_strDataFieldType: "",
-      //               assocVarName: "",
-      //               assocVarId: "",
-      //               assocVarFieldId: "",
-      //               assocExtObjId: "",
-      //             },
-      //           ],
-      //         },
-      //       ],
-      //     },
-      //   ],
-      // },
-    };
-    axios.post(SERVER_URL + SAVE_ARCHIVE, jsonBody).then((res) => {
-      if (res.data.Status === 0) {
-        console.log("SORRY");
+        ];
       }
-    });
+    } else {
+      temp.ActivityProperty.archiveInfo.folderInfo.fieldMappingInfoList =
+        assoFieldMapListTemp;
+    }
+    console.log("heyyyy", temp);
+    props.setShowAssDataClassMapping(false);
+    setlocalLoadedActivityPropertyData(temp);
   };
+
   return (
     <div>
       <table className="table">
@@ -150,7 +171,7 @@ function FieldMapping(props) {
                 <Select
                   className={
                     props.isDrawerExpanded
-                      ? "dropDownSelect_expanded"
+                      ? "dropDownSelect_expandeddms"
                       : "dropDownSelect"
                   }
                   onChange={(e) =>
@@ -191,6 +212,7 @@ function FieldMapping(props) {
           alignItems: "right",
           justifyContent: "end",
           marginTop: "10px",
+          marginRight: "10px",
         }}
       >
         <Button

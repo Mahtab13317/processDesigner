@@ -739,6 +739,7 @@ function Webservice(props) {
                     selected={selected}
                     selectionFunc={selectionFunc}
                     scope={props.scope}
+                    callLocation={props.callLocation}
                   />
                 </div>
                 <div className={styles.formDiv}>
@@ -809,7 +810,7 @@ function Webservice(props) {
               </div>
             </React.Fragment>
           ) : (
-            <NoWebServiceScreen addNewWebservice={addNewWebservice}/>
+            <NoWebServiceScreen addNewWebservice={addNewWebservice} />
           )}
         </React.Fragment>
       )}

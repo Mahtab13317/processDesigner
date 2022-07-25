@@ -24,8 +24,8 @@ function IncludeFeature(props) {
   let { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const { openProcessID, openProcessType } = props;
-  const [usedFeatures, getUsedFeatures] = useState([]);
-  const [availableFeatures, getAvailableFeatures] = useState([]);
+  const [usedFeatures, setUsedFeatures] = useState([]);
+  const [availableFeatures, setAvailableFeatures] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const direction = `${t("HTML_DIR")}`;
   const [allData, setallData] = useState([]);
@@ -47,10 +47,10 @@ function IncludeFeature(props) {
   // Function to add a feature to the used features list.
   const handleAddFeature = (index) => {
     const [addFeature] = availableFeatures.splice(index, 1);
-    getAvailableFeatures([...availableFeatures]);
+    setAvailableFeatures([...availableFeatures]);
     addFeature.Included = true;
     usedFeatures.splice(0, 0, addFeature);
-    getUsedFeatures(usedFeatures);
+    setUsedFeatures(usedFeatures);
     const outputArray = getOutputArray(addFeature);
     updateProcessFeatureCall(outputArray, ENDPOINT_INCLUDE_PROCESS_FEATURE);
   };
@@ -58,10 +58,10 @@ function IncludeFeature(props) {
   // Function to remove a feature from the used features list.
   const handleRemoveFeature = (index) => {
     const [removeFeature] = usedFeatures.splice(index, 1);
-    getUsedFeatures([...usedFeatures]);
+    setUsedFeatures([...usedFeatures]);
     removeFeature.Included = false;
     availableFeatures.splice(0, 0, removeFeature);
-    getAvailableFeatures(availableFeatures);
+    setAvailableFeatures(availableFeatures);
     const outputArray = getOutputArray(removeFeature);
     updateProcessFeatureCall(outputArray, ENDPOINT_EXCLUDE_PROCESS_FEATURE);
   };
@@ -117,18 +117,19 @@ function IncludeFeature(props) {
           const used = res.data.GlobalInterfaceData?.filter((d) => {
             return d.Included === true;
           });
-          getUsedFeatures([...used]);
+          setUsedFeatures([...used]);
           const available = res.data.GlobalInterfaceData?.filter((d) => {
             return d.Included === false;
           });
-          getAvailableFeatures([...available]);
+          setAvailableFeatures([...available]);
           setIsLoading(false);
         }
       })
       .catch(() => setIsLoading(false));
   }, [addNew]);
 
-  const handleDeleteFeature = (el) => {
+  //code edited for BugId 110821
+  const handleDeleteFeature = (el, list, setFunc) => {
     let json = {
       interfaceId: el.InterfaceId,
       interfaceName: el.MenuName,
@@ -136,15 +137,20 @@ function IncludeFeature(props) {
     axios
       .delete(SERVER_URL + ENDPOINT_POST_REGISTER_WINDOW, {
         data: json,
-        headers: { "Content-Type": "application/jsons" },
+        headers: { "Content-Type": "application/json" },
       })
       .then((res) => {
-        usedFeatures.forEach((val, index) => {
-          if (val.InterfaceId == el.InterfaceId) {
-            usedFeatures.splice(index, 1);
-          }
-        });
-      });
+        if (res.status === 200) {
+          let temp = [...list];
+          temp.forEach((val, index) => {
+            if (val.InterfaceId == el.InterfaceId) {
+              temp.splice(index, 1);
+            }
+          });
+          setFunc(temp);
+        }
+      })
+      .catch((err) => console.log(err));
   };
 
   const EditUseFeature = (d) => {
@@ -254,7 +260,10 @@ function IncludeFeature(props) {
                                   width: "1rem",
                                   margin: "1.2rem .5rem 1.031rem auto",
                                 }}
-                                onClick={() => handleDeleteFeature(d)}
+                                onClick={() =>
+                                  //code added for BugId 110821
+                                  handleDeleteFeature(d, usedFeatures, setUsedFeatures)
+                                }
                               />
                               <ClearOutlinedIcon
                                 id="PF_remove_feature_button"
@@ -325,7 +334,10 @@ function IncludeFeature(props) {
                                   margin: "1.2rem .5rem 1.031rem auto",
                                 }}
                                 src={cancelIcon}
-                                onClick={() => handleDeleteFeature(d)}
+                                onClick={() =>
+                                  //code added for BugId 110821
+                                  handleDeleteFeature(d, availableFeatures, setAvailableFeatures)
+                                }
                               />
                               <AddOutlinedIcon
                                 id="PF_add_feature_button"

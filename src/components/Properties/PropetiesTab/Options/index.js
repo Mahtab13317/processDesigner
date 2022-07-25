@@ -1,3 +1,5 @@
+// #BugID - 112055
+// #BugDescription - Made changes,added validations and made changes for set and get for bug.
 import React, { useState, useEffect } from "react";
 import {
   Radio,
@@ -15,6 +17,7 @@ import { connect } from "react-redux";
 import "./index.css";
 import {
   PROCESSTYPE_LOCAL,
+  propertiesLabel,
   RTL_DIRECTION,
 } from "../../../../Constants/appConstants";
 import {
@@ -34,14 +37,24 @@ function Options(props) {
     minutes: false,
     seconds: false,
   });
+  const [tatErrorObj, setTatErrorObj] = useState({
+    hours: false,
+    minutes: false,
+    seconds: false,
+  });
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
   const isProcessReadOnly = props.openProcessType !== PROCESSTYPE_LOCAL;
-  const [expireStatus, setExpireStatus] = useState(t("neverExpires"));
+  const [expireStatus, setExpireStatus] = useState(
+    localLoadedActivityPropertyData?.ActivityProperty?.optionInfo?.expiryInfo
+      ?.expFlag
+      ? t("expiresAfter")
+      : t("neverExpires")
+  );
   const [dateTime, setDateTime] = useState(null);
   const dispatch = useDispatch();
-  const [operatorType, setOperatorType] = useState(null);
+  const [operatorType, setOperatorType] = useState("11");
   let expiryInfo =
     localLoadedActivityPropertyData?.ActivityProperty?.optionInfo?.expiryInfo;
   let tatInfo =
@@ -95,10 +108,10 @@ function Options(props) {
           ?.wfSeconds
       : "0"
   );
-  const [daysType, setDaysType] = useState(null);
+  const [daysType, setDaysType] = useState("Y");
   const [routeTo, setRouteTo] = useState(null);
   const [triggerCheckValue, setTriggerCheckValue] = useState(false);
-  const [selectedTrigger, setSelectedTrigger] = useState();
+  const [selectedTrigger, setSelectedTrigger] = useState(null);
   const [turnAroundCheckValue, setTurnAroundCheckValue] = useState(
     tatInfo?.tatFlag
   );
@@ -106,63 +119,371 @@ function Options(props) {
   const loadedProcessData = store.getState("loadedProcessData");
   const [isFromConstant, setIsFromConstant] = useState(true);
   const [anyError, setAnyError] = useState(false);
+  const [filteredVarList, setFilteredVarList] = useState([]);
+  const [holdUntilList, setHoldUntilList] = useState([]);
+  const [tatInfoDaysType, setTatInfoDaysType] = useState("Y");
+  const [expiryInfoConstantsData, setExpiryInfoConstantsData] = useState({
+    days: "",
+    hours: "",
+    minutes: "",
+    seconds: "",
+  });
+  const [tatInfoConstantsData, setTatInfoConstantsData] = useState({
+    days: "",
+    hours: "",
+    minutes: "",
+    seconds: "",
+  });
+
+  useEffect(() => {
+    const tempObj = {
+      days: "",
+      hours: "",
+      minutes: "",
+      seconds: "",
+    };
+    setExpiryInfoConstantsData(tempObj);
+    setTatInfoConstantsData(tempObj);
+  }, []);
+
+  useEffect(() => {
+    if (variableDefinition) {
+      setFilteredVarList(
+        variableDefinition.filter(
+          (element) =>
+            (element.VariableScope === "U" || element.VariableScope === "I") &&
+            element.VariableType !== "11" &&
+            (element.VariableType === "3" || element.VariableType === "4") &&
+            element.Unbounded === "N"
+        )
+      );
+      setHoldUntilList(
+        variableDefinition.filter(
+          (element) =>
+            element.VariableType !== "11" &&
+            element.VariableType === "8" &&
+            element.Unbounded === "N"
+        )
+      );
+    }
+  }, [variableDefinition]);
+
+  const clearLocalObj = () => {
+    let tempData = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
+    let tempState = tempData?.ActivityProperty?.optionInfo;
+    const obj = {
+      expiryInfo: {
+        expFlag: false,
+      },
+      tatInfo: {
+        tatFlag: false,
+      },
+    };
+    tempState = obj;
+    tempData.ActivityProperty.optionInfo = tempState;
+    setTriggerCheckValue(false);
+    setTurnAroundCheckValue(false);
+    setDays("0");
+    setHours("0");
+    setMinutes("0");
+    setSeconds("0");
+    setTurnAroundDays("0");
+    setTurnAroundHours("0");
+    setTurnAroundMinutes("0");
+    setTurnAroundSeconds("0");
+    setTatInfoDaysType("Y");
+    setlocalLoadedActivityPropertyData(tempData);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.options]: { isModified: true, hasError: false },
+      })
+    );
+  };
+
   const expireStatusHandler = (event) => {
     setExpireStatus(event.target.value);
-    let tempLocalState = { ...localLoadedActivityPropertyData };
-    let expireStatus =
-      localLoadedActivityPropertyData?.ActivityProperty?.optionInfo;
-    // forwardIncomingDocsList &&
-    //   forwardIncomingDocsList.map((document, index) => {
-    //     if (document.ImportedFieldName == variablesToDelete.ImportedFieldName) {
-    //       forwardIncomingDocsList.splice(index, 1);
-    //     }
-    //   });
-    // tempLocalState.ActivityProperty.SubProcess.ForwardMapping.MappedDocument = [
-    //   ...forwardIncomingDocsList,
-    // ];
-    // setlocalLoadedActivityPropertyData(tempLocalState);
+    const expStatus = event.target.value;
+    if (expStatus === t("neverExpires")) {
+      clearLocalObj();
+    } else {
+      let tempData = JSON.parse(
+        JSON.stringify(localLoadedActivityPropertyData)
+      );
+      let tempState = tempData?.ActivityProperty?.optionInfo;
+      const obj = {
+        expiryInfo: {
+          varFieldId_Minutes: "0",
+          holdTillVar: "",
+          variableId_Hours: "0",
+          triggerName: "",
+          expiryActivity: "",
+          triggerId: "0",
+          wfDays: "0",
+          wfMinutes: "0",
+          varFieldId_Seconds: "0",
+          variableId_Minutes: "0",
+          expFlag: true,
+          varFieldId_Hours: "0",
+          expCalFlag: "Y",
+          varFieldId_Days: "0",
+          expiryOperator: "11",
+          variableId_Seconds: "0",
+          variableId_Days: "0",
+          wfSeconds: "0",
+          wfHours: "0",
+        },
+        tatInfo: {
+          tatFlag: false,
+        },
+      };
+      tempState = obj;
+      tempData.ActivityProperty.optionInfo = tempState;
+      setlocalLoadedActivityPropertyData(tempData);
+    }
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.options]: { isModified: true, hasError: false },
+      })
+    );
+  };
+
+  const clearTurnAroundTimeValues = () => {
+    let tempData = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
+    if (turnAroundCheckValue) {
+      const tempObj = {
+        tatFlag: false,
+      };
+      tempData.ActivityProperty.optionInfo.tatInfo = tempObj;
+      setTurnAroundDays("0");
+      setTurnAroundHours("0");
+      setTurnAroundMinutes("0");
+      setTurnAroundSeconds("0");
+      setTatInfoDaysType("Y");
+    } else {
+      tempData.ActivityProperty.optionInfo.tatInfo = {
+        varFieldId_Minutes: "0",
+        variableId_Hours: "0",
+        wfDays: "0",
+        wfMinutes: "0",
+        tatCalFlag: "Y",
+        varFieldId_Seconds: "0",
+        variableId_Minutes: "0",
+        tatFlag: true,
+        varFieldId_Hours: "0",
+        varFieldId_Days: "0",
+        variableId_Seconds: "0",
+        variableId_Days: "0",
+        wfSeconds: "0",
+        wfHours: "0",
+      };
+    }
+    setlocalLoadedActivityPropertyData(tempData);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.options]: { isModified: true, hasError: false },
+      })
+    );
+  };
+
+  const clearTriggerValues = () => {
+    if (!triggerCheckValue) {
+      let tempData = JSON.parse(
+        JSON.stringify(localLoadedActivityPropertyData)
+      );
+      let tempState = tempData?.ActivityProperty?.optionInfo;
+      if (
+        tempState.expiryInfo.hasOwnProperty("triggerId") &&
+        tempState.expiryInfo.hasOwnProperty("triggerName")
+      ) {
+        tempState.expiryInfo.triggerId = "";
+        tempState.expiryInfo.triggerName = "";
+      }
+      setSelectedTrigger(null);
+      tempData.ActivityProperty.optionInfo = tempState;
+      setlocalLoadedActivityPropertyData(tempData);
+      dispatch(
+        setActivityPropertyChange({
+          [propertiesLabel.options]: { isModified: true, hasError: false },
+        })
+      );
+    }
   };
 
   const setDateTimeHandler = (event) => {
     setDateTime(event.target.value);
-    let tempLocalState = { ...localLoadedActivityPropertyData };
-    tempLocalState.ActivityProperty.optionInfo.expiryInfo.holdTillVar =
-      event.target.value;
-    setlocalLoadedActivityPropertyData(tempLocalState);
+    setActivityPropertyData(
+      event.target.value,
+      "expiryInfo",
+      "holdTillVar",
+      "",
+      ""
+    );
+    // let tempLocalState = { ...localLoadedActivityPropertyData };
+    // tempLocalState.ActivityProperty.optionInfo.expiryInfo.holdTillVar =
+    //   event.target.value;
+    // setlocalLoadedActivityPropertyData(tempLocalState);
+  };
+
+  const getVariableDetails = (variableName) => {
+    let tempObj = {
+      variableId: "",
+      varFieldId: "",
+    };
+    variableDefinition?.forEach((element) => {
+      if (element.VariableName === variableName) {
+        tempObj.varFieldId = element.VarFieldId;
+        tempObj.variableId = element.VariableId;
+      }
+    });
+    return tempObj;
+  };
+
+  const getTriggerId = (triggerName) => {
+    let triggerId = "";
+    loadedProcessData.value.TriggerList?.forEach((element) => {
+      if (element.TriggerName === triggerName) {
+        triggerId = element.TriggerId;
+      }
+    });
+    return triggerId;
+  };
+
+  const getTriggerName = (triggerId) => {
+    let triggerName = "";
+    loadedProcessData.value.TriggerList?.forEach((element) => {
+      if (element.TriggerId === triggerId) {
+        triggerName = element.TriggerName;
+      }
+    });
+    return triggerName;
+  };
+
+  const setActivityPropertyData = (
+    value,
+    type,
+    key,
+    varFieldIdKey,
+    variableIdKey
+  ) => {
+    let tempData = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
+    let tempLocalState = tempData?.ActivityProperty?.optionInfo;
+    const variableId = getVariableDetails(value).variableId || "0";
+    const varFieldId = getVariableDetails(value).varFieldId || "0";
+
+    if (type === "expiryInfo") {
+      if (!tempLocalState?.expiryInfo?.hasOwnProperty(key)) {
+        const tempObj = {
+          varFieldId_Minutes: "0",
+          holdTillVar: "",
+          variableId_Hours: "0",
+          triggerName: "",
+          expiryActivity: "",
+          triggerId: "0",
+          wfDays: "0",
+          wfMinutes: "0",
+          varFieldId_Seconds: "0",
+          variableId_Minutes: "0",
+          expFlag: true,
+          varFieldId_Hours: "0",
+          expCalFlag: "",
+          varFieldId_Days: "0",
+          expiryOperator: "",
+          variableId_Seconds: "0",
+          variableId_Days: "0",
+          wfSeconds: "0",
+          wfHours: "0",
+        };
+        tempLocalState.expiryInfo = tempObj;
+      }
+      tempLocalState.expiryInfo[key] = value;
+      if (varFieldIdKey !== "") {
+        tempLocalState.expiryInfo[varFieldIdKey] = varFieldId;
+      }
+      if (variableIdKey !== "") {
+        tempLocalState.expiryInfo[variableIdKey] = variableId;
+      }
+      if (key === "triggerName") {
+        tempLocalState.expiryInfo.triggerId = getTriggerId(value);
+      }
+    } else {
+      if (!tempLocalState?.tatInfo?.hasOwnProperty(key)) {
+        const tempObj = {
+          varFieldId_Minutes: "0",
+          variableId_Hours: "0",
+          wfDays: "0",
+          wfMinutes: "0",
+          tatCalFlag: "",
+          varFieldId_Seconds: "0",
+          variableId_Minutes: "0",
+          tatFlag: true,
+          varFieldId_Hours: "0",
+          varFieldId_Days: "0",
+          variableId_Seconds: "0",
+          variableId_Days: "0",
+          wfSeconds: "0",
+          wfHours: "0",
+        };
+        tempLocalState.tatInfo = tempObj;
+      }
+      tempLocalState.tatInfo[key] = value;
+      if (varFieldIdKey !== "") {
+        tempLocalState.tatInfo[varFieldIdKey] = varFieldId;
+      }
+      if (variableIdKey !== "") {
+        tempLocalState.tatInfo[variableIdKey] = variableId;
+      }
+    }
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.options]: { isModified: true, hasError: false },
+      })
+    );
+    tempData.ActivityProperty.optionInfo = tempLocalState;
+    setlocalLoadedActivityPropertyData(tempData);
   };
 
   const operatorTypeHandler = (e) => {
     setOperatorType(e.target.value);
-    let tempLocalState = { ...localLoadedActivityPropertyData };
-    e.target.value == "+"
-      ? (tempLocalState.ActivityProperty.optionInfo.expiryInfo.expiryOperator =
-          "11")
-      : (tempLocalState.ActivityProperty.optionInfo.expiryInfo.expiryOperator =
-          "12");
-    setlocalLoadedActivityPropertyData(tempLocalState);
+    setActivityPropertyData(
+      e.target.value,
+      "expiryInfo",
+      "expiryOperator",
+      "",
+      ""
+    );
+    // let tempLocalState = { ...localLoadedActivityPropertyData };
+    // e.target.value == "+"
+    //   ? (tempLocalState.ActivityProperty.optionInfo.expiryInfo.expiryOperator =
+    //       "11")
+    //   : (tempLocalState.ActivityProperty.optionInfo.expiryInfo.expiryOperator =
+    //       "12");
+    // setlocalLoadedActivityPropertyData(tempLocalState);
   };
 
   const daysTypeHandler = (e) => {
     setDaysType(e.target.value);
-    let tempLocalState = { ...localLoadedActivityPropertyData };
-    e.target.value == "Working Days"
-      ? (tempLocalState.ActivityProperty.optionInfo.expiryInfo.expCalFlag = "Y")
-      : (tempLocalState.ActivityProperty.optionInfo.expiryInfo.expCalFlag =
-          "N");
-    setlocalLoadedActivityPropertyData(tempLocalState);
+    setActivityPropertyData(e.target.value, "expiryInfo", "expCalFlag", "", "");
+  };
+
+  const tatInfoDaysTypeHandler = (e) => {
+    setTatInfoDaysType(e.target.value);
+    setActivityPropertyData(e.target.value, "tatInfo", "tatCalFlag", "", "");
   };
 
   const routeToHandler = (e) => {
     setRouteTo(e.target.value);
-    let tempLocalState = { ...localLoadedActivityPropertyData };
-    tempLocalState.ActivityProperty.optionInfo.expiryInfo.expiryActivity =
-      e.target.value;
-    setlocalLoadedActivityPropertyData(tempLocalState);
-    // dispatch(
-    //   setActivityPropertyChange({
-    //     Options: { isModified: true, hasError: false },
-    //   })
-    // );
+    setActivityPropertyData(
+      e.target.value,
+      "expiryInfo",
+      "expiryActivity",
+      "",
+      ""
+    );
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.options]: { isModified: true, hasError: false },
+      })
+    );
   };
 
   useEffect(() => {
@@ -181,25 +502,48 @@ function Options(props) {
       localLoadedActivityPropertyData?.ActivityProperty?.optionInfo?.expiryInfo
         ?.expiryActivity
     );
-
-    setOperatorType(
+    let expOperator =
       localLoadedActivityPropertyData?.ActivityProperty?.optionInfo?.expiryInfo
-        ?.expiryOperator == "11"
-        ? "+"
-        : "-"
-    );
-
-    setDaysType(
+        ?.expiryOperator;
+    if (expOperator?.trim() !== "" && expOperator) {
+      setOperatorType(
+        localLoadedActivityPropertyData?.ActivityProperty?.optionInfo
+          ?.expiryInfo?.expiryOperator
+      );
+    }
+    let expCalFlag =
       localLoadedActivityPropertyData?.ActivityProperty?.optionInfo?.expiryInfo
-        ?.expCalFlag == "Y"
-        ? "Working Days"
-        : "Calender Days"
-    );
+        ?.expCalFlag;
+    if (expCalFlag?.trim() !== "" && expCalFlag) {
+      setDaysType(
+        localLoadedActivityPropertyData?.ActivityProperty?.optionInfo
+          ?.expiryInfo?.expCalFlag
+      );
+    }
+    let tatCalFlag =
+      localLoadedActivityPropertyData?.ActivityProperty?.optionInfo?.tatInfo
+        ?.tatCalFlag;
+    if (tatCalFlag?.trim() !== "" && tatCalFlag) {
+      setTatInfoDaysType(
+        localLoadedActivityPropertyData?.ActivityProperty?.optionInfo?.tatInfo
+          ?.tatCalFlag
+      );
+    }
+    let triggerIdValue =
+      localLoadedActivityPropertyData?.ActivityProperty?.optionInfo?.expiryInfo
+        ?.triggerId;
+    if (
+      triggerIdValue?.trim() !== "" &&
+      triggerIdValue &&
+      triggerIdValue !== "0"
+    ) {
+      setTriggerCheckValue(true);
+      setSelectedTrigger(getTriggerName(triggerIdValue));
+    }
   }, [localLoadedActivityPropertyData]);
 
   useEffect(() => {
     let temp = JSON.parse(JSON.stringify(tabStatus));
-    console.log("ERROS", errorsObj);
     // if (Object.values(errorsObj).includes(true)) {
     //   temp.Options.hasError = true;
 
@@ -211,12 +555,6 @@ function Options(props) {
     // }
   }, [errorsObj]);
 
-  // useEffect(() => {
-  //   if (tabStatus.Options.hasError) {
-  //     setErrorsObj({ hours: true, minutes: true, seconds: true });
-  //   }
-  // }, [tabStatus.Options.hasError]);
-
   return (
     <div id="OptionsTab">
       <div>
@@ -224,6 +562,7 @@ function Options(props) {
           defaultValue={t("neverExpires")}
           onChange={(e) => expireStatusHandler(e)}
           row={true}
+          value={expireStatus}
           name="row-radio-buttons-group"
         >
           <FormControlLabel
@@ -269,16 +608,14 @@ function Options(props) {
                 getContentAnchorEl: null,
               }}
             >
-              {variableDefinition.map((variable) => {
-                if (variable.VariableType == 8) {
-                  return (
-                    <MenuItem value={variable.VariableName}>
-                      <em style={{ fontSize: "12px", fontStyle: "normal" }}>
-                        {variable.VariableName}
-                      </em>
-                    </MenuItem>
-                  );
-                }
+              {holdUntilList?.map((variable) => {
+                return (
+                  <MenuItem value={variable.VariableName}>
+                    <em style={{ fontSize: "12px", fontStyle: "normal" }}>
+                      {variable.VariableName}
+                    </em>
+                  </MenuItem>
+                );
               })}
             </Select>
           </FormControl>
@@ -288,7 +625,6 @@ function Options(props) {
               inputProps={{ "aria-label": "Without label" }}
               value={operatorType}
               onChange={(e) => operatorTypeHandler(e)}
-              displayEmpty
               className="selectPlusMinus_options"
               MenuProps={{
                 anchorOrigin: {
@@ -302,10 +638,10 @@ function Options(props) {
                 getContentAnchorEl: null,
               }}
             >
-              <MenuItem style={{ fontSize: "12px" }} value="+">
+              <MenuItem style={{ fontSize: "12px" }} value="11">
                 +
               </MenuItem>
-              <MenuItem style={{ fontSize: "12px" }} value="-">
+              <MenuItem style={{ fontSize: "12px" }} value="12">
                 -
               </MenuItem>
             </Select>
@@ -324,21 +660,21 @@ function Options(props) {
                 {t("days")}
               </span>
               <SelectWithInput
-                dropdownOptions={variableDefinition.filter((variable) => {
-                  return variable.VariableType === 3;
-                })}
+                dropdownOptions={filteredVarList}
                 showError={true}
                 optionKey="VariableName"
-                setIsConstant={setIsFromConstant}
                 setValue={(val) => {
                   setDays(val);
-                  let tempLocalState = { ...localLoadedActivityPropertyData };
-                  tempLocalState.ActivityProperty.optionInfo.expiryInfo.wfDays =
-                    val;
-                  setlocalLoadedActivityPropertyData(tempLocalState);
+                  setActivityPropertyData(
+                    !isNaN(val) ? val : val?.VariableName,
+                    "expiryInfo",
+                    "wfDays",
+                    "varFieldId_Days",
+                    "variableId_Days"
+                  );
                 }}
                 value={days}
-                isConstant={isFromConstant}
+                isConstant={!isNaN(days)}
                 inputClass="selectWithInputTextField_WS"
                 constantInputClass="multiSelectConstInput_WS"
                 selectWithInput="selectWithInput_WS"
@@ -361,28 +697,34 @@ function Options(props) {
                 {t("Hour(s)")}
               </span>
               <SelectWithInput
-                dropdownOptions={variableDefinition.filter((variable) => {
-                  return variable.VariableType == 3;
-                })}
+                dropdownOptions={filteredVarList}
                 optionKey="VariableName"
-                setIsConstant={setIsFromConstant}
                 setValue={(val) => {
                   setHours(val);
-                  let tempLocalState = { ...localLoadedActivityPropertyData };
-                  tempLocalState.ActivityProperty.optionInfo.expiryInfo.wfHours =
-                    val;
-                  setlocalLoadedActivityPropertyData(tempLocalState);
                   let tempObj = { ...errorsObj };
-                  if (val > 24) {
-                    tempObj.hours = true;
+                  if (!isNaN(val)) {
+                    if (val > 24) {
+                      tempObj.hours = true;
+                    } else {
+                      tempObj.hours = false;
+                    }
                   } else {
                     tempObj.hours = false;
                   }
                   setErrorsObj(tempObj);
+                  if (!tempObj.hours) {
+                    setActivityPropertyData(
+                      !isNaN(val) ? val : val?.VariableName,
+                      "expiryInfo",
+                      "wfHours",
+                      "varFieldId_Hours",
+                      "variableId_Hours"
+                    );
+                  }
                 }}
                 showError={true}
                 value={hours}
-                isConstant={isFromConstant}
+                isConstant={!isNaN(hours)}
                 inputClass="selectWithInputTextField_WS"
                 constantInputClass="multiSelectConstInput_WS"
                 selectWithInput="selectWithInput_WS"
@@ -391,7 +733,7 @@ function Options(props) {
                 disabled={
                   expireStatus == t("neverExpires") || isProcessReadOnly
                 }
-                idTag="hours_select_input"
+                id="hours_select_input"
               />
             </div>
             {hours > 24 ? (
@@ -416,37 +758,34 @@ function Options(props) {
                 {t("minutes")}
               </span>
               <SelectWithInput
-                dropdownOptions={variableDefinition.filter((variable) => {
-                  return variable.VariableType == 3;
-                })}
+                dropdownOptions={filteredVarList}
                 showError={true}
                 optionKey="VariableName"
-                setIsConstant={setIsFromConstant}
-                // setValue={(val) => {
-                //   setMinutes(val);
-                //   let tempLocalState = { ...localLoadedActivityPropertyData };
-                //   tempLocalState.ActivityProperty.optionInfo.expiryInfo.wfMinutes =
-                //     val;
-                //   setlocalLoadedActivityPropertyData(tempLocalState);
-                //   if(val>60){setErrorsObj(prev=> prev.minutes=true)}
-                // }}
-
                 setValue={(val) => {
                   setMinutes(val);
-                  let tempLocalState = { ...localLoadedActivityPropertyData };
-                  tempLocalState.ActivityProperty.optionInfo.expiryInfo.wfHours =
-                    val;
-                  setlocalLoadedActivityPropertyData(tempLocalState);
                   let tempObj = { ...errorsObj };
-                  if (val > 60) {
-                    tempObj.minutes = true;
+                  if (!isNaN(val)) {
+                    if (val > 60) {
+                      tempObj.minutes = true;
+                    } else {
+                      tempObj.minutes = false;
+                    }
                   } else {
                     tempObj.minutes = false;
                   }
                   setErrorsObj(tempObj);
+                  if (!tempObj.minutes) {
+                    setActivityPropertyData(
+                      !isNaN(val) ? val : val?.VariableName,
+                      "expiryInfo",
+                      "wfMinutes",
+                      "varFieldId_Minutes",
+                      "variableId_Minutes"
+                    );
+                  }
                 }}
                 value={minutes}
-                isConstant={isFromConstant}
+                isConstant={!isNaN(minutes)}
                 inputClass="selectWithInputTextField_WS"
                 constantInputClass="multiSelectConstInput_WS"
                 selectWithInput="selectWithInput_WS"
@@ -455,7 +794,7 @@ function Options(props) {
                 disabled={
                   expireStatus == t("neverExpires") || isProcessReadOnly
                 }
-                idTag="mins_select_input"
+                id="mins_select_input"
               />
             </div>
             {minutes > 60 ? (
@@ -481,37 +820,34 @@ function Options(props) {
                 {t("seconds")}
               </span>
               <SelectWithInput
-                dropdownOptions={variableDefinition.filter((variable) => {
-                  return variable.VariableType == 3;
-                })}
+                dropdownOptions={filteredVarList}
                 showError={true}
                 optionKey="VariableName"
-                setIsConstant={setIsFromConstant}
-                // setValue={(val) => {
-                //   setSeconds(val);
-                //   let tempLocalState = { ...localLoadedActivityPropertyData };
-                //   tempLocalState.ActivityProperty.optionInfo.expiryInfo.wfSeconds =
-                //     val;
-                //   setlocalLoadedActivityPropertyData(tempLocalState);
-                //   if(val>60){setErrorsObj(prev=> prev.seconds=true)}
-                // }}
-
                 setValue={(val) => {
                   setSeconds(val);
-                  let tempLocalState = { ...localLoadedActivityPropertyData };
-                  tempLocalState.ActivityProperty.optionInfo.expiryInfo.wfHours =
-                    val;
-                  setlocalLoadedActivityPropertyData(tempLocalState);
                   let tempObj = { ...errorsObj };
-                  if (val > 60) {
-                    tempObj.seconds = true;
+                  if (!isNaN(val)) {
+                    if (val > 60) {
+                      tempObj.seconds = true;
+                    } else {
+                      tempObj.seconds = false;
+                    }
                   } else {
                     tempObj.seconds = false;
                   }
                   setErrorsObj(tempObj);
+                  if (!tempObj.seconds) {
+                    setActivityPropertyData(
+                      !isNaN(val) ? val : val?.VariableName,
+                      "expiryInfo",
+                      "wfSeconds",
+                      "varFieldId_Seconds",
+                      "variableId_Seconds"
+                    );
+                  }
                 }}
                 value={seconds}
-                isConstant={isFromConstant}
+                isConstant={!isNaN(seconds)}
                 inputClass="selectWithInputTextField_WS"
                 constantInputClass="multiSelectConstInput_WS"
                 selectWithInput="selectWithInput_WS"
@@ -520,7 +856,7 @@ function Options(props) {
                 disabled={
                   expireStatus == t("neverExpires") || isProcessReadOnly
                 }
-                idTag="seconds_select_input"
+                id="seconds_select_input"
               />
             </div>
             {seconds > 60 ? (
@@ -558,12 +894,12 @@ function Options(props) {
               getContentAnchorEl: null,
             }}
           >
-            <MenuItem value={t("workingDays")}>
+            <MenuItem value={"Y"}>
               <em style={{ fontSize: "12px", fontStyle: "normal" }}>
                 {t("workingDays")}
               </em>
             </MenuItem>
-            <MenuItem value={t("calenderDays")} style={{ fontSize: "12px" }}>
+            <MenuItem value={"N"} style={{ fontSize: "12px" }}>
               <em style={{ fontSize: "12px", fontStyle: "normal" }}>
                 {t("calenderDays")}
               </em>
@@ -630,9 +966,10 @@ function Options(props) {
                 disabled={
                   expireStatus == t("neverExpires") || isProcessReadOnly
                 }
-                check={triggerCheckValue}
+                checked={triggerCheckValue}
                 onChange={() => {
                   setTriggerCheckValue(!triggerCheckValue);
+                  clearTriggerValues();
                 }}
                 size="small"
                 style={{
@@ -652,7 +989,16 @@ function Options(props) {
               }
               inputProps={{ "aria-label": "Without label" }}
               value={selectedTrigger}
-              onChange={(e) => setSelectedTrigger(e.target.value)}
+              onChange={(e) => {
+                setSelectedTrigger(e.target.value);
+                setActivityPropertyData(
+                  e.target.value,
+                  "expiryInfo",
+                  "triggerName",
+                  "",
+                  ""
+                );
+              }}
               displayEmpty
               className="time_Options"
               MenuProps={{
@@ -687,8 +1033,11 @@ function Options(props) {
                 checked={turnAroundCheckValue}
                 onChange={() => {
                   setTurnAroundCheckValue(!turnAroundCheckValue);
+                  clearTurnAroundTimeValues();
                 }}
-                disabled={isProcessReadOnly}
+                disabled={
+                  expireStatus == t("neverExpires") || isProcessReadOnly
+                }
                 size="small"
                 style={{ fontSize: "10px", marginLeft: "8px" }}
               />
@@ -708,30 +1057,28 @@ function Options(props) {
                   {t("days")}
                 </span>
                 <SelectWithInput
-                  dropdownOptions={variableDefinition.filter((variable) => {
-                    return variable.VariableType == 3;
-                  })}
+                  dropdownOptions={filteredVarList}
                   showError={true}
                   optionKey="VariableName"
-                  setIsConstant={setIsFromConstant}
                   setValue={(val) => {
                     setTurnAroundDays(val);
-                    let tempLocalState = {
-                      ...localLoadedActivityPropertyData,
-                    };
-                    tempLocalState.ActivityProperty.optionInfo.tatInfo.wfDays =
-                      val;
-                    setlocalLoadedActivityPropertyData(tempLocalState);
+                    setActivityPropertyData(
+                      !isNaN(val) ? val : val?.VariableName,
+                      "tatInfo",
+                      "wfDays",
+                      "varFieldId_Days",
+                      "variableId_Days"
+                    );
                   }}
                   value={turnAroundDays}
-                  isConstant={isFromConstant}
+                  isConstant={!isNaN(turnAroundDays)}
                   inputClass="selectWithInputTextField_WS"
                   constantInputClass="multiSelectConstInput_WS"
                   selectWithInput="selectWithInput_WS"
                   showEmptyString={false}
                   showConstValue={true}
                   disabled={!turnAroundCheckValue || isProcessReadOnly}
-                  idTag="turnDays_select_input"
+                  id="turnDays_select_input"
                 />
               </div>
               <div className="options_time">
@@ -745,30 +1092,41 @@ function Options(props) {
                   {t("Hour(s)")}
                 </span>
                 <SelectWithInput
-                  dropdownOptions={variableDefinition.filter((variable) => {
-                    return variable.VariableType == 3;
-                  })}
+                  dropdownOptions={filteredVarList}
                   showError={true}
                   optionKey="VariableName"
-                  setIsConstant={setIsFromConstant}
                   setValue={(val) => {
                     setTurnAroundHours(val);
-                    let tempLocalState = {
-                      ...localLoadedActivityPropertyData,
-                    };
-                    tempLocalState.ActivityProperty.optionInfo.tatInfo.wfHours =
-                      val;
-                    setlocalLoadedActivityPropertyData(tempLocalState);
+                    let tempObj = { ...tatErrorObj };
+                    if (!isNaN(val)) {
+                      if (val > 24) {
+                        tempObj.hours = true;
+                      } else {
+                        tempObj.hours = false;
+                      }
+                    } else {
+                      tempObj.hours = false;
+                    }
+                    setTatErrorObj(tempObj);
+                    if (!tempObj.hours) {
+                      setActivityPropertyData(
+                        !isNaN(val) ? val : val?.VariableName,
+                        "tatInfo",
+                        "wfHours",
+                        "varFieldId_Hours",
+                        "variableId_Hours"
+                      );
+                    }
                   }}
                   value={turnAroundHours}
-                  isConstant={isFromConstant}
+                  isConstant={!isNaN(turnAroundHours)}
                   inputClass="selectWithInputTextField_WS"
                   constantInputClass="multiSelectConstInput_WS"
                   selectWithInput="selectWithInput_WS"
                   showEmptyString={false}
                   showConstValue={true}
                   disabled={!turnAroundCheckValue || isProcessReadOnly}
-                  idTag="turnHours_select_input"
+                  id="turnHours_select_input"
                 />
               </div>
               {turnAroundHours > 24 ? (
@@ -793,30 +1151,41 @@ function Options(props) {
                   {t("minutes")}
                 </span>
                 <SelectWithInput
-                  dropdownOptions={variableDefinition.filter((variable) => {
-                    return variable.VariableType == 3;
-                  })}
+                  dropdownOptions={filteredVarList}
                   showError={true}
                   optionKey="VariableName"
-                  setIsConstant={setIsFromConstant}
                   setValue={(val) => {
                     setTurnAroundMinutes(val);
-                    let tempLocalState = {
-                      ...localLoadedActivityPropertyData,
-                    };
-                    tempLocalState.ActivityProperty.optionInfo.tatInfo.wfMinutes =
-                      val;
-                    setlocalLoadedActivityPropertyData(tempLocalState);
+                    let tempObj = { ...tatErrorObj };
+                    if (!isNaN(val)) {
+                      if (val > 60) {
+                        tempObj.minutes = true;
+                      } else {
+                        tempObj.minutes = false;
+                      }
+                    } else {
+                      tempObj.minutes = false;
+                    }
+                    setTatErrorObj(tempObj);
+                    if (!tempObj.minutes) {
+                      setActivityPropertyData(
+                        !isNaN(val) ? val : val?.VariableName,
+                        "tatInfo",
+                        "wfMinutes",
+                        "varFieldId_Minutes",
+                        "variableId_Minutes"
+                      );
+                    }
                   }}
                   value={turnAroundMinutes}
-                  isConstant={isFromConstant}
+                  isConstant={!isNaN(turnAroundMinutes)}
                   inputClass="selectWithInputTextField_WS"
                   constantInputClass="multiSelectConstInput_WS"
                   selectWithInput="selectWithInput_WS"
                   showEmptyString={false}
                   showConstValue={true}
                   disabled={!turnAroundCheckValue || isProcessReadOnly}
-                  idTag="turnMins_select_input"
+                  id="turnMins_select_input"
                 />
               </div>
               {turnAroundMinutes > 60 ? (
@@ -841,30 +1210,41 @@ function Options(props) {
                   {t("seconds")}
                 </span>
                 <SelectWithInput
-                  dropdownOptions={variableDefinition.filter((variable) => {
-                    return variable.VariableType == 3;
-                  })}
+                  dropdownOptions={filteredVarList}
                   showError={true}
                   optionKey="VariableName"
-                  setIsConstant={setIsFromConstant}
                   setValue={(val) => {
                     setTurnAroundSeconds(val);
-                    let tempLocalState = {
-                      ...localLoadedActivityPropertyData,
-                    };
-                    tempLocalState.ActivityProperty.optionInfo.tatInfo.wfSeconds =
-                      val;
-                    setlocalLoadedActivityPropertyData(tempLocalState);
+                    let tempObj = { ...tatErrorObj };
+                    if (!isNaN(val)) {
+                      if (val > 60) {
+                        tempObj.seconds = true;
+                      } else {
+                        tempObj.seconds = false;
+                      }
+                    } else {
+                      tempObj.seconds = false;
+                    }
+                    setTatErrorObj(tempObj);
+                    if (!tempObj.seconds) {
+                      setActivityPropertyData(
+                        !isNaN(val) ? val : val?.VariableName,
+                        "tatInfo",
+                        "wfSeconds",
+                        "varFieldId_Seconds",
+                        "variableId_Seconds"
+                      );
+                    }
                   }}
                   value={turnAroundSeconds}
-                  isConstant={isFromConstant}
+                  isConstant={!isNaN(turnAroundSeconds)}
                   inputClass="selectWithInputTextField_WS"
                   constantInputClass="multiSelectConstInput_WS"
                   selectWithInput="selectWithInput_WS"
                   showEmptyString={false}
                   showConstValue={true}
                   disabled={!turnAroundCheckValue || isProcessReadOnly}
-                  idTag="turnSecs_select_input"
+                  id="turnSecs_select_input"
                 />
               </div>
               {turnAroundSeconds > 60 ? (
@@ -879,6 +1259,44 @@ function Options(props) {
                 </p>
               ) : null}
             </div>
+            <Select
+              disabled={
+                expireStatus == t("neverExpires") ||
+                !turnAroundCheckValue ||
+                isProcessReadOnly
+              }
+              inputProps={{ "aria-label": "Without label" }}
+              value={tatInfoDaysType}
+              onChange={(e) => tatInfoDaysTypeHandler(e)}
+              displayEmpty
+              style={{
+                marginLeft: direction == RTL_DIRECTION ? "0px" : "50px",
+                marginRight: direction == RTL_DIRECTION ? "50px" : "0px",
+              }}
+              className="time_Options"
+              MenuProps={{
+                anchorOrigin: {
+                  vertical: "bottom",
+                  horizontal: "left",
+                },
+                transformOrigin: {
+                  vertical: "top",
+                  horizontal: "left",
+                },
+                getContentAnchorEl: null,
+              }}
+            >
+              <MenuItem value={"Y"}>
+                <em style={{ fontSize: "12px", fontStyle: "normal" }}>
+                  {t("workingDays")}
+                </em>
+              </MenuItem>
+              <MenuItem value={"N"} style={{ fontSize: "12px" }}>
+                <em style={{ fontSize: "12px", fontStyle: "normal" }}>
+                  {t("calenderDays")}
+                </em>
+              </MenuItem>
+            </Select>
           </div>
         </div>
       </div>

@@ -15,17 +15,25 @@ import {
   RTL_DIRECTION,
   SERVER_URL,
   MENUOPTION_DEPLOY,
+  userRightsMenuNames,
 } from "../../../../../Constants/appConstants";
-import { connect } from "react-redux";
+import { connect, useSelector } from "react-redux";
 import { template } from "suneditor/src/plugins";
 import { useTranslation } from "react-i18next";
 import DeployProcess from "../../../../../components/DeployProcess/DeployProcess.js";
 import ProcessDeployment from "../../ProcessValidation/ProcessDeployment/DeploySucessModal.js";
 import ProcessDeploymentFailed from "../../ProcessValidation/ProcessDeployment/DeployFailedModal.js";
+import { UserRightsValue } from "../../../../../redux-store/slices/UserRightsSlice";
+import { getMenuNameFlag } from "../../../../../utility/UserRightsFunctions";
 
 function ProcessValidation(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
+  const userRightsValue = useSelector(UserRightsValue);
+  const registerProcessRightsFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.registerProcess
+  );
   const BorderLinearProgress = withStyles((theme) => ({
     root: {
       height: 10,
@@ -41,7 +49,12 @@ function ProcessValidation(props) {
       backgroundColor: "#619548",
     },
   }))(LinearProgress);
-  let {errorVariables, setErrorVariables, warningVariables, setWarningVariables} = props; 
+  let {
+    errorVariables,
+    setErrorVariables,
+    warningVariables,
+    setWarningVariables,
+  } = props;
   const [isDrawerMinimised, setIsDrawerMinimised] = useState(false);
   const [showDeployModal, setShowDeployModal] = useState(false);
   const [action, setAction] = useState(null);
@@ -210,7 +223,10 @@ function ProcessValidation(props) {
           style={{
             display: "flex",
             alignItems: "center",
-            width: errorVariables.length == 0 && warningVariables.length == 0 ? null : "125px",
+            width:
+              errorVariables.length == 0 && warningVariables.length == 0
+                ? null
+                : "125px",
             justifyContent: "space-between",
           }}
         >
@@ -232,7 +248,8 @@ function ProcessValidation(props) {
               Validate
             </Button>
           )}
-          {errorVariables.length == 0 && warningVariables.length == 0 ? null : isDrawerMinimised ? (
+          {errorVariables.length == 0 &&
+          warningVariables.length == 0 ? null : isDrawerMinimised ? (
             <CheckBoxOutlineBlankIcon
               style={{
                 cursor: "pointer",
@@ -249,7 +266,9 @@ function ProcessValidation(props) {
             />
           )}
 
-          {errorVariables.length == 0 && warningVariables.length == 0 ? (
+          {registerProcessRightsFlag &&
+          errorVariables.length == 0 &&
+          warningVariables.length == 0 ? (
             <button
               className="deployButton"
               // onClick={() => setShowDeployModal(true)}

@@ -192,6 +192,8 @@ export const collapseExpandCell = (
             (!cell.collapsed || cell.collapsed === false)
           ) {
             cell.style = "tasklane_collapsed";
+            // code added on 17 June 2022 for BugId 110174
+            graph.isTasklaneExpanded = false;
             cell.previousHeight = cell.geometry.height;
             cell.geometry.height = gridSize;
             cell.setCollapsed(true);
@@ -246,6 +248,8 @@ export const collapseExpandCell = (
             cell.collapsed === true
           ) {
             cell.style = "tasklane";
+            // code added on 17 June 2022 for BugId 110174
+            graph.isTasklaneExpanded = true;
             cell.geometry.height = cell.previousHeight;
             cell.setCollapsed(false);
             let tasklane = task_array[cell.id];

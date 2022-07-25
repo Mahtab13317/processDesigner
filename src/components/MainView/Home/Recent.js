@@ -49,7 +49,7 @@ function Recent() {
     async function fetchRecentsData() {
       try {
         const res = await axios.get(
-          SERVER_URL_LAUNCHPAD + ENDPOINT_FETCHRECENTS
+          SERVER_URL_LAUNCHPAD + ENDPOINT_FETCHRECENTS + "/1"
         );
         setrecentsData(res.data);
       } catch (err) {

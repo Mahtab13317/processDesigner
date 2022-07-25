@@ -1,34 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { Select, MenuItem } from "@material-ui/core";
-import { store, useGlobalState } from "state-pool";
 
 function ReusableOneMap(props) {
-  const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [selectedMappingField, setSelectedMappingField] = useState(null);
 
-  console.log('invocationType', props.invocationType);
-const handleFieldMapping=(e)=>{
-  setSelectedMappingField(e.target.value);
-  props.handleFieldMapping(e.target.value);
-}
+  const handleFieldMapping = (e) => {
+    setSelectedMappingField(e.target.value);
+    props.handleFieldMapping(e.target.value);
+  };
 
-useEffect(() => {
-  setSelectedMappingField(props.varField)
-}, [props.varField])
+  useEffect(() => {
+    setSelectedMappingField(props.varField);
+  }, [props.varField]);
 
   return (
-    <div style={{ display: "flex", marginBottom:'8px'}}>
+    <div style={{ display: "flex", marginBottom: "8px" }}>
       <div
         style={{
-          width: "220px",
+          flex: "1",
           height: "30px",
           border: "1px solid #F3F3F3",
           borderRadius: "2px",
           opacity: "1",
           marginRight: "10px",
-          fontSize:'12px', 
-          padding:'7px'
+          fontSize: "12px",
+          padding: "7px",
+          textOverflow: "ellipsis",
+          overflow: "hidden",
         }}
       >
         {props.mapField}
@@ -43,15 +41,15 @@ useEffect(() => {
       <Select
         onChange={(e) => handleFieldMapping(e)}
         style={{
-          width: "220px",
+          flex: "1",
           height: "30px",
           border: "1px solid #F3F3F3",
           borderRadius: "2px",
-          opacity: "1",
-          padding:'7px',
-          fontSize:'12px'
+          padding: "7px",
+          fontSize: "12px",
+          overflow: "hidden"
         }}
-        disabled={props.invocationType == 'F'? true:false}
+        disabled={props.invocationType == "F" ? true : false}
         value={selectedMappingField}
         MenuProps={{
           anchorOrigin: {
@@ -63,6 +61,11 @@ useEffect(() => {
             horizontal: "left",
           },
           getContentAnchorEl: null,
+          PaperProps: {
+            style: {
+              maxHeight: "10rem",
+            },
+          },
         }}
       >
         {props.dropDownOptions.map((loadedVar) => {
@@ -72,7 +75,7 @@ useEffect(() => {
               value={loadedVar}
               style={{
                 fontSize: "12px",
-                padding: "4px"
+                padding: "4px",
               }}
             >
               {loadedVar[props.dropDownKey]}

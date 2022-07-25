@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import React from "react";
+import styles from "./index.module.css";
 import MenuIcon from "@material-ui/icons/Menu";
 import CloseIcon from "@material-ui/icons/Close";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import deploy from "../../../assets/Header/deploy.svg";
-import { connect } from "react-redux";
+import { connect, useSelector } from "react-redux";
 import "./Header.css";
 import ProcessDeployment from "./ProcessValidation/ProcessDeployment/DeploySucessModal.js";
 import ProcessDeploymentFailed from "./ProcessValidation/ProcessDeployment/DeployFailedModal.js";
@@ -33,6 +34,7 @@ import {
   PROCESSTYPE_REGISTERED,
   PROCESS_CHECKOUT,
   SERVER_URL_LAUNCHPAD,
+  userRightsMenuNames,
 } from "../../../Constants/appConstants";
 import { ClickAwayListener } from "@material-ui/core";
 import Modal from "../../../UI/Modal/Modal.js";
@@ -50,7 +52,6 @@ import EnableProcess from "./Modals/EnableProcess";
 import SaveAsNewVersion from "./Modals/SaveAsNewVersion";
 import SaveAsNewDraft from "./Modals/SaveAsNewDraft";
 import ProjectReport from "./Modals/ProjectReport";
-
 import { Card, CardContent } from "@material-ui/core";
 import VersionHistory from "./Modals/VersionHistory";
 import axios from "axios";
@@ -61,10 +62,47 @@ import Box from "@material-ui/core/Box";
 import Drawer from "@material-ui/core/Drawer";
 import Button from "@material-ui/core/Button";
 import ProcessValidation from "./ProcessValidation/ProcessProgress/index";
+import { UserRightsValue } from "../../../redux-store/slices/UserRightsSlice";
+import { getMenuNameFlag } from "../../../utility/UserRightsFunctions";
 
 function Header(props) {
   let { t } = useTranslation();
   const history = useHistory();
+  const userRightsValue = useSelector(UserRightsValue);
+  const saveProcessRightsFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.saveProcess
+  );
+  const makerCheckerRightsFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.makerChecker
+  );
+
+  const importProcessRightsFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.importProcess
+  );
+
+  const exportProcessRightsFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.exportProcess
+  );
+
+  const reportGenerationRightsFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.reportGeneration
+  );
+
+  const deleteProcessRightsFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.deleteProcess
+  );
+
+  const registerProcessRightsFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.registerProcess
+  );
+
   const [showMore, setShowMore] = useState(false);
   const openProcessesArr = store.getState("openProcessesArr"); //array of keys of processdata stored
   const arrProcessesData = store.getState("arrProcessesData"); //array of processdata stored
@@ -87,6 +125,7 @@ function Header(props) {
   const [isDrawerMinimised, setIsDrawerMinimised] = useState(false);
   const [errorVariables, setErrorVariables] = useState([]);
   const [warningVariables, setWarningVariables] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (props.openProcessType === PROCESSTYPE_LOCAL) {
@@ -332,21 +371,23 @@ function Header(props) {
             props.openTemplateFlag ? null : (
               <div className="moreBtnDropdown">
                 <ul>
-                  <li
-                    className="moreOptions"
-                    onClick={() => handleProcessAction(MENUOPTION_SAVE_NEW_V)}
-                    style={{
-                      display:
-                        props.openProcessType !== PROCESSTYPE_LOCAL
-                          ? "none"
-                          : processData.CheckedOut === PROCESS_CHECKOUT
-                          ? "none"
-                          : "",
-                    }}
-                    id="saveAsNewVersion_btn"
-                  >
-                    {t("saveAsNewVersion")}
-                  </li>
+                  {saveProcessRightsFlag && (
+                    <li
+                      className="moreOptions"
+                      onClick={() => handleProcessAction(MENUOPTION_SAVE_NEW_V)}
+                      style={{
+                        display:
+                          props.openProcessType !== PROCESSTYPE_LOCAL
+                            ? "none"
+                            : processData.CheckedOut === PROCESS_CHECKOUT
+                            ? "none"
+                            : "",
+                      }}
+                      id="saveAsNewVersion_btn"
+                    >
+                      {t("saveAsNewVersion")}
+                    </li>
+                  )}
                   <li
                     className="moreOptions"
                     onClick={() =>
@@ -464,45 +505,51 @@ function Header(props) {
                       {t("unpin")} {t("process")}
                     </li>
                   )}
-                  <li
-                    className="moreOptions"
-                    onClick={() => handleProcessAction(MENUOPTION_IMPORT)}
-                    style={{
-                      display:
-                        processData.CheckedOut === PROCESS_CHECKOUT
-                          ? "none"
-                          : "",
-                    }}
-                    id="header_delete_btn"
-                  >
-                    {t("import")} {t("process")}
-                  </li>
-                  <li
-                    className="moreOptions"
-                    onClick={() => handleProcessAction(MENUOPTION_EXPORT)}
-                    style={{
-                      display:
-                        processData.CheckedOut === PROCESS_CHECKOUT
-                          ? "none"
-                          : "",
-                    }}
-                    id="header_delete_btn"
-                  >
-                    {t("export")} {t("processC")}
-                  </li>
-                  <li
-                    className="moreOptions"
-                    onClick={() => handleProcessAction(MENUOPTION_DELETE)}
-                    style={{
-                      display:
-                        processData.CheckedOut === PROCESS_CHECKOUT
-                          ? "none"
-                          : "",
-                    }}
-                    id="header_delete_btn"
-                  >
-                    {t("delete")} {t("processC")}
-                  </li>
+                  {importProcessRightsFlag && (
+                    <li
+                      className="moreOptions"
+                      onClick={() => handleProcessAction(MENUOPTION_IMPORT)}
+                      style={{
+                        display:
+                          processData.CheckedOut === PROCESS_CHECKOUT
+                            ? "none"
+                            : "",
+                      }}
+                      id="header_delete_btn"
+                    >
+                      {t("import")} {t("process")}
+                    </li>
+                  )}
+                  {exportProcessRightsFlag && (
+                    <li
+                      className="moreOptions"
+                      onClick={() => handleProcessAction(MENUOPTION_EXPORT)}
+                      style={{
+                        display:
+                          processData.CheckedOut === PROCESS_CHECKOUT
+                            ? "none"
+                            : "",
+                      }}
+                      id="header_delete_btn"
+                    >
+                      {t("export")} {t("processC")}
+                    </li>
+                  )}
+                  {deleteProcessRightsFlag && (
+                    <li
+                      className="moreOptions"
+                      onClick={() => handleProcessAction(MENUOPTION_DELETE)}
+                      style={{
+                        display:
+                          processData.CheckedOut === PROCESS_CHECKOUT
+                            ? "none"
+                            : "",
+                      }}
+                      id="header_delete_btn"
+                    >
+                      {t("delete")} {t("processC")}
+                    </li>
+                  )}
                   <li
                     className="moreOptions"
                     onClick={() => handleProcessAction(MENUOPTION_DISABLE)}
@@ -533,14 +580,27 @@ function Header(props) {
                   >
                     {t("enable")} {t("processC")}
                   </li>
-
-                  <li
-                    className="moreOptions"
-                    onClick={handleProcessReport}
-                    id="process_report_btn"
-                  >
-                    {t("processReport")}
-                  </li>
+                  {reportGenerationRightsFlag && (
+                    <li
+                      className="moreOptions"
+                      onClick={handleProcessReport}
+                      id="process_report_btn"
+                    >
+                      {t("processReport")}
+                    </li>
+                  )}
+                  {makerCheckerRightsFlag && (
+                    <li
+                      className="moreOptions"
+                      onClick={() => {
+                        window.loadInboxMC();
+                        setIsModalOpen(true);
+                      }}
+                      id="maker_checker_btn"
+                    >
+                      {"Maker Checker"}
+                    </li>
+                  )}
                 </ul>
               </div>
             )
@@ -550,7 +610,7 @@ function Header(props) {
           <button className="deployButton" id="useTemplate_btn">
             <span className="deployText">{t("UseThisTemplate")}</span>
           </button>
-        ) : (
+        ) : registerProcessRightsFlag ? (
           <button
             className="deployButton"
             style={{
@@ -565,7 +625,7 @@ function Header(props) {
             </span>
             <span className="deployText">{t("Deploy")}</span>
           </button>
-        )}
+        ) : null}
         {/*<button
           class="closeButton"
           id="header_close_btn"
@@ -595,6 +655,31 @@ function Header(props) {
             />
           }
         />
+      ) : null}
+
+      {isModalOpen ? (
+        <Modal
+          show={isModalOpen}
+          modalClosed={() => setIsModalOpen(false)}
+          style={{
+            width: "67%",
+            height: "91%",
+            left: "17%",
+            top: "6%",
+            padding: "5px 1% 1%",
+            paddingTop: 0,
+          }}
+        >
+          <div>
+            <CloseIcon
+              onClick={() => setIsModalOpen(false)}
+              className={styles.closeIcon}
+              // style={{ opacity: "0.2", marginBottom: "2px" }}
+              fontSize="medium"
+            />
+            <div id="mf_inbox_oapweb"></div>
+          </div>
+        </Modal>
       ) : null}
 
       {action === MENUOPTION_SAVE_TEMPLATE ? (

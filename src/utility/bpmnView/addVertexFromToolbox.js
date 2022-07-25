@@ -28,6 +28,7 @@ import { getExpandedSubprocess } from "./getExpandedSubprocess";
 import { AddActivityInSubprocess } from "../CommonAPICall/AddActivityInSubprocess";
 import { getFullWidth } from "../abstarctView/addWorkstepAbstractView";
 import { addTaskAPI } from "../CommonAPICall/AddTask";
+import { TaskType } from "../../Constants/appConstants";
 
 const mxgraphobj = require("mxgraph")({
   mxImageBasePath: "mxgraph/javascript/src/images",
@@ -257,7 +258,7 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
           Repeatable: "N",
           TaskId: maxId + 1,
           TaskName: `${title}_${maxId + 1}`,
-          TaskType: "Generic",
+          TaskType:  prototype.getStyle() === style.processTask ? TaskType.processTask: TaskType.globalTask,
           TemplateId: -1,
           isActive: "true",
           xLeftLoc: vertexX,
@@ -295,6 +296,7 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
         }
         return newProcessData;
       });
+
       addTaskAPI(
         maxId + 1,
         `${title}_${maxId + 1}`,

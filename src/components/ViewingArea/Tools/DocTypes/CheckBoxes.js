@@ -65,7 +65,6 @@ function CheckBoxes(props) {
       props.updateSetAllChecks(
         check_type,
         props.docIdx,
-        props.activityId,
         checks[check_type]
       );
     } else {

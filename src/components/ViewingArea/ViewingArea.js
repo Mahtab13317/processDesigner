@@ -9,12 +9,13 @@ import {
   expandedViewOnDrop,
   PROCESSTYPE_LOCAL,
   RTL_DIRECTION,
+  userRightsMenuNames,
 } from "../../Constants/appConstants";
 import SubHeader from "./SubHeader/SubHeader";
 import { useTranslation } from "react-i18next";
 import classes from "./ViewingArea.module.css";
 import Milestones from "./AbstractView/Milestones/Milestones";
-import { connect } from "react-redux";
+import { connect, useSelector } from "react-redux";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import StopIcon from "@material-ui/icons/Stop";
 import {
@@ -38,9 +39,12 @@ import { moveMilestoneArray } from "../../utility/InputForAPICall/moveMilestoneA
 import { addMileInBetweenArray } from "../../utility/InputForAPICall/addMileInBetweenArray";
 import { store, useGlobalState } from "state-pool";
 import { getSelectedCellType } from "../../utility/abstarctView/getSelectedCellType";
+import { UserRightsValue } from "../../redux-store/slices/UserRightsSlice";
+import { getMenuNameFlag } from "../../utility/UserRightsFunctions";
 
 function ViewingArea(props) {
   let { t } = useTranslation();
+  const userRightsValue = useSelector(UserRightsValue);
   const direction = `${t("HTML_DIR")}`;
   const [viewType, changeViewType] = useState(view.abstract.langKey);
   const [selectedMile, setSelectedMile] = useState(null);
@@ -71,6 +75,12 @@ function ViewingArea(props) {
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData, setlocalLoadedProcessData] =
     useGlobalState(loadedProcessData);
+
+  // Boolean that decides whether add milestone button will be visible or not.
+  const createMilestoneFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.createMilestone
+  );
 
   //function to add mile at the end
   const addNewMile = () => {
@@ -402,15 +412,18 @@ function ViewingArea(props) {
                     setNewId={setNewId}
                   />
                   {provided.placeholder}
-                  <div
-                    className={classes.addBtn}
-                    onClick={() => addNewMile()}
-                    style={{
-                      display: processType !== PROCESSTYPE_LOCAL ? "none" : "",
-                    }}
-                  >
-                    <p className={classes.addicon}>+</p>
-                  </div>
+                  {createMilestoneFlag && (
+                    <div
+                      className={classes.addBtn}
+                      onClick={() => addNewMile()}
+                      style={{
+                        display:
+                          processType !== PROCESSTYPE_LOCAL ? "none" : "",
+                      }}
+                    >
+                      <p className={classes.addicon}>+</p>
+                    </div>
+                  )}
                 </div>
               )}
             </Droppable>

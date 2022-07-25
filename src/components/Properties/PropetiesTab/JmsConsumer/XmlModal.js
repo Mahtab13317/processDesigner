@@ -27,7 +27,7 @@ function XmlModal(props) {
       activityId: props.activityId,
     };
     axios.post(SERVER_URL + ENDPOINT_READXML, jsonBody).then((res) => {
-      if (res.data.Status === 0) {
+      if (res?.data?.Status === 0) {
         props.responseXmlData(res.data);
         props.setModalClicked(false);
       }

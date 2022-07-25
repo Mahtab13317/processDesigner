@@ -97,7 +97,6 @@ function BasicDetails(props) {
   const [showQueueModal, setShowQueueModal] = useState(false);
   const [startActivities, setStartActivities] = useState(null);
   // code added on 6 July 2022 for BugId 111910
-  const [initialRender, setInitialRender] = useState(true);
   const openProcessData = useSelector(OpenProcessSliceValue);
   const [localState, setLocalState] = useState(null);
   const [initialTargetId, setInitialTargetId] = useState(null);
@@ -180,27 +179,12 @@ function BasicDetails(props) {
   useEffect(() => {
     if (localLoadedActivityPropertyData?.Status === 0) {
       setbasicDetails(localLoadedActivityPropertyData?.ActivityProperty);
+      setInitialTargetId(
+        localLoadedActivityPropertyData?.ActivityProperty?.targetId
+      );
       setspinner(false);
-      // code added on 6 July 2022 for BugId 111910
-      if (initialRender) {
-        localState?.Connections?.forEach((conn) => {
-          if (
-            conn.SourceId ==
-            localLoadedActivityPropertyData?.ActivityProperty?.actId
-          ) {
-            let localAct = { ...localLoadedActivityPropertyData };
-            localAct.ActivityProperty = {
-              ...localAct?.ActivityProperty,
-              targetId: conn.TargetId + "",
-            };
-            setInitialTargetId(conn.TargetId);
-            setlocalLoadedActivityPropertyData(localAct);
-            setInitialRender(false);
-          }
-        });
-      }
     }
-  }, [localLoadedActivityPropertyData, localState]);
+  }, [localLoadedActivityPropertyData]);
 
   useEffect(() => {
     if (localState?.ProcessType == "R" || localState?.ProcessType == "D") {

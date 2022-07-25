@@ -38,7 +38,14 @@ function WebServiceDefinition(props) {
   return (
     <div
       className={styles.webSDefinitionDiv}
-      style={props.scope === LOCAL_SCOPE ? { height: "60vh" } : {}}
+      style={
+        props.scope === LOCAL_SCOPE
+          ? {
+              height:
+                props.callLocation === "webServicePropTab" ? "50vh" : "60vh",
+            }
+          : {}
+      }
     >
       <label
         className={

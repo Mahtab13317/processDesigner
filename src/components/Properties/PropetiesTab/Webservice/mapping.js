@@ -1,33 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { Select, MenuItem, List } from "@material-ui/core";
+import { Select, MenuItem } from "@material-ui/core";
 import "./index.css";
 import { Tab, Tabs } from "@material-ui/core";
 import { TabPanel } from "../../../ProcessSettings";
 import ReusableOneMap from "./reusableOneMap";
-// import Modal from "../../../../UI/Modal/Modal.js";
-// import SoapParams from "./soapParams";
 import { store, useGlobalState } from "state-pool";
-import { getVariableByName } from "../../../../utility/ProcessSettings/Triggers/triggerCommonFunctions";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  setActivityPropertyChange,
-  ActivityPropertyChangeValue,
-} from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
+import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import { propertiesLabel } from "../../../../Constants/appConstants";
 import { connect } from "react-redux";
-import {
-  ActivityPropertySaveCancelValue,
-  setSave,
-} from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked";
+import TextInput from "../../../../UI/Components_With_ErrrorHandling/InputField/index.js";
 import { OpenProcessSliceValue } from "../../../../redux-store/slices/OpenProcessSlice";
+import { useTranslation } from "react-i18next";
 
 function Mapping(props) {
+  let { t } = useTranslation();
   const dispatch = useDispatch();
-  const [selectedService, setSelectedService] = useState(null);
   const openProcessData = useSelector(OpenProcessSliceValue);
-  const localLoadedProcessData = JSON.parse(
-    JSON.stringify(openProcessData.loadedData)
-  );
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [invocationType, setInvocationType] = useState(null);
   const [value, setValue] = useState(0); // Function to handle tab change.
   const [forwardMappingList, setForwardMappingList] = useState([]);
@@ -39,23 +30,138 @@ function Mapping(props) {
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
-  const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
+  const [timeOutValue, setTimeOutValue] = useState(null);
+  const [variablesListForDropDown, setVariablesListForDropDown] = useState([]);
 
   useEffect(() => {
     let temp = [];
-    localLoadedProcessData.MileStones[0].Activities.map((activity) => {
-      if (
-        (activity.ActivityType == 23 && activity.ActivitySubType == 1) ||
-        (activity.ActivityType == 24 && activity.ActivitySubType == 1)
-      ) {
-        temp.push(activity);
-      }
+    let tempOpenProcess = JSON.parse(
+      JSON.stringify(openProcessData.loadedData)
+    );
+    tempOpenProcess?.MileStones?.forEach((mile) => {
+      mile?.Activities?.forEach((activity) => {
+        if (
+          (+activity.ActivityType === 21 && +activity.ActivitySubType === 1) ||
+          (+activity.ActivityType === 23 && +activity.ActivitySubType === 1) ||
+          (+activity.ActivityType === 24 && +activity.ActivitySubType === 1) ||
+          (+activity.ActivityType === 25 && +activity.ActivitySubType === 1)
+        ) {
+          temp.push(activity);
+        }
+      });
     });
     setDropDownActivities(temp);
-  }, []);
+  }, [openProcessData.loadedData]);
+
+  const checkForModifyRights = (data) => {
+    let temp = false;
+    localLoadedActivityPropertyData?.ActivityProperty?.m_objDataVarMappingInfo?.dataVarList?.forEach(
+      (item, i) => {
+        if (item?.processVarInfo?.variableId === data.VariableId) {
+          if (item?.m_strFetchedRights === "O") {
+            temp = true;
+          }
+        }
+      }
+    );
+    return temp;
+  };
+
+  const checkForVarRights = (data) => {
+    let temp = false;
+    localLoadedActivityPropertyData?.ActivityProperty?.m_objDataVarMappingInfo?.dataVarList?.forEach(
+      (item, i) => {
+        if (item?.processVarInfo?.variableId === data.VariableId) {
+          if (
+            item?.m_strFetchedRights === "O" ||
+            item?.m_strFetchedRights === "R"
+          ) {
+            temp = true;
+          }
+        }
+      }
+    );
+    return temp;
+  };
+
+  useEffect(() => {
+    localLoadedActivityPropertyData?.ActivityProperty?.webserviceInfo?.objWebServiceDataInfo?.forEach(
+      (el) => {
+        if (el.methodIndex == props.serviceNameClicked.id) {
+          setTimeOutValue(el.timeoutInterval);
+        }
+      }
+    );
+  }, [localLoadedActivityPropertyData]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
+  };
+
+  const handleTimeOutChange = (event) => {
+    setTimeOutValue(event.target.value);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.webService]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
+
+    let temp = localLoadedActivityPropertyData;
+    temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo.map((el) => {
+      if (el.methodIndex == props.serviceNameClicked.id) {
+        el.timeoutInterval = event.target.value;
+      }
+    });
+    setlocalLoadedActivityPropertyData(temp);
+  };
+
+  const getVarName = (variableName, varList) => {
+    let variable;
+    varList?.forEach((content) => {
+      if (content.VariableName === variableName) {
+        variable = content;
+      }
+    });
+    return variable;
+  };
+
+  const getComplex = (variable) => {
+    let varList = [];
+    let varRelationMapArr = variable?.RelationAndMapping
+      ? variable.RelationAndMapping
+      : variable["Relation&Mapping"];
+    varRelationMapArr?.Mappings?.Mapping?.forEach((el) => {
+      if (el.VariableType === "11") {
+        let tempList = getComplex(el);
+        tempList.forEach((ell) => {
+          varList.push({
+            ...ell,
+            SystemDefinedName: `${variable.VariableName}.${ell.VariableName}`,
+            VariableName: `${variable.VariableName}.${ell.VariableName}`,
+          });
+        });
+      } else {
+        varList.push({
+          DefaultValue: "",
+          ExtObjectId: el.ExtObjectId ? el.ExtObjectId : variable.ExtObjectId,
+          SystemDefinedName: `${variable.VariableName}.${el.VariableName}`,
+          Unbounded: el.Unbounded,
+          VarFieldId: el.VarFieldId,
+          VarPrecision: el.VarPrecision,
+          VariableId: el.VariableId,
+          VariableLength: el.VariableLength,
+          VariableName: `${variable.VariableName}.${el.VariableName}`,
+          VariableScope: el.VariableScope
+            ? el.VariableScope
+            : variable.VariableScope,
+          VariableType: el.VariableType,
+        });
+      }
+    });
+    return varList;
   };
 
   useEffect(() => {
@@ -65,6 +171,19 @@ function Mapping(props) {
     let tempForwardList = [];
     let tempReverseList = [];
     let reverseList = [];
+
+    let variablesList = [];
+    localLoadedProcessData?.Variable?.forEach((item) => {
+      if (item.VariableType === "11") {
+        let tempList = getComplex(item);
+        tempList?.forEach((el) => {
+          variablesList.push(el);
+        });
+      } else {
+        variablesList.push(item);
+      }
+    });
+
     props?.completeList?.forEach((list) => {
       if (
         list.AppName == props.serviceNameClicked.webservice &&
@@ -81,19 +200,38 @@ function Mapping(props) {
       (el) => el.ParamScope == "O" || el.ParamScope == "R"
     );
 
-    localLoadedProcessData?.Variable?.forEach((varr) => {
-      reverseList.push({
-        fieldName: varr,
-        fieldDataStructID: null,
-        selectedVar: null,
-      });
+    localLoadedProcessData?.Variable?.forEach((item, i) => {
+      if (
+        item.VariableScope === "M" ||
+        item.VariableScope === "S" ||
+        (item.VariableScope === "U" && checkForModifyRights(item)) ||
+        (item.VariableScope === "I" && checkForModifyRights(item))
+      ) {
+        if (item.VariableType === "11") {
+          let tempList = getComplex(item);
+          tempList?.forEach((el) => {
+            reverseList.push({
+              fieldName: el,
+              fieldDataStructID: null,
+              selectedVar: null,
+            });
+          });
+        } else {
+          reverseList.push({
+            fieldName: item,
+            fieldDataStructID: null,
+            selectedVar: null,
+          });
+        }
+      }
     });
-    console.log("reverseInputParams", reverseInputParams);
+
     forwardInputParams?.forEach((param) => {
       if (param.ParamType == "11") {
         CreateParamKey(
           param.ParamName,
           param.DataStructureId,
+          param.ParamIndex,
           tempForwardList,
           selectedWebService
         );
@@ -101,6 +239,8 @@ function Mapping(props) {
         tempForwardList.push({
           fieldName: param.ParamName,
           fieldDataStructID: param.DataStructureId,
+          fieldType: param.ParamType,
+          fieldIndex: param.ParamIndex,
           selectedVar: null,
         });
       }
@@ -111,6 +251,7 @@ function Mapping(props) {
         CreateParamKey(
           param.ParamName,
           param.DataStructureId,
+          param.ParamIndex,
           tempReverseList,
           selectedWebService
         );
@@ -122,6 +263,8 @@ function Mapping(props) {
               ? param.ParamIndex
               : param.DataStructureId,
           selectedVar: null,
+          fieldType: param.ParamType,
+          fieldIndex: param.ParamIndex,
         });
       }
     });
@@ -134,10 +277,7 @@ function Mapping(props) {
         one?.fwdParamMapList?.forEach((el) => {
           tempForwardList?.forEach((param, index) => {
             if (el.dataStructId == param.fieldDataStructID) {
-              let selectedVar = getVariableByName(
-                el.selectedVar,
-                localLoadedProcessData.Variable
-              );
+              let selectedVar = getVarName(el.selectedVar, variablesList);
               tempForwardList[index].selectedVar = selectedVar;
             }
           });
@@ -151,7 +291,6 @@ function Mapping(props) {
             ) {
               reverseList?.forEach((list, indexOne) => {
                 if (list.fieldName.VariableName == el.mapField) {
-                  console.log("ELELLO", el, param);
                   reverseList[indexOne].selectedVar = param;
                 }
               });
@@ -164,14 +303,14 @@ function Mapping(props) {
 
     setForwardMappingList(tempForwardList);
     setReverseMappingList(reverseList);
-    setSelectedService(selectedWebService);
     setReverseDropdownOptions(tempReverseList);
-    console.log("catalog", tempForwardList, selectedWebService);
+    setVariablesListForDropDown(variablesList);
   }, [props.completeList, props.serviceNameClicked, props.combinations]);
 
   const CreateParamKey = (
     parentKey,
     parentIndex,
+    paramIndex,
     arrayList,
     selectedWebService
   ) => {
@@ -180,12 +319,15 @@ function Mapping(props) {
         arrayList.push({
           fieldName: `${parentKey}.${ds.Name}`,
           fieldDataStructID: ds.DataStructureId,
+          fieldIndex: paramIndex,
           selectedVar: null,
+          fieldType: ds.Type,
         });
       } else if (parentIndex == ds.ParentIndex && ds.Type == "11") {
         CreateParamKey(
           `${parentKey}.${ds.Name}`,
           ds.DataStructureId,
+          paramIndex,
           arrayList,
           selectedWebService
         );
@@ -193,7 +335,16 @@ function Mapping(props) {
     });
   };
 
-  const handleForwardFieldMapping = (selectedValue, list, indexInput) => {
+  const handleForwardFieldMapping = (selectedValue, list) => {
+    setForwardMappingList((prev) => {
+      let tempList = [...prev];
+      tempList.forEach((el, index) => {
+        if (el.fieldDataStructID == list.fieldDataStructID) {
+          tempList[index].selectedVar = selectedValue;
+        }
+      });
+      return tempList;
+    });
     let temp = { ...localLoadedActivityPropertyData };
     let tempArr = [
       ...temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo,
@@ -207,8 +358,6 @@ function Mapping(props) {
         indexValue = index;
       }
     });
-
-    console.log("MAPPING", temp.ActivityProperty.webserviceInfo, indexValue);
     let forwardArr = temp?.ActivityProperty?.webserviceInfo
       ?.objWebServiceDataInfo[indexValue]?.fwdParamMapList
       ? [
@@ -225,7 +374,6 @@ function Mapping(props) {
         idx = index;
       }
     });
-
     if (doExists) {
       temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo[
         indexValue
@@ -236,8 +384,8 @@ function Mapping(props) {
         mapFieldType: selectedValue.VariableScope,
         mapVarFieldId: selectedValue.VarFieldId,
         mapVariableId: selectedValue.VariableId,
-        paramIndex: idx + 1,
-        selectedVar: selectedValue.VariableName,
+        paramIndex: list.fieldIndex,
+        selectedVar: list.fieldName,
       };
     } else {
       temp?.ActivityProperty?.webserviceInfo?.objWebServiceDataInfo[indexValue]
@@ -251,8 +399,8 @@ function Mapping(props) {
             mapFieldType: selectedValue.VariableScope,
             mapVarFieldId: selectedValue.VarFieldId,
             mapVariableId: selectedValue.VariableId,
-            paramIndex: forwardArr.length + 1,
-            selectedVar: selectedValue.VariableName,
+            paramIndex: list.fieldIndex,
+            selectedVar: list.fieldName,
           })
         : (temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo[
             indexValue
@@ -268,15 +416,13 @@ function Mapping(props) {
                 mapFieldType: selectedValue.VariableScope,
                 mapVarFieldId: selectedValue.VarFieldId,
                 mapVariableId: selectedValue.VariableId,
-                paramIndex: forwardArr.length + 1,
-                selectedVar: selectedValue.VariableName,
+                paramIndex: list.fieldIndex,
+                selectedVar: list.fieldName,
               },
             ],
           });
     }
-
     setlocalLoadedActivityPropertyData(temp);
-
     dispatch(
       setActivityPropertyChange({
         [propertiesLabel.webService]: {
@@ -288,6 +434,15 @@ function Mapping(props) {
   };
 
   const handleReverseFieldMapping = (selectedValue, list, indexInput) => {
+    setReverseMappingList((prev) => {
+      let tempList = [...prev];
+      tempList.forEach((el, index) => {
+        if (el.fieldName.VariableName == list.fieldName.VariableName) {
+          tempList[index].selectedVar = selectedValue;
+        }
+      });
+      return tempList;
+    });
     let temp = { ...localLoadedActivityPropertyData };
     let tempArr = [
       ...temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo,
@@ -312,7 +467,7 @@ function Mapping(props) {
     let doExists = false;
     let idx = null;
     ReverseArr?.forEach((arr, index) => {
-      if (arr.dataStructId === list.fieldDataStructID) {
+      if (arr.mapVariableId === list.fieldName.VariableId) {
         doExists = true;
         idx = index;
       }
@@ -328,8 +483,8 @@ function Mapping(props) {
         mapFieldType: list.fieldName.VariableScope,
         mapVarFieldId: list.fieldName.VarFieldId,
         mapVariableId: list.fieldName.VariableId,
-        paramIndex: idx + 1,
-        selectedVar: selectedValue.fieldDataStructID,
+        paramIndex: selectedValue.fieldIndex,
+        selectedVar: selectedValue.fieldName,
       };
     } else {
       temp?.ActivityProperty?.webserviceInfo?.objWebServiceDataInfo[indexValue]
@@ -343,8 +498,8 @@ function Mapping(props) {
             mapFieldType: list.fieldName.VariableScope,
             mapVarFieldId: list.fieldName.VarFieldId,
             mapVariableId: list.fieldName.VariableId,
-            paramIndex: ReverseArr.length + 1,
-            selectedVar: selectedValue.fieldDataStructID,
+            paramIndex: selectedValue.fieldIndex,
+            selectedVar: selectedValue.fieldName,
           })
         : (temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo[
             indexValue
@@ -360,8 +515,8 @@ function Mapping(props) {
                 mapFieldType: list.fieldName.VariableScope,
                 mapVarFieldId: list.fieldName.VarFieldId,
                 mapVariableId: list.fieldName.VariableId,
-                paramIndex: ReverseArr.length + 1,
-                selectedVar: selectedValue.fieldDataStructID,
+                paramIndex: selectedValue.fieldIndex,
+                selectedVar: selectedValue.fieldName,
               },
             ],
           });
@@ -380,7 +535,6 @@ function Mapping(props) {
   };
 
   const handleInvocationTypeChange = (e) => {
-    console.log("SWAAD", e, props.serviceNameClicked);
     setInvocationType(e.target.value);
     dispatch(
       setActivityPropertyChange({
@@ -390,32 +544,58 @@ function Mapping(props) {
         },
       })
     );
-
     let temp = localLoadedActivityPropertyData;
     temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo.map((el) => {
       if (el.methodIndex == props.serviceNameClicked.id) {
         el.invocationType = e.target.value;
       }
     });
-    // if (saveCancelStatus.SaveClicked) {
     setlocalLoadedActivityPropertyData(temp);
-    // }
+  };
+
+  const getVarListByType = (varList, item) => {
+    let varType = item?.fieldType;
+    let list = [];
+    varList?.forEach((el) => {
+      if (
+        el.VariableScope === "M" ||
+        el.VariableScope === "S" ||
+        (el.VariableScope === "U" && checkForVarRights(el)) ||
+        (el.VariableScope === "I" && checkForVarRights(el))
+      ) {
+        let type = el.VariableType;
+        if (varType === type) {
+          list.push(el);
+        }
+      }
+    });
+    return list;
+  };
+
+  const getRevVarListByType = (varList, item) => {
+    let varType = item.fieldName.VariableType;
+    let list = [];
+    varList?.forEach((el) => {
+      let type = el.fieldType;
+      if (varType === type) {
+        list.push(el);
+      }
+    });
+    return list;
   };
 
   return (
-    <div style={{ padding: "20px", width: "58%" }}>
+    <div style={{ padding: "1rem 1vw 0", width: "40%" }}>
       <div
         style={{
           display: "flex",
           alignItems: "center",
+          gap: "1vw",
         }}
       >
-        <div style={{ marginRight: "20px" }}>
-          <p
-            style={{ fontSize: "12px", color: "#886F6F" }}
-            // onClick={() => setShowSOAPParamsModal(true)}
-          >
-            Invocation Type
+        <div style={{ flex: "1" }}>
+          <p style={{ fontSize: "12px", color: "#886F6F" }}>
+            {t("InvocationType")}
           </p>
           <Select
             className="select_webService_mapping"
@@ -443,7 +623,7 @@ function Mapping(props) {
               }}
               value="F"
             >
-              Fire And Forget
+              {t("FireAndForget")}
             </MenuItem>
             <MenuItem
               style={{
@@ -452,7 +632,7 @@ function Mapping(props) {
               }}
               value="A"
             >
-              Asynchronous
+              {t("Asynchronous")}
             </MenuItem>
             <MenuItem
               style={{
@@ -461,14 +641,15 @@ function Mapping(props) {
               }}
               value="S"
             >
-              Synchronous
+              {t("Synchronous")}
             </MenuItem>
           </Select>
         </div>
         {invocationType == "A" ? (
-          <div>
+          <div style={{ flex: "1" }}>
             <p style={{ fontSize: "12px", color: "#886F6F" }}>
-              JMS/SOAP Target
+              {t("JMS/SOAPTarget")}
+              <span className="starIcon">*</span>
             </p>
             <Select
               className="select_webService_mapping"
@@ -505,61 +686,20 @@ function Mapping(props) {
             </Select>
           </div>
         ) : null}
-        {invocationType == "S" ? (
-          <div>
-            <p style={{ fontSize: "12px", color: "#886F6F" }}>Time Out</p>
-            <Select
-              className="select_webService_timeOut"
-              // onChange={(e) => setSelectedWebService(e.target.value)}
-              // value={selectedWebService}
-              style={{
-                fontSize: "12px",
-              }}
-              MenuProps={{
-                anchorOrigin: {
-                  vertical: "bottom",
-                  horizontal: "left",
-                },
-                transformOrigin: {
-                  vertical: "top",
-                  horizontal: "left",
-                },
-                getContentAnchorEl: null,
-              }}
-            >
-              <MenuItem
-                style={{
-                  fontSize: "12px",
-                  padding: "4px",
-                }}
-                value="F"
-              >
-                Fire And Forget
-              </MenuItem>
-              <MenuItem
-                style={{
-                  fontSize: "12px",
-                  padding: "4px",
-                }}
-                value="A"
-              >
-                Asynchronous
-              </MenuItem>
-              <MenuItem
-                style={{
-                  fontSize: "12px",
-                  padding: "4px",
-                }}
-                value="S"
-              >
-                Synchronous
-              </MenuItem>
-            </Select>
-          </div>
-        ) : null}
+        <div style={{ flex: `${invocationType == "A" ? "0.5" : "1.55"}` }}>
+          <p style={{ fontSize: "12px", color: "#886F6F" }}>
+            {t("TimeOut")}
+            <span className="starIcon">*</span>
+          </p>
+          <TextInput
+            type="number"
+            inputValue={timeOutValue}
+            idTag="timeOutWebservice"
+            onChangeEvent={(e) => handleTimeOutChange(e)}
+          />
+        </div>
       </div>
-
-      <div className="tabStyles ">
+      <div className="webS_props_tabStyles ">
         <Tabs
           value={value}
           onChange={handleChange}
@@ -575,44 +715,50 @@ function Mapping(props) {
             <div
               style={{
                 display: "flex",
-                marginTop: "20px",
-                marginBottom: "8px",
+                marginTop: "1rem",
+                marginBottom: "0.5rem",
+                marginRight: "0.375rem",
               }}
             >
               <div
                 style={{
                   height: "30px",
-                  width: "220px",
+                  flex: "1",
                   backgroundColor: "#F4F4F4",
                   marginRight: "30px",
                   fontSize: "12px",
                   padding: "7px",
+                  fontWeight: "600",
                 }}
               >
-                SOAP Input Parameters
+                {t("SOAPInputParameters")}
               </div>
               <div
                 style={{
                   height: "30px",
-                  width: "220px",
+                  flex: "1",
                   backgroundColor: "#F4F4F4",
                   fontSize: "12px",
                   padding: "7px",
+                  fontWeight: "600",
                 }}
               >
-                Current Process Variable(s)
+                {t("CurrentProcessVariable(s)")}
               </div>
             </div>
-            <div style={{ height: "270px", overflow: "scroll" }}>
+            <div style={{ height: "16.5rem", overflow: "auto" }}>
               {forwardMappingList?.map((list, index) => {
                 return (
                   <ReusableOneMap
                     mapField={list.fieldName}
                     varField={list.selectedVar}
-                    dropDownOptions={localLoadedProcessData?.Variable}
+                    dropDownOptions={getVarListByType(
+                      variablesListForDropDown,
+                      list
+                    )}
                     dropDownKey="VariableName"
                     handleFieldMapping={(val) =>
-                      handleForwardFieldMapping(val, list, index)
+                      handleForwardFieldMapping(val, list)
                     }
                   />
                 );
@@ -633,34 +779,43 @@ function Mapping(props) {
               <div
                 style={{
                   height: "30px",
-                  width: "220px",
+                  flex: "1",
                   backgroundColor: "#F4F4F4",
                   marginRight: "30px",
                   fontSize: "12px",
                   padding: "7px",
+                  fontWeight: "600",
                 }}
               >
-                SOAP Input Parameters
+                {t("CurrentProcessVariable(s)")}
               </div>
               <div
                 style={{
                   height: "30px",
-                  width: "220px",
+                  flex: "1",
                   backgroundColor: "#F4F4F4",
                   fontSize: "12px",
                   padding: "7px",
+                  fontWeight: "600",
                 }}
               >
-                Current Process Variable(s)
+                {t("SOAPOutputParameters")}
               </div>
             </div>
-            <div style={{ height: "270px", overflow: "scroll" }}>
+            <div style={{ height: "16.5rem", overflow: "auto" }}>
               {reverseMappingList?.map((list, index) => {
                 return (
                   <ReusableOneMap
-                    mapField={list.fieldName.VariableName}
+                    mapField={
+                      list.fieldName.processVarInfo
+                        ? list.fieldName.processVarInfo.varName
+                        : list.fieldName.VariableName
+                    }
                     varField={list.selectedVar}
-                    dropDownOptions={reverseDropdownOptions}
+                    dropDownOptions={getRevVarListByType(
+                      reverseDropdownOptions,
+                      list
+                    )}
                     dropDownKey="fieldName"
                     handleFieldMapping={(val) =>
                       handleReverseFieldMapping(val, list, index)
@@ -680,11 +835,6 @@ function Mapping(props) {
 const mapStateToProps = (state) => {
   return {
     showDrawer: state.showDrawerReducer.showDrawer,
-    cellID: state.selectedCellReducer.selectedId,
-    cellName: state.selectedCellReducer.selectedName,
-    cellType: state.selectedCellReducer.selectedType,
-    cellActivityType: state.selectedCellReducer.selectedActivityType,
-    cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
     openProcessID: state.openProcessClick.selectedId,
   };

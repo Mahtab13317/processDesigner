@@ -242,9 +242,9 @@ export const ENDPOINT_CHECKOUT = "/checkOutProcess";
 export const ENDPOINT_CHECKIN = "/checkInProcess";
 export const ENDPOINT_UNDO_CHECKOUT = "/undoCheckOutProcess";
 export const ENDPOINT_SAVE_LOCAL = "/saveLocal";
-export const ENDPOINT_ADD_RULE = "/addRule";
-export const ENDPOINT_DELETE_RULE = "/deleteRule";
-export const ENDPOINT_MODIFY_RULE = "/modifyRule";
+export const ENDPOINT_ADD_RULE = "/addRule"; // Not being used.
+export const ENDPOINT_DELETE_RULE = "/deleteRule"; // Not being used.
+export const ENDPOINT_MODIFY_RULE = "/modifyRule"; // Not being used.
 export const ENDPOINT_GET_REGISTERED_FUNCTIONS = "/registeredFunc";
 export const ENDPOINT_DELETE_PROCESS = "/deleteprocess";
 export const ENDPOINT_DELETE_PROCESS_DEPLOYED = "/unregisterProcess";
@@ -254,7 +254,7 @@ export const ENDPOINT_DELETEPROCESSREQUIREMENTS = "/removeProcessRequirement";
 export const ENDPOINT_EDITSYSTEMREQUIREMENTS = "/modifySystemRequirement";
 export const ENDPOINT_EDITPROCESSREQUIREMENTS = "/modifyProcessRequirement";
 export const ENDPOINT_EDITPROJECTREQUIREMENTS = "/modifyProjectRequirement";
-export const ENDPOINT_REGISTER_PROCESS = "/requirement";
+export const ENDPOINT_REGISTER_PROCESS = "/requirement/";
 export const ENDPOINT_READXML = "/readXML";
 export const ENDPOINT_MODIFY_CONNECTION = "/modifyConnection";
 export const ENDPOINT_GET_COMPLEX = "/complexTypeData";
@@ -273,6 +273,7 @@ export const ENDPOINT_ADD_USER_DEFINE_VARIABLE = "/addNewColumn";
 export const ENDPOINT_DELETE_USER_DEFINE_VARIABLE = "/removeColumn";
 export const ENDPOINT_MODIFY_USER_DEFINE_VARIABLE = "/modifyColumn";
 export const ARCHIEVE_CONNECT = "/connect";
+export const ARCHIEVE_DISCONNECT = "/disconnect";
 export const SAVE_ARCHIVE = "/saveArchive";
 export const ENDPOINT_GETALLVERSIONS = "/allVersion";
 export const ENDPOINT_GET_COLUMN_LIST = "/columnList";
@@ -324,6 +325,8 @@ export const ENDPOINT_GET_EXISTING_TABLES = "/tableList";
 export const ENDPOINT_GET_COLUMNS = "/columnList";
 export const ENDPOINT_TEST_CONNECTION = "/testConnection";
 export const ENDPOINT_GET_CURRENT_CABINETNAME = "/currentCabinetName";
+
+export const ENDPOINT_GET_USER_RIGHTS = "/assignableRights";
 
 export const ENDPOINT_UPLOAD_ATTACHMENT = "/attachDoc";
 export const ENDPOINT_DOWNLOAD_ATTACHMENT = "/downloadDoc";
@@ -600,11 +603,14 @@ export const propertiesLabel = {
   eventConfiguration: "eventConfiguration",
   fwdVarMapping: "fwdVarMapping",
   revVarMapping: "revVarMapping",
+  fwdVarMappingProcessTask: "fwdVarMappingProcessTask",
+  revVarMappingProcessTask: "revVarMappingProcessTask",
   streams: "streams",
   options: "options",
   throwEvents: "throwEvents",
   catchEvents: "catchEvents",
   task: "task",
+  archieve: "archieve",
   receive: "receive",
   outputVariables: "outputVariables",
   Export: "Export",
@@ -629,7 +635,9 @@ export const propertiesLabel = {
   reqConSOAP: "reqConSOAP",
   Restful: "Restful",
   fwdDocMapping: "fwdDocMapping",
+  fwdDocMappingProcessTask: "fwdDocMapping_ProcessTask",
   revDocMapping: "revDocMapping",
+  revDocMappingProcessTask: "revDocMapping_ProcessTask",
   collect: "collect",
   send: "send",
   taskDetails: "taskDetails",
@@ -707,3 +715,51 @@ export const toDoActivities = [
   { activityId: 2, subActivityId: 2 },
   { activityId: 32, subActivityId: 1 },
 ];
+
+export const userRightsMenuNames = {
+  saveProcess: "SAVEPROCESS",
+  version: "VERSION",
+  auditTrail: "AUDITRAIL",
+  includeWindow: "INCLUDEWINDOW",
+  todoList: "TODOLIST",
+  documents: "DOCUMENTS",
+  catalogDefinition: "CATLOGDEFINATION",
+  exception: "EXCEPTION",
+  trigger: "TRIGGER",
+  registerTemplate: "REGISTERTEMPLATE",
+  registerWindow: "REGISTERWINDOW",
+  registerTrigger: "RIGSTERTRIGGER",
+  constants: "CONSTANTS",
+  defineTable: "DEFINETABLE",
+  externalVariable: "EXTERNALVARIABLE",
+  complexTypes: "COMPLEXTYPES",
+  queueVariables: "QUEUEVARIABLES",
+  searchVariables: "SEARCHVARIABLES",
+  createProject: "CREATEPROJECT",
+  deleteProject: "DELETEPROJECT",
+  createProcess: "CREATEPROCESS",
+  deleteProcess: "DELETEPROCESS",
+  registerProcess: "REGISTERPROCESS",
+  importProcess: "IMPORTPROCESS",
+  exportProcess: "EXPORTPROCESS",
+  reportGeneration: "REPORTGENERATION",
+  createMilestone: "CREATEMILESTONE",
+  deleteMilestone: "DELETEMILESTONE",
+  modifyMilestone: "MODIFYMILESTONE",
+  addActivity: "ADDACTIVITY",
+  deleteActivity: "DELETEACTIVITY",
+  modifyActivity: "MODIFYACTIVITY",
+  createSwimlane: "CREATESWIMLANE",
+  deleteSwimlane: "DELETESWIMLANE",
+  modifySwimlane: "MODIFYSWIMLANE",
+  manageForm: "MANAGEFORM",
+  viewForm: "VIEWFORM",
+  importBusinessObject: "IMPORTBUSINESSOBJECT",
+  queueManagement: "QUEUEMANAGEMENT",
+  makerChecker: "MAKERCHECKER",
+  addQueue: "ADDQUEUE",
+  defineVarAlias: "DEFINEVARALIAS",
+  createApplication: "CREATEAPPLICATION",
+  importApplication: "IMPORTAPPLICATION",
+  createSurvey: "CREATESURVEY",
+};

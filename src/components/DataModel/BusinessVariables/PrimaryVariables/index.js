@@ -4,6 +4,7 @@ import arabicStyles from "./ArabicStyles.module.css";
 import menuStyles from "../../../../UI/TypeAndFieldMapping/index.module.css";
 import {
   dataInputs,
+  getDropdownOptions,
   getVariableIdFromSysDefinedName,
 } from "./TypeAndFieldMapping";
 import { BASE_URL, RTL_DIRECTION } from "../../../../Constants/appConstants";
@@ -19,52 +20,33 @@ import ClearOutlinedIcon from "@material-ui/icons/ClearOutlined";
 import { store, useGlobalState } from "state-pool";
 import { connect } from "react-redux";
 import { SERVER_URL } from "../../../../Constants/appConstants";
+import EditIcon from "@material-ui/icons/Edit";
 import axios from "axios";
 
-function RelationshipMappingModal(props) {
+function Edit(props) {
   const {
-    openProcessID,
-    isArrayType,
-    tableName,
-    variableName,
-    mappingDataField,
-    relationAndMapping,
+    varData,
+    setUserDefinedVariables,
+    userDefinedVariables,
+    editVarData,
   } = props;
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div>
-      {isArrayType ? (
-        // <p
-        //   className={
-        //     direction === RTL_DIRECTION
-        //       ? arabicStyles.infoText
-        //       : styles.infoText
-        //   }
-        // >
-        //   <span
-        //     id="view_or_edit_mapping"
-        //     className={styles.viewAndEdit}
-        //     onClick={() => setIsModalOpen(true)}
-        //   >
-        //     {t("viewOrEdit")}
-        //   </span>
-        //   &nbsp;&nbsp;
-        //   {t("tableMapping")}
-        //   <br /> {t("andRelationship")}.
-        // </p>
-        <InfoOutlinedIcon
-          className={
-            direction === RTL_DIRECTION
-              ? arabicStyles.infoIcon
-              : styles.dataInfoIcon
-          }
-          fontSize="small"
-          onClick={() => setIsModalOpen(true)}
-        />
-      ) : null}
-      {isModalOpen ? (
+      <EditIcon
+        className={
+          direction === RTL_DIRECTION
+            ? arabicStyles.infoIcon
+            : styles.dataInfoIcon
+        }
+        fontSize="small"
+        onClick={() => editVarData(varData)}
+      />
+
+      {/* {isModalOpen ? (
         <Modal
           show={isModalOpen}
           modalClosed={() => setIsModalOpen(false)}
@@ -86,7 +68,7 @@ function RelationshipMappingModal(props) {
             handleClose={() => setIsModalOpen(false)}
           />
         </Modal>
-      ) : null}
+      ) : null} */}
     </div>
   );
 }
@@ -118,15 +100,84 @@ function PrimaryVariables(props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isComplexTypeSelected, setIsComplexTypeSelected] = useState(false);
   const [isComplexSelected, setIsComplexSelected] = useState(false);
+  const [modifyComplexJson, setModifyComplexJson] = useState({});
+  const [modifyButtonDisableId, setmodifyButtonDisableId] = useState();
+
+  const callbackMethod = (data) => {
+    let temp = false;
+    data.columns.forEach((col) => {
+      if (col.alias === aliasName) {
+        temp = true;
+      }
+    });
+    if (!temp) {
+      handleVariableType("11", data);
+    } else {
+      handleVariableType(variableType, data);
+    }
+    setcomplexDataJSON(data);
+  };
+
+  let microProps = {
+    source: "PD_CMP", //PD_EXT
+    data_object_alias_name: "", // Mandatory in props in PD_EXT
+    data_object_name: "", // Mandatory in props in PD_EXT
+    data_object_id: "",
+    // default_category_name: "a_puneet",
+    object_type: "P", //AP/P/C
+    //object_id: localLoadedProcessData.ProcessDefId,
+    // object_name: "a_puneet",
+    parent_do: [
+      {
+        name: "WFINSTRUMENTTABLE",
+        rel_do_id: "-1",
+        relation_type: "P",
+        relations: [
+          {
+            mapped_do_field: "ProcessInstanceID",
+            base_do_field: "mapid",
+            base_do_field_id: 0,
+          },
+        ],
+        status: 4,
+      },
+    ],
+    default_data_fields: [
+      {
+        name: "mapid",
+        alias: "mapid",
+        type: "1",
+        key_field: true,
+        id: 0,
+      },
+    ],
+
+    //"1" = String, "2" = Integer, "3" = Long, "4" = Float,"5" =Date and Time,"6" = Binary Data, "7" = Currency, "8" = Boolean,"9" = ShortDate, "10" = Ntext, "11" = Text, "12" = Nvarchar,"13" = Phone Number,"14" =Email.Binary,
+
+    ContainerId: "dataObjectContainer",
+    Module: "MDM",
+
+    Component: "DataModelListViewer",
+
+    InFrame: false,
+
+    Renderer: "renderDataModelListViewer",
+
+    Callback: callbackMethod,
+
+    // auto_generate_table: true,
+
+    data_types: [1, 2, 3, 4, 5, 8, 9, 10],
+  };
 
   // Function to make a variable array type.
   const handleArrayType = (e) => {
     setArrayType(e.target.checked);
-    setcomplexDataJSON((prev) => {
-      let temp = { ...prev };
-      temp.unbounded = e.target.checked ? "Y" : "N";
-      return temp;
-    });
+    // setcomplexDataJSON((prev) => {
+    //   let temp = { ...prev };
+    //   temp.unbounded = e.target.checked ? "Y" : "N";
+    //   return temp;
+    // });
   };
 
   // Function that closes the modal.
@@ -158,9 +209,8 @@ function PrimaryVariables(props) {
         order_by: "2",
       },
     });
-    console.log("vvvvvvvvvvvvvvvvvres", res.data);
   };
-  console.log("vvvvvvvvvvvvvvvmodata", complexDataJSON);
+
   const getUserDefinedVariables = (processData) => {
     let temp = [];
     processData &&
@@ -180,6 +230,8 @@ function PrimaryVariables(props) {
             tableName: variable.TableName || "",
             relationAndMapping: variable.RelationAndMapping || "",
             variableId: variable.VariableId,
+            isEditable: false,
+            dataObjectId: variable?.DataObjectId || "",
           });
         }
       });
@@ -312,13 +364,33 @@ function PrimaryVariables(props) {
     // setDataField(temp);
   };
 
+  const getVariableTypeName = (varType) => {
+    let temp = "";
+    let finalVariableTypes = [
+      { value: "3", label: "Integer" },
+      { value: "4", label: "Long" },
+      { value: "6", label: "Float" },
+      { value: "8", label: "Date" },
+      { value: "10", label: "Text" },
+    ];
+    finalVariableTypes.forEach((_var) => {
+      if (_var.value === varType) {
+        temp = _var.label;
+      }
+    });
+    return temp;
+  };
+
   // Function that sets the variable type when the user selects a value from the dropdown.
   const handleVariableType = (event, complexDataFields) => {
-    setcomplexDataJSON(complexDataFields);
+    setVariableType(event);
+    // setcomplexDataJSON(complexDataFields);
     if (event === "11") {
       setDataField(complexDataFields?.name);
+    } else if (event !== 11 && complexDataFields?.hasOwnProperty("id")) {
+      setDataField(complexDataFields?.name);
     }
-    setVariableType(event);
+
     // if (
     //   event !== "" &&
     //   event.includes("C") === false
@@ -412,7 +484,7 @@ function PrimaryVariables(props) {
       unbounded: arrayType ? "Y" : "N",
       extObjectId: "0",
     };
-    if (variableType !== "11") {
+    if (variableType !== "11" && !arrayType) {
       axios.post(SERVER_URL + `/addVariable`, postBody).then((res) => {
         if (res.status === 200 && res.data.Status === 0) {
           let temp = [...userDefinedVariables];
@@ -423,7 +495,7 @@ function PrimaryVariables(props) {
           let newProcessData = JSON.parse(
             JSON.stringify(localLoadedProcessData)
           );
-          newProcessData.Variable.push({
+          newProcessData?.Variable?.push({
             DefaultValue: "",
             ExtObjectId: "0",
             SystemDefinedName: dataField,
@@ -462,13 +534,21 @@ function PrimaryVariables(props) {
       setArrayType(false);
     } else {
       const formData = new FormData();
-      let mystring = JSON.stringify(complexDataJSON);
+      let varData = {
+        variableType: variableType,
+        variableName: aliasName,
+        unbounded: arrayType ? "Y" : "N",
+        processName: localLoadedProcessData.ProcessName,
+      };
+      let modData = { ...complexDataJSON, ...varData };
+
+      let mystring = JSON.stringify(modData);
       let myBlob = new Blob([mystring], {
         type: "text/plain",
       });
       formData.append("file", myBlob);
 
-      if (complexDataJSON.hasOwnProperty("id")) {
+      if (modData.hasOwnProperty("id")) {
         const response = await axios({
           method: "post",
           url: `/pmweb/saveVariable/${localLoadedProcessData.ProcessDefId}`,
@@ -525,10 +605,6 @@ function PrimaryVariables(props) {
       }
     });
 
-    if (dataField !== "") {
-      temp.push(dataField);
-    }
-
     if (type === "11" || type === "") return [];
     else return temp;
   };
@@ -570,6 +646,81 @@ function PrimaryVariables(props) {
     setLocalLoadedProcessData(temp);
     userDefinedVariables[index].arrayType = e.target.checked;
     setUserDefinedVariables([...userDefinedVariables]);
+  };
+
+  const editVarData = (varData) => {
+    let temp = JSON.parse(JSON.stringify(userDefinedVariables));
+    temp.forEach((_var) => {
+      if (_var.variableId === varData.variableId) {
+        _var.isEditable = !_var.isEditable;
+      } else {
+        _var.isEditable = false;
+      }
+    });
+    setUserDefinedVariables(temp);
+  };
+
+  const getPreviousVarData = (varData) => {
+    getUserDefinedVariables(localLoadedProcessData);
+  };
+
+  const handleModifyAliasName = (e, varData) => {
+    // let temp = JSON.parse(JSON.stringify(userDefinedVariables));
+    // temp.forEach((_var) => {
+    //   if (_var.variableId === varData.variableId) {
+    //     _var.aliasName = e.target.value;
+    //   }
+    // });
+    // setUserDefinedVariables(temp);
+  };
+
+  const getAllDataFieldsForType = (varType) => {
+    let temp = [];
+    dataInputs.forEach((data) => {
+      if (data.variableType === varType) {
+        temp = data.dataFields;
+      }
+    });
+    return temp;
+  };
+  console.log("vvvvvvvvvvvvvmodata", modifyComplexJson);
+  const modifyVarDataHandler = async (varData) => {
+    const formData = new FormData();
+
+    let moreData = {
+      variableType: varData.variableType,
+      variableName: varData.aliasName,
+      unbounded: varData.arrayType ? "Y" : "N",
+      variableId: varData.variableId,
+      processName: localLoadedProcessData.ProcessName,
+    };
+    let modData = { ...modifyComplexJson, ...moreData };
+
+    let mystring = JSON.stringify(modData);
+    let myBlob = new Blob([mystring], {
+      type: "text/plain",
+    });
+    formData.append("file", myBlob);
+    if (modifyComplexJson?.hasOwnProperty("id")) {
+      const response = await axios({
+        method: "post",
+        url: `/pmweb/modifyVariable/${localLoadedProcessData.ProcessDefId}`,
+        data: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+          // type: "application/json",
+        },
+      });
+      if (response.data.Status === 0) {
+        let temp = JSON.parse(JSON.stringify(localLoadedProcessData));
+        temp.Variable = [];
+        temp.Variable = [...response.data.Variable];
+        setLocalLoadedProcessData(temp);
+        getUserDefinedVariables(temp);
+        setModifyComplexJson({});
+        setmodifyButtonDisableId(undefined);
+      }
+    }
   };
 
   return (
@@ -624,6 +775,7 @@ function PrimaryVariables(props) {
       {bForInputStrip ? (
         <div className={styles.inputsDiv}>
           <TypeAndFieldMapping
+            microProps={microProps}
             autofocusInput={true}
             componentStyles={inputComponentStyles}
             handleAliasName={handleAliasName}
@@ -637,14 +789,12 @@ function PrimaryVariables(props) {
             dataField={dataField}
             dataTypeOnOpen={handleDataTypeOnOpen}
             handleDataType={handleDataType}
-            dataTypeOptions={getDataFieldsForType(
-              variableType,
-              true,
-              dataField
-            )}
+            dataTypeOptions={getDataFieldsForType(variableType)}
             arrayType={arrayType}
             setarrayType={(e) => handleArrayType(e)}
             localLoadedProcessData={localLoadedProcessData}
+            newField={true}
+            isEditable={true}
           />
           <div>
             {arrayType ? (
@@ -754,9 +904,14 @@ function PrimaryVariables(props) {
                 size="small"
               />
               <TypeAndFieldMapping
+                modifyVariableData={(data) => {
+                  setModifyComplexJson(data);
+                  setmodifyButtonDisableId(d.variableId);
+                }}
                 bForDisabled={isProcessReadOnly}
                 componentStyles={dataComponentStyles}
                 aliasName={d.aliasName}
+                handleAliasName={(e) => handleModifyAliasName(e, d)}
                 variableType={d.variableType}
                 variableLength={d.variableLength}
                 handleVariableType={(event, complexDataFields) =>
@@ -767,12 +922,8 @@ function PrimaryVariables(props) {
                 defaultValue={d.defaultValue}
                 dataTypeOnOpen={() => handleDataFieldData(index)}
                 handleDataType={(event) => handleDataFieldChange(event, index)}
-                dataTypeOptions={getDataFieldsForType(
-                  d.variableType,
-                  false,
-                  d.dataField
-                )}
-                isNonEditable={true}
+                dataTypeOptions={getDropdownOptions(d.variableType)}
+                isEditable={d.isEditable}
                 // selectDataTypeOption={
                 //   <MenuItem
                 //     className={menuStyles.menuItemStyles}
@@ -784,16 +935,70 @@ function PrimaryVariables(props) {
                 arrayType={d.arrayType}
                 localLoadedProcessData={localLoadedProcessData}
                 setarrayType={(e) => changeUnboundedType(e, d, index)}
+                varData={d}
               />
-              <RelationshipMappingModal
-                openProcessID={openProcessID}
-                isArrayType={d?.isArrayType}
-                tableName={d?.tableName || ""}
-                variableName={d?.aliasName}
-                mappingDataField={d?.columnName}
-                relationAndMapping={d?.relationAndMapping}
-              />
-              {!isProcessReadOnly ? (
+
+              {d.variableType === "11" ? (
+                <>
+                  {!d.isEditable ? (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "flex-end",
+                        width: "100%",
+                        paddingTop: "10px",
+                        paddingInline: "20px",
+                      }}
+                    >
+                      <Edit
+                        varData={d}
+                        userDefinedVariables={userDefinedVariables}
+                        setUserDefinedVariables={setUserDefinedVariables}
+                        editVarData={(varData) => editVarData(varData)}
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "flex-end",
+                        width: "100%",
+                        marginTop: "10px",
+                      }}
+                    >
+                      <button
+                        className={styles.cancelButton}
+                        onClick={() => {
+                          getPreviousVarData(d);
+                          setModifyComplexJson({});
+                          setmodifyButtonDisableId(undefined);
+                        }}
+                      >
+                        {t("cancel")}
+                      </button>
+                      <button
+                        style={{
+                          background:
+                            d.variableId === modifyButtonDisableId
+                              ? "#0072C6"
+                              : "#0073c64c",
+                        }}
+                        className={styles.updateButton}
+                        onClick={() => modifyVarDataHandler(d)}
+                        disabled={!d.variableId === modifyButtonDisableId}
+                      >
+                        {t("update")}
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : null}
+
+              {!isProcessReadOnly && !d.isEditable ? (
                 <DeleteOutlinedIcon
                   id="primary_variables_delete_variable"
                   className={

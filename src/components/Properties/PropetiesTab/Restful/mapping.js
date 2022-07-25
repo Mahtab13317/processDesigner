@@ -1,120 +1,581 @@
 import React, { useState, useEffect } from "react";
-import { Select, MenuItem, List } from "@material-ui/core";
 import "./index.css";
 import { Tab, Tabs } from "@material-ui/core";
 import { TabPanel } from "../../../ProcessSettings";
-import ReusableOneMap from "./reusableOneMap.js";
+import ReusableOneMap from "./reusableOneMap";
 import { store, useGlobalState } from "state-pool";
+import { useDispatch } from "react-redux";
+import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
+import { propertiesLabel } from "../../../../Constants/appConstants";
+import { connect } from "react-redux";
+import { useTranslation } from "react-i18next";
+import TextInput from "../../../../UI/Components_With_ErrrorHandling/InputField";
 
 function Mapping(props) {
-  // const [invocationType, setInvocationType] = useState(null);
+  let { t } = useTranslation();
+  const dispatch = useDispatch();
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [value, setValue] = useState(0); // Function to handle tab change.
   const [forwardMappingList, setForwardMappingList] = useState([]);
   const [reverseMappingList, setReverseMappingList] = useState([]);
-  const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
+  const [reverseDropdownOptions, setReverseDropdownOptions] = useState([]);
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
+  const [timeOutValue, setTimeOutValue] = useState(null);
+  const [variablesListForDropDown, setVariablesListForDropDown] = useState([]);
 
-  useEffect(() => {
-    // props.completeList.map((list) => {
-    //   if (list.MethodIndex == props.methodClicked.id) {
-    //     let temp = list?.RequestBodyParameters?.NestedReqComplexType;
-    //     setForwardMappingList(temp);
-    //   }
-    // });
-    console.log(
-      "RASGULLA",
-      localLoadedActivityPropertyData?.ActivityProperty?.restFullInfo
-        ?.assocMethodList,
-      props.methodClicked,
-      props.completeList
+  const checkForModifyRights = (data) => {
+    let temp = false;
+    localLoadedActivityPropertyData?.ActivityProperty?.m_objDataVarMappingInfo?.dataVarList?.forEach(
+      (item, i) => {
+        if (item?.processVarInfo?.variableId === data.VariableId) {
+          if (item?.m_strFetchedRights === "O") {
+            temp = true;
+          }
+        }
+      }
     );
-  }, [props.methodClicked, props.completeList]);
-
-  const handleForwardFieldMapping = (selectedValue, list, indexInput) => {
-    console.log("BAKWAS_FORWARD", selectedValue, list, indexInput);
+    return temp;
   };
 
-  const handleReverseFieldMapping = (selectedValue, list, indexInput) => {
-    console.log("BAKWAS_REVERSE", selectedValue, list, indexInput);
+  const checkForVarRights = (data) => {
+    let temp = false;
+    localLoadedActivityPropertyData?.ActivityProperty?.m_objDataVarMappingInfo?.dataVarList?.forEach(
+      (item, i) => {
+        if (item?.processVarInfo?.variableId === data.VariableId) {
+          if (
+            item?.m_strFetchedRights === "O" ||
+            item?.m_strFetchedRights === "R"
+          ) {
+            temp = true;
+          }
+        }
+      }
+    );
+    return temp;
   };
-
-  // useEffect(() => {
-  //   props.combinations.map((one) => {
-  //     if (one.methodIndex == props.methodClicked.id) {
-  //       setForwardMappingList(
-  //         one.mappingInfoList.filter((info) => {
-  //           return info.mappingType == "F";
-  //         })
-  //       );
-  //       setReverseMappingList(
-  //         one.mappingInfoList.filter((info) => {
-  //           return info.mappingType == "R";
-  //         })
-  //       );
-  //     }
-  //   });
-  // }, [props.methodClicked]);
-
 
   useEffect(() => {
-    setForwardMappingList(props.completeList.filter(el=> {return el.MethodIndex == props.methodClicked.id} )[0]?.RequestBodyParameters?.NestedReqComplexType);
-    console.log('HELL', props.completeList.filter(el=> {return el.MethodIndex == props.methodClicked.id} )[0]?.RequestBodyParameters?.NestedReqComplexType);
-  }, [props.methodClicked])
-  
-  return (
-    <div style={{ padding: "20px", width: "55%" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <div>
-          <p style={{ fontSize: "12px", color: "#886F6F" }}>Time Out</p>
-          <Select
-            className="select_webService_mapping"
-            // onChange={(e) => setInvocationType(e.target.value)}
-            value="10(s)"
-            style={{
-              fontSize: "12px",
-              width: "76px",
-              height: "28px",
-              border: "1px solid #C4C4C4",
-              borderRadius: "2px",
-            }}
-            MenuProps={{
-              anchorOrigin: {
-                vertical: "bottom",
-                horizontal: "left",
-              },
-              transformOrigin: {
-                vertical: "top",
-                horizontal: "left",
-              },
-              getContentAnchorEl: null,
-            }}
-          >
-            <MenuItem
-              style={{
-                fontSize: "12px",
-                padding: "4px",
-              }}
-              value="Fire And Forget"
-            >
-              10(s)
-            </MenuItem>
-          </Select>
-        </div>
-      </div>
+    localLoadedActivityPropertyData?.ActivityProperty?.restFullInfo?.assocMethodList?.forEach(
+      (el) => {
+        if (el.methodIndex == props.methodClicked.id) {
+          setTimeOutValue(el.timeoutInterval);
+        }
+      }
+    );
+  }, [localLoadedActivityPropertyData]);
 
-      <div className="tabStyles ">
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
+  const handleTimeOutChange = (event) => {
+    setTimeOutValue(event.target.value);
+    let temp = localLoadedActivityPropertyData;
+    temp.ActivityProperty.restFullInfo.assocMethodList?.map((el) => {
+      if (el.methodIndex == props.methodClicked.id) {
+        el.timeoutInterval = event.target.value;
+      }
+    });
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.Restful]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
+  };
+
+  const getVarName = (variableName, varList) => {
+    let variable;
+    varList?.forEach((content) => {
+      if (content.VariableName === variableName) {
+        variable = content;
+      }
+    });
+    return variable;
+  };
+
+  const getComplex = (variable) => {
+    let varList = [];
+    let varRelationMapArr = variable?.RelationAndMapping
+      ? variable.RelationAndMapping
+      : variable["Relation&Mapping"];
+    varRelationMapArr?.Mappings?.Mapping?.forEach((el) => {
+      if (el.VariableType === "11") {
+        let tempList = getComplex(el);
+        tempList.forEach((ell) => {
+          varList.push({
+            ...ell,
+            SystemDefinedName: `${variable.VariableName}.${ell.VariableName}`,
+            VariableName: `${variable.VariableName}.${ell.VariableName}`,
+          });
+        });
+      } else {
+        varList.push({
+          DefaultValue: "",
+          ExtObjectId: el.ExtObjectId ? el.ExtObjectId : variable.ExtObjectId,
+          SystemDefinedName: `${variable.VariableName}.${el.VariableName}`,
+          Unbounded: el.Unbounded,
+          VarFieldId: el.VarFieldId,
+          VarPrecision: el.VarPrecision,
+          VariableId: el.VariableId,
+          VariableLength: el.VariableLength,
+          VariableName: `${variable.VariableName}.${el.VariableName}`,
+          VariableScope: el.VariableScope
+            ? el.VariableScope
+            : variable.VariableScope,
+          VariableType: el.VariableType,
+        });
+      }
+    });
+    return varList;
+  };
+
+  useEffect(() => {
+    let selectedMethod;
+    let tempForwardList = [];
+    let tempReverseList = [];
+    let reverseList = [];
+    let tempReverseArr = [
+      {
+        DataStructureId: "0",
+        ParamIndex: "10000",
+        ParamName: "Fault",
+        ParamScope: "O",
+        ParamType: "3",
+        Unbounded: "N",
+      },
+      {
+        DataStructureId: "0",
+        ParamIndex: "10001",
+        ParamName: "FaultDesc",
+        ParamScope: "O",
+        ParamType: "10",
+        Unbounded: "N",
+      },
+    ];
+
+    let variablesList = [];
+    localLoadedProcessData?.Variable?.forEach((item) => {
+      if (item.VariableType === "11") {
+        let tempList = getComplex(item);
+        tempList?.forEach((el) => {
+          variablesList.push(el);
+        });
+      } else {
+        variablesList.push(item);
+      }
+    });
+
+    props?.completeList?.forEach((list) => {
+      if (list.MethodName == props.methodClicked.method) {
+        selectedMethod = list;
+      }
+    });
+
+    localLoadedProcessData?.Variable?.forEach((item, i) => {
+      if (
+        (item.VariableScope === "U" && checkForModifyRights(item)) ||
+        (item.VariableScope === "I" && checkForModifyRights(item))
+      ) {
+        if (item.VariableType === "11") {
+          let tempList = getComplex(item);
+          tempList?.forEach((el) => {
+            reverseList.push({
+              fieldName: el,
+              fieldDataStructID: null,
+              selectedVar: null,
+            });
+          });
+        } else {
+          reverseList.push({
+            fieldName: item,
+            fieldDataStructID: null,
+            selectedVar: null,
+          });
+        }
+      }
+    });
+
+    selectedMethod?.InputParameters?.PrimitiveComplexType?.forEach((param) => {
+      if (param.ParamType == "11") {
+        CreateParamKey(
+          param.ParamName,
+          param.DataStructureId,
+          tempForwardList,
+          param
+        );
+      } else {
+        tempForwardList.push({
+          fieldName: param.ParamName,
+          fieldDataStructID: param.DataStructureId,
+          fieldType: param.ParamType,
+          selectedVar: null,
+        });
+      }
+    });
+
+    selectedMethod?.RequestBodyParameters?.NestedReqComplexType?.forEach(
+      (param) => {
+        if (param.ParamType == "11") {
+          CreateParamKey(
+            param.ParamName,
+            param.DataStructureId,
+            tempForwardList,
+            param
+          );
+        } else {
+          tempForwardList.push({
+            fieldName: param.ParamName,
+            fieldDataStructID: param.DataStructureId,
+            fieldType: param.ParamType,
+            selectedVar: null,
+          });
+        }
+      }
+    );
+
+    selectedMethod?.ResponseBodyParameters?.NestedResComplexType?.forEach(
+      (param) => {
+        if (param.ParamType == "11") {
+          CreateParamKey(
+            param.ParamName,
+            param.DataStructureId,
+            tempReverseList,
+            param
+          );
+        } else {
+          tempReverseList.push({
+            fieldName: param.ParamName,
+            fieldDataStructID: param.DataStructureId,
+            selectedVar: null,
+            fieldType: param.ParamType,
+          });
+        }
+      }
+    );
+
+    tempReverseArr?.forEach((param) => {
+      tempReverseList.push({
+        fieldName: param.ParamName,
+        fieldDataStructID: param.DataStructureId,
+        selectedVar: null,
+        fieldType: param.ParamType,
+      });
+    });
+
+    props.combinations?.map((one) => {
+      if (props.methodClicked.id == one.methodIndex) {
+        one?.mappingInfoList?.forEach((el) => {
+          if (el.mappingType === "F") {
+            tempForwardList?.forEach((param, index) => {
+              if (el.dataStructureId == param.fieldDataStructID) {
+                let selectedVar = getVarName(el.varName, variablesList);
+                tempForwardList[index].selectedVar = selectedVar;
+              }
+            });
+          } else if (el.mappingType === "R") {
+            tempReverseList?.forEach((param) => {
+              if (
+                (el.dataStructureId === param.fieldDataStructID &&
+                  el.dataStructureId !== "0") ||
+                (el.dataStructureId === "0" &&
+                  el.parameterName === param.fieldName)
+              ) {
+                reverseList?.forEach((list, indexOne) => {
+                  if (list.fieldName.VariableName == el.varName) {
+                    reverseList[indexOne].selectedVar = param;
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+    setForwardMappingList(tempForwardList);
+    setReverseMappingList(reverseList);
+    setReverseDropdownOptions(tempReverseList);
+    setVariablesListForDropDown(variablesList);
+  }, [props.completeList, props.methodClicked, props.combinations]);
+
+  const CreateParamKey = (
+    parentKey,
+    parentIndex,
+    arrayList,
+    selectedMethod
+  ) => {
+    selectedMethod?.Member?.forEach((ds) => {
+      if (+parentIndex === +ds.ParentID && ds.ParamType != "11") {
+        arrayList.push({
+          fieldName: `${parentKey}.${ds.ParamName}`,
+          fieldDataStructID: ds.DataStructureId,
+          fieldType: ds.ParamType,
+          selectedVar: null,
+        });
+      } else if (+parentIndex === +ds.ParentID && ds.ParamType == "11") {
+        CreateParamKey(
+          `${parentKey}.${ds.ParamName}`,
+          ds.DataStructureId,
+          arrayList,
+          selectedMethod
+        );
+      }
+    });
+  };
+
+  const handleForwardFieldMapping = (selectedValue, list) => {
+    setForwardMappingList((prev) => {
+      let tempList = [...prev];
+      tempList.forEach((el, index) => {
+        if (el.fieldDataStructID == list.fieldDataStructID) {
+          tempList[index].selectedVar = selectedValue;
+        }
+      });
+      return tempList;
+    });
+    let temp = { ...localLoadedActivityPropertyData };
+    let tempArr = [...temp.ActivityProperty.restFullInfo.assocMethodList];
+    let indexValue = null;
+    tempArr?.forEach((arr, index) => {
+      if (props.methodClicked.id == arr.methodIndex) {
+        indexValue = index;
+      }
+    });
+    let forwardArr = temp?.ActivityProperty?.restFullInfo?.assocMethodList[
+      indexValue
+    ]?.mappingInfoList
+      ? [
+          ...temp.ActivityProperty.restFullInfo.assocMethodList[indexValue]
+            .mappingInfoList,
+        ]
+      : [];
+    let doExists = false;
+    let idx = null;
+    forwardArr?.forEach((arr, index) => {
+      if (
+        (+arr.dataStructureId !== 0 &&
+          +arr.dataStructureId === +list.fieldDataStructID) ||
+        (+arr.dataStructureId === 0 && arr.parameterName === list.fieldName)
+      ) {
+        doExists = true;
+        idx = index;
+      }
+    });
+    if (doExists) {
+      temp.ActivityProperty.restFullInfo.assocMethodList[
+        indexValue
+      ].mappingInfoList[idx] = {
+        check: true,
+        dataStructureId: list.fieldDataStructID,
+        mappingType: "F",
+        parameterDataType: list.fieldType,
+        parameterName: list.fieldName,
+        unbounded: "N",
+        varFieldId: selectedValue.VarFieldId,
+        varName: selectedValue.VariableName,
+        varScope: selectedValue.VariableScope,
+        variableId: selectedValue.VariableId,
+      };
+    } else {
+      temp?.ActivityProperty?.restFullInfo?.assocMethodList[indexValue]
+        ?.mappingInfoList
+        ? temp.ActivityProperty.restFullInfo.assocMethodList[
+            indexValue
+          ].mappingInfoList.push({
+            check: true,
+            dataStructureId: list.fieldDataStructID,
+            mappingType: "F",
+            parameterDataType: list.fieldType,
+            parameterName: list.fieldName,
+            unbounded: "N",
+            varFieldId: selectedValue.VarFieldId,
+            varName: selectedValue.VariableName,
+            varScope: selectedValue.VariableScope,
+            variableId: selectedValue.VariableId,
+          })
+        : (temp.ActivityProperty.restFullInfo.assocMethodList[indexValue] = {
+            ...temp.ActivityProperty.restFullInfo.assocMethodList[indexValue],
+            mappingInfoList: [
+              {
+                check: true,
+                dataStructureId: list.fieldDataStructID,
+                mappingType: "F",
+                parameterDataType: list.fieldType,
+                parameterName: list.fieldName,
+                unbounded: "N",
+                varFieldId: selectedValue.VarFieldId,
+                varName: selectedValue.VariableName,
+                varScope: selectedValue.VariableScope,
+                variableId: selectedValue.VariableId,
+              },
+            ],
+          });
+    }
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.Restful]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
+  };
+
+  const handleReverseFieldMapping = (selectedValue, list) => {
+    setReverseMappingList((prev) => {
+      let tempList = [...prev];
+      tempList.forEach((el, index) => {
+        if (el.fieldName.VariableName == list.fieldName.VariableName) {
+          tempList[index].selectedVar = selectedValue;
+        }
+      });
+      return tempList;
+    });
+    let temp = { ...localLoadedActivityPropertyData };
+    let tempArr = [...temp.ActivityProperty.restFullInfo.assocMethodList];
+    let indexValue = null;
+    tempArr?.forEach((arr, index) => {
+      if (props.methodClicked.id == arr.methodIndex) {
+        indexValue = index;
+      }
+    });
+    let ReverseArr = temp?.ActivityProperty?.restFullInfo?.assocMethodList[
+      indexValue
+    ]?.mappingInfoList
+      ? [
+          ...temp.ActivityProperty.restFullInfo.assocMethodList[indexValue]
+            .mappingInfoList,
+        ]
+      : [];
+    let doExists = false;
+    let idx = null;
+    ReverseArr?.forEach((arr, index) => {
+      if (
+        (+arr.dataStructureId !== 0 &&
+          +arr.dataStructureId === +list.fieldDataStructID) ||
+        (+arr.dataStructureId === 0 && arr.parameterName === list.fieldName)
+      ) {
+        doExists = true;
+        idx = index;
+      }
+    });
+
+    if (doExists) {
+      temp.ActivityProperty.restFullInfo.assocMethodList[
+        indexValue
+      ].mappingInfoList[idx] = {
+        check: true,
+        dataStructureId: selectedValue.fieldDataStructID,
+        mappingType: "R",
+        parameterDataType: selectedValue.fieldType,
+        parameterName: selectedValue.fieldName,
+        unbounded: "N",
+        varFieldId: list.fieldName.VarFieldId,
+        varName: list.fieldName.VariableName,
+        varScope: list.fieldName.VariableScope,
+        variableId: list.fieldName.VariableId,
+      };
+    } else {
+      temp?.ActivityProperty?.restFullInfo?.assocMethodList[indexValue]
+        ?.mappingInfoList
+        ? temp.ActivityProperty.restFullInfo.assocMethodList[
+            indexValue
+          ].mappingInfoList.push({
+            check: true,
+            dataStructureId: selectedValue.fieldDataStructID,
+            mappingType: "R",
+            parameterDataType: selectedValue.fieldType,
+            parameterName: selectedValue.fieldName,
+            unbounded: "N",
+            varFieldId: list.fieldName.VarFieldId,
+            varName: list.fieldName.VariableName,
+            varScope: list.fieldName.VariableScope,
+            variableId: list.fieldName.VariableId,
+          })
+        : (temp.ActivityProperty.restFullInfo.assocMethodList[indexValue] = {
+            ...temp.ActivityProperty.restFullInfo.assocMethodList[indexValue],
+            mappingInfoList: [
+              {
+                check: true,
+                dataStructureId: selectedValue.fieldDataStructID,
+                mappingType: "R",
+                parameterDataType: selectedValue.fieldType,
+                parameterName: selectedValue.fieldName,
+                unbounded: "N",
+                varFieldId: list.fieldName.VarFieldId,
+                varName: list.fieldName.VariableName,
+                varScope: list.fieldName.VariableScope,
+                variableId: list.fieldName.VariableId,
+              },
+            ],
+          });
+    }
+
+    setlocalLoadedActivityPropertyData(temp);
+
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.Restful]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
+  };
+
+  const getVarListByType = (varList, item) => {
+    let varType = item?.fieldType;
+    let list = [];
+    varList?.forEach((el) => {
+      if (
+        el.VariableScope === "M" ||
+        el.VariableScope === "S" ||
+        (el.VariableScope === "U" && checkForVarRights(el)) ||
+        (el.VariableScope === "I" && checkForVarRights(el))
+      ) {
+        let type = el.VariableType;
+        if (varType === type) {
+          list.push(el);
+        }
+      }
+    });
+    return list;
+  };
+
+  const getRevVarListByType = (varList, item) => {
+    let varType = item.fieldName.VariableType;
+    let list = [];
+    varList?.forEach((el) => {
+      let type = el.fieldType;
+      if (varType === type) {
+        list.push(el);
+      }
+    });
+    return list;
+  };
+
+  return (
+    <div style={{ padding: "1rem 1vw 0", width: "40%" }}>
+      <div>
+        <p style={{ fontSize: "12px", color: "#886F6F" }}>
+          {t("TimeOut")}
+          <span className="starIcon">*</span>
+        </p>
+        <TextInput
+          type="number"
+          inputValue={timeOutValue}
+          idTag="timeOutWebservice"
+          onChangeEvent={(e) => handleTimeOutChange(e)}
+        />
+      </div>
+      <div className="webS_props_tabStyles ">
         <Tabs
           value={value}
           onChange={handleChange}
@@ -130,49 +591,55 @@ function Mapping(props) {
             <div
               style={{
                 display: "flex",
-                marginTop: "20px",
-                marginBottom: "8px",
+                marginTop: "1rem",
+                marginBottom: "0.5rem",
+                marginRight: "0.375rem",
               }}
             >
               <div
                 style={{
                   height: "30px",
-                  width: "220px",
+                  flex: "1",
                   backgroundColor: "#F4F4F4",
                   marginRight: "30px",
                   fontSize: "12px",
                   padding: "7px",
+                  fontWeight: "600",
                 }}
               >
-                REST Input Parameters
+                {t("RESTInputParameters")}
               </div>
               <div
                 style={{
                   height: "30px",
-                  width: "220px",
+                  flex: "1",
                   backgroundColor: "#F4F4F4",
                   fontSize: "12px",
                   padding: "7px",
+                  fontWeight: "600",
                 }}
               >
-                Current Process Variable(s)
+                {t("CurrentProcessVariable(s)")}
               </div>
             </div>
-            {forwardMappingList?.map((list) => {
-              return (
-                <ReusableOneMap
-                  mapField={list.ParamName}
-                  dropDownOptions={localLoadedProcessData?.Variable}
-                  dropDownKey="VariableName"
-                  methodClicked={props.methodClicked}
-                  methodIndex = {props.completeList.filter(el=> {return el.MethodIndex == props.methodClicked.id} )[0].MethodIndex}
-                  // varField={list.varName}
-                  // handleFieldMapping={(val) =>
-                  //   handleForwardFieldMapping(val, list, index)
-                  // }
-                />
-              );
-            })}
+            <div style={{ height: "16.5rem", overflow: "auto" }}>
+              {forwardMappingList?.map((list, index) => {
+                return (
+                  <ReusableOneMap
+                    mapField={list.fieldName}
+                    varField={list.selectedVar}
+                    dropDownOptions={getVarListByType(
+                      variablesListForDropDown,
+                      list
+                    )}
+                    dropDownKey="VariableName"
+                    handleFieldMapping={(val) =>
+                      handleForwardFieldMapping(val, list)
+                    }
+                  />
+                );
+              })}
+            </div>
           </div>
         </TabPanel>
 
@@ -188,42 +655,51 @@ function Mapping(props) {
               <div
                 style={{
                   height: "30px",
-                  width: "220px",
+                  flex: "1",
                   backgroundColor: "#F4F4F4",
                   marginRight: "30px",
                   fontSize: "12px",
                   padding: "7px",
+                  fontWeight: "600",
                 }}
               >
-                SOAP Input Parameters
+                {t("CurrentProcessVariable(s)")}
               </div>
               <div
                 style={{
                   height: "30px",
-                  width: "220px",
+                  flex: "1",
                   backgroundColor: "#F4F4F4",
                   fontSize: "12px",
                   padding: "7px",
+                  fontWeight: "600",
                 }}
               >
-                Current Process Variable(s)
+                {t("RESTOutputParameters")}
               </div>
             </div>
-            {/* {reverseMappingList.map((list) => {
-              return (
-                <ReusableOneMap
-                  mapField={list.parameterName}
-                  dropDownKey="fieldName"
-                  varField={list.varName}
-                  handleFieldMapping={(val) =>
-                    handleReverseFieldMapping(val, list, index)
-                  }
-                  dropDownOptions={list?.mappingInfoList?.filter((el) => {
-                    return el.mappingType == "R";
-                  })}
-                />
-              );
-            })} */}
+            <div style={{ height: "16.5rem", overflow: "auto" }}>
+              {reverseMappingList?.map((list, index) => {
+                return (
+                  <ReusableOneMap
+                    mapField={
+                      list.fieldName.processVarInfo
+                        ? list.fieldName.processVarInfo.varName
+                        : list.fieldName.VariableName
+                    }
+                    varField={list.selectedVar}
+                    dropDownOptions={getRevVarListByType(
+                      reverseDropdownOptions,
+                      list
+                    )}
+                    dropDownKey="fieldName"
+                    handleFieldMapping={(val) =>
+                      handleReverseFieldMapping(val, list, index)
+                    }
+                  />
+                );
+              })}
+            </div>
           </div>
         </TabPanel>
       </div>
@@ -231,4 +707,17 @@ function Mapping(props) {
   );
 }
 
-export default Mapping;
+const mapStateToProps = (state) => {
+  return {
+    showDrawer: state.showDrawerReducer.showDrawer,
+    cellID: state.selectedCellReducer.selectedId,
+    cellName: state.selectedCellReducer.selectedName,
+    cellType: state.selectedCellReducer.selectedType,
+    cellActivityType: state.selectedCellReducer.selectedActivityType,
+    cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
+    isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
+    openProcessID: state.openProcessClick.selectedId,
+  };
+};
+
+export default connect(mapStateToProps, null)(Mapping);

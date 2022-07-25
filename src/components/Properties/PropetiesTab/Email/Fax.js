@@ -12,13 +12,12 @@ import {
   RTL_DIRECTION,
 } from "../../../../Constants/appConstants";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
+import { OpenProcessSliceValue } from "../../../../redux-store/slices/OpenProcessSlice";
 
 function Fax(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const [variableDefinition] = useGlobalState("variableDefinition");
-  const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
@@ -26,6 +25,7 @@ function Fax(props) {
   const [allData, setAllData] = useState({});
   const [FaxNo, setFaxNo] = useState([]);
   const [faxNumber, setfaxNumber] = useState([]);
+  const openProcessData = useSelector(OpenProcessSliceValue);
   let DropdownOptions = ["Status"];
 
   const [varDocSelected, setVarDocSelected] = useState("");
@@ -64,25 +64,23 @@ function Fax(props) {
 
   useEffect(() => {
     let temp = {};
-
-    localLoadedProcessData &&
-      localLoadedProcessData.DocumentTypeList.forEach((el) => {
-        temp = {
-          ...temp,
-          [`d_${el.DocTypeId}`]: {
-            createDoc: "N",
-            docTypeId: el.DocTypeId,
-            m_bCreateCheckbox: false,
-            m_bFax: false,
-            varFieldId: "0",
-            variableId: "0",
-            DocName: el.DocName,
-          },
-        };
-      });
+    let tempLocal = JSON.parse(JSON.stringify(openProcessData.loadedData));
+    tempLocal?.DocumentTypeList.forEach((el) => {
+      temp = {
+        ...temp,
+        [`d_${el.DocTypeId}`]: {
+          createDoc: "N",
+          docTypeId: el.DocTypeId,
+          m_bCreateCheckbox: false,
+          m_bFax: false,
+          varFieldId: "0",
+          variableId: "0",
+          DocName: el.DocName,
+        },
+      };
+    });
     setAllData(temp);
 
-    let tempArr = [];
     let tempList =
       localLoadedActivityPropertyData.ActivityProperty?.sendInfo?.faxInfo
         ?.mapselectedfaxDocList;
@@ -103,7 +101,7 @@ function Fax(props) {
       localLoadedActivityPropertyData.ActivityProperty?.sendInfo?.faxInfo
         ?.m_strFaxNumber
     );
-  }, []);
+  }, [openProcessData.loadedData]);
 
   const faxNumHandler = (e) => {
     setfaxNumber(e.target.value);
@@ -113,7 +111,6 @@ function Fax(props) {
     let tempCheck = { ...checked };
     tempCheck[el] = { ...tempCheck[el], [e.target.name]: e.target.checked };
     setChecked(tempCheck);
-
 
     let temp = { ...localLoadedActivityPropertyData };
     let SaveFax = {

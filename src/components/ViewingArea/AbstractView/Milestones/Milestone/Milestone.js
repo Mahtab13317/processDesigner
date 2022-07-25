@@ -6,15 +6,28 @@ import c_Names from "classnames";
 import { useTranslation } from "react-i18next";
 import { renameMilestone } from "../../../../../utility/CommonAPICall/RenameMilestone";
 import "./MilestoneArabic.css";
-import { PROCESSTYPE_LOCAL } from "../../../../../Constants/appConstants";
+import {
+  PROCESSTYPE_LOCAL,
+  userRightsMenuNames,
+} from "../../../../../Constants/appConstants";
+import { useSelector } from "react-redux";
+import { UserRightsValue } from "../../../../../redux-store/slices/UserRightsSlice";
+import { getMenuNameFlag } from "../../../../../utility/UserRightsFunctions";
 
 const Mile = (props) => {
+  const userRightsValue = useSelector(UserRightsValue);
   //t is our translation function
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const [showDragIcon, setShowDragIcon] = useState(false);
   const { provided, MileName } = props;
   const [mileNameValue, setMileNameValue] = useState("");
+
+  // Boolean that decides whether create milestone button will be visible or not.
+  const createMilestoneRightsFlag = getMenuNameFlag(
+    userRightsValue?.menuRightsList,
+    userRightsMenuNames.createMilestone
+  );
 
   useEffect(() => {
     if (MileName) {
@@ -72,19 +85,22 @@ const Mile = (props) => {
               })}
               {...provided.dragHandleProps}
             >
-              <DragIndicatorIcon style={{marginTop: "-0.1875rem", height: "1.4rem" ,marginLeft: "-0.25rem"}} />
+              <DragIndicatorIcon
+                style={{
+                  marginTop: "-0.1875rem",
+                  height: "1.4rem",
+                  marginLeft: "-0.25rem",
+                }}
+              />
             </div>
           ) : (
             <div
-            className={c_Names({
-              dragIconHandle: direction !== "rtl",
-              dragIconHandleArabic: direction == "rtl",
-            })}
-           
-          >
-           
+              className={c_Names({
+                dragIconHandle: direction !== "rtl",
+                dragIconHandleArabic: direction == "rtl",
+              })}
+            >
               {props.index + 1 + "."}
-          
             </div>
           )}
 
@@ -102,13 +118,14 @@ const Mile = (props) => {
               value={mileNameValue}
             />
           </ClickAwayListener>
-
-          <button
-            className="addBetween"
-            onClick={() => props.addInBetweenNewMile(props.index)}
-          >
-            <p className="addIcon">+</p>
-          </button>
+          {createMilestoneRightsFlag && (
+            <button
+              className="addBetween"
+              onClick={() => props.addInBetweenNewMile(props.index)}
+            >
+              <p className="addIcon">+</p>
+            </button>
+          )}
         </div>
         <div className="spaceAfterMile"></div>
       </div>

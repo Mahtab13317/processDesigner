@@ -3,7 +3,7 @@
   flex-wrap: wrap;
   flex-direction: row;
   font-family: "Open Sans, Regular";
-  height: 30rem;
+  height: 100vh;
   overflow-y: auto;
   width: 100%;
 }
@@ -11,12 +11,11 @@
 .leftPanel {
   flex: 1 1 auto;
   border-right: 1px solid #c4c4c4;
-  max-width: 25%;
+  width: 25%;
 }
 .rightPanel {
   flex: 3 1 auto;
-  overflow-x: auto;
-  max-width: 75%;
+  width: 75%;
 }
 .leftHeadSection,
 .rightHeadSection {
@@ -42,8 +41,8 @@
   font-size: 12px;
   color: #606060;
 }
-.showCountRight{
-    font-size: 12px;
+.showCountRight {
+  font-size: 12px;
   color: #606060;
   flex-grow: 1;
 }
@@ -76,31 +75,29 @@
   color: #606060;
 }
 
-.rightsTableHead {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-  /*margin-top:0.9rem;
-  align-items:center;
-  height: 2.3rem;*/
-}
-.item {
-  font-size: 14px;
-  border-right: 1px solid #c4c4c4;
-}
-
 .rightsActivities {
   display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-  border-bottom: 1px solid #c4c4c4;
+  overflow-x: auto;
+  width: 50rem;
+  margin-top:1rem;
+  padding-bottom: 0.5rem;
 }
-.actItem {
-  font-size: 14px;
+.actColumn {
+  display: flex;
+  flex-direction: column;
+  width: 25%;
   border-right: 1px solid #c4c4c4;
+  
 }
 
-.rightsTable {
+.actItem {
+  width: 12.5rem;
+  padding: 0.5rem 0.5rem 0 0.5rem;
+  font-size: 12px;
+  font-weight: 600;
+  border-bottom: 1px solid #c4c4c4;
+  font-family: "Open Sans, Semibold";
+  height: 2.25rem;
 }
 
 .checkGroup {
@@ -128,6 +125,14 @@
   font: normal normal normal 12px/17px Open Sans;
   letter-spacing: 0px;
 }
+.actRights{
+  padding: 1rem;
+  height: 3.5rem;
+  font-weight: 600;
+  border-bottom: 1px solid #c4c4c4;
+  font-family: "Open Sans, Semibold";
+ 
+}
 
 .footer {
   width: 100%;
@@ -143,3 +148,8 @@
   margin-top: 0.5rem;
 }
 
+.arrow{
+  height: 12px !important;
+  width: 12px !important;
+  cursor: pointer;
+}

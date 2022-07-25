@@ -1,10 +1,12 @@
+// Changes made to solve bug ID 110921
+// WebServices: On opening the properties of Webservice it keeps on loading
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { store, useGlobalState } from "state-pool";
 import { connect } from "react-redux";
 import { Select, MenuItem, List } from "@material-ui/core";
 import "./index.css";
-import Button from "@material-ui/core/Button";
 import { useDispatch, useSelector } from "react-redux";
 import ServiceAndMethods from "./webservice&Methods.js";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
@@ -36,16 +38,14 @@ function Webservice(props) {
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [associations, setAssociations] = useState([]);
   const [showMapping, setShowMapping] = useState(false);
-  const [combinationExists, setCombinationExists] = useState(false);
   const [associateButtonClicked, setAssociateButtonClicked] = useState(false);
   const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
   const [showCatelogScreen, setShowCatelogScreen] = useState(false);
-  const [commonError, setCommonError] = useState(null);
 
   useEffect(() => {
     if (saveCancelStatus.SaveClicked) {
       let isValidObj = validateFunc();
-      if (!isValidObj.isValid) {
+      if (!isValidObj.isValid && isValidObj.type === "FW") {
         dispatch(
           setToastDataFunc({
             message: `${t("PleaseDefineAtleastOneForwardMapping")}`,
@@ -53,9 +53,12 @@ function Webservice(props) {
             open: true,
           })
         );
+      } else if (!isValidObj.isValid && isValidObj.type === "RW") {
         dispatch(
-          setActivityPropertyChange({
-            [propertiesLabel.webService]: { isModified: true, hasError: true },
+          setToastDataFunc({
+            message: `${t("PleaseDefineAtleastOneReverseMapping")}`,
+            severity: "error",
+            open: true,
           })
         );
       }
@@ -114,15 +117,21 @@ function Webservice(props) {
       // -------------------------------
       let combExists = false;
       // Not allowing addition of already existing webservice and method combination
-      localLoadedActivityPropertyData.ActivityProperty.webserviceInfo.objWebServiceDataInfo.map(
+      // Changes made to solve bug ID 110921
+      localLoadedActivityPropertyData?.ActivityProperty?.webserviceInfo?.objWebServiceDataInfo?.map(
         (el) => {
           if (
             el.methodName == selectedMethod &&
             el.webserviceName == selectedWebService
           ) {
-            setCombinationExists(true);
             combExists = true;
-            alert("This combination already exists!");
+            dispatch(
+              setToastDataFunc({
+                message: t("CombAlreadyExists"),
+                severity: "error",
+                open: true,
+              })
+            );
           }
         }
       );
@@ -137,10 +146,10 @@ function Webservice(props) {
         });
         // Saving Data
         let temp = { ...localLoadedActivityPropertyData };
-        temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo.push({
+        temp?.ActivityProperty?.webserviceInfo?.objWebServiceDataInfo?.push({
           asynchActId: "0",
           fwdParamMapList: [],
-          invocationType: "S",
+          invocationType: "F",
           methodIndex: methodIndex,
           methodName: selectedMethod,
           proxyEnabled: "F",
@@ -175,14 +184,14 @@ function Webservice(props) {
         ]
       : [];
     newAssociateList?.forEach((el) => {
-      if (el.invocationType != "F" && isValid) {
+      if (isValid) {
         if (!el.fwdParamMapList) {
           isValid = false;
           invalidTemplate = el;
           type = "FW";
         } else if (el.fwdParamMapList) {
           let minMapping = false;
-          el.fwdParamMapList.forEach((ele) => {
+          el.fwdParamMapList?.forEach((ele) => {
             if (ele.mapField) {
               minMapping = true;
             }
@@ -193,13 +202,13 @@ function Webservice(props) {
             type = "FW";
           }
         }
-        if (isValid && !el.revParamMapList) {
+        if (el.invocationType !== "F" && isValid && !el.revParamMapList) {
           isValid = false;
           invalidTemplate = el;
           type = "RW";
         } else {
           let minMapping = false;
-          el.revParamMapList.forEach((ele) => {
+          el.revParamMapList?.forEach((ele) => {
             if (ele.mapField) {
               minMapping = true;
             }
@@ -219,8 +228,6 @@ function Webservice(props) {
     } else {
       return {
         isValid: false,
-        templateName: invalidTemplate.productName,
-        templateVersion: invalidTemplate.version,
         type: type,
       };
     }
@@ -230,9 +237,36 @@ function Webservice(props) {
     setShowCatelogScreen(true);
   };
 
-  {
-    /*code changes on 21 June 2022 for BugId 110907 */
-  }
+  const handleAssociationDelete = (row) => {
+    let tempVariablesList = [...associations];
+    let tempVariablesList_Filtered = tempVariablesList.filter((variable) => {
+      return variable.id !== row.id;
+    });
+    if (tempVariablesList_Filtered?.length === 0) {
+      setShowMapping(false);
+      setServiceNameClicked(null);
+    }
+    setAssociations(tempVariablesList_Filtered);
+    // Delete association permanently from get Activity Call
+    let temp = { ...localLoadedActivityPropertyData };
+    let idx = null;
+    temp?.ActivityProperty?.webserviceInfo?.objWebServiceDataInfo?.forEach(
+      (el, index) => {
+        if (el.methodIndex === row.id) {
+          idx = index;
+        }
+      }
+    );
+    temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo.splice(idx, 1);
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.webService]: { isModified: true, hasError: false },
+      })
+    );
+  };
+
+  /*code changes on 21 June 2022 for BugId 110907 */
   return (
     <div>
       <div
@@ -286,6 +320,7 @@ function Webservice(props) {
               style={{
                 display: props.isDrawerExpanded ? "flex" : "block",
                 alignItems: props.isDrawerExpanded ? "end" : "normal",
+                gap: "1vw",
               }}
             >
               <div
@@ -436,8 +471,10 @@ function Webservice(props) {
             showMapping={showMapping}
             setShowMapping={setShowMapping}
             associations={associations}
+            setAssociations={setAssociations}
             isDrawerExpanded={props.isDrawerExpanded}
             setServiceNameClicked={setServiceNameClicked}
+            handleAssociationDelete={handleAssociationDelete}
           />
           {/* ----------------------------------- */}
         </div>

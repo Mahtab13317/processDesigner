@@ -6,15 +6,15 @@ import Button from "@material-ui/core/Button";
 import { store, useGlobalState } from "state-pool";
 import { useDispatch, useSelector } from "react-redux";
 import { setActivityPropertyChange } from "../../../../../redux-store/slices/ActivityPropertyChangeSlice.js";
-import { OpenProcessSliceValue, setOpenProcess } from "../../../../../redux-store/slices/OpenProcessSlice.js";
+import {
+  OpenProcessSliceValue,
+  setOpenProcess,
+} from "../../../../../redux-store/slices/OpenProcessSlice.js";
 
 function TaskList(props) {
   const [json, setJson] = useState([]);
   const [SelectAllChecked, setSelectAllChecked] = useState(false);
   const openProcessData = useSelector(OpenProcessSliceValue);
-  const localLoadedProcessData = JSON.parse(
-    JSON.stringify(openProcessData.loadedData)
-  );
   let dispatch = useDispatch();
 
   useEffect(() => {
@@ -28,9 +28,9 @@ function TaskList(props) {
   }, [SelectAllChecked]);
 
   useEffect(() => {
-    let temp = JSON.parse(JSON.stringify(localLoadedProcessData.Tasks));
-    setJson(temp);
-  }, [localLoadedProcessData.Tasks]);
+    let temp = JSON.parse(JSON.stringify(openProcessData.loadedData));
+    setJson(temp.Tasks);
+  }, [openProcessData.loadedData?.Tasks]);
 
   const handleCheckChange = (task) => {
     let count = 0;
@@ -48,11 +48,9 @@ function TaskList(props) {
     } else setSelectAllChecked(false);
 
     setJson(temp);
-    let temp2 = JSON.parse(JSON.stringify(localLoadedProcessData));
+    let temp2 = JSON.parse(JSON.stringify(openProcessData.loadedData));
     temp2.Tasks = temp;
-    dispatch(
-      setOpenProcess({ loadedData: temp2 })
-    );
+    dispatch(setOpenProcess({ loadedData: temp2 }));
     dispatch(
       setActivityPropertyChange({
         Task: { isModified: true, hasError: false },

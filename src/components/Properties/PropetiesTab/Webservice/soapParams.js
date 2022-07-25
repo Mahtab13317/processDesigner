@@ -40,7 +40,6 @@ function soapParams(props) {
   ]);
 
   const handleCheckChange = (para, checkValue) => {
-    console.log("CHOTU", para, checkValue);
     let temp = Params;
     temp.map((t) => {
       if (t.mapField == para.mapField) {
@@ -51,11 +50,6 @@ function soapParams(props) {
   };
 
   const addParamsToList = () => {
-    console.log(
-      "DOOSRA",
-      localLoadedActivityPropertyData?.ActivityProperty?.webserviceInfo
-        ?.objWebServiceDataInfo
-    );
     let tempInfo = localLoadedActivityPropertyData;
     let temp =
     tempInfo?.ActivityProperty?.webserviceInfo
@@ -77,8 +71,6 @@ function soapParams(props) {
     setlocalLoadedActivityPropertyData(tempInfo);
     props.setShowSOAPParamsModal(false);
   };
-
-  //   <button onClick={()=> addParamsToList()}>Add Param</button>
 
   return (
     <div>
