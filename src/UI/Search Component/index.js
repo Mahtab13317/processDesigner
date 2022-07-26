@@ -109,6 +109,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const SearchBox = (props) => {
+  console.log("search",props)
   const {
     name,
     width = "200px",
@@ -138,6 +139,11 @@ const SearchBox = (props) => {
   useEffect(() => {
     if (haveRecents) if (onLoadRecents !== null) onLoadRecents();
   }, []);
+
+  useEffect(() => {
+    console.log('TEST', props.searchTerm)
+  }, [props.searchTerm])
+  
 
   useEffect(() => {
     function onClickEvent(event) {

@@ -3,7 +3,7 @@
   flex-wrap: wrap;
   flex-direction: row;
   font-family: "Open Sans, Regular";
-  height: 100vh;
+  height: 30rem;
   overflow-y: auto;
   width: 100%;
 }
@@ -146,6 +146,7 @@
   gap: 8px;
   justify-content: flex-end;
   margin-top: 0.5rem;
+  margin-right: 1rem;
 }
 
 .arrow{

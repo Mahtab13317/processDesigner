@@ -25,7 +25,6 @@ import axios from "axios";
 import { RTL_DIRECTION, SERVER_URL } from "../../../Constants/appConstants";
 import { element } from "prop-types";
 import PaginateVar from "./PaginateVar";
-import { setToastDataFunc } from "../../../redux-store/slices/ToastDataHandlerSlice";
 
 function DataRights() {
   let { t } = useTranslation();
@@ -45,25 +44,21 @@ function DataRights() {
   const [varActRights, setVarActRights] = useState([]);
   const [totalVar, setTotalVar] = useState(null);
   const [totalAct, setTotalAct] = useState(null);
-  const [showPerPage, setShowPerPage] = useState(4);
+  const [showPerPage, setShowPerPage] = useState(2);
   const [pagination, setPagination] = useState({
     start: 0,
     end: showPerPage,
   });
-  const [showPerPageVar, setShowPerPageVar] = useState(5);
+  const [showPerPageVar, setShowPerPageVar] = useState(2);
   const [paginationVar, setPaginationVar] = useState({
     start: 0,
     end: showPerPageVar,
   });
 
   const [fetchedRights, setFetchedRights] = useState([]);
-
-
-  const [searchVar, setSearchVar] = useState("");
-  const [searchAct, setSearchAct] = useState("");
+  const [checkedStatus, setChekedStatus] = useState(false);
 
   useEffect(async () => {
-    //getting variable list from process
     let temp = [];
     localLoadedProcessData?.Variable.filter(
       (d) => d.VariableScope === "U" || d.VariableScope === "I"
@@ -73,18 +68,18 @@ function DataRights() {
         name: data.VariableName,
         varScope: data.VariableScope,
         varType: data.VariableType,
-        read: false,
-        modify: false,
       });
     });
+    console.log("mahtab variables", temp);
 
     setVariables(temp);
     setActVar(temp);
     setTotalVar(temp.length);
 
+    console.log("mahtab milestones", localLoadedProcessData?.MileStones);
+
     let arr = [];
 
-    //getting activities list from process
     localLoadedProcessData?.MileStones.map((mileStone) => {
       mileStone.Activities.map((activity, index) => {
         arr.push({
@@ -94,7 +89,6 @@ function DataRights() {
           actName: activity.ActivityName,
           read: false,
           modify: false,
-          isChecked: false,
         });
       });
     });
@@ -107,7 +101,6 @@ function DataRights() {
     let tempAct = [...arr];
     let newArr = [];
 
-    //setting activities and variable both list in an array to give rights for read and modify
     tempAct.map((data, i) => {
       newArr[i] = {
         id: data.id,
@@ -125,7 +118,7 @@ function DataRights() {
             varScope: item.varScope,
             varType: item.varType,
             mStatus: null,
-            fetchedRights: "",
+            fetchedRights:""
           };
         }),
       };
@@ -140,12 +133,13 @@ function DataRights() {
       });
     });
 
-    //code for getting existing rights using get api call and set to the above array which have both list activity and variables
+    console.table(newArr);
 
     let ids = arr.map((elem) => {
       return elem.id;
     });
     ids = ids.toString();
+    console.log("mahtab ids", ids);
     const urlData = {
       pid: localLoadedProcessData.ProcessDefId,
       repoType: localLoadedProcessData.ProcessType,
@@ -169,6 +163,7 @@ function DataRights() {
       "&actId=" +
       urlData.id;
     const response = await getRightsAPICall(url);
+    console.log("response", response?.data?.actVarRightsDetails);
     setFetchedRights(response?.data?.actVarRightsDetails);
     response?.data?.actVarRightsDetails?.forEach((data, i) => {
       if (data?.varDetails && data?.varDetails?.length > 0) {
@@ -182,7 +177,7 @@ function DataRights() {
             newArr[i][j].read = true;
             newArr[i].varDetail[j].read = true;
           }
-          newArr[i].varDetail[j].fetchedRights = item.varType;
+           newArr[i].varDetail[j].fetchedRights=item.varType
         });
       } else {
         newArr = [...newArr];
@@ -196,119 +191,70 @@ function DataRights() {
     return await axios.get(url);
   };
 
-//function for variable search filter
-  const getVarList=()=>{
-    console.log("sfsf")
-  }
-
-
   const getList = () => {
     //alert("sfdsf")
   };
 
-  //give all rights to all variables in a particular activity
-  const checkedAllAct = (e, element, i) => {
+  const checkedAllAct = (e,element, i) => {
     const tempAct = [...activities];
     let tempVar = [...variables];
     let tempVarAct = [...varActRights];
-
-    tempVarAct
-      .filter((d) => d.actName === element.actName)
-      .forEach((data, i) => {
-        data.modStatus = true;
-        tempVar.forEach((elem, j) => {
-          data.varDetail[j].read = e.target.checked;
-          data.varDetail[j].modify = e.target.checked;
-          if (e.target.checked === false) {
-            data.varDetail[j].mStatus = "D";
-          } else {
-            data.varDetail[j].mStatus = "A";
-          }
-        });
-      });
-
-    tempAct.forEach((el, z) => {
-      if (el.actName === element.actName) {
-        el.isChecked = e.target.checked;
+    tempVarAct[i].modStatus = true;
+    tempVar.forEach((elem, j) => {
+      tempVarAct[i][j].read = e.target.checked;
+      tempVarAct[i][j].modify = e.target.checked;
+      tempVarAct[i].varDetail[j].read = e.target.checked;
+      tempVarAct[i].varDetail[j].modify = e.target.checked;
+      if (e.target.checked === false) {
+        tempVarAct[i].varDetail[j].mStatus = "D";
+      } else {
+        tempVarAct[i].varDetail[j].mStatus = "A";
       }
     });
 
-    setActivities(tempAct);
     setVarActRights(tempVarAct);
   };
 
-  //function to give read rights to the articular variable in all activities
-  const readAllVar = (e, data, j) => {
+  const readAllVar = (e, j) => {
     let tempAct = [...activities];
     let tempVar = [...variables];
     let tempVarAct = [...varActRights];
 
-    tempVarAct.forEach((el, i) => {
-      el.modStatus = true;
-      el.varDetail
-        .filter((d) => d.varName === data.name)
-        .forEach((elem, j) => {
-          elem.read = e.target.checked;
-
-          if (e.target.checked === false) {
-            elem.mStatus = "D";
-            elem.modify = e.target.checked;
-          } else {
-            elem.mStatus = "A";
-          }
-        });
-    });
-
-    tempVar.forEach((el, z) => {
-      if (el.name === data.name) {
-        el.read = e.target.checked;
-        if (e.target.checked === false) {
-          el.modify = e.target.checked;
-        }
+    tempAct.forEach((el, i) => {
+      tempVarAct[i][j].read = e.target.checked;
+      tempVarAct[i].varDetail[j].read = e.target.checked;
+      tempVarAct[i].modStatus = true;
+      if (e.target.checked === false) {
+        tempVarAct[i].varDetail[j].mStatus = "D";
+      } else {
+        tempVarAct[i].varDetail[j].mStatus = "A";
       }
     });
-
-    setVariables(tempVar);
 
     setVarActRights(tempVarAct);
   };
 
-  //function to give modify rights to the articular variable in all activities
-  const modifyAllVar = (e, data, j) => {
+  const modifyAllVar = (e, j) => {
     let tempAct = [...activities];
     let tempVar = [...variables];
     let tempVarAct = [...varActRights];
 
-    tempVarAct.forEach((el, i) => {
-      el.modStatus = true;
-      el.varDetail
-        .filter((d) => d.varName === data.name)
-        .forEach((elem, j) => {
-          elem.modify = e.target.checked;
-
-          if (e.target.checked === false) {
-            elem.mStatus = "D";
-          } else {
-            elem.mStatus = "A";
-            elem.read = e.target.checked;
-          }
-        });
-    });
-
-    tempVar.forEach((el, z) => {
-      if (el.name === data.name) {
-        el.modify = e.target.checked;
-        if (e.target.checked === true) {
-          el.read = e.target.checked;
-        }
+    tempAct.forEach((el, i) => {
+      tempVarAct[i][j].modify = e.target.checked;
+      tempVarAct[i].varDetail[j].modify = e.target.checked;
+      tempVarAct[i].modStatus = true;
+      if (e.target.checked === false) {
+        tempVarAct[i].varDetail[j].mStatus = "D";
+      } else {
+        tempVarAct[i].varDetail[j].mStatus = "A";
       }
     });
 
-    setVariables(tempVar);
     setVarActRights(tempVarAct);
   };
 
-  //give read rights to particular variable in an activity
+  console.log("mahtab all rights", varActRights);
+
   const readVar = (e, actData, varData) => {
     let tempVarAct = [...varActRights];
 
@@ -321,7 +267,6 @@ function DataRights() {
             itm.read = e.target.checked;
             tempVarAct[i][j].read = e.target.checked;
             if (e.target.checked === false) {
-              itm.modify = e.target.checked;
               itm.mStatus = "D";
             } else {
               itm.mStatus = "A";
@@ -333,7 +278,6 @@ function DataRights() {
     setVarActRights(tempVarAct);
   };
 
-  //give modify rights to particular variable in an activity
   const modifyVar = (e, actData, varData) => {
     let tempVarAct = [...varActRights];
     tempVarAct
@@ -342,7 +286,6 @@ function DataRights() {
         el.modStatus = true;
         el.varDetail.forEach((itm, j) => {
           if (itm.varName == varData) {
-            itm.read = e.target.checked;
             itm.modify = e.target.checked;
             tempVarAct[i][j].modify = e.target.checked;
             if (e.target.checked === false) {
@@ -357,28 +300,27 @@ function DataRights() {
     setVarActRights(tempVarAct);
   };
 
-  //function for pagination for activities
-
   const onPaginationChange = (start, end) => {
     setPagination({ start: start, end: end });
     return { start: start + 1, end: end };
   };
 
-  //function for pagination for variables
   const onPaginationVarChange = (start, end) => {
     setPaginationVar({ start: start, end: end });
     return { start: start + 1, end: end };
   };
 
-  //function to return by default read value
   const getReadVal = (actData, varData) => {
+    console.log("123", "cheked data", actData, varData);
     let tempRights = [...varActRights];
     let retVal = null;
     tempRights
       .filter((d) => d.actName == actData)
       .forEach((el, i) => {
+        console.log("123", "mapped data", el);
         el.varDetail.forEach((itm, j) => {
           if (itm.varName == varData) {
+            console.log("123", "mapped data new", itm.read);
             retVal = itm.read;
           }
         });
@@ -386,15 +328,17 @@ function DataRights() {
     return retVal;
   };
 
-  //function to return by default modify value
   const getModifyVal = (actData, varData) => {
+    console.log("123", "cheked data", actData, varData);
     let tempRights = [...varActRights];
     let retVal = null;
     tempRights
       .filter((d) => d.actName == actData)
       .forEach((el, i) => {
+        console.log("123", "mapped data", el);
         el.varDetail.forEach((itm, j) => {
           if (itm.varName == varData) {
+            console.log("123", "mapped data new", itm.read);
             retVal = itm.modify;
           }
         });
@@ -402,24 +346,23 @@ function DataRights() {
     return retVal;
   };
 
-  //While saving getting mapped variable for json payload
   const getMappedVar = (data, index) => {
     let tempVarAct = [...varActRights];
+   
+    
 
-    const x = tempVarAct[index]?.varDetail
-      ?.filter((d) => d.mStatus != null)
-      .map((item, m) => ({
-        m_sStatus: item.mStatus,
-        varDefInfo: {
-          varScope: item.varScope,
-          variableId: item.varId,
-          varName: item.varName,
-          type: item.varType,
-        },
-        isModify: item.modify,
-        isView: item.read,
-        m_strFetchedRights: item.fetchedRights,
-      }));
+    const x = tempVarAct[index]?.varDetail?.filter(d=>d.mStatus!=null).map((item, m) => ({
+      m_sStatus: item.mStatus,
+      varDefInfo: {
+        varScope: item.varScope,
+        variableId: item.varId,
+        varName: item.varName,
+        type: item.varType,
+      },
+      isModify: item.modify,
+      isView: item.read,
+      m_strFetchedRights: item.fetchedRights
+    }));
 
     return x;
   };
@@ -436,6 +379,8 @@ function DataRights() {
       (d) => d?.varDetails && d?.varDetails?.length > 0
     );
 
+    // console.log("123","save data",tempVarAct.filter(x => x.varDetail.filter(g => g.read==true || g.modify==true)))
+
     const saveAct = tempVarAct.map((el, i) => {
       const retMapVar = getMappedVar(el, i);
 
@@ -445,12 +390,9 @@ function DataRights() {
         actSubType: el.subType,
         actName: el.actName,
         bActDataModified: el.modStatus,
-        m_objDataVarMappingInfo:
-          el.modStatus == true
-            ? {
-                dataVarMap: Object.assign({}, retMapVar),
-              }
-            : {},
+        m_objDataVarMappingInfo: el.modStatus==true ? {
+          dataVarMap: retMapVar,
+        }: {},
       };
     });
 
@@ -459,24 +401,31 @@ function DataRights() {
       processName: localLoadedProcessData.ProcessName,
       projectId: localLoadedProcessData.ProjectId,
       activities: saveAct,
+      /* activities:[
+      {
+      "actId":"2",
+      "actType":"31",
+      "actSubType":"1",
+      "actName":"BusinessRule_2",
+      "bActDataModified":true,
+      "m_objDataVarMappingInfo":{
+          "dataVarMap":{
+              "1":{            
+                  "m_sStatus":"A",
+                  "varDefInfo":{"varScope":"U","variableId":"19","varName":"name","type":"10"},
+                  "isModify":false,
+                  "isView":true,
+                  "m_strFetchedRights": ""
+                  
+              }
+          }
+      }
+      }
+    ] */
     };
 
-    axios
-      .post(SERVER_URL + "/saveDataAssoc", payLoad)
-      .then((res) => {
-        if (res?.data?.Status === 0) {
-          dispatch(
-            setToastDataFunc({
-              message: "Data saved successfully",
-              severity: "error",
-              open: true,
-            })
-          );
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    console.log("123", "fetch data", arr);
+    console.log("123", "save data", payLoad);
   };
 
   console.log("1234", "final data", varActRights);
@@ -503,7 +452,7 @@ function DataRights() {
               </div>
               <div className={styles.row}>
                 <span className={styles.searchBar}>
-                  <SearchComponent searchTerm={searchVar}  onSearchChange={getVarList} />
+                  <SearchComponent onSearchChange={getList} />
                 </span>
               </div>
             </div>
@@ -520,9 +469,8 @@ function DataRights() {
                           control={
                             <Checkbox
                               onChange={(e) => {
-                                readAllVar(e, data, i);
+                                readAllVar(e, i);
                               }}
-                              checked={data?.read}
                             />
                           }
                           label="Read"
@@ -532,9 +480,8 @@ function DataRights() {
                           control={
                             <Checkbox
                               onChange={(e) => {
-                                modifyAllVar(e, data, i);
+                                modifyAllVar(e, i);
                               }}
-                              checked={data?.modify}
                             />
                           }
                           label="Modify"
@@ -590,9 +537,8 @@ function DataRights() {
                         control={
                           <Checkbox
                             onChange={(e) => {
-                              checkedAllAct(e, elem, i);
+                              checkedAllAct(e,elem, i);
                             }}
-                            checked={elem.isChecked}
                           />
                         }
                       />
