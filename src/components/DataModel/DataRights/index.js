@@ -58,9 +58,9 @@ function DataRights() {
 
   const [fetchedRights, setFetchedRights] = useState([]);
 
-
   const [searchVar, setSearchVar] = useState("");
   const [searchAct, setSearchAct] = useState("");
+  const [btnDisable, setBtnDisable] = useState(true);
 
   useEffect(async () => {
     //getting variable list from process
@@ -196,14 +196,13 @@ function DataRights() {
     return await axios.get(url);
   };
 
-//function for variable search filter
-  const getVarList=()=>{
-    console.log("sfsf")
-  }
+  //function for variable search filter
+  const getVarList = (val) => {
+    setSearchVar(val);
+  };
 
-
-  const getList = () => {
-    //alert("sfdsf")
+  const getList = (val) => {
+    setSearchAct(val);
   };
 
   //give all rights to all variables in a particular activity
@@ -235,6 +234,7 @@ function DataRights() {
 
     setActivities(tempAct);
     setVarActRights(tempVarAct);
+    setBtnDisable(false);
   };
 
   //function to give read rights to the articular variable in all activities
@@ -271,6 +271,7 @@ function DataRights() {
     setVariables(tempVar);
 
     setVarActRights(tempVarAct);
+    setBtnDisable(false);
   };
 
   //function to give modify rights to the articular variable in all activities
@@ -306,6 +307,7 @@ function DataRights() {
 
     setVariables(tempVar);
     setVarActRights(tempVarAct);
+    setBtnDisable(false);
   };
 
   //give read rights to particular variable in an activity
@@ -331,6 +333,7 @@ function DataRights() {
       });
 
     setVarActRights(tempVarAct);
+    setBtnDisable(false);
   };
 
   //give modify rights to particular variable in an activity
@@ -355,6 +358,7 @@ function DataRights() {
       });
 
     setVarActRights(tempVarAct);
+    setBtnDisable(false);
   };
 
   //function for pagination for activities
@@ -503,13 +507,21 @@ function DataRights() {
               </div>
               <div className={styles.row}>
                 <span className={styles.searchBar}>
-                  <SearchComponent searchTerm={searchVar}  onSearchChange={getVarList} />
+                  <SearchComponent
+                    searchTerm={searchVar}
+                    onSearchChange={(val) => {
+                      getVarList(val);
+                    }}
+                  />
                 </span>
               </div>
             </div>
             <div className={styles.variableSection}>
               {variables
                 ?.slice(paginationVar.start, paginationVar.end)
+                .filter((d) =>
+                  d.name.toLowerCase().includes(searchVar.toLowerCase())
+                )
                 .map((data, i) => (
                   <div className={styles.varibleList}>
                     <p className={styles.varTitle}>{data.name}</p>
@@ -561,7 +573,11 @@ function DataRights() {
                 />
               </div>
               <div className={styles.searchBar}>
-                <SearchComponent onSearchChange={getList} />
+                <SearchComponent
+                  onSearchChange={(e) => {
+                    getList(e);
+                  }}
+                />
               </div>
               <div className="switch">
                 <FormControl>
@@ -582,7 +598,10 @@ function DataRights() {
             <div class={styles.rightsActivities}>
               {activities
                 .slice(pagination.start, pagination.end)
-                .map((elem, i) => (
+                ?.filter((d) =>
+                  d.actName.toLowerCase().includes(searchAct.toLowerCase())
+                )
+                ?.map((elem, i) => (
                   <div class={styles.actColumn}>
                     <div className={styles.actItem}>
                       <FormControlLabel
@@ -603,6 +622,11 @@ function DataRights() {
                       {actVar &&
                         actVar
                           ?.slice(paginationVar.start, paginationVar.end)
+                          .filter((d) =>
+                            d.name
+                              .toLowerCase()
+                              .includes(searchVar.toLowerCase())
+                          )
                           .map((item, j) => (
                             <div className={styles.actRights}>
                               <p className={styles.checkGroup}>
@@ -665,10 +689,11 @@ function DataRights() {
               </Button>
               <Button
                 id="save"
-                className="btnSave"
+                className={btnDisable ? "btnDisable" : "btnSave"}
                 variant="contained"
                 size="small"
                 onClick={saveData}
+                disabled={btnDisable}
               >
                 {t("toolbox.dataRights.save")}
               </Button>

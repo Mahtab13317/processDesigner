@@ -49,7 +49,7 @@ function Paginate({ showPerPage, onPaginationChange, total, page }) {
       />
       <span>
         {" "}
-        {t("toolbox.dataRights.showing")} {data?.first}-{data?.last} of {total}
+        {t("toolbox.dataRights.showing")} {data?.first}-{data?.last>total?total:data?.last} of {total}
       </span>{" "}
       <ArrowForwardIosIcon
         className={`${styles.next} ${styles.arrow}`}

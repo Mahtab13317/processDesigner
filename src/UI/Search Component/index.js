@@ -109,7 +109,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const SearchBox = (props) => {
-  console.log("search",props)
+ 
   const {
     name,
     width = "200px",
