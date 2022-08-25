@@ -41,6 +41,8 @@ import { store, useGlobalState } from "state-pool";
 import axios from "axios";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import Toast from "../../../../UI/ErrorToast";
+import { getVarTypeAndIsArray } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 function BusinessRules(props) {
   let { t } = useTranslation();
@@ -82,7 +84,7 @@ function BusinessRules(props) {
   useEffect(() => {
     const mappedData =
       localLoadedActivityPropertyData?.ActivityProperty?.m_objBusinessRule
-        .m_arrAssocBRMSRuleSetList;
+        ?.m_arrAssocBRMSRuleSetList;
     axios
       .get(
         SERVER_URL +
@@ -194,7 +196,6 @@ function BusinessRules(props) {
       return false;
     } else {
       setAssociateList([...associateList, data]);
-
       let tempLocalState = JSON.parse(
         JSON.stringify(localLoadedActivityPropertyData)
       );
@@ -202,12 +203,11 @@ function BusinessRules(props) {
         localLoadedActivityPropertyData?.ActivityProperty?.m_objBusinessRule
           ?.m_arrAssocBRMSRuleSetList.length;
       const nameVersion = data.name + "(" + data.version + ")";
-
       const activityData = {
         m_arrMappingInfo: [],
         m_bSelectRow: false,
         m_iRSetOrder: lastIndex + 1,
-        m_strRSetId: "",
+        m_strRSetId: data.id,
         m_strRSetName: data.name,
         m_strRSetNameWithVersion: nameVersion,
         m_strRSetVersion: data.version,
@@ -215,12 +215,15 @@ function BusinessRules(props) {
         m_strTimeOutInterval: "0",
         m_strVersionTitle: nameVersion,
       };
-
       tempLocalState?.ActivityProperty?.m_objBusinessRule?.m_arrAssocBRMSRuleSetList.push(
         activityData
       );
-
       setlocalLoadedActivityPropertyData(tempLocalState);
+      dispatch(
+        setActivityPropertyChange({
+          [propertiesLabel.businessRule]: { isModified: true, hasError: false },
+        })
+      );
     }
   }
 
@@ -273,33 +276,30 @@ function BusinessRules(props) {
       revInfo = mapInfo?.filter((data) => data.m_strMappingType == "R");
     }
 
+    // code edited on 22 August 2022 for BugId 114460
     const postData = {
       ruleSetNo: id,
-      ruleSetVersionId: version,
+      ruleSetVersionId: version === "Version Free" ? "0.0" : version,
       ruleType: type,
-      activityId: localLoadedActivityPropertyData?.ActivityProperty?.actId,
     };
 
     axios
       .post(SERVER_URL + ENDPOINT_GET_RULE_MEMBER_LIST, postData)
       .then((res) => {
-        const fwdList = res?.data?.m_arrFwdMappingList?.filter(
-          (data) =>
-            data.m_strEntityArgType == "IN/OUT" ||
-            data.m_strEntityArgType == "IN"
-        );
-
+        //code edited on 19 Aug 2022 for BugId 114416
+        const fwdList = res?.data?.m_arrFwdMappingList;
         setFwdBrtInputs(
           fwdList?.map((item, i) => ({
             input: item.m_strParameterName,
             fullName: item.m_strParemterFullName,
             process: "",
             type: item.m_strParameterDataType,
-            varType: item.m_strVarDataType,
+            varType: getVarTypeAndIsArray(item.m_strVarDataType).variableType,
             varFieldId: item.m_strVarFieldId,
             varId: item.m_strVariableId,
             name: item.m_strVarName,
             parentIsArray: item.m_strParentIsArray,
+            unbounded: getVarTypeAndIsArray(item.m_strVarDataType).isArray,
             info:
               fwdInfo != null
                 ? fwdInfo?.some(
@@ -312,23 +312,20 @@ function BusinessRules(props) {
           }))
         );
 
-        const revList = res?.data?.m_arrFwdMappingList?.filter(
-          (data) =>
-            data.m_strEntityArgType == "IN/OUT" ||
-            data.m_strEntityArgType == "OUT"
-        );
-
+        //code edited on 19 Aug 2022 for BugId 114416
+        const revList = res?.data?.m_arrRvrMappingList;
         setRevInputs(
           revList?.map((item, i) => ({
             input: item.m_strParameterName,
             fullName: item.m_strParemterFullName,
             process: "",
             type: item.m_strParameterDataType,
-            varType: item.m_strVarDataType,
+            varType: getVarTypeAndIsArray(item.m_strVarDataType).variableType,
             varFieldId: item.m_strVarFieldId,
             varId: item.m_strVariableId,
             name: item.m_strVarName,
             parentIsArray: item.m_strParentIsArray,
+            unbounded: getVarTypeAndIsArray(item.m_strVarDataType).isArray,
             info:
               fwdInfo != null
                 ? fwdInfo?.some(
@@ -437,9 +434,7 @@ function BusinessRules(props) {
 
   const getId = (name, arr) => {
     const ruleList = [...arr];
-
     const rule = ruleList?.find((data) => data.m_strRSetName == name);
-
     if (rule) {
       return rule.m_strRSetId;
     } else {
@@ -458,6 +453,11 @@ function BusinessRules(props) {
       1
     );
     setlocalLoadedActivityPropertyData(tempLocalState);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.businessRule]: { isModified: true, hasError: false },
+      })
+    );
   }
 
   /*code updated on 6 July 2022 for BugId 111907*/
@@ -471,7 +471,10 @@ function BusinessRules(props) {
         (_var.VariableScope === "U" && checkForVarRights(_var)) ||
         (_var.VariableScope === "I" && checkForVarRights(_var))
       ) {
-        if (_var.VariableType == item.varType) {
+        if (
+          _var.VariableType == item.varType &&
+          _var.Unbounded == item.unbounded
+        ) {
           temp.push(_var);
         }
       }
@@ -531,12 +534,16 @@ function BusinessRules(props) {
     let temp = [];
     let allInput = "";
     let type = "";
+    let unbounded = "";
     brtProcess?.forEach((item) => {
       if (item.VariableId == id && item.VarFieldId == fieldId) {
         type = item.VariableType;
+        unbounded = item.Unbounded;
       }
     });
-    allInput = revInputs?.filter((data) => data.type == type);
+    allInput = revInputs?.filter(
+      (data) => data.type == type && data.unbounded == unbounded
+    );
     return allInput;
   };
 
@@ -618,7 +625,7 @@ function BusinessRules(props) {
                     m_strParameterName: item.input,
                     m_strParemterFullName: item.fullName,
                     m_strParentIsArray: item.parentIsArray,
-                    m_strUnbounded: "N",
+                    m_strUnbounded: item.unbounded,
                     m_strVarDataType: "",
                     m_strVarFieldId: getRevMapId(value).VarFieldId,
                     m_strVarName: value,
@@ -655,7 +662,7 @@ function BusinessRules(props) {
                     m_strParameterName: value,
                     m_strParemterFullName: fullName,
                     m_strParentIsArray: "R",
-                    m_strUnbounded: "N",
+                    m_strUnbounded: getRevMapId(item.VariableName).Unbounded,
                     m_strVarDataType: "",
                     m_strVarFieldId: getRevMapId(item.VariableName).VarFieldId,
                     m_strVarName: item.VariableName,
@@ -680,7 +687,7 @@ function BusinessRules(props) {
                   m_strParameterName: item.input,
                   m_strParemterFullName: item.fullName,
                   m_strParentIsArray: item.parentIsArray,
-                  m_strUnbounded: "N",
+                  m_strUnbounded: item.unbounded,
                   m_strVarDataType: "",
                   m_strVarFieldId: getRevMapId(value).VarFieldId,
                   m_strVarName: value,
@@ -707,7 +714,7 @@ function BusinessRules(props) {
                   m_strParameterName: value,
                   m_strParemterFullName: fullName,
                   m_strParentIsArray: "R",
-                  m_strUnbounded: "N",
+                  m_strUnbounded: getRevMapId(item.VariableName).Unbounded,
                   m_strVarDataType: "",
                   m_strVarFieldId: getRevMapId(item.VariableName).VarFieldId,
                   m_strVarName: item.VariableName,
@@ -730,7 +737,6 @@ function BusinessRules(props) {
 
   const changeService = (e) => {
     setServiceType(e.target.value);
-
     if (serviceType == "true") {
       var url = SERVER_URL + ENDPOINT_REST_PACKAGE + "?restService=true";
     } else {
@@ -758,7 +764,11 @@ function BusinessRules(props) {
       });
 
     setAssociateList([]);
-
+    setMapping(false);
+    setRuleFlow({ id: "", name: "" });
+    setRuleVersion("");
+    setRulePackage({ id: "", name: "" });
+    setPackageVersion("");
     let tempLocalState = JSON.parse(
       JSON.stringify(localLoadedActivityPropertyData)
     );
@@ -766,8 +776,12 @@ function BusinessRules(props) {
       e.target.value;
     tempLocalState.ActivityProperty.m_objBusinessRule.m_arrAssocBRMSRuleSetList =
       [];
-
     setlocalLoadedActivityPropertyData(tempLocalState);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.businessRule]: { isModified: true, hasError: false },
+      })
+    );
   };
 
   const setTime = (val, name) => {
@@ -786,6 +800,11 @@ function BusinessRules(props) {
       }
     );
     setlocalLoadedActivityPropertyData(tempLocalState);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.businessRule]: { isModified: true, hasError: false },
+      })
+    );
   };
 
   return (
@@ -803,13 +822,14 @@ function BusinessRules(props) {
           props.isDrawerExpanded ? "brtContainerExpand" : "brtContainer"
         }
       >
-        <Box
+        {/* <Box
           className={
             props.isDrawerExpanded ? "label-heading-expand" : "label-heading"
           }
         >
-          <h4>{t(activityType_label.businessRule_label)}</h4>
-        </Box>
+          {props?.heading}
+        </Box> */}
+        <TabsHeading heading={props?.heading} />
 
         <div style={mapping ? { display: "flex" } : {}}>
           <div style={mapping ? { width: "100%" } : {}}>
@@ -1027,13 +1047,18 @@ function BusinessRules(props) {
                     <td align="center">{item.name}</td>
                     <td align="center">{item.version}</td>
                     <td align="center">
-                      {item.type == "P"
-                        ? t("toolbox.businessRules.ruleFlow")
-                        : t("toolbox.businessRules.rulePackage")}
+                      {item.type === "P"
+                        ? t("toolbox.businessRules.rulePackage")
+                        : t("toolbox.businessRules.ruleFlow")}
                     </td>
                     {props.isDrawerExpanded ? (
                       <td>
-                        <div style={{ display: "flex" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-evenly",
+                          }}
+                        >
                           <CompareArrowsIcon
                             onClick={() => {
                               mapData(
@@ -1045,12 +1070,20 @@ function BusinessRules(props) {
                                 item.name
                               );
                             }}
+                            style={{
+                              width: "24px !important",
+                              height: "24px !important",
+                            }}
                           />
                           <DeleteIcon
                             onClick={() => {
                               deleteData(item.id, i);
                             }}
-                            style={{ color: "#D53D3D" }}
+                            style={{
+                              color: "#D53D3D",
+                              width: "24px !important",
+                              height: "24px !important",
+                            }}
                           />
                         </div>
                       </td>
@@ -1178,7 +1211,7 @@ function BusinessRules(props) {
                                         {t("toolbox.businessRules.selVar")}
                                       </MenuItem>
                                     }
-                                    {getFilteredVarList(item).map(
+                                    {getFilteredVarList(item)?.map(
                                       (process, j) => (
                                         <MenuItem value={process.VariableName}>
                                           {process.VariableName}

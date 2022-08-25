@@ -5,3 +5,13 @@
   gap: 0.75vw;
   display: flex;
 }
+.deleteIconProcessTask.MuiSvgIcon-root {
+  fill: currentColor;
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  display: inline-block;
+
+  transition: fill 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  flex-shrink: 0;
+  user-select: none;
+}

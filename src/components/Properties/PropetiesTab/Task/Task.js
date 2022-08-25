@@ -13,7 +13,11 @@ import AssociateUsers from "./AssociateUsers/AssociateUsers";
 import ManageRules from "./ManageRules/ManageRules";
 import Modal from "../../../../UI/Modal/Modal";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
-import { OpenProcessSliceValue, setOpenProcess } from "../../../../redux-store/slices/OpenProcessSlice";
+import {
+  OpenProcessSliceValue,
+  setOpenProcess,
+} from "../../../../redux-store/slices/OpenProcessSlice";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 function Task(props) {
   let { t } = useTranslation();
@@ -127,7 +131,9 @@ function Task(props) {
   };
 
   return (
-    <div
+    <>
+    <TabsHeading heading={props?.heading} />
+      <div
       className={styles.mainDiv}
       style={{
         width: "100%",
@@ -157,7 +163,7 @@ function Task(props) {
             >
               <p className={classes.taskHeading}>{t("tasks")}</p>
               <AddIcon
-                fontSize="medium"
+                fontSize="large"
                 onClick={() => settaskListModal(true)}
                 style={{ color: "blue" }}
               />
@@ -244,6 +250,7 @@ function Task(props) {
         }
       />
     </div>
+    </>
   );
 }
 

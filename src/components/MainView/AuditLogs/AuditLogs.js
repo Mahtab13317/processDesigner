@@ -27,9 +27,12 @@ import {
 import axios from "axios";
 import { tileProcess } from "../../../utility/HomeProcessView/tileProcess";
 import EventIcon from "@material-ui/icons/Event";
+import { useDispatch } from "react-redux";
+import { setToastDataFunc } from "../../../redux-store/slices/ToastDataHandlerSlice";
 
 function AuditLogs() {
   let { t } = useTranslation();
+  const dispatch = useDispatch();
   const [fromDate, setfromDate] = useState("");
   const [toDate, settoDate] = useState("");
   const [selectedDateRangeOption, setselectedDateRangeOption] = useState(SEVEN);
@@ -75,7 +78,14 @@ function AuditLogs() {
 
   useEffect(() => {
     if (moment(fromDate).diff(moment(toDate), "days") > 0) {
-      alert("End Date cant be before Start Date");
+      dispatch(
+        setToastDataFunc({
+          message: t("endDateBeforeError"),
+          severity: "error",
+          open: true,
+        })
+      );
+
       settoDate("");
       // setfromDate("");
     }
@@ -243,8 +253,8 @@ function AuditLogs() {
               <Select
                 IconComponent={ExpandMoreIcon}
                 style={{
-                  width: "200px",
-                  height: "30px",
+                  width: "15.5rem",
+                  minHeight: "2.5rem",
                 }}
                 variant="outlined"
                 value={selectedDateRangeOption}
@@ -290,6 +300,10 @@ function AuditLogs() {
                       })
                     }
                     className={classes.fromToCalculatorDiv}
+                    style={{
+                      justifyContent:
+                        fromDate !== "" ? "space-between" : "flex-end",
+                    }}
                   >
                     {fromDate !== ""
                       ? moment(fromDate).format(DATE_FORMAT)
@@ -329,6 +343,10 @@ function AuditLogs() {
                       })
                     }
                     className={classes.fromToCalculatorDiv}
+                    style={{
+                      justifyContent:
+                        toDate !== "" ? "space-between" : "flex-end",
+                    }}
                   >
                     {toDate !== "" ? moment(toDate).format(DATE_FORMAT) : ""}
                     <EventIcon className={classes.eventIcon} />
@@ -366,7 +384,13 @@ function AuditLogs() {
                 {allProcessList.map((item) => {
                   return (
                     <MenuItem key={item.ProcessDefId} value={item.ProcessDefId}>
-                      <div style={{ display: "flex", flexDirection: "row" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          alignItems: "center",
+                        }}
+                      >
                         <p
                           className={classes.iconForProcessType}
                           style={{
@@ -432,7 +456,13 @@ function AuditLogs() {
                 {filterByDropdownMenu.map((item) => {
                   return (
                     <MenuItem key={item.value} value={item.value}>
-                      <div style={{ display: "flex", flexDirection: "row" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          alignItems: "center",
+                        }}
+                      >
                         {item.value === "B" ? (
                           "   "
                         ) : (
@@ -460,7 +490,7 @@ function AuditLogs() {
             }}
             className={classes.generateButton}
           >
-            <p className={classes.generateText}>{t("generate")}</p>
+            <p className={classes.generateText}>{t("generateLogs")}</p>
           </button>
         </div>
       </div>
@@ -545,8 +575,8 @@ function AuditLogs() {
           <div
             className={classes.tableCellBody}
             style={{
-              fontSize: "2rem",
-              color: "red",
+              fontSize: "var(--title_text_font_size)",
+              color: "var(--brand_color1)",
               width: "88vw",
               height: "80vh",
               display: "flex",
@@ -554,15 +584,15 @@ function AuditLogs() {
               justifyContent: "center",
             }}
           >
-            {t("generate")}
+            {t("generateAuditLogsHere")}
           </div>
         )
       ) : (
         <div
           className={classes.tableCellBody}
           style={{
-            fontSize: "2rem",
-            color: "red",
+            fontSize: "var(--title_text_font_size)",
+            color: "var(--brand_color1)",
             width: "88vw",
             height: "80vh",
             display: "flex",

@@ -13,11 +13,16 @@ import arabicStyles from "./ArabicStyles.module.css";
 import DefinedConstants from "./DefinedConstants";
 import BusinessVariables from "./BusinessVariables";
 import UserDefinedDataTypes from "./UserDefinedDataTypes";
-import BusinessVariableIcon from "../../assets/DataModalIcons/DML_BusinessVariable.svg";
-import ConstantsIcon from "../../assets/DataModalIcons/DML_Constant.svg";
-import UserDefinedDataTypeIcon from "../../assets/DataModalIcons/DML_UserDefinedDataType.svg";
-import DataObjectsIcon from "../../assets/DataModalIcons/DML_DtataObjects.svg";
-
+import BusinessVariableIcon from "../../assets/DataModalIcons/DML_BusinessVariable.png";
+import BusinessVariableIcon_EN from "../../assets/DataModalIcons/DML_BusinessVariable_EN.png";
+import ConstantsIcon from "../../assets/DataModalIcons/DML_Constant.png";
+import ConstantsIcon_EN from "../../assets/DataModalIcons/DML_Constant_EN.png";
+import UserDefinedDataTypeIcon from "../../assets/DataModalIcons/DML_UserDefinedDataType.png";
+import UserDefinedDataTypeIcon_EN from "../../assets/DataModalIcons/DML_UserDefinedDataType_EN.png";
+import DataObjectsIcon from "../../assets/DataModalIcons/DML_DataObjects.png";
+import DataObjectsIcon_EN from "../../assets/DataModalIcons/DML_DataObjects_EN.png";
+import ERDiagramIcon from "../../assets/DataModalIcons/DML_ERDiagram.png";
+import ERDiagramIcon_EN from "../../assets/DataModalIcons/DML_ERDiagram_EN.png";
 import { store, useGlobalState } from "state-pool";
 import { getMenuNameFlag } from "../../utility/UserRightsFunctions";
 import { UserRightsValue } from "../../redux-store/slices/UserRightsSlice";
@@ -65,11 +70,22 @@ function DataModel(props) {
       label: getLabel(t("businessVariablesTab"), totalVariablesCount),
       labelName: t("businessVariablesTab"),
       icon: (
-        <Icon style={{ textAlign: "center" }}>
-          <img style={{ height: "100%" }} src={BusinessVariableIcon} />
+        <Icon style={{ textAlign: "center", width: "20px", height: "20px" }}>
+          <img style={{ height: "100%" }} src={BusinessVariableIcon} alt="" />
         </Icon>
       ),
-      style: { backgroundColor: "#F8F8F8" },
+      selectedIcon: (
+        <Icon style={{ textAlign: "center", width: "20px", height: "20px" }}>
+          <img
+            style={{ height: "100%" }}
+            src={BusinessVariableIcon_EN}
+            alt=""
+          />
+        </Icon>
+      ),
+      style: {
+        backgroundColor: "#F8F8F8",
+      },
       component: (
         <BusinessVariables
           openProcessType={openProcessType}
@@ -84,8 +100,13 @@ function DataModel(props) {
       ),
       labelName: t("constants"),
       icon: (
-        <Icon style={{ textAlign: "center" }}>
-          <img style={{ height: "100%" }} src={ConstantsIcon} />
+        <Icon style={{ textAlign: "center", width: "20px", height: "20px" }}>
+          <img style={{ height: "100%" }} src={ConstantsIcon} alt="" />
+        </Icon>
+      ),
+      selectedIcon: (
+        <Icon style={{ textAlign: "center", width: "20px", height: "20px" }}>
+          <img style={{ height: "100%" }} src={ConstantsIcon_EN} alt="" />
         </Icon>
       ),
       style: { backgroundColor: "#F8F8F8" },
@@ -94,31 +115,20 @@ function DataModel(props) {
           openProcessID={openProcessID}
           openProcessType={openProcessType}
         />
-        
       ),
     },
-    {
-      label: getLabel(t("userDefinedDataTypes"), userDefinedCount),
-      labelName: t("userDefinedDataTypes"),
-      icon: (
-        <Icon style={{ textAlign: "center" }}>
-          <img style={{ height: "100%" }} src={UserDefinedDataTypeIcon} />
-        </Icon>
-      ),
-      component: (
-        <UserDefinedDataTypes
-          setUserDefinedCount={setUserDefinedCount}
-          dataTypesList={dataTypesList}
-          setDataTypesList={setDataTypesList}
-        />
-      ),
-    },
+
     {
       label: getLabel(t("dataObjects"), "0"),
       labelName: t("dataObjects"),
       icon: (
-        <Icon style={{ textAlign: "center" }}>
-          <img style={{ height: "100%" }} src={DataObjectsIcon} />
+        <Icon style={{ textAlign: "center", width: "20px", height: "20px" }}>
+          <img style={{ height: "100%" }} src={DataObjectsIcon} alt="" />
+        </Icon>
+      ),
+      selectedIcon: (
+        <Icon style={{ textAlign: "center", width: "20px", height: "20px" }}>
+          <img style={{ height: "100%" }} src={DataObjectsIcon_EN} alt="" />
         </Icon>
       ),
       style: { padding: "0.625rem" },
@@ -128,7 +138,12 @@ function DataModel(props) {
       label: getLabel(t("dataRights")),
       labelName: t("dataRights"),
       icon: (
-        <Icon style={{ textAlign: "center" }}>
+        <Icon style={{ textAlign: "center", width: "20px", height: "20px" }}>
+          <img style={{ height: "100%" }} src={DataObjectsIcon} />
+        </Icon>
+      ),
+      selectedIcon: (
+        <Icon style={{ textAlign: "center", width: "20px", height: "20px" }}>
           <img style={{ height: "100%" }} src={DataObjectsIcon} />
         </Icon>
       ),
@@ -136,18 +151,6 @@ function DataModel(props) {
       component: <DataRights />,
     },
   ];
-
-  // {
-  //   label: getLabel(t("erDiagram")),
-  //   labelName: t("erDiagram"),
-  //   icon: (
-  //     <Icon style={{ textAlign: "center" }}>
-  //       <img style={{ height: "100%" }} src={ERDiagramIcon} />
-  //     </Icon>
-  //   ),
-  //   style: { padding: "0.625rem" },
-  //   component: "ER Diagram section to be painted here.",
-  // },
 
   // Function that runs when the component loads.
   useEffect(() => {
@@ -200,7 +203,7 @@ function DataModel(props) {
         >
           {dataModelTabs?.map((element, index) => (
             <Tab
-              icon={element.icon}
+              icon={value === index ? element.selectedIcon : element.icon}
               className={styles.dataModelTab}
               label={element.label}
             />

@@ -23,18 +23,11 @@ import {
   ENDPOINT_ADD_CONNECTION,
   ENDPOINT_DELETE_CONNECTION,
   ENDPOINT_MODIFY_CONNECTION,
-  ENDPOINT_GETPROJECTLIST,
-  ADD,
-  DELETE,
-  EDIT,
   WEBSERVICESOAP,
   WEBSERVICEREST,
   RESCONSUMERJMS,
   RESCONSUMERSOAP,
   REQUESTCONSUMERSOAP,
-  CALLACTVITY_MAPPINGLIST,
-  ENDPOINT_GET_ALLPROCESSLIST,
-  ENDPOINT_GET_ALLDEPLOYEDPROCESSLIST,
   RTL_DIRECTION,
   propertiesLabel,
 } from "../../../../Constants/appConstants.js";
@@ -65,11 +58,16 @@ import {
   OpenProcessSliceValue,
   setOpenProcess,
 } from "../../../../redux-store/slices/OpenProcessSlice";
+import {
+  setWebservice,
+  webserviceChangeVal,
+} from "../../../../redux-store/slices/webserviceChangeSlice";
 
 function BasicDetails(props) {
   let { t } = useTranslation();
   const dispatch = useDispatch();
   const direction = `${t("HTML_DIR")}`;
+  const [selfQueueCreated, setSelfQueueCreated] = useState(false);
   const [addDescriptionBoolean, setAddDescriptionBoolean] = useState(false);
   const [configPeopleAndSystem, setConfigPeopleAndSystem] = useState(false);
   const localActivityPropertyData = store.getState("activityPropertyData");
@@ -82,7 +80,9 @@ function BasicDetails(props) {
     setlocalLoadedActivityPropertyData,
     updatelocalLoadedActivityPropertyData,
   ] = useGlobalState(localActivityPropertyData);
-  const [selectedField, setSelectedField] = useState();
+  const [selectedWebService, setSelectedWebService] = useState(null);
+  const [openCalenderMfBool, setopenCalenderMfBool] = useState(false);
+  const [targetId, setTargetId] = useState("None");
   const [basicDetails, setbasicDetails] = useState();
   const [spinner, setspinner] = useState(true);
   const [allActivitiesTargetDropdown, setAllActivitiesTargetDropdown] =
@@ -94,17 +94,67 @@ function BasicDetails(props) {
   const [showCostError, setShowCostError] = useState(false);
   const [costInput, setCostInput] = useState();
   const [queueType, setQueueType] = useState(0);
+  const [disableSwim, setDisableSwim] = useState(false);
+  const [isUsingSwimlaneQueue, setIsUsingSwimlaneQueue] = useState(false);
+  const [isUsingSelfQueue, setIsUsingSelfQueue] = useState(false);
   const [showQueueModal, setShowQueueModal] = useState(false);
   const [startActivities, setStartActivities] = useState(null);
   // code added on 6 July 2022 for BugId 111910
   const openProcessData = useSelector(OpenProcessSliceValue);
+  // code added on 6 July 2022 for BugId 110924
+  const [hasDefaultCheck, setHasDefaultCheck] = useState(false);
+  const [defaultCheckDisabled, setDefaultCheckDisabled] = useState(false);
   const [localState, setLocalState] = useState(null);
-  const [initialTargetId, setInitialTargetId] = useState(null);
+  const webserviceVal = useSelector(webserviceChangeVal);
+  const webServiceDropdownOptions = [
+    {
+      value: WEBSERVICESOAP,
+      activityType: 22,
+      activitySubType: 1,
+      name: t("webServiceSOAP"),
+    },
+    {
+      value: WEBSERVICEREST,
+      activityType: 40,
+      activitySubType: 1,
+      name: t("webServiceREST"),
+    },
+    {
+      value: RESCONSUMERJMS,
+      activityType: 23,
+      activitySubType: 1,
+      name: t("resConsumerJms"),
+    },
+    {
+      value: RESCONSUMERSOAP,
+      activityType: 25,
+      activitySubType: 1,
+      name: t("resConsumerSoap"),
+    },
+    {
+      value: REQUESTCONSUMERSOAP,
+      activityType: 24,
+      activitySubType: 1,
+      name: t("requestConsumerSoap"),
+    },
+  ];
 
-  const handleQueueSwitching = () => {
-    // queueType == 0?setQueueType(1):setQueueType(0);
-    setShowQueueModal(true);
-  };
+  useEffect(() => {
+    let flag = false;
+    localLoadedProcessData?.Lanes?.map((el) => {
+      if (el.QueueId == props.cellQueueId) {
+        flag = true;
+      }
+    });
+    if (flag) {
+      setIsUsingSwimlaneQueue(true);
+      setIsUsingSelfQueue(false);
+    } else {
+      setIsUsingSwimlaneQueue(false);
+      setIsUsingSelfQueue(true);
+      setSelfQueueCreated(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (props.cellID) {
@@ -128,7 +178,6 @@ function BasicDetails(props) {
           ?.processName
       );
     }
-
     let activityProps = getActivityProps(
       props.cellActivityType,
       props.cellActivitySubType
@@ -151,38 +200,45 @@ function BasicDetails(props) {
     setStartActivities(startActivities);
   }, [openProcessData.loadedData]);
 
-  useState(() => {
-    if (localState !== null) {
-      dispatch(
-        setOpenProcess({ loadedData: JSON.parse(JSON.stringify(localState)) })
-      );
-    }
-  }, [localState]);
-
-  // useEffect(() => {
-  //   let temp = JSON.parse(JSON.stringify(tabStatus));
-  //   if (showCostError === true) {
-  //     temp.BasicDetails.hasError = true;
-  //     dispatch(setActivityPropertyChange(temp));
-  //   } else {
-  //     temp.BasicDetails.hasError = false;
-  //     dispatch(setActivityPropertyChange(temp));
-  //   }
-  // }, [showCostError]);
-
-  // useEffect(() => {
-  //   if (tabStatus.BasicDetails.hasError) {
-  //     setShowCostError(tabStatus.BasicDetails.hasError);
-  //   }
-  // }, [tabStatus.BasicDetails.hasError]);
-
   useEffect(() => {
     if (localLoadedActivityPropertyData?.Status === 0) {
       setbasicDetails(localLoadedActivityPropertyData?.ActivityProperty);
-      setInitialTargetId(
-        localLoadedActivityPropertyData?.ActivityProperty?.targetId
-      );
+      if (
+        (+localLoadedActivityPropertyData?.ActivityProperty?.actType === 40 &&
+          +localLoadedActivityPropertyData?.ActivityProperty?.actSubType ===
+            1) ||
+        (+localLoadedActivityPropertyData?.ActivityProperty?.actType === 23 &&
+          +localLoadedActivityPropertyData?.ActivityProperty?.actSubType ===
+            1) ||
+        (+localLoadedActivityPropertyData?.ActivityProperty?.actType === 24 &&
+          +localLoadedActivityPropertyData?.ActivityProperty?.actSubType ===
+            1) ||
+        (+localLoadedActivityPropertyData?.ActivityProperty?.actType === 25 &&
+          +localLoadedActivityPropertyData?.ActivityProperty?.actSubType ===
+            1) ||
+        (+localLoadedActivityPropertyData?.ActivityProperty?.actType === 22 &&
+          +localLoadedActivityPropertyData?.ActivityProperty?.actSubType === 1)
+      ) {
+        webServiceDropdownOptions.forEach((item) => {
+          if (
+            +localLoadedActivityPropertyData?.ActivityProperty?.actType ===
+              +item.activityType &&
+            +localLoadedActivityPropertyData?.ActivityProperty?.actSubType ===
+              +item.activitySubType
+          ) {
+            setSelectedWebService(item.value);
+          }
+        });
+      }
+      setTargetId(localLoadedActivityPropertyData?.ActivityProperty?.targetId);
       setspinner(false);
+      // code added on 6 July 2022 for BugId 110924
+      setHasDefaultCheck(
+        localLoadedActivityPropertyData?.ActivityProperty?.primaryAct === "Y"
+      );
+      setDefaultCheckDisabled(
+        localLoadedActivityPropertyData?.ActivityProperty?.oldPrimaryAct === "Y"
+      );
     }
   }, [localLoadedActivityPropertyData]);
 
@@ -194,33 +250,84 @@ function BasicDetails(props) {
 
   useEffect(() => {
     if (saveCancelStatus.CancelClicked) {
-      let tempOpenProcess = JSON.parse(JSON.stringify(localLoadedProcessData));
-      tempOpenProcess?.Connections?.forEach((conn, index) => {
-        if (
-          conn.SourceId ==
-          localLoadedActivityPropertyData?.ActivityProperty?.actId
-        ) {
-          tempOpenProcess.Connections[index].TargetId = initialTargetId;
+      webServiceDropdownOptions.forEach((item) => {
+        if (+webserviceVal.initialWebservice === +item.activityType) {
+          setSelectedWebService(item.value);
         }
       });
-      setLocalLoadedProcessData(tempOpenProcess);
+      if (
+        (+props.cellActivityType === 40 && +props.cellActivitySubType === 1) ||
+        (+props.cellActivityType === 23 && +props.cellActivitySubType === 1) ||
+        (+props.cellActivityType === 24 && +props.cellActivitySubType === 1) ||
+        (+props.cellActivityType === 25 && +props.cellActivitySubType === 1) ||
+        (+props.cellActivityType === 22 && +props.cellActivitySubType === 1)
+      ) {
+        props.selectedCell(
+          props.cellID,
+          props.cellName,
+          webserviceVal.initialWebservice,
+          1,
+          null,
+          null,
+          getSelectedCellType("ACTIVITY")
+        );
+      }
     }
-  }, [saveCancelStatus.CancelClicked]);
+    if (saveCancelStatus.SaveClicked) {
+      const { mileStoneIndex, activityIndex, activityId } =
+        getActivityDetailsFromOpenProcess(props.cellID);
+      let tempOpenProcess = JSON.parse(JSON.stringify(localLoadedProcessData));
+      if (
+        (+props.cellActivityType === 40 && +props.cellActivitySubType === 1) ||
+        (+props.cellActivityType === 23 && +props.cellActivitySubType === 1) ||
+        (+props.cellActivityType === 24 && +props.cellActivitySubType === 1) ||
+        (+props.cellActivityType === 25 && +props.cellActivitySubType === 1) ||
+        (+props.cellActivityType === 22 && +props.cellActivitySubType === 1)
+      ) {
+        // code edited on 22 Aug 2022 for BugId 114418
+        if (
+          +props.cellActivityType !== +webserviceVal.initialWebservice &&
+          mileStoneIndex &&
+          activityIndex
+        ) {
+          ChangeActivityType(
+            tempOpenProcess?.ProcessDefId,
+            props.cellName,
+            tempOpenProcess.MileStones[mileStoneIndex].Activities[activityIndex]
+              .ActivityType,
+            tempOpenProcess.MileStones[mileStoneIndex].Activities[activityIndex]
+              .ActivitySubType,
+            setLocalLoadedProcessData,
+            mileStoneIndex,
+            activityIndex,
+            activityId
+          );
+        }
+      }
+      if (
+        webserviceVal.connChanged &&
+        +webserviceVal.initialConn !== +targetId
+      ) {
+        targetWorkstepApi(tempOpenProcess);
+      }
+    }
+    dispatch(setSave({ SaveClicked: false, CancelClicked: false }));
+  }, [saveCancelStatus.CancelClicked, saveCancelStatus.SaveClicked]);
 
   const getAllActivities = () => {
+    let actList = [];
     let temp = JSON.parse(JSON.stringify(openProcessData.loadedData));
     temp?.MileStones?.forEach((mileStone) => {
       mileStone?.Activities?.forEach((activity) => {
         if (
           activity.ActivityId !== props.cellID &&
           noIncomingTypes(activity, t)
-        )
-          setAllActivitiesTargetDropdown((prevState) => [
-            ...prevState,
-            activity,
-          ]);
+        ) {
+          actList = [...actList, activity];
+        }
       });
     });
+    setAllActivitiesTargetDropdown(actList);
   };
 
   const getActivityDetailsFromOpenProcess = (activityId) => {
@@ -229,8 +336,8 @@ function BasicDetails(props) {
       activityIndex: "",
       activityId: "",
     };
-    localState?.MileStones.forEach((mileStone, indexMilestone) => {
-      mileStone.Activities.forEach((activity, indexActivity) => {
+    localState?.MileStones?.forEach((mileStone, indexMilestone) => {
+      mileStone?.Activities?.forEach((activity, indexActivity) => {
         if (activity.ActivityId == activityId) {
           activityDetails = {
             mileStoneIndex: indexMilestone,
@@ -244,30 +351,17 @@ function BasicDetails(props) {
     return activityDetails;
   };
 
+  // code edited on 22 July 2022 for BugId 113313
   const onSelect = (e) => {
     const { mileStoneIndex, activityIndex, activityId } =
       getActivityDetailsFromOpenProcess(props.cellID);
-
     let actType, actSubType;
-
     webServiceDropdownOptions.forEach((item) => {
       if (e.target.value === item.value) {
         actType = item.activityType;
         actSubType = item.activitySubType;
       }
     });
-
-    ChangeActivityType(
-      localState?.ProcessDefId,
-      props.cellName,
-      actType,
-      actSubType,
-      setLocalState,
-      mileStoneIndex,
-      activityIndex,
-      activityId
-    );
-
     props.selectedCell(
       activityId,
       props.cellName,
@@ -277,16 +371,33 @@ function BasicDetails(props) {
       null,
       getSelectedCellType("ACTIVITY")
     );
-
-    setSelectedField(e.target.value);
+    let temp = { ...localLoadedActivityPropertyData };
+    temp.ActivityProperty.actType = actType;
+    temp.ActivityProperty.actSubType = actSubType;
+    setlocalLoadedActivityPropertyData(temp);
+    let tempLocal = { ...localState };
+    tempLocal.MileStones[mileStoneIndex].Activities[
+      activityIndex
+    ].ActivityType = actType;
+    tempLocal.MileStones[mileStoneIndex].Activities[
+      activityIndex
+    ].ActivitySubType = actSubType;
+    dispatch(setOpenProcess({ loadedData: tempLocal }));
+    dispatch(setWebservice({ webserviceChanged: true }));
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.basicDetails]: { isModified: true, hasError: false },
+      })
+    );
   };
+
   const useStyles = makeStyles({
     input: {
       height: "2.0625rem",
     },
     inputWithError: {
-      height: "2.0625rem",
-      width: "4.875rem",
+      height: "2.5rem",
+      width: "5.875rem",
     },
     errorStatement: {
       color: "red",
@@ -325,42 +436,16 @@ function BasicDetails(props) {
 
   const classes = useStyles();
 
-  const webServiceDropdownOptions = [
-    { value: WEBSERVICESOAP, name: t("webServiceSOAP") },
-    {
-      value: WEBSERVICEREST,
-      activityType: 40,
-      activitySubType: 1,
-      name: t("webServiceREST"),
-    },
-    {
-      value: RESCONSUMERJMS,
-      activityType: 23,
-      activitySubType: 1,
-      name: t("resConsumerJms"),
-    },
-    {
-      value: RESCONSUMERSOAP,
-      activityType: 25,
-      activitySubType: 1,
-      name: t("resConsumerSoap"),
-    },
-    {
-      value: REQUESTCONSUMERSOAP,
-      activityType: 24,
-      activitySubType: 1,
-      name: t("requestConsumerSoap"),
-    },
-  ];
-
   const getSelectedActivity = (data) => {
     let temp = JSON.parse(JSON.stringify(localState));
-    let method;
+    let maxConnId = 0;
+    temp.Connections?.forEach((conn) => {
+      if (+conn.ConnectionId > +maxConnId) {
+        maxConnId = +conn.ConnectionId;
+      }
+    });
     let newConnection = {
-      ConnectionId:
-        temp.Connections.length !== 0
-          ? temp.Connections[temp.Connections.length - 1].ConnectionId + 1
-          : 0,
+      ConnectionId: maxConnId + 1,
       Type: "D",
       SourceId: props.cellID,
       TargetId: data,
@@ -371,22 +456,19 @@ function BasicDetails(props) {
     if (data === 0) {
       temp.Connections?.forEach((el) => {
         if (el.SourceId == props.cellID) {
-          newConnection = el;
           let pos = temp.Connections.map(function (e) {
             return e.SourceId;
           }).indexOf(+props.cellID);
-
-          temp.Connections.splice(pos, 1);
-
-          method = DELETE;
+          temp.Connections[pos].TargetId = data;
+          // method = DELETE;
         }
       });
     } else {
       if (temp.Connections.length !== 0) {
         let editBool = false,
-          indexVal = 0;
+          indexVal = null;
         temp.Connections.forEach((el, index) => {
-          if (el.SourceId == props.cellID) {
+          if (+el.SourceId === props.cellID) {
             editBool = true;
             indexVal = index;
           }
@@ -394,18 +476,25 @@ function BasicDetails(props) {
         if (editBool) {
           temp.Connections[indexVal].TargetId = newConnection.TargetId;
           newConnection = temp.Connections[indexVal];
-          method = EDIT;
+          // method = EDIT;
         } else {
           temp.Connections.push(newConnection);
-          method = ADD;
+          // method = ADD;
         }
       } else {
         temp.Connections.push(newConnection);
-        method = ADD;
+        // method = ADD;
       }
     }
-
-    targetWorkstepApi(newConnection, method, temp);
+    dispatch(setOpenProcess({ loadedData: JSON.parse(JSON.stringify(temp)) }));
+    dispatch(setWebservice({ connChanged: true }));
+    // code added on 6 July 2022 for BugId 111910
+    let localAct = { ...localLoadedActivityPropertyData };
+    localAct.ActivityProperty = {
+      ...localAct?.ActivityProperty,
+      targetId: data + "",
+    };
+    setlocalLoadedActivityPropertyData(localAct);
     dispatch(
       setActivityPropertyChange({
         [propertiesLabel.basicDetails]: {
@@ -414,6 +503,73 @@ function BasicDetails(props) {
         },
       })
     );
+  };
+
+  const targetWorkstepApi = async (temp) => {
+    let data = {};
+    if (+targetId === 0) {
+      temp?.Connections?.forEach((conn) => {
+        if (+conn.SourceId === +props.cellID && +conn.TargetId === 0) {
+          data = conn;
+        }
+      });
+      let payload = {
+        processDefId: temp?.ProcessDefId,
+        processMode: temp?.ProcessType,
+        connId: data.ConnectionId,
+        connType: data.Type,
+      };
+      const res = await axios.post(
+        SERVER_URL + ENDPOINT_DELETE_CONNECTION,
+        payload
+      );
+      const resData = await res.data;
+      if (resData.Status === 0) {
+        let pos = temp.Connections.map(function (e) {
+          return e.SourceId;
+        }).indexOf(+props.cellID);
+        temp.Connections.splice(pos, 1);
+        // code added on 5 August 2022 for BugId 113918
+        dispatch(setWebservice({ connChanged: false }));
+      }
+    } else {
+      temp?.Connections?.forEach((conn) => {
+        if (+conn.SourceId === +props.cellID) {
+          data = conn;
+        }
+      });
+      let payload = {
+        processDefId: temp?.ProcessDefId,
+        processMode: temp?.ProcessType,
+        connId: data.ConnectionId,
+        sourceId: data.SourceId,
+        targetId: data.TargetId,
+        connType: data.Type,
+      };
+      if (webserviceVal.initialConn === 0) {
+        const res = await axios.post(
+          SERVER_URL + ENDPOINT_ADD_CONNECTION,
+          payload
+        );
+        const resData = await res.data;
+        if (resData.Status === 0) {
+          // code added on 5 August 2022 for BugId 113918
+          dispatch(setWebservice({ connChanged: false }));
+          return 0;
+        }
+      } else if (webserviceVal.initialConn !== 0) {
+        const res = await axios.post(
+          SERVER_URL + ENDPOINT_MODIFY_CONNECTION,
+          payload
+        );
+        const resData = await res.data;
+        if (resData.Status === 0) {
+          // code added on 5 August 2022 for BugId 113918
+          dispatch(setWebservice({ connChanged: false }));
+          return 0;
+        }
+      }
+    }
   };
 
   const HandleRegisteredProcessChange = (e) => {
@@ -445,79 +601,7 @@ function BasicDetails(props) {
 
   const editQueueHandler = () => {
     setShowQueueModal(true);
-
-    // queueType == 0 ? setQueueType(1) : setQueueType(0);
-  };
-
-  const targetWorkstepApi = async (data, method, temp) => {
-    if (method === ADD) {
-      let payload = {
-        processDefId: localState?.ProcessDefId,
-        processMode: localState?.ProcessType,
-        connId: data.ConnectionId,
-        sourceId: data.SourceId,
-        targetId: data.TargetId,
-        connType: data.Type,
-      };
-      const res = await axios.post(
-        SERVER_URL + ENDPOINT_ADD_CONNECTION,
-        payload
-      );
-      const resData = await res.data;
-      if (resData.Status === 0) {
-        setLocalState(temp);
-        return true;
-      } else return false;
-    } else if (method === DELETE) {
-      let payload = {
-        processDefId: localState?.ProcessDefId,
-        processMode: localState?.ProcessType,
-        connId: data.ConnectionId,
-        connType: data.Type,
-      };
-      const res = await axios.post(
-        SERVER_URL + ENDPOINT_DELETE_CONNECTION,
-        payload
-      );
-      const resData = await res.data;
-      if (resData.Status === 0) {
-        setLocalState(temp);
-        return true;
-      } else return false;
-    } else {
-      let payload = {
-        processDefId: localState?.ProcessDefId,
-        processMode: localState?.ProcessType,
-        connId: data.ConnectionId,
-        sourceId: data.SourceId,
-        targetId: data.TargetId,
-        connType: data.Type,
-      };
-      const res = await axios.post(
-        SERVER_URL + ENDPOINT_MODIFY_CONNECTION,
-        payload
-      );
-      const resData = await res.data;
-      if (resData.Status === 0) {
-        let tempOpenProcess = JSON.parse(JSON.stringify(temp));
-        tempOpenProcess?.Connections?.forEach((conn, index) => {
-          if (
-            conn.SourceId ==
-            localLoadedActivityPropertyData?.ActivityProperty?.actId
-          ) {
-            tempOpenProcess.Connections[index].TargetId = data.TargetId;
-          }
-        });
-        setLocalState(tempOpenProcess);
-        // code added on 6 July 2022 for BugId 111910
-        let localAct = { ...localLoadedActivityPropertyData };
-        localAct.ActivityProperty = {
-          ...localAct?.ActivityProperty,
-          targetId: data.TargetId + "",
-        };
-        setlocalLoadedActivityPropertyData(localAct);
-      }
-    }
+    queueType == 0 ? setQueueType(1) : setQueueType(0);
   };
 
   const changeBasicDetails = (e, customName) => {
@@ -556,58 +640,242 @@ function BasicDetails(props) {
     );
   };
 
-  const getTargetWorkstep = () => {
-    let temp = "None";
-    localState?.Connections?.map((conn) => {
-      if (
-        conn.SourceId == localLoadedActivityPropertyData.ActivityProperty.actId
-      ) {
-        console.log("abcder");
-        temp = conn.TargetId + "";
-      }
+  const checkQueueType = (cellActivityType, cellActivitySubType) => {
+    if (
+      // Default Queues
+      (cellActivityType == 1 && cellActivitySubType == 1) ||
+      (cellActivityType == 1 && cellActivitySubType == 3) ||
+      (cellActivityType == 10 && cellActivitySubType == 7) ||
+      (cellActivityType == 32 && cellActivitySubType == 1) ||
+      (cellActivityType == 1 && cellActivitySubType == 2) ||
+      (cellActivityType == 30 && cellActivitySubType == 1) ||
+      (cellActivityType == 33 && cellActivitySubType == 1) ||
+      (cellActivityType == 27 && cellActivitySubType == 1) ||
+      (cellActivityType == 19 && cellActivitySubType == 1) ||
+      (cellActivityType == 21 && cellActivitySubType == 1) ||
+      (cellActivityType == 4 && cellActivitySubType == 1)
+    ) {
+      return 1;
+    } else if (
+      // No Queues to show on front End
+      (cellActivityType == 41 && cellActivitySubType == 1) ||
+      (cellActivityType == 10 && cellActivitySubType == 1) ||
+      (cellActivityType == 20 && cellActivitySubType == 1) ||
+      (cellActivityType == 29 && cellActivitySubType == 1) ||
+      (cellActivityType == 22 && cellActivitySubType == 1) ||
+      (cellActivityType == 31 && cellActivitySubType == 1) ||
+      (cellActivityType == 10 && cellActivitySubType == 4)
+    ) {
+      return 0;
+    } else if (
+      // Add Queues
+      (cellActivityType == 10 && cellActivitySubType == 7) ||
+      (cellActivityType == 10 && cellActivitySubType == 3) ||
+      (cellActivityType == 26 && cellActivitySubType == 1)
+    ) {
+      return 2;
+    }
+  };
+
+  const handleOwnQueueCheck = () => {
+    setIsUsingSwimlaneQueue(!isUsingSwimlaneQueue);
+    setIsUsingSelfQueue(!isUsingSelfQueue);
+  };
+
+  const handleSwimlaneQueueCheck = () => {
+    setIsUsingSwimlaneQueue(!isUsingSwimlaneQueue);
+    setIsUsingSelfQueue(!isUsingSelfQueue);
+  };
+
+  const queueContent = () => {
+    if (
+      checkQueueType(props.cellActivityType, props.cellActivitySubType) == 1
+    ) {
+      return (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            flexDirection: "column",
+          }}
+        >
+          <p style={{ fontSize: "12px", cursor: "pointer" }}>
+            {t("accInitiativeQueue")}&nbsp;
+            <CreateIcon
+              style={{ height: "15px", width: "15px" }}
+              onClick={editQueueHandler}
+            />
+          </p>
+        </div>
+      );
+    } else if (
+      checkQueueType(props.cellActivityType, props.cellActivitySubType) == 0
+    ) {
+      return null;
+    } else if (
+      checkQueueType(props.cellActivityType, props.cellActivitySubType) == 2
+    ) {
+      return (
+        <div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <p style={{ fontSize: "var(--base_text_font_size)" }}>
+              <Checkbox
+                disabled={selfQueueCreated ? true : false}
+                checked={isUsingSwimlaneQueue}
+                onChange={() => handleSwimlaneQueueCheck()}
+                name="UseSwimlane"
+              />{" "}
+              Use Swimlane Queue
+              {isUsingSwimlaneQueue ? (
+                <CreateIcon
+                  style={{
+                    cursor: "pointer",
+                    width: "1.5em",
+                    height: "1em",
+                  }}
+                  onClick={() => setShowQueueModal(true)}
+                />
+              ) : null}
+            </p>
+            <p style={{ fontSize: "var(--base_text_font_size)" }}>
+              <Checkbox
+                checked={isUsingSelfQueue}
+                onChange={() => handleOwnQueueCheck()}
+                name="UseOwn"
+              />{" "}
+              Create Own Queue
+              {isUsingSelfQueue ? (
+                <CreateIcon
+                  style={{
+                    cursor: "pointer",
+                    width: "1.5em",
+                    height: "1em",
+                  }}
+                  onClick={() => setShowQueueModal(true)}
+                />
+              ) : null}
+            </p>
+          </div>
+        </div>
+      );
+    }
+  };
+
+  // code added on 6 July 2022 for BugId 110924
+  const setDefaultCheckFunc = (e) => {
+    let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
+    if (e.target.checked) {
+      temp.ActivityProperty.primaryAct = "Y";
+    } else {
+      temp.ActivityProperty.primaryAct = "N";
+    }
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.basicDetails]: { isModified: true, hasError: false },
+      })
+    );
+  };
+
+  const getDistributeCount = () => {
+    let count = 0;
+    localLoadedProcessData.Connections.forEach((conn) => {
+      if (conn.SourceId === props.cellID) count++;
     });
-    console.log("abcder", temp);
-    return temp;
+    return count;
+  };
+
+  const openCalenderMf = () => {
+    let props = {
+      Component: "ProcessCalendar", // change here
+      Callback: (data) => console.log(data),
+      source: "CAL_PRO",
+      popupIndex: "2",
+      ProcessDefinitionId: localLoadedProcessData.ProcessDefId + "",
+
+      AssociationFlag: "N",
+      CalendarType: "G",
+      RegisteredProcess:
+        localLoadedProcessData?.ProcessType === "R" ? "Y" : "N",
+
+      ContainerId: "calenderDiv",
+      Module: "MDM",
+      InFrame: false,
+      Renderer: "renderProcessCalendar",
+    };
+
+    console.log("calenderprops", props);
+    window.loadCalender(props);
+  };
+
+  const handleQueueSwitching = () => {
+    // queueType == 0?setQueueType(1):setQueueType(0);
+    setShowQueueModal(true);
   };
 
   return (
     <div className="flexScreen basicDetails-mainDiv">
+      {
+        //added by mahtab
+        <div className="headingSectionTab">{<h4>{props?.heading}</h4>}</div>
+      }
       {spinner ? (
         <CircularProgress style={{ marginTop: "30vh", marginLeft: "40%" }} />
       ) : (
         <div
           className={classes.mainDiv}
-          style={{ flexDirection: props.isDrawerExpanded ? "row" : "column" }}
+          style={{
+            flexDirection: props.isDrawerExpanded ? "row" : "column",
+            fontSize: "var(--subtitle_text_font_size)",
+          }}
         >
+          <div style={{ display: "hidden" }} id="calenderDiv"></div>
           <div
             style={{
               marginLeft: "0.8rem",
-              marginBottom: "0.9rem",
+              // marginBottom: "1.4rem",
               width: props.isDrawerExpanded ? "50%" : null,
               height: "100%",
               paddingTop: props.isDrawerExpanded ? "0.4rem" : "0",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginLeft: "-0.6875rem",
-              }}
-            >
-              <Checkbox
-                size="small"
-                style={{ color: "rgba(0, 0, 0, 0.54)" }}
-                disabled={startActivities?.length == 1}
-              ></Checkbox>
-              <p style={{ fontWeight: "600" }}>{t("setAsDefaultStart")}</p>
-            </div>
+            {/* code added on 6 July 2022 for BugId 110924*/}
+            {(+props.cellActivityType === 1 &&
+              +props.cellActivitySubType === 1) ||
+            (+props.cellActivityType === 1 &&
+              +props.cellActivitySubType === 3) ||
+            (+props.cellActivityType === 1 &&
+              +props.cellActivitySubType === 2) ? (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  marginLeft: "-0.6875rem",
+                }}
+              >
+                <Checkbox
+                  size="medium"
+                  style={{ color: "rgba(0, 0, 0, 0.54)" }}
+                  checked={hasDefaultCheck} // code added on 6 July 2022 for BugId 110924
+                  onChange={(e) => setDefaultCheckFunc(e)} // code added on 6 July 2022 for BugId 110924
+                  disabled={defaultCheckDisabled} // code added on 6 July 2022 for BugId 110924
+                ></Checkbox>
+                <p style={{ fontWeight: "600" }}>{t("setAsDefaultStart")}</p>
+              </div>
+            ) : null}
+
             {!addDescriptionBoolean ? (
               <p
                 id="add_description"
                 style={{
-                  color: "#0072C6",
+                  color: "var(--button_color)",
                   cursor: "pointer",
+                  fontSize: "var(--base_text_font_size)",
                 }}
                 onClick={() => setAddDescriptionBoolean(true)}
               >
@@ -615,32 +883,41 @@ function BasicDetails(props) {
               </p>
             ) : null}
             {addDescriptionBoolean ? (
-              <div style={{ marginBlock: "0.5rem" }}>
+              <div style={{ marginBlock: "1.7rem" }}>
                 <p
                   style={{
                     color: "#606060",
-                    marginBottom: "0.3rem",
+                    marginBottom: "0.5rem",
                   }}
                 >
                   {t("Discription")}
                 </p>
                 <SunEditor
                   id="add_description_sunEditor"
-                  width="100%"
-                  customHeight="6rem"
+                  width={props.isDrawerExpanded ? "98%" : "100%"}
+                  customHeight="8rem"
                   placeholder={t("placeholderDescription")}
                   value={
-                    localLoadedActivityPropertyData.ActivityProperty
+                    localLoadedActivityPropertyData?.ActivityProperty
                       .actGenPropInfo.genPropInfo.description
                   }
                   getValue={(e) => changeBasicDetails(e, "descBasicDetails")}
                 />
               </div>
             ) : null}
-            {selectedActivityType === activityType.webService ? (
+            {(+props.cellActivityType === 40 &&
+              +props.cellActivitySubType === 1) ||
+            (+props.cellActivityType === 23 &&
+              +props.cellActivitySubType === 1) ||
+            (+props.cellActivityType === 24 &&
+              +props.cellActivitySubType === 1) ||
+            (+props.cellActivityType === 25 &&
+              +props.cellActivitySubType === 1) ||
+            (+props.cellActivityType === 22 &&
+              +props.cellActivitySubType === 1) ? (
               <div
                 style={{
-                  marginBlock: "0.5rem",
+                  marginBlock: "0.9rem",
                   width: props.isDrawerExpanded ? "80%" : "100%",
                 }}
               >
@@ -660,17 +937,18 @@ function BasicDetails(props) {
                     flexDirection: "row",
                     color: "#727272",
 
-                    marginTop: "0.3rem",
+                    marginTop: "0.5rem",
                     width: "95%",
                   }}
                 >
                   <Select
                     id="webservice_dropdown"
                     onChange={onSelect}
+                    value={selectedWebService}
                     IconComponent={ExpandMoreIcon}
                     style={{
                       width: "95%",
-                      height: "2rem",
+                      height: "3rem",
                     }}
                     variant="outlined"
                     defaultValue="WSRC"
@@ -678,14 +956,13 @@ function BasicDetails(props) {
                     {webServiceDropdownOptions.map((item) => {
                       return (
                         <MenuItem
-                          style={{ width: "100%", marginBlock: "0.2rem" }}
+                          style={{ width: "100%", marginBlock: "0.4rem" }}
                           value={item.value}
                           actType={item.activityType}
-                          // onClick={()=>getSelectedActivity(item)}
                         >
                           <p
                             style={{
-                              marginInline: "0.4rem",
+                              marginInline: "0.8rem",
                               font: "0.8rem Open Sans",
                             }}
                           >
@@ -710,10 +987,10 @@ function BasicDetails(props) {
                   id="mobile_enabled"
                   disabled={isDisableTab}
                   checked={
-                    localLoadedActivityPropertyData.ActivityProperty
+                    localLoadedActivityPropertyData?.ActivityProperty
                       .isMobileEnabled
                   }
-                  size="small"
+                  size="medium"
                   name="mobileEnabled"
                   onChange={(e) => changeBasicDetails(e)}
                 />
@@ -728,21 +1005,45 @@ function BasicDetails(props) {
                 </p>
                 <InfoOutlinedIcon
                   style={{
-                    marginTop: "0.6rem",
+                    marginTop: "0.7rem",
                     padding: "0.1rem",
                     opacity: "0.7",
                   }}
                 />
               </div>
             ) : null}
-            <div style={{ marginBlock: "0.5rem" }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
+            <div>
+              {queueContent()}
+              {showQueueModal ? (
+                <Modal
+                  show={showQueueModal}
+                  backDropStyle={{ backgroundColor: "transparent" }}
+                  style={{
+                    top: "10%",
+                    left: direction == RTL_DIRECTION ? "10%" : "-200%",
+                    position: "absolute",
+                    width: "702px",
+                    height: "475px",
+                    zIndex: "1500",
+                    boxShadow: "0px 3px 6px #00000029",
+                    border: "1px solid #D6D6D6",
+                    borderRadius: "3px",
+                    direction: direction,
+                    padding: "0px",
+                  }}
+                  modalClosed={() => setShowQueueModal(false)}
+                  children={
+                    <QueueAssociation
+                      setShowQueueModal={setShowQueueModal}
+                      queueType={isUsingSwimlaneQueue ? "0" : "1"}
+                      selfQueueCreated={selfQueueCreated}
+                      setSelfQueueCreated={setSelfQueueCreated}
+                      queueFrom="abstractView"
+                    />
+                  }
+                ></Modal>
+              ) : null}
+              <div>
                 <p
                   style={{
                     fontWeight: "700",
@@ -755,7 +1056,7 @@ function BasicDetails(props) {
                 <p
                   style={{
                     fontWeight: "700",
-                    color: "#0072C6",
+                    color: "var(--brand_color1)",
                     fontSize: "12px",
                     cursor: "pointer",
                     marginRight: "0.625rem",
@@ -767,75 +1068,20 @@ function BasicDetails(props) {
                     : t("useWorkstepQueue")}
                 </p>
               </div>
-              {showQueueModal ? (
-                <Modal
-                  show={showQueueModal}
-                  backDropStyle={{ backgroundColor: "transparent" }}
-                  style={{
-                    top: "10%",
-                    left: direction == RTL_DIRECTION ? "10%" : "-200%",
-                    position: "absolute",
-                    width: "702px",
-                    height: "361px",
-                    zIndex: "1500",
-                    boxShadow: "0px 3px 6px #00000029",
-                    border: "1px solid #D6D6D6",
-                    borderRadius: "3px",
-                    direction: direction,
-                  }}
-                  modalClosed={() => setShowQueueModal(false)}
-                  children={
-                    <QueueAssociation
-                      setShowQueueModal={setShowQueueModal}
-                      queueType={queueType}
-                      setQueueType={setQueueType}
-                    />
-                  }
-                ></Modal>
-              ) : null}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  flexDirection: "column",
-                }}
-              >
-                <p style={{ fontSize: "12px", cursor: "pointer" }}>
-                  {t("accInitiativeQueue")}&nbsp;
-                  <CreateIcon
-                    style={{ height: "15px", width: "15px" }}
-                    onClick={editQueueHandler}
-                  />
-                </p>
-                <span style={{ fontSize: "12px" }}>
-                  {queueType == 0 ? "(Workstep Queue)" : "(Swimlane Queue)"}
-                </span>
-                {/* <p style={{ color: "blue", fontSize:'12px', cursor:'pointer' }}>
-                    {queueType == "Swimlane"
-                      ? "Use Swimlane Queue"
-                      : "Use Workstep Queue"}
-                  </p> */}
-              </div>
             </div>
-            {selectedActivityType !== activityType.subProcess &&
-            basicDetails.hasOwnProperty("QueueName") ? (
-              <div style={{ marginBlock: "0.5rem" }}>
-                <p style={{ color: "#727272", fontSize: "0.875rem" }}>
-                  {t("queue")}
-                </p>
-                <p style={{ fontWeight: "600" }}>{basicDetails.QueueName}</p>
-              </div>
-            ) : null}
 
             <div style={{ marginBlock: "0.5rem" }}>
-              <p style={{ color: "#727272", fontSize: "0.875rem" }}>
+              <p
+                style={{ color: "#727272", fontSize: "0.875rem" }}
+                id="targetWorkStep_basicDetails"
+              >
                 {t("targetWorkstep")}
               </p>
               <div style={{ width: props.isDrawerExpanded ? "60%" : "100%" }}>
                 <SetIconWithActivityType
                   id="target_workstep"
                   disabled={isDisableTab}
-                  selectedActivity={getTargetWorkstep}
+                  selectedActivity={targetId}
                   activityList={allActivitiesTargetDropdown}
                   getSelectedActivity={(val) => getSelectedActivity(val)}
                 />
@@ -849,10 +1095,10 @@ function BasicDetails(props) {
                     flexDirection: "row",
                     color: "#727272",
 
-                    marginBlock: "0.5rem",
+                    // marginBlock: "1rem",
                   }}
                 >
-                  <p>{t("cost")}</p>
+                  <p id="cost_basicDetails">{t("cost")}</p>
                   <span
                     style={{
                       color: "red",
@@ -991,7 +1237,7 @@ function BasicDetails(props) {
                 />
               </div>
             ) : null}
-            <div style={{ marginBlock: "0.5rem" }}>
+            <div style={{ marginBlock: "1rem" }}>
               {arrEntrySettingsPresent().includes(selectedActivityType) ? (
                 <>
                   <div
@@ -1000,7 +1246,7 @@ function BasicDetails(props) {
                       flexDirection: "row",
                       color: "#727272",
 
-                      marginTop: "1rem",
+                      marginTop: "1.7rem",
                     }}
                   >
                     <p>
@@ -1035,6 +1281,7 @@ function BasicDetails(props) {
                         color: "#727272",
                         fontWeight: "bolder",
                       }}
+                      className="disCount_basicDetails"
                     >
                       {t("distribute")} {t("count")}
                     </p>
@@ -1048,6 +1295,7 @@ function BasicDetails(props) {
                       style={{ width: "100%", cursor: "not-allowed" }}
                       variant="outlined"
                       size="small"
+                      value={getDistributeCount()}
                     />
                   </div>
                 </>
@@ -1059,9 +1307,11 @@ function BasicDetails(props) {
                       display: "flex",
                       flexDirection: "column",
                       width: "95%",
+                      margin: "1rem 0rem",
                     }}
                   >
                     <p
+                      id="routingCriteriaCount_basicDetails"
                       style={{
                         color: "#727272",
 
@@ -1075,7 +1325,7 @@ function BasicDetails(props) {
                         className: classes.input,
                         readOnly: true,
                       }}
-                      style={{ width: "100%" }}
+                      style={{ width: "100%", fontSize: "1rem" }}
                       id="routing_criteriaCount"
                       variant="outlined"
                       size="small"
@@ -1090,7 +1340,7 @@ function BasicDetails(props) {
                       display: "flex",
                       flexDirection: "row",
                       color: "#727272",
-                      marginTop: "1rem",
+                      marginTop: "1.7rem",
                     }}
                   >
                     <p>
@@ -1121,6 +1371,7 @@ function BasicDetails(props) {
 
                       fontWeight: "bolder",
                     }}
+                    className="calender_basicDetails"
                   >
                     {t("calendar")}
                   </p>
@@ -1128,7 +1379,7 @@ function BasicDetails(props) {
                     style={{
                       display: "flex",
                       flexDirection: "row",
-                      marginBottom: "1rem",
+                      marginBottom: "1.7rem",
                       justifyContent: "space-between",
                       width: props.isDrawerExpanded ? "60%" : "98%",
                     }}
@@ -1142,7 +1393,7 @@ function BasicDetails(props) {
                     >
                       <Select
                         IconComponent={ExpandMoreIcon}
-                        style={{ width: "100%", height: "2rem" }}
+                        style={{ width: "100%", height: "2.5rem" }}
                         variant="outlined"
                         defaultValue={1}
                       >
@@ -1150,18 +1401,21 @@ function BasicDetails(props) {
                           style={{ width: "10rem", margin: "0.5rem" }}
                           value={1} //1 is set as default value for this selectbox
                         >
-                          <p style={{ font: "0.8rem Open Sans" }}>
+                          <p style={{ fontsize: "var(--base_text_font_size)" }}>
                             {t("default24/7")}
                           </p>
                         </MenuItem>
                       </Select>
-                      <AddIcon className="basicDetails-addIcon" />
+                      <AddIcon
+                        //onClick={() => openCalenderMf()}
+                        className="basicDetails-addIcon"
+                      />
                     </div>
                     <RefreshSharpIcon
                       style={{
                         color: "#606060",
                         marginLeft: "0.2rem",
-                        marginTop: "0.25rem",
+                        marginTop: "0.5rem",
                       }}
                     />
                   </div>
@@ -1181,7 +1435,7 @@ function BasicDetails(props) {
             <div
               style={{
                 marginLeft: "0.8rem",
-                marginTop: "0.9rem",
+                marginTop: "1.5rem",
                 width: props.isDrawerExpanded ? "50%" : null,
                 height: "100%",
               }}
@@ -1206,7 +1460,7 @@ function BasicDetails(props) {
                     style={{
                       display: "flex",
                       flexDirection: "row",
-                      marginBottom: "1rem",
+                      marginBottom: "1.7rem",
                       justifyContent: "space-between",
                       width: props.isDrawerExpanded ? "60%" : "98%",
                     }}
@@ -1220,32 +1474,35 @@ function BasicDetails(props) {
                     >
                       <Select
                         IconComponent={ExpandMoreIcon}
-                        style={{ width: "100%", height: "2rem" }}
+                        style={{ width: "100%", height: "2.5rem" }}
                         variant="outlined"
                         defaultValue={1}
                       >
                         <MenuItem
-                          style={{ width: "10rem", margin: "0.5rem" }}
+                          style={{ width: "10rem", margin: "1rem" }}
                           value={1} //1 is set as default value for this selectbox
                         >
-                          <p style={{ font: "0.8rem Open Sans" }}>
+                          <p style={{ fontSize: "var(--base_text_font_size)" }}>
                             {t("default24/7")}
                           </p>
                         </MenuItem>
                       </Select>
-                      <AddIcon className="basicDetails-addIcon" />
+                      <AddIcon
+                        //onClick={() => openCalenderMf()}
+                        className="basicDetails-addIcon"
+                      />
                     </div>
                     <RefreshSharpIcon
                       style={{
                         color: "#606060",
                         marginLeft: "0.2rem",
-                        marginTop: "0.25rem",
+                        marginTop: "0.5rem",
                       }}
                     />
                   </div>
                 </>
               ) : null}
-              {!arrFormValidationAbsent().includes(selectedActivityType) ? (
+              {/* {!arrFormValidationAbsent().includes(selectedActivityType) ? (
                 <FormsAndValidations
                   formEnabled={basicDetails.FormId}
                   disabled={isDisableTab}
@@ -1253,7 +1510,7 @@ function BasicDetails(props) {
                   value={basicDetails.CustomValidation}
                   changeBasicDetails={changeBasicDetails}
                 />
-              ) : null}
+              ) : null} */}
               <div>
                 {!configPeopleAndSystem ? (
                   <p
@@ -1314,6 +1571,7 @@ const mapStateToProps = (state) => {
     cellActivityType: state.selectedCellReducer.selectedActivityType,
     cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
+    cellQueueId: state.selectedCellReducer.selectedQueueId,
   };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(BasicDetails);

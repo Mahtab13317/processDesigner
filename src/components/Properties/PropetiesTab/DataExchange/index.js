@@ -1,3 +1,5 @@
+// #BugID - 112517
+// #BugDescription - Added a condition for key that was not coming from backend in case of no rules.
 import React, { useState, useEffect } from "react";
 import styles from "./index.module.css";
 import { connect, useDispatch, useSelector } from "react-redux";
@@ -29,6 +31,7 @@ import {
 } from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 function DataExchange(props) {
   let { t } = useTranslation();
@@ -85,9 +88,15 @@ function DataExchange(props) {
   // Function that gets called when the activity property data changes.
   useEffect(() => {
     if (localActivityPropertyData) {
-      setOpList(
-        localActivityPropertyData?.ActivityProperty?.objDataExchange?.dbRules
-      );
+      if (
+        localActivityPropertyData?.ActivityProperty?.objDataExchange?.hasOwnProperty(
+          "dbRules"
+        )
+      ) {
+        setOpList(
+          localActivityPropertyData?.ActivityProperty?.objDataExchange?.dbRules
+        );
+      }
       if (
         localActivityPropertyData?.ActivityProperty?.objDataExchange
           ?.m_strSelectedOption !== ""
@@ -478,6 +487,8 @@ function DataExchange(props) {
   }, [opList]);
 
   return (
+    <>
+      <TabsHeading heading={props?.heading} />
     <div className={styles.flexRow} style={{ background: "#F8F8F8" }}>
       <div
         className={clsx(
@@ -577,7 +588,9 @@ function DataExchange(props) {
         )}
       >
         <div className={clsx(styles.flexRow, styles.operationSubDiv)}>
-          <p className={styles.heading}>{t("listOfOperations")}</p>
+          <p className={clsx(styles.heading, styles.listOfOpMargin)}>
+            {t("listOfOperations")}
+          </p>
           {!isProcessReadOnly && (
             <button
               onClick={localOpHandler}
@@ -612,25 +625,28 @@ function DataExchange(props) {
           })}
         </div>
       </div>
-      {opList?.length > 0 ? (
-        <PropertyDetails
-          operationType={activityOpType}
-          openProcessType={openProcessType}
-          openProcessID={openProcessID}
-          isProcessReadOnly={isProcessReadOnly}
-          getFilteredVariableList={getFilteredVariableList}
-          existingTableData={existingTableData}
-          filteredVariables={filteredVariables}
-          selectedOp={selectedOp}
-          opList={opList}
-          setOpList={setOpList}
-          setGlobalData={setGlobalData}
-          tableDetails={tableDetails}
-          setTableDetails={setTableDetails}
-          getExistingTableData={getExistingTableData}
-        />
-      ) : null}
+      <div className={styles.propertiesWidth}>
+        {opList?.length > 0 ? (
+          <PropertyDetails
+            operationType={activityOpType}
+            openProcessType={openProcessType}
+            openProcessID={openProcessID}
+            isProcessReadOnly={isProcessReadOnly}
+            getFilteredVariableList={getFilteredVariableList}
+            existingTableData={existingTableData}
+            filteredVariables={filteredVariables}
+            selectedOp={selectedOp}
+            opList={opList}
+            setOpList={setOpList}
+            setGlobalData={setGlobalData}
+            tableDetails={tableDetails}
+            setTableDetails={setTableDetails}
+            getExistingTableData={getExistingTableData}
+          />
+        ) : null}
+      </div>
     </div>
+    </>
   );
 }
 

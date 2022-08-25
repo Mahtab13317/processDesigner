@@ -11,8 +11,8 @@ export function configureStyleForCell(graph, icon, styleGraph) {
   let elemStyle = {};
   if (defaultShapeVertex.includes(styleGraph)) {
     if (styleGraph === style.workdesk || styleGraph === style.caseWorkdesk) {
-      elemStyle[mxConstants.STYLE_STROKECOLOR] = "#0072C6";
-      elemStyle[mxConstants.STYLE_FILLCOLOR] = "#EAF5FC";
+      elemStyle[mxConstants.STYLE_STROKECOLOR] = "#7642A7";
+      elemStyle[mxConstants.STYLE_FILLCOLOR] = "#F5F1F9";
     } else {
       elemStyle[mxConstants.STYLE_STROKECOLOR] = "black";
       elemStyle[mxConstants.STYLE_FILLCOLOR] = "white";

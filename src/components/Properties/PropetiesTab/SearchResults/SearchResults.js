@@ -20,6 +20,7 @@ import {
   RTL_DIRECTION,
 } from "../../../../Constants/appConstants.js";
 import arabicStyles from "./ArabicStyles.module.css";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 function SearchResults(props) {
   let { t } = useTranslation();
@@ -162,6 +163,7 @@ function SearchResults(props) {
 
   return (
     <React.Fragment>
+    <TabsHeading heading={props?.heading} />
       <div className={styles.SearchVariable} style={{ direction: direction }}>
         <div style={{ width: "98%" }}>
           <p

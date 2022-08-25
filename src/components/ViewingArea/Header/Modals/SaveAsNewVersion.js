@@ -7,10 +7,14 @@ import {
   SERVER_URL
 } from "../../../../Constants/appConstants";
 import CommonModalBody from "../CommonModalBody";
+import { store, useGlobalState } from "state-pool";
 import axios from "axios";
 
 function SaveAsNewVersion(props) {
   let { t } = useTranslation();
+  const poolProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData, setlocalLoadedProcessData] =
+    useGlobalState(poolProcessData);
   const [selectedType, setSelectedType] = useState(VERSION_TYPE_MAJOR);
   const [comment, setComment] = useState("");
 
@@ -18,7 +22,8 @@ function SaveAsNewVersion(props) {
     if (selectedType === VERSION_TYPE_MAJOR) {
       let json = {
         processDefId: +props.processDefId,
-        version: props.existingVersion,
+        version: +props.existingVersion+1,
+        processName:localLoadedProcessData.ProcessName
       };
       axios.post(SERVER_URL + ENDPOINT_SAVE_MAJOR, json).then((response) => {
         if (response.data.Status === 0) {
@@ -28,7 +33,8 @@ function SaveAsNewVersion(props) {
     } else {
       let json = {
         processDefId: +props.processDefId,
-        version: props.existingVersion,
+        version: +props.existingVersion+0.1,
+        processName:localLoadedProcessData.ProcessName
       };
       axios.post(SERVER_URL + ENDPOINT_SAVE_MINOR, json).then((response) => {
         if (response.data.Status === 0) {

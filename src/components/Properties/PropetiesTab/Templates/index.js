@@ -43,6 +43,7 @@ import { withStyles } from "@material-ui/core/styles";
 import "./index.css";
 import TemplatePropertiesScreen from "./TemplateProperties.js";
 import PropertiesModal from "./PropertiesModal.js";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 function TemplateProperties(props) {
   let { t } = useTranslation();
@@ -543,27 +544,249 @@ function TemplateProperties(props) {
   };
 
   return (
-    <div className="flexColumn">
-      {spinner ? (
-        <CircularProgress
-          style={
-            direction === RTL_DIRECTION
-              ? { marginTop: "30vh", marginRight: "40%" }
-              : { marginTop: "30vh", marginLeft: "40%" }
-          }
-        />
-      ) : (
-        <div
-          className={`${styles.mainDiv} ${
-            props.isDrawerExpanded ? styles.expandedView : styles.collapsedView
-          }`}
-          style={{ direction: `${direction}` }}
-        >
-          <div className={styles.cabinetDiv}>
-            <p className={styles.divHeading}>{t("O2MsDetails")}</p>
-            <div className={styles.cabinetBodyDiv}>
+    <>
+      <TabsHeading heading={props?.heading} />
+      <div className="flexColumn">
+        {spinner ? (
+          <CircularProgress
+            style={
+              direction === RTL_DIRECTION
+                ? { marginTop: "30vh", marginRight: "40%" }
+                : { marginTop: "30vh", marginLeft: "40%" }
+            }
+          />
+        ) : (
+          <div
+            className={`${styles.mainDiv} ${
+              props.isDrawerExpanded
+                ? styles.expandedView
+                : styles.collapsedView
+            }`}
+            style={{ direction: `${direction}` }}
+          >
+            <div className={styles.cabinetDiv}>
+              <p className={styles.divHeading}>{t("O2MsDetails")}</p>
+              <div className={styles.cabinetBodyDiv}>
+                <label className={styles.templatePropLabel}>
+                  {t("ProtocolType")}
+                </label>
+                <Select
+                  className={`templatePropSelect ${styles.templatePropSelect}`}
+                  MenuProps={{
+                    anchorOrigin: {
+                      vertical: "bottom",
+                      horizontal: "left",
+                    },
+                    transformOrigin: {
+                      vertical: "top",
+                      horizontal: "left",
+                    },
+                    getContentAnchorEl: null,
+                  }}
+                  inputProps={{
+                    readOnly: connected,
+                  }}
+                  style={{ backgroundColor: connected ? "#f8f8f8" : "#fff" }}
+                  name="protocolType"
+                  value={connectData.protocolType}
+                  onChange={onChange}
+                >
+                  {["http", "https"].map((option) => {
+                    return (
+                      <MenuItem
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.templateDropdownData
+                            : styles.templateDropdownData
+                        }
+                        value={option}
+                      >
+                        {option}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+                <label className={styles.templatePropLabel}>
+                  {t("domainName")} / {t("IpAddress")}
+                  <span
+                    className={
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.starIcon
+                        : styles.starIcon
+                    }
+                  >
+                    *
+                  </span>
+                </label>
+                <TextInput
+                  inputValue={connectData?.ipAddress}
+                  classTag={styles.templatePropInput}
+                  onChangeEvent={onChange}
+                  readOnlyCondition={connected}
+                  name="ipAddress"
+                  idTag="oms_ipAddress"
+                  errorStatement={error?.ipAddress?.statement}
+                  errorSeverity={error?.ipAddress?.severity}
+                  errorType={error?.ipAddress?.errorType}
+                  inlineError={true}
+                />
+                <label className={styles.templatePropLabel}>
+                  {t("PortId")}
+                </label>
+                <TextInput
+                  inputValue={connectData?.portId}
+                  classTag={styles.templatePropInput}
+                  onChangeEvent={onChange}
+                  readOnlyCondition={connected}
+                  type="number"
+                  name="portId"
+                  idTag="oms_portId"
+                  rangeVal={{ start: 0, end: 65535 }}
+                  errorStatement={error?.portId?.statement}
+                  errorSeverity={error?.portId?.severity}
+                  errorType={error?.portId?.errorType}
+                  inlineError={true}
+                />
+                {hideConnectBtn ? (
+                  <button
+                    onClick={getCabinetFunc}
+                    className={
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.getCabinetBtn
+                        : styles.getCabinetBtn
+                    }
+                  >
+                    {t("GetCabinets")}
+                  </button>
+                ) : (
+                  <div>
+                    <label className={styles.templatePropLabel}>
+                      {t("Cabinet")}
+                    </label>
+                    <Select
+                      className={`templatePropSelect ${styles.templatePropSelect}`}
+                      MenuProps={{
+                        anchorOrigin: {
+                          vertical: "bottom",
+                          horizontal: "left",
+                        },
+                        transformOrigin: {
+                          vertical: "top",
+                          horizontal: "left",
+                        },
+                        getContentAnchorEl: null,
+                      }}
+                      inputProps={{
+                        readOnly: connected,
+                      }}
+                      style={{
+                        backgroundColor: connected ? "#f8f8f8" : "#fff",
+                      }}
+                      name="cabinet"
+                      value={connectData.cabinet}
+                      onChange={onChange}
+                    >
+                      {cabinetList?.map((option) => {
+                        return (
+                          <MenuItem
+                            className={
+                              direction === RTL_DIRECTION
+                                ? arabicStyles.templateDropdownData
+                                : styles.templateDropdownData
+                            }
+                            value={option.CabinetName}
+                          >
+                            {option.CabinetName}
+                          </MenuItem>
+                        );
+                      })}
+                    </Select>
+                    <label className={styles.templatePropLabel}>
+                      {t("Username")}
+                      <span
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.starIcon
+                            : styles.starIcon
+                        }
+                      >
+                        *
+                      </span>
+                    </label>
+                    <TextInput
+                      inputValue={connectData?.username}
+                      classTag={styles.templatePropInput}
+                      onChangeEvent={onChange}
+                      readOnlyCondition={connected}
+                      name="username"
+                      idTag="oms_username"
+                      errorStatement={error?.username?.statement}
+                      errorSeverity={error?.username?.severity}
+                      errorType={error?.username?.errorType}
+                      inlineError={true}
+                    />
+                    <label className={styles.templatePropLabel}>
+                      {t("Password")}
+                      <span
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.starIcon
+                            : styles.starIcon
+                        }
+                      >
+                        *
+                      </span>
+                    </label>
+                    <TextInput
+                      inputValue={connectData?.password}
+                      classTag={styles.templatePropInput}
+                      onChangeEvent={onChange}
+                      readOnlyCondition={connected}
+                      name="password"
+                      type="password"
+                      idTag="oms_password"
+                      errorStatement={error?.password?.statement}
+                      errorSeverity={error?.password?.severity}
+                      errorType={error?.password?.errorType}
+                      inlineError={true}
+                    />
+                    {connected ? (
+                      <button
+                        onClick={disconnectFunc}
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.disconnectBtn
+                            : styles.disconnectBtn
+                        }
+                      >
+                        {t("Disconnect")}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={connectFunc}
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.getCabinetBtn
+                            : styles.getCabinetBtn
+                        }
+                      >
+                        {t("Connect")}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div
+              className={
+                direction === RTL_DIRECTION
+                  ? arabicStyles.templateList
+                  : styles.templateList
+              }
+            >
+              <p className={styles.divHeading}>{t("SelectTemplate(s)")}</p>
               <label className={styles.templatePropLabel}>
-                {t("ProtocolType")}
+                {t("Category")}
               </label>
               <Select
                 className={`templatePropSelect ${styles.templatePropSelect}`}
@@ -579,14 +802,26 @@ function TemplateProperties(props) {
                   getContentAnchorEl: null,
                 }}
                 inputProps={{
-                  readOnly: connected,
+                  readOnly: !connected,
                 }}
-                style={{ backgroundColor: connected ? "#f8f8f8" : "#fff" }}
-                name="protocolType"
-                value={connectData.protocolType}
-                onChange={onChange}
+                style={{ backgroundColor: !connected ? "#f8f8f8" : "#fff" }}
+                name="cabinet"
+                value={category}
+                onChange={(e) => getTemplateForCategory(e.target.value)}
               >
-                {["http", "https"].map((option) => {
+                {categoryList?.length > 1 ? (
+                  <MenuItem
+                    className={
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.templateDropdownData
+                        : styles.templateDropdownData
+                    }
+                    value={-1}
+                  >
+                    {t("All")}
+                  </MenuItem>
+                ) : null}
+                {categoryList?.map((option) => {
                   return (
                     <MenuItem
                       className={
@@ -594,416 +829,197 @@ function TemplateProperties(props) {
                           ? arabicStyles.templateDropdownData
                           : styles.templateDropdownData
                       }
-                      value={option}
+                      value={option.CategoryName}
                     >
-                      {option}
+                      {option.CategoryName}
                     </MenuItem>
                   );
                 })}
               </Select>
               <label className={styles.templatePropLabel}>
-                {t("domainName")} / {t("IpAddress")}
-                <span
-                  className={
-                    direction === RTL_DIRECTION
-                      ? arabicStyles.starIcon
-                      : styles.starIcon
-                  }
-                >
-                  *
-                </span>
+                {t("Template")}
               </label>
-              <TextInput
-                inputValue={connectData?.ipAddress}
-                classTag={styles.templatePropInput}
-                onChangeEvent={onChange}
-                readOnlyCondition={connected}
-                name="ipAddress"
-                idTag="oms_ipAddress"
-                errorStatement={error?.ipAddress?.statement}
-                errorSeverity={error?.ipAddress?.severity}
-                errorType={error?.ipAddress?.errorType}
-                inlineError={true}
+              <MultiSelectWithSearchInput
+                optionList={templateList}
+                selectedOptionList={associatedList}
+                optionRenderKey="ProductName"
+                showTags={false}
+                getSelectedItems={setAssociatedTemplateListFunc}
+                isDisabled={!connected}
               />
-              <label className={styles.templatePropLabel}>{t("PortId")}</label>
-              <TextInput
-                inputValue={connectData?.portId}
-                classTag={styles.templatePropInput}
-                onChangeEvent={onChange}
-                readOnlyCondition={connected}
-                type="number"
-                name="portId"
-                idTag="oms_portId"
-                rangeVal={{ start: 0, end: 65535 }}
-                errorStatement={error?.portId?.statement}
-                errorSeverity={error?.portId?.severity}
-                errorType={error?.portId?.errorType}
-                inlineError={true}
-              />
-              {hideConnectBtn ? (
-                <button
-                  onClick={getCabinetFunc}
-                  className={
-                    direction === RTL_DIRECTION
-                      ? arabicStyles.getCabinetBtn
-                      : styles.getCabinetBtn
-                  }
-                >
-                  {t("GetCabinets")}
-                </button>
-              ) : (
-                <div>
-                  <label className={styles.templatePropLabel}>
-                    {t("Cabinet")}
-                  </label>
-                  <Select
-                    className={`templatePropSelect ${styles.templatePropSelect}`}
-                    MenuProps={{
-                      anchorOrigin: {
-                        vertical: "bottom",
-                        horizontal: "left",
-                      },
-                      transformOrigin: {
-                        vertical: "top",
-                        horizontal: "left",
-                      },
-                      getContentAnchorEl: null,
-                    }}
-                    inputProps={{
-                      readOnly: connected,
-                    }}
-                    style={{
-                      backgroundColor: connected ? "#f8f8f8" : "#fff",
-                    }}
-                    name="cabinet"
-                    value={connectData.cabinet}
-                    onChange={onChange}
-                  >
-                    {cabinetList?.map((option) => {
+              {associatedTemplateList?.length > 0 ? (
+                <React.Fragment>
+                  <p className={styles.nextDivHeading}>
+                    {t("AssociatedTemplates")}
+                  </p>
+                  <div className={styles.associatedTemplateDiv}>
+                    {associatedTemplateList.map((el, index) => {
                       return (
-                        <MenuItem
+                        <div
                           className={
-                            direction === RTL_DIRECTION
-                              ? arabicStyles.templateDropdownData
-                              : styles.templateDropdownData
+                            selectedTemplate?.ProductName === el.ProductName
+                              ? styles.selectedTempDiv
+                              : styles.associatedTempDiv
                           }
-                          value={option.CabinetName}
                         >
-                          {option.CabinetName}
-                        </MenuItem>
+                          <span
+                            className={styles.tempName}
+                            onClick={() => setSelectedTemplate(el)}
+                          >
+                            {el.ProductName}
+                          </span>
+                          <span className={styles.tempIconsDiv}>
+                            <TemplateTooltip
+                              arrow
+                              title={
+                                !connected
+                                  ? t("mappingError")
+                                  : t("viewMapping")
+                              }
+                              placement={"bottom"}
+                            >
+                              <SwapHorizIcon
+                                className={styles.downloadIcon}
+                                style={{
+                                  cursor: !connected ? "default" : "pointer",
+                                }}
+                                onClick={() => {
+                                  if (connected) {
+                                    mapTemplate(el);
+                                  }
+                                }}
+                              />
+                            </TemplateTooltip>
+                            <TemplateTooltip
+                              arrow
+                              title={
+                                !connected ? t("downloadError") : t("download")
+                              }
+                              placement={"bottom"}
+                            >
+                              <GetAppIcon
+                                className={styles.downloadIcon}
+                                style={{
+                                  cursor: !connected ? "default" : "pointer",
+                                }}
+                                onClick={() => {
+                                  if (connected) {
+                                    downloadTemplate(el);
+                                  }
+                                }}
+                              />
+                            </TemplateTooltip>
+                            <DeleteIcon
+                              className={styles.downloadIcon}
+                              onClick={() => removeTemplateFromList(index, el)}
+                            />
+                          </span>
+                        </div>
                       );
                     })}
-                  </Select>
-                  <label className={styles.templatePropLabel}>
-                    {t("Username")}
-                    <span
-                      className={
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.starIcon
-                          : styles.starIcon
-                      }
-                    >
-                      *
-                    </span>
-                  </label>
-                  <TextInput
-                    inputValue={connectData?.username}
-                    classTag={styles.templatePropInput}
-                    onChangeEvent={onChange}
-                    readOnlyCondition={connected}
-                    name="username"
-                    idTag="oms_username"
-                    errorStatement={error?.username?.statement}
-                    errorSeverity={error?.username?.severity}
-                    errorType={error?.username?.errorType}
-                    inlineError={true}
-                  />
-                  <label className={styles.templatePropLabel}>
-                    {t("Password")}
-                    <span
-                      className={
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.starIcon
-                          : styles.starIcon
-                      }
-                    >
-                      *
-                    </span>
-                  </label>
-                  <TextInput
-                    inputValue={connectData?.password}
-                    classTag={styles.templatePropInput}
-                    onChangeEvent={onChange}
-                    readOnlyCondition={connected}
-                    name="password"
-                    type="password"
-                    idTag="oms_password"
-                    errorStatement={error?.password?.statement}
-                    errorSeverity={error?.password?.severity}
-                    errorType={error?.password?.errorType}
-                    inlineError={true}
-                  />
-                  {connected ? (
-                    <button
-                      onClick={disconnectFunc}
-                      className={
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.disconnectBtn
-                          : styles.disconnectBtn
-                      }
-                    >
-                      {t("Disconnect")}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={connectFunc}
-                      className={
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.getCabinetBtn
-                          : styles.getCabinetBtn
-                      }
-                    >
-                      {t("Connect")}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-          <div
-            className={
-              direction === RTL_DIRECTION
-                ? arabicStyles.templateList
-                : styles.templateList
-            }
-          >
-            <p className={styles.divHeading}>{t("SelectTemplate(s)")}</p>
-            <label className={styles.templatePropLabel}>{t("Category")}</label>
-            <Select
-              className={`templatePropSelect ${styles.templatePropSelect}`}
-              MenuProps={{
-                anchorOrigin: {
-                  vertical: "bottom",
-                  horizontal: "left",
-                },
-                transformOrigin: {
-                  vertical: "top",
-                  horizontal: "left",
-                },
-                getContentAnchorEl: null,
-              }}
-              inputProps={{
-                readOnly: !connected,
-              }}
-              style={{ backgroundColor: !connected ? "#f8f8f8" : "#fff" }}
-              name="cabinet"
-              value={category}
-              onChange={(e) => getTemplateForCategory(e.target.value)}
-            >
-              {categoryList?.length > 1 ? (
-                <MenuItem
-                  className={
-                    direction === RTL_DIRECTION
-                      ? arabicStyles.templateDropdownData
-                      : styles.templateDropdownData
-                  }
-                  value={-1}
-                >
-                  {t("All")}
-                </MenuItem>
+                  </div>
+                </React.Fragment>
               ) : null}
-              {categoryList?.map((option) => {
-                return (
-                  <MenuItem
-                    className={
-                      direction === RTL_DIRECTION
-                        ? arabicStyles.templateDropdownData
-                        : styles.templateDropdownData
-                    }
-                    value={option.CategoryName}
-                  >
-                    {option.CategoryName}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-            <label className={styles.templatePropLabel}>{t("Template")}</label>
-            <MultiSelectWithSearchInput
-              optionList={templateList}
-              selectedOptionList={associatedList}
-              optionRenderKey="ProductName"
-              showTags={false}
-              getSelectedItems={setAssociatedTemplateListFunc}
-              isDisabled={!connected}
-            />
-            {associatedTemplateList?.length > 0 ? (
-              <React.Fragment>
-                <p className={styles.nextDivHeading}>
-                  {t("AssociatedTemplates")}
-                </p>
-                <div className={styles.associatedTemplateDiv}>
-                  {associatedTemplateList.map((el, index) => {
-                    return (
-                      <div
-                        className={
-                          selectedTemplate?.ProductName === el.ProductName
-                            ? styles.selectedTempDiv
-                            : styles.associatedTempDiv
-                        }
-                      >
-                        <span
-                          className={styles.tempName}
-                          onClick={() => setSelectedTemplate(el)}
+            </div>
+            {props.isDrawerExpanded ? (
+              <div
+                className={
+                  direction === RTL_DIRECTION
+                    ? arabicStyles.templateDetails
+                    : styles.templateDetails
+                }
+              >
+                {selectedTemplate ? (
+                  <React.Fragment>
+                    <p className={styles.selectedDiv}>
+                      <span className={styles.subDivHeading}>
+                        {selectedTemplate.ProductName} - {t("Properties")}
+                      </span>
+                      <span className={styles.selectedIconsDiv}>
+                        <TemplateTooltip
+                          arrow
+                          title={
+                            !connected ? t("downloadError") : t("download")
+                          }
+                          placement={"bottom"}
                         >
-                          {el.ProductName}
-                        </span>
-                        <span className={styles.tempIconsDiv}>
-                          <TemplateTooltip
-                            arrow
-                            title={
-                              !connected ? t("mappingError") : t("viewMapping")
-                            }
-                            placement={"bottom"}
-                          >
-                            <SwapHorizIcon
-                              className={styles.downloadIcon}
-                              style={{
-                                cursor: !connected ? "default" : "pointer",
-                              }}
-                              onClick={() => {
-                                if (connected) {
-                                  mapTemplate(el);
-                                }
-                              }}
-                            />
-                          </TemplateTooltip>
-                          <TemplateTooltip
-                            arrow
-                            title={
-                              !connected ? t("downloadError") : t("download")
-                            }
-                            placement={"bottom"}
-                          >
-                            <GetAppIcon
-                              className={styles.downloadIcon}
-                              style={{
-                                cursor: !connected ? "default" : "pointer",
-                              }}
-                              onClick={() => {
-                                if (connected) {
-                                  downloadTemplate(el);
-                                }
-                              }}
-                            />
-                          </TemplateTooltip>
-                          <DeleteIcon
-                            className={styles.downloadIcon}
-                            onClick={() => removeTemplateFromList(index, el)}
+                          <GetAppIcon
+                            className={styles.expandViewIcon}
+                            style={{
+                              cursor: !connected ? "default" : "pointer",
+                            }}
+                            onClick={() => downloadTemplate(selectedTemplate)}
                           />
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </React.Fragment>
+                        </TemplateTooltip>
+                        <DeleteIcon
+                          className={styles.expandViewIcon}
+                          onClick={() =>
+                            removeTemplateFromList(null, selectedTemplate)
+                          }
+                        />
+                        <CloseIcon
+                          className={styles.expandViewIcon}
+                          onClick={() => setSelectedTemplate(null)}
+                        />
+                      </span>
+                    </p>
+                    <TemplatePropertiesScreen
+                      selectedTemplate={selectedTemplate}
+                    />
+                  </React.Fragment>
+                ) : (
+                  <div className={styles.noSelectedTemplateScreen}>
+                    <img src={emptyStatePic} />
+                    <p className={styles.noTemplateSelectedString}>
+                      {t("noOMS_TemplateSelected")}
+                    </p>
+                  </div>
+                )}
+              </div>
             ) : null}
           </div>
-          {props.isDrawerExpanded ? (
-            <div
-              className={
-                direction === RTL_DIRECTION
-                  ? arabicStyles.templateDetails
-                  : styles.templateDetails
-              }
-            >
-              {selectedTemplate ? (
-                <React.Fragment>
-                  <p className={styles.selectedDiv}>
-                    <span className={styles.subDivHeading}>
-                      {selectedTemplate.ProductName} - {t("Properties")}
-                    </span>
-                    <span className={styles.selectedIconsDiv}>
-                      <TemplateTooltip
-                        arrow
-                        title={!connected ? t("downloadError") : t("download")}
-                        placement={"bottom"}
-                      >
-                        <GetAppIcon
-                          className={styles.expandViewIcon}
-                          style={{
-                            cursor: !connected ? "default" : "pointer",
-                          }}
-                          onClick={() => downloadTemplate(selectedTemplate)}
-                        />
-                      </TemplateTooltip>
-                      <DeleteIcon
-                        className={styles.expandViewIcon}
-                        onClick={() =>
-                          removeTemplateFromList(null, selectedTemplate)
-                        }
-                      />
-                      <CloseIcon
-                        className={styles.expandViewIcon}
-                        onClick={() => setSelectedTemplate(null)}
-                      />
-                    </span>
-                  </p>
-                  <TemplatePropertiesScreen
-                    selectedTemplate={selectedTemplate}
-                  />
-                </React.Fragment>
-              ) : (
-                <div className={styles.noSelectedTemplateScreen}>
-                  <img src={emptyStatePic} />
-                  <p className={styles.noTemplateSelectedString}>
-                    {t("noOMS_TemplateSelected")}
-                  </p>
-                </div>
-              )}
-            </div>
-          ) : null}
-        </div>
-      )}
-      {showMappingModal !== null ? (
-        <Modal
-          show={showMappingModal !== null}
-          style={{
-            width: "50vw",
-            left: "24%",
-            top: "20%",
-            padding: "0",
-          }}
-          modalClosed={() => setShowMappingModal(null)}
-          children={
-            <MappingModal
-              schemaList={schemaList}
-              template={showMappingModal}
-              cancelFunc={() => setShowMappingModal(null)}
-              okFunc={saveMappingDetailsFunc}
-            />
-          }
-        />
-      ) : null}
-      {!props.isDrawerExpanded && selectedTemplate ? (
-        <Modal
-          show={!props.isDrawerExpanded && selectedTemplate}
-          style={{
-            width: "50vw",
-            left: "24%",
-            top: "21.5%",
-            padding: "0",
-          }}
-          modalClosed={() => setSelectedTemplate(null)}
-          children={
-            <PropertiesModal
-              selectedTemplate={selectedTemplate}
-              okFunc={() => setSelectedTemplate(null)}
-              cancelFunc={() => setSelectedTemplate(null)}
-            />
-          }
-        />
-      ) : null}
-    </div>
+        )}
+        {showMappingModal !== null ? (
+          <Modal
+            show={showMappingModal !== null}
+            style={{
+              width: "50vw",
+              left: "24%",
+              top: "20%",
+              padding: "0",
+            }}
+            modalClosed={() => setShowMappingModal(null)}
+            children={
+              <MappingModal
+                schemaList={schemaList}
+                template={showMappingModal}
+                cancelFunc={() => setShowMappingModal(null)}
+                okFunc={saveMappingDetailsFunc}
+              />
+            }
+          />
+        ) : null}
+        {!props.isDrawerExpanded && selectedTemplate ? (
+          <Modal
+            show={!props.isDrawerExpanded && selectedTemplate}
+            style={{
+              width: "50vw",
+              left: "24%",
+              top: "21.5%",
+              padding: "0",
+            }}
+            modalClosed={() => setSelectedTemplate(null)}
+            children={
+              <PropertiesModal
+                selectedTemplate={selectedTemplate}
+                okFunc={() => setSelectedTemplate(null)}
+                cancelFunc={() => setSelectedTemplate(null)}
+              />
+            }
+          />
+        ) : null}
+      </div>
+    </>
   );
 }
 

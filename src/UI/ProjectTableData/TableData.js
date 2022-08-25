@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import PropTypes from "prop-types";
 import clsx from "clsx";
-import { makeStyles } from "@material-ui/core/styles";
+import { hexToRgb, makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { RTL_DIRECTION } from "../../Constants/appConstants";
 import { useDispatch } from "react-redux";
 import { setImportExportVal } from "../../redux-store/slices/ImportExportSlice";
+import { hexToRGB } from "../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function EnhancedTableHead(props) {
   const { headCells, hideHeader } = props;
@@ -125,31 +126,26 @@ const useStyles = makeStyles({
   selectedCell: {
     textAlign: (props) =>
       props.direction === RTL_DIRECTION ? "right" : "left",
-    font: "normal normal 600 12px/17px Open Sans",
+    font: "normal normal 600 var(--base_text_font_size)/17px var(--font_family)",
     borderBottom: "0px",
-    fontSize: "12px",
-    padding: "0.25rem 0.25rem",
+    fontSize: "var(--base_text_font_size)",
+    padding: "0 var(--spacing_v)",
     alignItems: "center",
-    marginRight: "14px",
     letterSpacing: "0px",
-    color: "#1072C6",
+    color: "var(--brand_color2) !important",
   },
   tableCell: {
-    fontFamily: "Open Sans , Roboto , Helvetica , Arial , sans-serif",
+    fontFamily: "var(--font_family)",
     borderBottom: "0px",
-    fontSize: "12px",
-    padding: "0.25rem 0.25rem",
+    fontSize: "var(--base_text_font_size)",
+    padding: "0 var(--spacing_v)",
     alignItems: "center",
-    marginRight: "14px",
     textAlign: (props) =>
       props.direction === RTL_DIRECTION ? "right" : "left",
   },
   TableRow: {
     cursor: "pointer",
     background: "#FFFFFF 0% 0% no-repeat padding-box",
-    "&$selected, &$selected:hover": {
-      background: "#0072C614 0% 0% no-repeat padding-box",
-    },
   },
   visuallyHidden: {
     border: 0,
@@ -200,7 +196,7 @@ export default function TabularData(props) {
     props.getSelectedRow(rowId);
     dispatch(setImportExportVal({ ProjectName: rowData, Type: "import" }));
   };
- 
+
   useEffect(() => {
     if (props.selectedRow) {
       setRowSelected(props.selectedRow);
@@ -351,7 +347,7 @@ export default function TabularData(props) {
                           className={classes.TableRow}
                           classes={{
                             hover: classes.hover,
-                            selected: classes.selected,
+                            selected: classes.selectedTableRow,
                           }}
                           hover
                           onClick={(event) => {

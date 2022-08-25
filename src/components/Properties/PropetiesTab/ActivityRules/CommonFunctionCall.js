@@ -93,8 +93,12 @@ export function getConditionalOperatorLabel(valueSelected) {
     label = "not null";
   } else if (valueSelected === "") {
     label = "";
+  } else if (valueSelected === "1") {
+    label = "Less than";
   } else if (valueSelected === "2") {
     label = "Less than or equal to";
+  } else if (valueSelected === "5") {
+    label = "Greater than ";
   } else if (valueSelected === "6") {
     label = "Greater than or equal to";
   }
@@ -121,6 +125,10 @@ export function getConditionalOperator(valueSelected) {
     label = "<=";
   } else if (valueSelected === "6") {
     label = ">=";
+  } else if (valueSelected === "1") {
+    label = "<";
+  } else if (valueSelected === "5") {
+    label = ">";
   }
   return label;
 }
@@ -173,6 +181,8 @@ export function getTypedropdown(valueSelected) {
     label = "AUDIT";
   } else if (valueSelected === "21") {
     label = "DISTRIBUTE TO";
+  } else if (valueSelected === "39") {
+    label = "REMINDER";
   } else if (valueSelected === "") {
     label = "";
   }
@@ -196,6 +206,7 @@ export const operationTypeOptions = [
   { label: "ROLLBACK", value: "17" },
   { label: "AUDIT", value: "25" },
   { label: "DISTRIBUTE TO", value: "21" },
+  { label: "REMINDER", value: "39" },
 ];
 
 export const operationFieldKeys = {
@@ -226,6 +237,15 @@ export const operationFieldKeys = {
   1: ["param1", "param2", "operator", "param3"],
   19: ["param1", "param2", "operator", "param3", "ruleCalFlag"],
   21: ["param1", "param2", "param3"],
+  39: [
+    "param2",
+    "iReminderFrequency",
+    "durationInfo.paramDays",
+    "durationInfo.paramHours",
+    "durationInfo.paramMinutes",
+    "durationInfo.paramSeconds",
+
+  ],
 };
 
 export const databaseExclusiveOperations = [
@@ -264,6 +284,22 @@ export const distributeOperations = [
   "9",
   "15",
   "16",
+  "22",
+  "23",
+];
+
+export const entryDetailsOperations = ["1", "8", "9", "15", "16", "22", "23"];
+
+export const reminderOperations = ["39"];
+
+export const replyOperations = [
+  "1",
+  "8",
+  "9",
+  "15",
+  "16",
+  "17",
+  "19",
   "22",
   "23",
 ];

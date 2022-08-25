@@ -1,5 +1,5 @@
 .formLabel {
-  font-size: 0.875rem;
+  font-size: var(--subtitle_text_font_size);
   font-weight: bold;
 }
 .box {

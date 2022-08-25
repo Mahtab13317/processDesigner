@@ -152,6 +152,7 @@ function REST_Manual(props) {
   }, [selected]);
 
   useEffect(() => {
+    // code edited for BugId 113306 and BugId 113320
     setChangedSelection((prev) => {
       let temp = { ...prev };
       temp = {
@@ -159,10 +160,20 @@ function REST_Manual(props) {
         ...webServiceObj,
         brmsEnabled: brmsRestService,
         proxyEnabled: isProxyReq,
+        ResBodyParameters: resBodyList,
+        ReqBodyParameters: reqBodyList,
+        InputParameters: inputParamList,
       };
       return temp;
     });
-  }, [webServiceObj, brmsRestService, isProxyReq]);
+  }, [
+    webServiceObj,
+    brmsRestService,
+    isProxyReq,
+    resBodyList,
+    reqBodyList,
+    inputParamList,
+  ]);
 
   const onChange = (e) => {
     let tempWebService = { ...webServiceObj };

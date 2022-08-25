@@ -231,21 +231,21 @@ function Projects(props) {
       />
       <div className="searchbar_N_Header" ref={projectHeadRef}>
         <div className="project_Header_Adder">
-          <h4 style={{ fontWeight: "600" }}>
+          <h4
+            style={{
+              fontWeight: "600",
+              fontSize: "var(--subtitle_text_font_size)",
+            }}
+          >
             {t("projectList.ProjectHeading")}{" "}
             {`(${props.projectList ? props.projectList.length : 0})`}
           </h4>
           {createProjectRightsFlag && (
-            <h1
-              style={{ color: "#0072C6" }}
-              onClick={() => CreateProjectHandler()}
-            >
-              +
-            </h1>
+            <h1 onClick={() => CreateProjectHandler()}>+</h1>
           )}
         </div>
         <div className="searchBarNFilter">
-          <div style={{ marginRight: "0.5rem" }}>
+          <div>
             <SearchProject
               setSearchTerm={setSearchTerm}
               placeholder={t("search")}
@@ -256,9 +256,9 @@ function Projects(props) {
           <SortButton
             backDrop={true}
             buttonToOpenModal={
-              <button className="filterButton" type="button">
-                <img src={FilterImage} />
-              </button>
+              <div className="filterButton">
+                <img src={FilterImage} style={{ width: "100%" }} />
+              </div>
             }
             sortSelection={sortSelectionFunc}
             showTickIcon={true}
@@ -319,13 +319,7 @@ function Projects(props) {
             padding: "0",
           }}
           modalClosed={() => setShowModal(null)}
-          children={
-            <ProjectCreation
-              setShowModal={setShowModal}
-              // AddDescp={AddDescp}
-              // setmodalHeight={setmodalHeight}
-            />
-          }
+          children={<ProjectCreation setShowModal={setShowModal} />}
         />
       ) : null}
     </div>

@@ -1,3 +1,5 @@
 .arrowIcon {
-  color: #0072c6;
+  color: var(--brand_color1);
+  width: 1.7rem !important;
+  height: 1.7rem !important;
 }

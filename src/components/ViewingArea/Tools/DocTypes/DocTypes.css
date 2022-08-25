@@ -7,23 +7,26 @@
   font-size: 1rem !important;
 }
 
-.DocTypes .MuiFormControlLabel-root span {
+/*.DocTypes .MuiFormControlLabel-root span {
   font-size: 0.625rem !important;
-  margin-bottom: -0.3125rem !important;
+  padding: 0.125rem 0.125rem;
+  text-align: left;
 }
+.DocTypes .MuiFormControlLabel-root span {
+  font-size: var(--base_text_font_size) !important;
+  padding: 0.125rem 0.125rem;
+  text-align: left;
+  align-items: flex-start;
+}*/
 
 .DocTypes #searchBoxId {
   width: 12.8125rem !important;
 }
 
+/*code changes on 3 August 2022 for BugId 112560*/
 .DocTypes .oneBox {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-}
-
-.oneBox .checkBoxes {
-  transform: translate(1.5rem, 1.5625rem);
 }
 
 .DocTypes
@@ -33,10 +36,10 @@
 
 .addDocs {
   background-color: white;
-  width: 40vw;
+  width: 36vw;
   position: absolute;
   top: 21.5%;
-  left: 30%;
+  left: 32%;
   padding: 0;
   height: auto;
 }
@@ -90,23 +93,23 @@
 }
 
 .activities {
-  width: 12.5rem;
+  /* width: 12.5rem;*/
   border-right: 1px solid rgb(218, 208, 194);
   font-size: 0.8125rem;
   text-align: center;
 }
 
+/*code changes on 3 August 2022 for BugId 112560*/
 .oneActivityColumn {
-  width: 12.51875rem;
+  /* width: 12.51875rem;*/
   border-right: 1px solid #dad0c2;
   text-align: center;
-  height: 8.5rem;
 }
 
 .checkBoxesThree {
   display: flex;
   flex-direction: column;
-  align-items: left;
+  align-items: flex-start;
 }
 .screenHeading {
   margin-right: 1.875rem;
@@ -121,40 +124,44 @@
   margin-right: 0.625rem;
 }
 
+/*code changes on 3 August 2022 for BugId 112560*/
 .activityNameDiv {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: start;
+  width: 60%;
 }
 .checkBoxesStyling {
   margin-top: -0.625rem;
   margin-left: 0.625rem;
 }
 
-.docNameDiv {
+/*code edited on 2 August 2022 for BugId 111822*/
+/*.docNameDiv {
   display: flex;
-  margin-bottom: 0.5rem;
   padding: 0.25rem 0rem;
-}
+}*/
 
 .docName {
-  font-size: 0.75rem;
+  font-size: var(--base_text_font_size);
   font-weight: 700;
+  width: 75%;
+  display: flex;
 }
 
+/*code changes on 3 August 2022 for BugId 112560*/
 .oneDocDiv {
-  height: 80vh;
-  width: 17.4375rem;
+  height: 100%;
+  width: 23.4375rem;
   background-color: white;
   margin-top: 0.625rem;
   display: flex;
   flex-direction: column;
 }
 
-.Rules {
+/*.Rules {
   color: grey;
   font-size: 1rem;
-}
+}*/
 
 .docSearchDiv {
   display: flex;
@@ -175,13 +182,13 @@
   border-left: 1px solid rgb(218, 208, 194);
 }
 
-.activityHeadingDiv {
+/*.activityHeadingDiv {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.48125rem;
   border-bottom: 1px solid #dad0c2;
-}
+}*/
 .activitySideHeading {
   margin-right: 1.875rem;
   font-size: 1rem;

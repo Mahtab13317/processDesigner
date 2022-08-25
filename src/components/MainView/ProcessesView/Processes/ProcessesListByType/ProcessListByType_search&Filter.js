@@ -16,7 +16,7 @@ function ProcessListByType_TableNSearchNSortNFilter(props) {
   let [searchTerm, setSearchTerm] = useState("");
   let [selectionOne, setSelectionOne] = useState(0);
   let [selectionTwo, setSelectionTwo] = useState(0);
-  
+
   let Pending =
     props.selectedProcessCode == ("RP" || "EP")
       ? tileProcess(props.selectedProcessCode)[2]
@@ -30,7 +30,7 @@ function ProcessListByType_TableNSearchNSortNFilter(props) {
   return (
     <div className="processName_Filters_Table">
       <div className="processName_Search_Filters">
-        <p>
+        <p className="processName_Search_FiltersHeading">
           {t("processList.All")}{" "}
           {props.selectedProcessCode
             ? tileProcess(props.selectedProcessCode)[1] + " " + Pending
@@ -39,13 +39,22 @@ function ProcessListByType_TableNSearchNSortNFilter(props) {
           {props.selectedProcessCount})
         </p>
         <div className="filterBox">
-          <Checkbox
-            onChange={() => setGroupByProjectCheck(!groupByProjectcheck)}
-            checked={groupByProjectcheck}
-            size="small"
-            inputProps={{ "aria-label": "uncontrolled-checkbox" }}
-          />
-          {t("processList.GroupByProject")}
+          <div
+            style={{
+              marginRight: "1vw",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Checkbox
+              onChange={() => setGroupByProjectCheck(!groupByProjectcheck)}
+              checked={groupByProjectcheck}
+              className="groupProjectCheck"
+              size="small"
+              inputProps={{ "aria-label": "uncontrolled-checkbox" }}
+            />
+            {t("processList.GroupByProject")}
+          </div>
           {/* <Checkbox onChange={()=>setPinToTopCheck(!pinToTopcheck)} checked={pinToTopcheck} size= 'small' inputProps={{ 'aria-label': 'uncontrolled-checkbox' }} />{t('processList.ShowPinnedAtTop')} */}
           <SearchProcess
             id="ProcessesTab_searchProcess"
@@ -64,9 +73,9 @@ function ProcessListByType_TableNSearchNSortNFilter(props) {
             id="ProcessesTab_sortProcess"
             backDrop={true}
             buttonToOpenModal={
-              <button className="filterButton" type="button">
-                <img src={FilterImage} />
-              </button>
+              <div className="filterButton" type="button">
+                <img src={FilterImage} style={{ width: "100%" }} />
+              </div>
             }
             sortSelection={sortSelectionFunc}
             showTickIcon={true}
@@ -83,7 +92,7 @@ function ProcessListByType_TableNSearchNSortNFilter(props) {
               t("LastModified"),
               t("Name"),
             ]}
-            modalPaper="modalPaperProjects"
+            modalPaper="modalPaperProjects1"
             isArabic={false}
           />
         </div>

@@ -3,17 +3,20 @@ import TrendingFlatIcon from "@material-ui/icons/TrendingFlat";
 import CloseIcon from "@material-ui/icons/Close";
 import { useTranslation } from "react-i18next";
 import { connect } from "react-redux";
-import * as actionCreators from "../../../redux-store/actions/Properties/showDrawerAction.js";
+import * as actionCreators from "../../../redux-store/actions/Properties/showDrawerAction";
 import { getActivityProps } from "../../../utility/abstarctView/getActivityProps.js";
-import * as actionCreators_activity from "../../../redux-store/actions/Properties/showDrawerAction";
 import { useDispatch } from "react-redux";
 import { setSave } from "../../../redux-store/slices/ActivityPropertySaveCancelClicked";
 import { getSelectedCellType } from "../../../utility/abstarctView/getSelectedCellType.js";
+import { store, useGlobalState } from "state-pool";
 
 function DataFieldsCommonSection(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}​​​​​​​​`;
   const dispatch = useDispatch();
+  const loadedActivityPropertyData = store.getState("activityPropertyData");
+  const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
+    useGlobalState(loadedActivityPropertyData);
 
   // Function that handles the size of the drawer.
   const handleDrawerSize = () => {
@@ -22,6 +25,7 @@ function DataFieldsCommonSection(props) {
 
   const closePropertiesModal = () => {
     dispatch(setSave({ CloseClicked: true }));
+    setlocalLoadedActivityPropertyData(undefined);
   };
 
   return (
@@ -29,6 +33,7 @@ function DataFieldsCommonSection(props) {
       style={{
         direction: direction,
         padding: "0.5rem 0.5vw 0.75rem",
+        // fontSize: "var(--title_text_font_size) !important",
       }}
     >
       <div
@@ -38,14 +43,15 @@ function DataFieldsCommonSection(props) {
           flexDirection: direction === "rtl" ? "row-reverse" : "row",
           backgroundColor: props.isDrawerExpanded ? "white" : null,
           direction: direction,
+          width: "100%",
         }}
       >
         <div className="flex">
           <img
             src={props.selectedActivityIcon}
             style={{
-              height: "2.5rem",
-              width: "2.5rem",
+              aspectRatio: "1",
+              width: "3.5rem",
             }}
             alt=""
           />
@@ -57,7 +63,7 @@ function DataFieldsCommonSection(props) {
               marginInline: "0.75vw",
             }}
           >
-            <p style={{ fontSize: "0.75rem" }}>
+            <p style={{ fontSize: "var(--base_text_font_size)" }}>
               {props.cellType === getSelectedCellType("TASK")
                 ? t("task")
                 : t(
@@ -67,19 +73,30 @@ function DataFieldsCommonSection(props) {
                     )[4]
                   )}
             </p>
-            <p style={{ fontWeight: "bold", fontSize: "1rem" }}>
+            <p
+              style={{
+                fontWeight: "bold",
+                fontSize: "var(--title_text_font_size)",
+              }}
+            >
               {props.cellName}
             </p>
           </div>
         </div>
         <div>
           <TrendingFlatIcon
-            style={{ cursor: "pointer" }}
+            fontSize="medium"
+            style={{
+              cursor: "pointer",
+              width: "1.5rem",
+              height: "1.5rem",
+              marginRight: "0.25vw",
+            }}
             onClick={handleDrawerSize}
           />
           <CloseIcon
-            fontSize="small"
-            style={{ cursor: "pointer" }}
+            fontSize="medium"
+            style={{ cursor: "pointer", width: "1.5rem", height: "1.5rem" }}
             onClick={() => closePropertiesModal()}
           />
         </div>
@@ -140,7 +157,7 @@ function DataFieldsCommonSection(props) {
 const mapDispatchToProps = (dispatch) => {
   return {
     expandDrawer: (flag) => dispatch(actionCreators.expandDrawer(flag)),
-    showDrawer: (flag) => dispatch(actionCreators_activity.showDrawer(flag)),
+    showDrawer: (flag) => dispatch(actionCreators.showDrawer(flag)),
   };
 };
 

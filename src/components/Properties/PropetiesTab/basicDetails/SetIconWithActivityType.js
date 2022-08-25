@@ -11,15 +11,16 @@ function SetIconWithActivityType(props) {
   const [activityAndIconPair, setactivityAndIconPair] = React.useState([]);
 
   React.useEffect(() => {
+    let actList = [];
     props.activityList.forEach((item) => {
       const activityWithIcon = {
         icon: getActivityIcon(item.ActivityType, item.ActivitySubType),
         name: item.ActivityName,
         id: item.ActivityId,
       };
-
-      setactivityAndIconPair((prevState) => [...prevState, activityWithIcon]);
+      actList = [...actList, activityWithIcon];
     });
+    setactivityAndIconPair(actList);
   }, [props.activityList]);
 
   return (

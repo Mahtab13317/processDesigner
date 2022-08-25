@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import "./App.css";
 import Radium from "radium";
-import { withTranslation } from "react-i18next";
+import { useTranslation, withTranslation } from "react-i18next";
 import DisplayMessage from "../components/DisplayMessage/DisplayMessage";
 import ProcessView from "../components/ViewingArea/ProcessView";
 import MainView from "../components/MainView/MainView";
@@ -36,9 +36,10 @@ function initializeStore() {
 initializeStore();
 
 const App = (props) => {
+  let { t } = useTranslation();
   const inMemoryDB = store.getState("inMemoryDB");
   const [localinMemoryDB, setlocalinMemoryDB] = useGlobalState(inMemoryDB);
-  const [isLoading, setisLoading] = useState(false);
+  const [isLoading, setisLoading] = useState(true);
 
   let mainContainer = React.createRef();
 
@@ -49,14 +50,28 @@ const App = (props) => {
       message: "",
     },
   });
-  // const [dataObjectLaunchpad, setdataObjectLaunchpad] = useState({
-  //   session: window?.sharedKey?.session,
-  //   userIndex: window?.sharedKey?.userIndex,
-  // });
 
   const launchpadKey = JSON.parse(localStorage.getItem("launchpadKey"));
+  const token = launchpadKey?.token;
   const toastDataValue = useSelector(ToastDataValue);
   const dispatch = useDispatch();
+
+  const includeTheme = (cabinet_name, resolution, locale, auth_token) => {
+    var themeURL =
+      "/oap-rest/app/theme/" + cabinet_name + `/${resolution}` + `/${locale}`;
+    if (auth_token && auth_token.trim().length > 0) {
+      themeURL += `/${auth_token}`;
+    }
+    // if(resolution){
+    //   themeURL += `/${resolution}`
+    // }
+    var link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.type = "text/css";
+    link.href = themeURL;
+    document.head.appendChild(link);
+    setisLoading(false);
+  };
 
   useEffect(() => {
     window.getMicroApps = function (microAppsHandler) {
@@ -68,7 +83,6 @@ const App = (props) => {
               JwtToken: JSON.parse(localStorage.getItem("launchpadKey"))?.token,
               from: "LPWEB",
             },
-
             Module: "MDM",
           },
         ],
@@ -76,41 +90,66 @@ const App = (props) => {
 
       microAppsHandler({ ...microAppsJSON });
     };
-    if (window.loadIntegrator) {
-      window.loadIntegrator();
-    }
+
+    window.loadIntegrator();
+
     const ApiMethod = async () => {
       const res = await axios.get(SERVER_URL + "/fetchSavedData/PMWEB");
-      if (res.data !== "" && res.data) {
-        setlocalinMemoryDB(res?.data);
-        setisLoading(false);
+      try {
+        if (res.data !== "" && res.data) {
+          setlocalinMemoryDB(res?.data);
+          // code added for theme implementation
+          includeTheme(
+            localStorage.getItem("cabinet"),
+            "1024_768",
+            "en_US",
+            token
+          );
+        }
+      } catch (error) {
+        console.log(error);
       }
     };
     ApiMethod();
   }, []);
 
-  const token = launchpadKey?.token;
   if (token) {
     axios.interceptors.request.use(function (config) {
       config.headers.Authorization = token;
       return config;
     });
-    axios.interceptors.response.use(
-      function (response) {
-        // Do something with response data
-        return response;
-      },
-      function (error) {
+  }
+
+  axios.interceptors.response.use(
+    function (response) {
+      // Do something with response data
+      return response;
+    },
+    function (error) {
+      if (error?.response?.status === 401) {
         dispatch(
           setToastDataFunc({
-            message: error.response.data.error,
+            message: t("Unauthorized"),
+            severity: "error",
+            open: true,
+          })
+        );
+        const timeout = setTimeout(() => {
+          window.location.href = window.location.origin + `/lpweb`;
+          localStorage.clear();
+        }, 200);
+        return () => clearTimeout(timeout);
+      } else {
+        dispatch(
+          setToastDataFunc({
+            message: error?.response?.data?.error,
             severity: "error",
             open: true,
           })
         );
       }
-    );
-  }
+    }
+  );
 
   const setDisplayMessage = (message, toShow) => {
     if (

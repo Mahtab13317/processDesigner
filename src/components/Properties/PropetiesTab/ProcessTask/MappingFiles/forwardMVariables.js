@@ -22,6 +22,7 @@ import Modal from "../../../../../UI/Modal/Modal";
 import VariableList from "../MappingLists/variableListForward";
 import DeleteIcon from "@material-ui/icons/Delete";
 import "./index.css";
+import TabsHeading from "../../../../../UI/TabsHeading";
 
 function ForwardForVariables(props) {
   // Process Data
@@ -94,7 +95,10 @@ function ForwardForVariables(props) {
   const oneLineForMap = () => {
     return forwardVariablesList?.map((el) => {
       return (
-        <div
+        <>
+        <TabsHeading heading={props?.heading} />
+          <div
+          id="processTaskId1"
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -159,6 +163,7 @@ function ForwardForVariables(props) {
           </div>
           <div style={{ marginTop: "5px", flex: "0.2", textAlign: "center" }}>
             <DeleteIcon
+              className="deleteIconProcessTask"
               style={{
                 cursor: "pointer",
               }}
@@ -166,6 +171,7 @@ function ForwardForVariables(props) {
             />
           </div>
         </div>
+        </>
       );
     });
   };

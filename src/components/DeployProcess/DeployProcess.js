@@ -1,3 +1,5 @@
+// To solve bug - Making comments mandatory while deploying process- 110015
+
 import React, { useState, useEffect } from "react";
 import classes from "./DeployProcess.module.css";
 import { useTranslation } from "react-i18next";
@@ -18,7 +20,6 @@ import {
   ENDPOINT_DEPLOYPROCESS,
 } from "../../Constants/appConstants";
 import axios from "axios";
-import { LocalPrintshopSharp } from "@material-ui/icons";
 
 function DeployProcess(props) {
   let { t } = useTranslation();
@@ -160,10 +161,12 @@ function DeployProcess(props) {
           props.setErrorVariables([]);
           if (props.setShowDeployModal) {
             props.setShowDeployModal(true);
+            props.toggleDrawer();
           }
           props.setModalClosed();
         } else if (res.data.Status === 0 && res.data.hasOwnProperty("Error")) {
           props.setErrorVariables(res.data.Error);
+          props.toggleDrawer();
           if (props.setShowDeployFailModal) {
             props.setShowDeployFailModal(true);
           }
@@ -225,7 +228,7 @@ function DeployProcess(props) {
           <p
             className={classes.deployProcessHeading}
             style={{
-              marginLeft: direction == RTL_DIRECTION ? "0rem" : "1.5rem",
+              marginLeft: direction == RTL_DIRECTION ? "0rem" : "1.1rem",
               marginRight: direction == RTL_DIRECTION ? "1.5rem" : "0rem",
             }}
           >
@@ -744,7 +747,7 @@ function DeployProcess(props) {
         {props.deployFrom == "Settings" ? (
           <button
             className={classes.buttons}
-            style={{ backgroundColor: "#0072C6", cursor: "pointer" }}
+            style={{ backgroundColor: "var(--button_color)", cursor: "pointer" }}
             onClick={() => saveProcessHandler()}
           >
             Save
@@ -756,7 +759,7 @@ function DeployProcess(props) {
                 ? classes.DeploynSaveButton
                 : classes.buttons
             }
-            style={{ backgroundColor: "#0072C6", cursor: "pointer" }}
+            style={{ backgroundColor: "var(--button_color)", cursor: "pointer" }}
             onClick={() => deployProcessHandler()}
           >
             {props.buttonFrom == "DeployHeader" ? "Save & Deploy" : t("Deploy")}

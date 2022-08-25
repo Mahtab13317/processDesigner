@@ -16,6 +16,7 @@ import ButtonDropdown from "../../../../UI/ButtonDropdown/index";
 import { ClickAwayListener } from "@material-ui/core";
 import { JMSProducerServers } from "../../../../Constants/appConstants";
 import TextInput from "../../../../UI/Components_With_ErrrorHandling/InputField";
+import TabsHeading from "../../../../UI/TabsHeading";
 function JmsProducer(props) {
   let { t } = useTranslation();
   const loadedProcessData = store.getState("loadedProcessData");
@@ -116,7 +117,7 @@ function JmsProducer(props) {
     props.cellActivityType,
     props.cellActivitySubType,
     props.cellID,
-    localLoadedActivityPropertyData.ActivityProperty.JMSProducer,
+    localLoadedActivityPropertyData?.ActivityProperty?.JMSProducer,
   ]);
 
   useEffect(() => {
@@ -124,7 +125,9 @@ function JmsProducer(props) {
   }, []);
 
   return (
-    <div className="jmsProducer">
+   <>
+    <TabsHeading heading={props?.heading} />
+     <div className="jmsProducer">
       <FormControl component="fieldset">
         <RadioGroup
           aria-label="gender"
@@ -311,6 +314,7 @@ function JmsProducer(props) {
         </div>
       </div>
     </div>
+   </>
   );
 }
 

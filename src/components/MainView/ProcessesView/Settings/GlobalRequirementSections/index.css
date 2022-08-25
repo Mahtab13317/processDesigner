@@ -1,0 +1,13 @@
+.globalSection .MuiAccordionSummary-expandIcon {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.globalSection .MuiAccordionSummary-content {
+  margin: 0 !important;
+}
+
+.globalSection,
+.globalSection.MuiAccordion-root.Mui-expanded {
+  margin-bottom: 0.5rem !important;
+}

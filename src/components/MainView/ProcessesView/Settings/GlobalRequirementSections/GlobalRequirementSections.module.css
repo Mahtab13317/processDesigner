@@ -9,18 +9,19 @@
 .headingProjectLevel {
   display: flex;
   flex-direction: row;
-  width: 74.9vw;
+  width: 100%;
   justify-content: space-between;
-  height: 10vh;
+  margin-bottom: 1rem;
 }
 
 .headingText {
-  font: 1.2rem "Open Sans";
+  font-size: var(--title_text_font_size);
+  font-family: var(--font_family);
   letter-spacing: 0rem;
   color: rgb(0, 0, 0);
-  opacity: 1;
   font-weight: 600;
 }
+
 .page {
   width: 78vw;
   height: 100vh;
@@ -28,45 +29,39 @@
 }
 
 .buttonText {
-  font: 0.8rem "Open Sans";
+  font-size: var(--base_text_font_size);
   letter-spacing: 0rem;
-  opacity: 1;
-  font-weight: 500;
+  font-family: var(--font_family);
+  font-weight: 600;
+  color: white;
 }
 
 .headingInfo {
-  font: 0.8rem "Open Sans";
+  font-size: var(--subtitle_text_font_size);
   letter-spacing: 0rem;
-  opacity: 1;
-  margin: 0.3rem 0 0 0;
+  font-family: var(--font_family);
+  margin: 0.5rem 0 0 0;
 }
 .headingBox {
   display: flex;
   flex-direction: column;
+  width: 65%;
 }
 
 .addSectionButton {
-  width: 6rem !important;
-  height: 1.75rem !important;
-  background-color: #0072c6 !important;
-  /* border: 1px solid #C4C4C4 !important; */
-
-  opacity: 1 !important;
-  font-size: 0.625rem;
+  min-width: 7vw !important;
+  background-color: var(--button_color) !important;
   text-transform: none !important;
-  margin: 0.3rem !important;
-  white-space: nowrap;
 }
 
 .body {
   min-height: 100vh;
-  padding: "0 5px 0 5px";
   width: 76vw;
 }
 .buttons {
-  width: 4.8125rem !important;
+  /* width: 4.8125rem !important; */
   height: 1.75rem !important;
-  background: #0072c6 0% 0% no-repeat padding-box !important;
+  background: var(--button_color) 0% 0% no-repeat padding-box !important;
   font-family: "Open Sans";
   opacity: 1 !important;
   font-size: 0.625rem !important;

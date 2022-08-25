@@ -18,7 +18,7 @@
   background: rgb(68, 66, 68);
   border: none;
   color: white;
-  font-size: 0.75vw;
+  font-size: var(--sub_text_font_size);
   display: flex;
   align-items: center;
   margin-right: 1vw;
@@ -58,7 +58,7 @@
   border: none;
   color: white;
   margin-right: 1vw;
-  font-size: 0.75vw;
+  font-size: var(--sub_text_font_size);
   align-items: center;
   padding-left: 1.25vw;
   display: flex;
@@ -93,11 +93,11 @@
 .templateActivity {
   width: 93%;
   max-width: 10.5vw;
-  height: 1.5rem;
+  height: 2rem;
   display: flex;
   margin-top: 5px;
   align-items: center;
-  font-size: 0.75vw;
+  font-size: var(--sub_text_font_size);
   padding-left: 0.5vw;
   border: 1px solid #707070;
 }

@@ -1,0 +1,12 @@
+.exceptionGroupChecked {
+  background: white 0% 0% no-repeat padding-box !important;
+  border: 1px solid #c4c4c4;
+}
+
+.exceptionGroup_checkIcon {
+  color: #1072c6 !important;
+  width: 15px !important;
+  position: absolute;
+  top: -6px;
+  left: -1px;
+}

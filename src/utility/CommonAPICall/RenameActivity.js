@@ -12,6 +12,7 @@ export const renameActivity = (
   processDefId,
   processName,
   queueId,
+  queueInfo,
   isBpmn
 ) => {
   let obj = {
@@ -21,6 +22,9 @@ export const renameActivity = (
     processDefId: processDefId,
     processName: processName,
     queueId: queueId,
+    // code added on 22 July 2022 for BugId 113305
+    queueInfo: queueInfo,
+    queueExist: queueInfo.queueExist,
   };
   axios
     .post(SERVER_URL + ENDPOINT_RENAMEACTIVITY, obj)
@@ -30,7 +34,7 @@ export const renameActivity = (
           //value already set in bpmn view
           setProcessData((prevProcessData) => {
             let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
-            newProcessData.MileStones.forEach((milestone) => {
+            newProcessData.MileStones?.forEach((milestone) => {
               milestone.Activities &&
                 milestone.Activities.map((activity) => {
                   if (activity.ActivityId === actId) {
@@ -39,6 +43,16 @@ export const renameActivity = (
                   }
                 });
             });
+            // code added on 22 July 2022 for BugId 113305
+            if (!queueInfo.queueExist) {
+              newProcessData.Queue?.forEach((el, index) => {
+                if (+queueId === +el.QueueId) {
+                  newProcessData.Queue[index].QueueName = queueInfo?.queueName;
+                  newProcessData.Queue[index].QueueDescription =
+                    queueInfo?.queueDesc;
+                }
+              });
+            }
             return newProcessData;
           });
         }
@@ -47,7 +61,7 @@ export const renameActivity = (
           // revert to old activity name if api fails
           setProcessData((prevProcessData) => {
             let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
-            newProcessData.MileStones.forEach((milestone) => {
+            newProcessData.MileStones?.forEach((milestone) => {
               milestone.Activities &&
                 milestone.Activities.map((activity) => {
                   if (activity.ActivityId === actId) {
@@ -56,6 +70,17 @@ export const renameActivity = (
                   }
                 });
             });
+            // code added on 22 July 2022 for BugId 113305
+            if (!queueInfo.queueExist) {
+              newProcessData.Queue?.forEach((el, index) => {
+                if (+queueId === +el.QueueId) {
+                  newProcessData.Queue[index].QueueName =
+                    queueInfo?.oldQueueName;
+                  newProcessData.Queue[index].QueueDescription =
+                    queueInfo?.oldQueueDesc;
+                }
+              });
+            }
             return newProcessData;
           });
         }

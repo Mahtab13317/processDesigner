@@ -14,12 +14,39 @@ import WorkdeskIcon_EN from "../../../src/assets/abstractView/Icons/Workdesk_Ena
 import ForwardMapping from "../../../src/assets/abstractView/Icons/ForwardMapping.svg";
 import ReverseMapping from "../../../src/assets/abstractView/Icons/ReverseMapping.svg";
 import EntrySettingsIcon from "../../../src/assets/abstractView/Icons/EntrySetting.svg";
+import EntrySettingsIcon_EN from "../../../src/assets/abstractView/Icons/EntrySetting_Enabled.svg";
+import WebserviceIcon from "../../../src/assets/abstractView/Icons/Webservice.png";
+import WebserviceIcon_EN from "../../../src/assets/abstractView/Icons/Webservice_Enabled.png";
+import ExportIcon from "../../../src/assets/abstractView/Icons/Export.png";
+import ExportIcon_EN from "../../../src/assets/abstractView/Icons/Export_Enabled.png";
+import OutputVariablesIcon from "../../../src/assets/abstractView/Icons/OutputVariables.png";
+import OutputVariablesIcon_EN from "../../../src/assets/abstractView/Icons/OutputVariables_Enabled.png";
+import ReceiveIcon from "../../../src/assets/abstractView/Icons/Receive.png";
+import ReceiveIcon_EN from "../../../src/assets/abstractView/Icons/Receive_Enabled.png";
+import SendIcon from "../../../src/assets/abstractView/Icons/Send.png";
+import SendIcon_EN from "../../../src/assets/abstractView/Icons/Send_Enabled.png";
+import SearchVariableIcon from "../../../src/assets/abstractView/Icons/SearchVariable.png";
+import SearchVariableIcon_EN from "../../../src/assets/abstractView/Icons/SearchVariable_Enabled.png";
+import SearchResultIcon from "../../../src/assets/abstractView/Icons/SearchResult.png";
+import SearchResultIcon_EN from "../../../src/assets/abstractView/Icons/SearchResult_Enabled.png";
+import RoutingCriteriaIcon from "../../../src/assets/abstractView/Icons/RoutingCriteria.png";
+import RoutingCriteriaIcon_EN from "../../../src/assets/abstractView/Icons/RoutingCriteria_Enabled.png";
+import ArchieveIcon from "../../../src/assets/abstractView/Icons/Archieve.png";
+import ArchieveIcon_EN from "../../../src/assets/abstractView/Icons/Archieve_Enabled.png";
+import SAPIcon from "../../../src/assets/abstractView/Icons/SAP.png";
+import SAPIcon_EN from "../../../src/assets/abstractView/Icons/SAP_Enabled.png";
+import RestfulIcon from "../../../src/assets/abstractView/Icons/Restful.png";
+import RestfulIcon_EN from "../../../src/assets/abstractView/Icons/Restful_Enabled.png";
+import fwdDocMappingIcon from "../../../src/assets/abstractView/Icons/fwdDocMapping.png";
+import fwdDocMappingIcon_EN from "../../../src/assets/abstractView/Icons/fwdDocMapping_Enabled.png";
+import revDocMappingIcon from "../../../src/assets/abstractView/Icons/revDocMapping.png";
+import revDocMappingIcon_EN from "../../../src/assets/abstractView/Icons/revDocMapping_Enabled.png";
+import StreamsIcon from "../../../src/assets/abstractView/Icons/Streams.png";
+import StreamsIcon_EN from "../../../src/assets/abstractView/Icons/Streams_Enabled.png";
 import OptionIcon from "../../../src/assets/abstractView/Icons/Options.svg";
 import Throw from "../../../src/assets/abstractView/Icons/Throw.svg";
 import Catch from "../../../src/assets/abstractView/Icons/Catch.svg";
-import businessRuleLogo from "../../../src/assets/bpmnViewIcons/BusinessRule.svg";
-
-import { propertiesLabel } from "../../Constants/appConstants";
+import { propertiesLabel,tabsHeading } from "../../Constants/appConstants";
 import TaskEscalationRules from "../../components/Properties/PropetiesTab/TaskEscalationRules/TaskEscalationRules";
 import TaskData from "../../components/Properties/PropetiesTab/TaskData/TaskData";
 
@@ -42,14 +69,9 @@ const InitialRule = React.lazy(() =>
 const Attachment = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/Attachment/Attachment")
 );
-// const Webservice = React.lazy(() =>
-//   import("../../components/Properties/PropetiesTab/Webservice/index.js")
-// );
-
 const Restful = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/Restful/index.js")
 );
-
 const ResponseConsumerJMS = React.lazy(() =>
   import(
     "../../components/Properties/PropetiesTab/ResponseConsumerJMS/index.js"
@@ -93,6 +115,18 @@ const JmsConsumer = React.lazy(() =>
 const Collect = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/Collect/Collect")
 );
+
+const EntryDetails = React.lazy(
+  () => import("../../components/Properties/PropetiesTab/ActivityRules/index") //added by mahtab
+);
+const Reminder = React.lazy(
+  () => import("../../components/Properties/PropetiesTab/Reminder/Reminder") //added by mahtab
+);
+
+const Timer = React.lazy(
+  () => import("../../components/Properties/PropetiesTab/Timer/index") //added by mahtab
+);
+
 const WorkdeskTab = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/WorkdeskTab/Workdesk")
 );
@@ -113,7 +147,9 @@ const ForwardMapping_DocTypes = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/callActivity/forwardMDoc")
 );
 const ForwardMapping_DocTypes_ProcessTask = React.lazy(() =>
-  import("../../components/Properties/PropetiesTab/ProcessTask/MappingFiles/forwardMDocs")
+  import(
+    "../../components/Properties/PropetiesTab/ProcessTask/MappingFiles/forwardMDocs"
+  )
 );
 
 const ReverseMapping_Variables = React.lazy(() =>
@@ -133,7 +169,9 @@ const ReverseMDoc = React.lazy(() =>
 );
 
 const ReverseMDoc_ProcessTask = React.lazy(() =>
-  import("../../components/Properties/PropetiesTab/ProcessTask/MappingFiles/reverseMDocs")
+  import(
+    "../../components/Properties/PropetiesTab/ProcessTask/MappingFiles/reverseMDocs"
+  )
 );
 
 const Stream = React.lazy(() =>
@@ -188,45 +226,46 @@ const SharePointArchives = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/sharePointArchives/index.js")
 );
 
+
 const tabNames = {
   1: {
-    name: <BasicDetails />,
-
+    name: <BasicDetails heading={tabsHeading[1]} />,
     toolTip: "basicDetails",
     icon: BasicDetailsIcon,
     icon_enabled: BasicDetailsIcon_EN,
     label: propertiesLabel.basicDetails,
   },
   2: {
-    name: <DataFields />,
+    name: <DataFields heading={tabsHeading[2]} />,
     toolTip: "dataFields",
     icon: DataFieldsIcon,
     icon_enabled: DataFieldsIcon_EN,
     label: propertiesLabel.dataFields,
   },
   3: {
-    name: <InitialRule />,
+    name: <InitialRule heading={tabsHeading[3]}  />,
     toolTip: "initialRules",
     icon: InitialRulesIcon,
     icon_enabled: InitialRulesIcon_EN,
     label: propertiesLabel.initialRules,
   },
   4: {
-    name: <Requirements />,
+    
+    name: <Requirements heading={tabsHeading[4]} />,
     toolTip: "requirements",
     icon: RequirementsIcon,
     icon_enabled: RequirementsIcon_EN,
     label: propertiesLabel.requirements,
   },
   5: {
-    name: <Attachment />,
+    name: <Attachment heading={tabsHeading[5]} />,
     toolTip: "attachments",
     icon: AttachmentsIcon,
     icon_enabled: AttachmentsIcon_EN,
     label: propertiesLabel.attachments,
   },
   6: {
-    name: <WorkdeskTab />,
+    name: <WorkdeskTab heading={tabsHeading[6]} />,
     toolTip: "workdesk",
     icon: WorkdeskIcon,
     icon_enabled: WorkdeskIcon_EN,
@@ -243,30 +282,33 @@ const tabNames = {
     label: propertiesLabel.eventConfiguration,
   },
   9: {
-    name: <ForwardMapping_Variables tabType="Forward Variable Mapping" />,
+    name: <ForwardMapping_Variables tabType="Forward Variable Mapping" heading={tabsHeading[9]} />,
     toolTip: "ForwardVariableMapping",
     icon: ForwardMapping,
     label: propertiesLabel.fwdVarMapping,
   },
   10: {
-    name: <ReverseMapping_Variables tabType="Reverse Variable Mapping" />,
+    name: <ReverseMapping_Variables tabType="Reverse Variable Mapping" heading={tabsHeading[10]} />,
     toolTip: "ReverseVariableMapping",
     icon: ReverseMapping,
     label: propertiesLabel.revVarMapping,
   },
   11: {
-    name: <EntrySetting />,
+    name: <EntrySetting heading={tabsHeading[11]} />,
     toolTip: "entrySettings",
     icon: EntrySettingsIcon,
+    icon_enabled: EntrySettingsIcon_EN,
     label: propertiesLabel.EntrySetting,
   },
   12: {
-    name: <Stream />,
+    name: <Stream heading={tabsHeading[12]} />,
     toolTip: "streams",
+    icon: StreamsIcon, //code edited on 28 July 2022 for BugId 111551
+    icon_enabled: StreamsIcon_EN, //code edited on 28 July 2022 for BugId 111551
     label: propertiesLabel.streams,
   },
   13: {
-    name: <Options />,
+    name: <Options heading={tabsHeading[13]} />,
     toolTip: "options",
     icon: OptionIcon,
     label: propertiesLabel.options,
@@ -284,49 +326,67 @@ const tabNames = {
     label: propertiesLabel.catchEvents,
   },
   16: {
-    name: <Task />,
+    name: <Task heading={tabsHeading[16]} />,
     toolTip: "task",
     label: propertiesLabel.task,
   },
   17: {
-    name: <ReceiveInvocation />,
+    name: <ReceiveInvocation heading={tabsHeading[17]} />,
     toolTip: "receive",
+    icon: ReceiveIcon,
+    icon_enabled: ReceiveIcon_EN,
     label: propertiesLabel.receive,
   },
   18: {
-    name: <OutputVariables />,
+    name: <OutputVariables heading={tabsHeading[18]} />,
     toolTip: "outputVariables",
+    icon: OutputVariablesIcon,
+    icon_enabled: OutputVariablesIcon_EN,
     label: propertiesLabel.outputVariables,
   },
-  19: { name: <Export />, toolTip: "Export", label: propertiesLabel.Export },
+  19: {
+    name: <Export heading={tabsHeading[19]} />,
+    toolTip: "Export",
+    icon: ExportIcon,
+    icon_enabled: ExportIcon_EN,
+    label: propertiesLabel.Export,
+  },
   20: {
-    name: <SearchVariable />,
+    name: <SearchVariable heading={tabsHeading[20]} />,
     toolTip: "searchVariables",
+    icon: SearchVariableIcon,
+    icon_enabled: SearchVariableIcon_EN,
     label: propertiesLabel.searchVariables,
   },
   21: {
-    name: <SearchResults />,
+    name: <SearchResults heading={tabsHeading[21]} />,
     toolTip: "searchResults",
+    icon: SearchResultIcon,
+    icon_enabled: SearchResultIcon_EN,
     label: propertiesLabel.searchResults,
   },
   22: {
-    name: <Webservice />,
+    name: <Webservice heading={tabsHeading[22]} />,
     toolTip: "webService",
-    icon: OptionIcon,
+    icon: WebserviceIcon,
+    icon_enabled: WebserviceIcon_EN,
     label: propertiesLabel.webService,
   },
   23: {
-    name: <BusinessRules />,
+    name: <BusinessRules heading={tabsHeading[23]} />,
     toolTip: "businessRule",
     label: propertiesLabel.businessRule,
   },
+  
   24: {
-    name: <Archieve />,
+    name: <Archieve heading={tabsHeading[24]} />,
     toolTip: "archive",
+    icon: ArchieveIcon,
+    icon_enabled: ArchieveIcon_EN,
     label: propertiesLabel.archive,
   },
   25: {
-    name: <Templates />,
+    name: <Templates heading={tabsHeading[25]} />,
     toolTip: "templates",
     label: propertiesLabel.templates,
   },
@@ -336,145 +396,154 @@ const tabNames = {
     label: propertiesLabel.message,
   },
   27: {
-    name: <div>Email to be painted here.</div>,
-    toolTip: "entryDetails",
-    label: propertiesLabel.entryDetails,
+    name: <EntryDetails heading={tabsHeading[11]} />,
+    toolTip: "entrySettings",
+    icon: EntrySettingsIcon,
+    icon_enabled: EntrySettingsIcon_EN,
+    label: propertiesLabel.EntrySetting,
   },
   28: {
-    name: <JmsProducer />,
+    name: <JmsProducer heading={tabsHeading[28]} />,
     toolTip: "jmsProducer",
     label: propertiesLabel.jmsProducer,
   },
   29: {
-    name: <JmsConsumer />,
+    name: <JmsConsumer heading={tabsHeading[29]} />,
     toolTip: "jmsConsumer",
     label: propertiesLabel.jmsConsumer,
   },
   30: {
-    name: <div>timer to be painted here</div>,
+    name: <Timer heading={tabsHeading[30]} />,
     toolTip: "timer",
     label: propertiesLabel.timer,
   },
   31: {
-    name: <div>reminder to be painted here</div>,
+    name: <Reminder heading={tabsHeading[31]} />,
     toolTip: "reminder",
     label: propertiesLabel.reminder,
   },
   32: {
-    name: <DistributeTab />,
+    name: <DistributeTab heading={tabsHeading[11]} />,
     toolTip: "distribute",
     icon: EntrySettingsIcon,
     label: propertiesLabel.distribute,
   },
   33: {
-    name: <Collect />,
+    name: <Collect heading={tabsHeading[33]} />,
     toolTip: "collect",
     label: propertiesLabel.collect,
   },
   34: {
-    name: <RoutingCriteria />,
+    name: <RoutingCriteria heading={tabsHeading[11]} />,
     toolTip: "routingCriteria",
-    icon: EntrySettingsIcon,
+    icon: RoutingCriteriaIcon,
+    icon_enabled: RoutingCriteriaIcon_EN,
     label: propertiesLabel.routingCriteria,
   },
   35: {
-    name: <IntiateWorkstep />,
+    name: <IntiateWorkstep heading={tabsHeading[35]} />,
     toolTip: "initiateWorkstep",
     label: propertiesLabel.initiateWorkstep,
   },
   36: {
-    name: <DataExchange />,
+    name: <DataExchange heading={tabsHeading[36]} />,
     toolTip: "dataExchange",
     label: propertiesLabel.dataExchange,
   },
   37: {
-    name: <Sap />,
+    name: <Sap heading={tabsHeading[37]} />,
     toolTip: "sap",
+    icon: SAPIcon,
+    icon_enabled: SAPIcon_EN,
     label: propertiesLabel.sap,
   },
   38: {
-    name: <ResponseConsumerJMS />,
+    name: <ResponseConsumerJMS heading={tabsHeading[38]} />,
     toolTip: "resConsumerJms",
     label: propertiesLabel.resConJMS,
   },
   39: {
-    name: <Options />,
+    name: <Options heading={tabsHeading[13]} />,
     toolTip: "resConsumerSoap",
     label: propertiesLabel.resConSOAP,
   },
   40: {
-    name: <RequestConsumerSoap />,
+    name: <RequestConsumerSoap heading={tabsHeading[40]} />,
     toolTip: "reqConsumerSoap",
     label: propertiesLabel.reqConSOAP,
   },
   41: {
-    name: <Restful />,
+    name: <Restful heading={tabsHeading[41]} />,
     toolTip: "Restful",
+    icon: RestfulIcon,
+    icon_enabled: RestfulIcon_EN,
     label: propertiesLabel.Restful,
   },
   42: {
-    name: <ForwardMapping_DocTypes tabType="Forward DocType Mapping" />,
+    name: <ForwardMapping_DocTypes tabType="Forward DocType Mapping" heading={tabsHeading[42]} />,
     toolTip: "ForwardDocTypeMapping",
-    icon: ForwardMapping,
+    icon: fwdDocMappingIcon,
+    icon_enabled: fwdDocMappingIcon_EN,
     label: propertiesLabel.fwdDocMapping,
   },
   43: {
-    name: <ReverseMDoc tabType="Reverse DocType Mapping" />,
+    name: <ReverseMDoc tabType="Reverse DocType Mapping" heading={tabsHeading[43]} />,
     toolTip: "ReverseDocTypeMapping",
-    icon: ReverseMapping,
+    icon: revDocMappingIcon,
+    icon_enabled: revDocMappingIcon_EN,
     label: propertiesLabel.revDocMapping,
   },
   44: {
-    name: <Email />,
+    name: <Email heading={tabsHeading[44]} />,
     toolTip: "send",
+    icon: SendIcon,
+    icon_enabled: SendIcon_EN,
     label: propertiesLabel.send,
   },
   45: {
-    // name: <div>Task details to be painted</div>,
-    name: <TaskDetails />,
-    // name: <TaskOptions />,
+    name: <TaskDetails heading={tabsHeading[45]} />,
     toolTip: "TaskDetails",
+    icon: BasicDetailsIcon,
+    icon_enabled: BasicDetailsIcon_EN,
     label: propertiesLabel.taskDetails,
   },
   46: {
-    name: <TaskEscalationRules />,
+    name: <TaskEscalationRules heading={tabsHeading[46]} />,
     toolTip: "EscalationRule(s)",
     label: propertiesLabel.escalationRules,
   },
   47: {
-    // name: <div>Task Options to be painted</div>,
-    name: <TaskOptions />,
+    name: <TaskOptions heading={tabsHeading[13]} />,
     toolTip: "options",
     label: propertiesLabel.taskOptions,
   },
   48: {
-    // name: <div>Task Data to be painted</div>,
-    name: <TaskData />,
+    name: <TaskData heading={tabsHeading[48]} />,
     toolTip: "data",
     label: propertiesLabel.taskData,
   },
   49: {
-    name: <SharePointArchives />,
+    name: <SharePointArchives heading={tabsHeading[24]} />,
     toolTip: "Archive",
     label: propertiesLabel.sharePointArchive,
   },
   50: {
     name: (
-      <ForwardMapping_DocTypes_ProcessTask tabType="Forward DocType Mapping" />
+      <ForwardMapping_DocTypes_ProcessTask tabType="Forward DocType Mapping" heading={tabsHeading[42]} />
     ),
     toolTip: "ForwardDocTypeMapping",
     icon: ForwardMapping,
     label: propertiesLabel.fwdDocMappingProcessTask,
   },
   51: {
-    name: <ReverseMDoc_ProcessTask tabType="Reverse DocType Mapping" />,
+    name: <ReverseMDoc_ProcessTask tabType="Reverse DocType Mapping" heading={tabsHeading[43]} />,
     toolTip: "ReverseDocTypeMapping",
     icon: ReverseMapping,
     label: propertiesLabel.revDocMappingProcessTask,
   },
   52: {
     name: (
-      <ForwardMapping_Variables_ProcessTask tabType="Forward Variable Mapping" />
+      <ForwardMapping_Variables_ProcessTask tabType="Forward Variable Mapping" heading={tabsHeading[9]} />
     ),
     toolTip: "ForwardVariableMapping",
     icon: ForwardMapping,
@@ -482,7 +551,7 @@ const tabNames = {
   },
   53: {
     name: (
-      <ReverseMapping_Variables_ProcessTask tabType="Reverse Variable Mapping" />
+      <ReverseMapping_Variables_ProcessTask tabType="Reverse Variable Mapping" heading={tabsHeading[10]} />
     ),
     toolTip: "ReverseVariableMapping",
     icon: ReverseMapping,

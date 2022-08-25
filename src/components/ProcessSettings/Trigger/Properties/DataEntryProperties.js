@@ -180,7 +180,6 @@ function DataEntryProperties(props) {
             <div className="flex2">
               <SearchBox
                 width="100%"
-                height="1.5rem"
                 id="trigger_de_removeDivSearch"
                 setSearchTerm={setRemoveSearchTerm}
               />
@@ -240,7 +239,6 @@ function DataEntryProperties(props) {
             <div className="flex2">
               <SearchBox
                 width="100%"
-                height="1.5rem"
                 id="trigger_de_addDivSearch"
                 setSearchTerm={setSearchTerm}
               />

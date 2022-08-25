@@ -3,9 +3,10 @@
   flex-wrap: wrap;
   flex-direction: row;
   font-family: "Open Sans, Regular";
-  height: 30rem;
+  height: 40rem;
   overflow-y: auto;
   width: 100%;
+  overflow-x: hidden;
 }
 
 .leftPanel {
@@ -20,8 +21,8 @@
 .leftHeadSection,
 .rightHeadSection {
   border-bottom: 1px solid #c4c4c4;
-  height: 5rem;
-  max-height: 5rem;
+  height: 7rem;
+  max-height: 7rem;
 }
 .variableHead {
   display: flex;
@@ -35,16 +36,16 @@
   margin-right: 0.5rem;
 }
 .heading {
-  font-size: 16px;
+  font-size: var(--title_text_font_size);
 }
 .showCount {
-  font-size: 12px;
+  font-size: var(--base_text_font_size);
   color: #606060;
 }
 .showCountRight {
-  font-size: 12px;
+  font-size: var(--base_text_font_size);
   color: #606060;
-  flex-grow: 1;
+  flex-grow: 0.5;
 }
 .row {
   margin-top: 1rem;
@@ -57,28 +58,29 @@
 }
 .varibleList {
   padding: 0.25rem;
-  height: 3.5rem;
+  height: 6.5rem;
   border-bottom: 1px solid #c4c4c4;
 }
 .varTitle {
-  font-size: 14px;
+  font-size: var(--subtitle_text_font_size);
   font-weight: 600;
   font-family: "Open Sans, Semibold";
 }
 .actTitle {
-  font-size: 12px;
+  font-size: var(--base_text_font_size);
   font-weight: 600;
   font-family: "Open Sans, Semibold";
 }
 .switch {
-  font-size: 12px;
+  font-size: var(--base_text_font_size);
   color: #606060;
+  display:none !important;
 }
 
 .rightsActivities {
   display: flex;
   overflow-x: auto;
-  width: 50rem;
+  width: 60vw;
   margin-top:1rem;
   padding-bottom: 0.5rem;
 }
@@ -91,13 +93,13 @@
 }
 
 .actItem {
-  width: 12.5rem;
+  width: 100%;
   padding: 0.5rem 0.5rem 0 0.5rem;
-  font-size: 12px;
+  font-size: var(--base_text_font_size);
   font-weight: 600;
   border-bottom: 1px solid #c4c4c4;
   font-family: "Open Sans, Semibold";
-  height: 2.25rem;
+  height: 3.25rem;
 }
 
 .checkGroup {
@@ -122,12 +124,13 @@
 
 .rightsCheck span {
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px;
 }
 .actRights{
   padding: 1rem;
-  height: 3.5rem;
+  height: 6.5rem;
   font-weight: 600;
   border-bottom: 1px solid #c4c4c4;
   font-family: "Open Sans, Semibold";
@@ -136,7 +139,7 @@
 
 .footer {
   width: 100%;
-  height: 3rem;
+  height: 4.5rem;
   border-top: 1px solid #c4c4c4;
   border-bottom: 1px solid #c4c4c4;
   background: #f8f8f8;

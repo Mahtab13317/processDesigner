@@ -31,54 +31,56 @@ function CommonCondition(props) {
     <div>
       <div className="row">
         <p className={styles.mainHeading}>{t("rulesCondition")}</p>
+        <div style={{ marginLeft: "auto" }}>
+          {rulesSelected && rulesSelected.Desc == t("newRule") ? (
+            <button
+              // className={styles.cancelHeaderBtn}
+              className="tertiary"
+              onClick={() => cancelRule(selected)}
+              style={{
+                display: isDisable ? "none" : "",
+              }}
+              id="cancelRule"
+            >
+              {t("cancel")}
+            </button>
+          ) : (
+            <button
+              className={styles.cancelHeaderBtn}
+              onClick={() => deleteRule(selected)}
+              style={{
+                display: isDisable ? "none" : "",
+              }}
+              id="deleteRule"
+            >
+              {t("delete")}
+            </button>
+          )}
 
-        {rulesSelected && rulesSelected.Desc == t("newRule") ? (
-          <button
-            className={styles.cancelHeaderBtn}
-            onClick={() => cancelRule(selected)}
-            style={{
-              display: isDisable ? "none" : "",
-            }}
-            id="cancelRule"
-          >
-            {t("cancel")}
-          </button>
-        ) : (
-          <button
-            className={styles.cancelHeaderBtn}
-            onClick={() => deleteRule(selected)}
-            style={{
-              display: isDisable ? "none" : "",
-            }}
-            id="deleteRule"
-          >
-            {t("delete")}
-          </button>
-        )}
-
-        {rulesSelected && rulesSelected.Desc == t("newRule") ? (
-          <button
-            className={styles.addHeaderBtn}
-            onClick={addClickRule}
-            style={{
-              display: isDisable ? "none" : "",
-            }}
-            id="addRule"
-          >
-            {t("addRule")}
-          </button>
-        ) : (
-          <button
-            className={styles.addHeaderBtn}
-            onClick={updateRule}
-            style={{
-              display: isDisable ? "none" : "",
-            }}
-            id="updateRule"
-          >
-            {t("modify")}
-          </button>
-        )}
+          {rulesSelected && rulesSelected.Desc == t("newRule") ? (
+            <button
+              className={styles.addHeaderBtn}
+              onClick={addClickRule}
+              style={{
+                display: isDisable ? "none" : "",
+              }}
+              id="addRule"
+            >
+              {t("addRule")}
+            </button>
+          ) : (
+            <button
+              className={styles.addHeaderBtn}
+              onClick={updateRule}
+              style={{
+                display: isDisable ? "none" : "",
+              }}
+              id="updateRule"
+            >
+              {t("modify")}
+            </button>
+          )}
+        </div>
       </div>
 
       <RadioGroup

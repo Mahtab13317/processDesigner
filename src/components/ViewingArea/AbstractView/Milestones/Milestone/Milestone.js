@@ -72,6 +72,7 @@ const Mile = (props) => {
         onClick={() => props.selectMileHandler(props.Mile)}
         title={props.MileName}
       >
+        <div className="beforeDiv"></div>
         <div
           className="milestonePosition"
           onMouseOver={() => setShowDragIcon(true)}
@@ -87,17 +88,16 @@ const Mile = (props) => {
             >
               <DragIndicatorIcon
                 style={{
-                  marginTop: "-0.1875rem",
-                  height: "1.4rem",
-                  marginLeft: "-0.25rem",
+                  height: "1.75rem",
+                  width:"1.75rem"
                 }}
               />
             </div>
           ) : (
             <div
               className={c_Names({
-                dragIconHandle: direction !== "rtl",
-                dragIconHandleArabic: direction == "rtl",
+                mileIndexDiv: direction !== "rtl",
+                mileIndexDivArabic: direction == "rtl",
               })}
             >
               {props.index + 1 + "."}
@@ -115,12 +115,13 @@ const Mile = (props) => {
                   mileNameonKeydown();
                 }
               }}
+              id="mileNameDiv"
               value={mileNameValue}
             />
           </ClickAwayListener>
           {createMilestoneRightsFlag && (
             <button
-              className="addBetween"
+              className="addBetween icon-button"
               onClick={() => props.addInBetweenNewMile(props.index)}
             >
               <p className="addIcon">+</p>
@@ -128,6 +129,7 @@ const Mile = (props) => {
           )}
         </div>
         <div className="spaceAfterMile"></div>
+        <div className="afterDiv"></div>
       </div>
     </React.Fragment>
   );

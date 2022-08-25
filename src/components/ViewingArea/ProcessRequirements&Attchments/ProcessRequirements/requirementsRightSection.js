@@ -75,7 +75,7 @@ const useStyles = makeStyles({
   },
   tableHeader: {
     fontWeight: 600,
-    fontSize: 14,
+    fontSize: "var(--subtitle_text_font_size)",
     backgroundColor: "#F3F3F3",
     color: "black",
   },
@@ -84,7 +84,7 @@ const useStyles = makeStyles({
     color: "black !important",
   },
   tableBodyCell: {
-    fontSize: 12,
+    fontSize: "var(--base_text_font_size)",
   },
 });
 
@@ -339,20 +339,24 @@ function RequireRightSection(props) {
   return (
     <div>
       <div>
-        <div>
+        <div
+          style={{
+            paddingLeft: "12px",
+          }}
+        >
           <p
             style={{
-              fontSize: "16px",
+              fontSize: "var(--title_text_font_size)",
               fontWeight: "600",
               marginBottom: "10px",
             }}
           >
             {props?.selectedOrder?.SectionName}
           </p>
-          <p style={{ fontSize: "16px" }}>
+          <p style={{ fontSize: "var(--title_text_font_size)" }}>
             <span
               style={{
-                fontSize: "12px",
+                fontSize: "var(--base_text_font_size)",
                 color: "#606060",
                 marginRight: "10px",
               }}
@@ -372,7 +376,11 @@ function RequireRightSection(props) {
             // getValue={(e) => changeBasicDetails(e, "descBasicDetails")}
           />
           <p
-            style={{ fontSize: "16px", fontWeight: "600", margin: "10px 0px" }}
+            style={{
+              fontSize: "var(--title_text_font_size)",
+              fontWeight: "600",
+              margin: "10px 0px",
+            }}
           >
             Implementation Summary
           </p>

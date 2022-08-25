@@ -1,3 +1,4 @@
+// Made changes to fix for Bug Ids  113431, 111550 & 110324
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import ReusableInputs from "./reusables/reusableInputs_VarR.js";
@@ -15,6 +16,7 @@ import {
   setActivityPropertyChange,
   ActivityPropertyChangeValue,
 } from "../../../../redux-store/slices/ActivityPropertyChangeSlice.js";
+import TabsHeading from "../../../../UI/TabsHeading/index.js";
 
 function ReverseMVariables(props) {
   const dispatch = useDispatch();
@@ -161,6 +163,8 @@ function ReverseMVariables(props) {
 
   const content = () => {
     return (
+    <>
+        <TabsHeading heading={props.heading} />
       <div
         style={{
           backgroundColor: props.isDrawerExpanded ? "white" : null,
@@ -170,7 +174,7 @@ function ReverseMVariables(props) {
         <div className="forwardMapping_VariablesLabel">
           <p style={{ fontSize: "12px", color: "#606060" }}>REVERSE MAPPING</p>
           <p
-            style={{ fontSize: "11px", color: "#0072C6", cursor: "pointer" }}
+            style={{ fontSize: "11px", color: "var(--link_color)", cursor: "pointer" }}
             onClick={() => setShowVariablesModal(true)}
           >
             Add Variable(s)
@@ -193,8 +197,7 @@ function ReverseMVariables(props) {
             <p className="targetProcess">Target process</p>
             <p className="processName_CallActivity">
               {
-                localLoadedActivityPropertyData.ActivityProperty.SubProcess
-                  .importedProcessName
+                localLoadedActivityPropertyData?.ActivityProperty?.SubProcess?.importedProcessName
               }
             </p>
           </div>
@@ -249,6 +252,7 @@ function ReverseMVariables(props) {
             );
           })}
       </div>
+    </>
     );
   };
 

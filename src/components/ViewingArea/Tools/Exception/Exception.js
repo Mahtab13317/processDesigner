@@ -1,3 +1,7 @@
+// Made changes to solve bug ID 109967 and 109970
+// 1. Exceptions are added without adding all the mandatory fields -ID 109967
+// 2. Delete button pop up not disappearing after Exception is deleted - ID 109970
+
 import React, { useEffect, useState } from "react";
 import "../Interfaces.css";
 import { useTranslation } from "react-i18next";
@@ -62,17 +66,19 @@ function Exception(props) {
   });
   const [showDescError, setShowDescError] = useState(false);
   const [showNameError, setShowNameError] = useState(false);
+  const [showGroupNameError, setShowGroupNameError] = useState(false);
   const [ruleDataArray, setRuleDataArray] = useState("");
   const [exceptionRules, setExceptionRules] = useState([]);
   const [subColumns, setSubColumns] = useState([]);
   const [splicedColumns, setSplicedColumns] = useState([]);
   const [expName, setExpName] = useState(null);
+  const [showExpDelete, setShowExpDelete] = useState(null);
 
   useEffect(() => {
     let arr = [];
     let activityIdString = "";
-    localLoadedProcessData?.MileStones?.forEach((mileStone) => {
-      mileStone?.Activities?.forEach((activity) => {
+    loadedMileStones.map((mileStone) => {
+      mileStone.Activities.map((activity, index) => {
         if (
           !(activity.ActivityType === 18 && activity.ActivitySubType === 1) &&
           !(activity.ActivityType === 1 && activity.ActivitySubType === 2) &&
@@ -102,7 +108,7 @@ function Exception(props) {
     MapAllActivities(activityIdString);
     setSubColumns(arr);
     setSplicedColumns(arr.slice(0, BATCH_COUNT));
-  }, [localLoadedProcessData]);
+  }, [loadedMileStones]);
 
   useEffect(() => {
     if (document.getElementById("oneBoxMatrix")) {
@@ -262,6 +268,7 @@ function Exception(props) {
       return;
     }
 
+    // Made changes to solve bug ID 109967
     if (ExceptionDesc.trim() == "") {
       setShowDescError(true);
       document.getElementById("ExceptionNameInput").focus();
@@ -270,7 +277,7 @@ function Exception(props) {
       setShowNameError(true);
     }
 
-    if (ExceptionToAdd != "" && ExceptionDesc != "") {
+    if (ExceptionToAdd.trim() != "" && ExceptionDesc.trim() != "") {
       let maxExceptionId = 0;
       expData.ExceptionGroups.map((group, groupIndex) => {
         group.ExceptionList.map((listElem) => {
@@ -294,23 +301,11 @@ function Exception(props) {
             tempData.ExceptionGroups.map((group) => {
               if (group.GroupId == groupId) {
                 groupName = group.GroupName;
-                let addedActivity = [];
-                if (subColumns.length > 0) {
-                  subColumns?.forEach((activity) => {
-                    addedActivity.push({
-                      ActivityId: activity.ActivityId,
-                      Clear: false,
-                      Raise: false,
-                      Respond: false,
-                      View: false,
-                    });
-                  });
-                }
                 group.ExceptionList.push({
                   ExceptionId: +maxExceptionId + 1,
                   ExceptionName: ExceptionToAdd,
                   Description: ExceptionDesc,
-                  Activities: addedActivity,
+                  Activities: [],
                   SetAllChecks: {
                     Clear: false,
                     Raise: false,
@@ -372,7 +367,7 @@ function Exception(props) {
     if (exist) {
       return;
     }
-    if (GroupToAdd != "") {
+    if (GroupToAdd.trim() !== "") {
       let maxGroupId = expData.ExceptionGroups.reduce(
         (acc, group) => (acc > group.GroupId ? acc : group.GroupId),
         0
@@ -417,8 +412,8 @@ function Exception(props) {
         setGroupName("");
         document.getElementById("groupNameInput_exception").focus();
       }
-    } else if (GroupToAdd.trim() == "") {
-      alert("Please enter Group Name");
+    } else {
+      setShowGroupNameError(true);
       document.getElementById("groupNameInput_exception").focus();
     }
   };
@@ -448,8 +443,7 @@ function Exception(props) {
             1
           );
           setExpData(tempData);
-          handleClose();
-
+          setShowExpDelete(null);
           //code added on 3 June 2022 for BugId 110096
           //Updating RuleDataArray
           let tempRule = [...ruleDataArray];
@@ -563,7 +557,7 @@ function Exception(props) {
           let exceptionToDeleteIndex, parentIndex;
           tempData.ExceptionGroups.forEach((group, groupIndex) => {
             group.ExceptionList.forEach((exception, exceptionIndex) => {
-              if (exception.ExceptionId == exceptionId) {
+              if (+exception.ExceptionId == +exceptionId) {
                 exceptionToDeleteIndex = exceptionIndex;
                 parentIndex = groupIndex;
               }
@@ -573,6 +567,7 @@ function Exception(props) {
             exceptionToDeleteIndex,
             1
           );
+
           // Adding to TargetGroup
           tempData.ExceptionGroups.map((group) => {
             if (group.GroupId == targetGroupId) {
@@ -676,14 +671,15 @@ function Exception(props) {
       loadedMileStones.map((mileStone) => {
         let activities = [];
         mileStone.Activities.map((activity, index) => {
-          if (activity.ActivityName.includes(value)) {
+          if (
+            activity.ActivityName.toLowerCase().includes(value.toLowerCase())
+          ) {
             activityIdString = activityIdString + activity.ActivityId + ",";
             activities.push(activity);
           }
         });
         temp.push({ ...mileStone, Activities: activities });
       });
-      // MapAllActivities(activityIdString);
       setLoadedMileStones(temp);
     } else {
       clearActivitySearchResult();
@@ -1387,14 +1383,14 @@ function Exception(props) {
       let data = [];
       expData.ExceptionGroups &&
         expData.ExceptionGroups.map((group, groupIndex) => {
-          data.push(<p style={{ height: "33.5px" }}></p>);
+          data.push(<p style={{ height: "34px" }}></p>);
           group.ExceptionList.map((exception, expIndex) => {
             data.push(
               <div
                 className="oneActivityColumn"
                 style={{
                   backgroundColor: "#EEF4FCC4",
-                  height: compact ? "38px" : "137px",
+                  height: compact ? "38px" : "122px",
                   padding: "10px",
                   borderBottom: "1px solid #DAD0C2",
                 }}
@@ -1477,9 +1473,10 @@ function Exception(props) {
       expData.ExceptionGroups.map((group, groupIndex) => {
         arrExceptions.push(
           <React.Fragment>
-            <div className="groupNamesDiv">
-              <p className="groupName">
-                {group.GroupName}
+            <div className="groupNamesDiv" style={{height:'34px'}}>
+              <p className="groupNameExp">
+                {/*code added on 2 August for BugId 110100*/}
+                <span title={group.GroupName}>{group.GroupName}</span>
                 <span>{`(${group.ExceptionList.length})`}</span>
               </p>
               {props.openProcessType !== "L" ? null : (
@@ -1495,36 +1492,38 @@ function Exception(props) {
                   >
                     {t("exceptionAdd")}
                   </span>
-                  <DeleteModal
-                    backDrop={false}
-                    modalPaper="modalPaperActivity"
-                    sortByDiv="sortByDivActivity"
-                    oneSortOption="oneSortOptionActivity"
-                    docIndex={groupIndex}
-                    buttonToOpenModal={
-                      <button className="threeDotsButton" type="button">
-                        <MoreVertIcon
-                          style={{
-                            color: "#606060",
-                            height: "16px",
-                            width: "16px",
-                          }}
-                        />
-                      </button>
-                    }
-                    modalWidth="180"
-                    sortSectionOne={[
-                      <p
-                        id="deleteGroup_exception"
-                        onClick={() =>
-                          deleteGroup(group.GroupName, group.GroupId)
-                        }
-                      >
-                        {t("delete")}
-                      </p>,
-                      <p id="modifyGroup_exception">{t("modify")}</p>,
-                    ]}
-                  />
+                  {/*code added on 4 August 2022 for BugId 113922 */}
+                  {+group.GroupId !== 0 ? (
+                    <DeleteModal
+                      backDrop={false}
+                      modalPaper="modalPaperActivity"
+                      sortByDiv="sortByDivActivity"
+                      oneSortOption="oneSortOptionActivity"
+                      docIndex={groupIndex}
+                      buttonToOpenModal={
+                        <button className="threeDotsButton" type="button">
+                          <MoreVertIcon
+                            style={{
+                              color: "#606060",
+                              height: "16px",
+                              width: "16px",
+                            }}
+                          />
+                        </button>
+                      }
+                      modalWidth="180"
+                      sortSectionOne={[
+                        <p
+                          id="deleteGroup_exception"
+                          onClick={() =>
+                            deleteGroup(group.GroupName, group.GroupId)
+                          }
+                        >
+                          {t("delete")}
+                        </p>,
+                      ]}
+                    />
+                  ) : null}
                 </div>
               )}
             </div>
@@ -1536,6 +1535,8 @@ function Exception(props) {
             >
               <AddException
                 bExpExists={bExpExists}
+                setbExpExists={setbExpExists}
+                expData={expData}
                 groupId={group.GroupId}
                 addExceptionToList={addExceptionToList}
                 handleClose={handleExpClose}
@@ -1577,94 +1578,107 @@ function Exception(props) {
                       updateSetAllChecks={updateSetAllChecks}
                       GiveCompleteRights={GiveCompleteRights}
                     />
-                    <DeleteModal
-                      backDrop={false}
-                      modalPaper="modalPaperActivity"
-                      sortByDiv="sortByDivActivity"
-                      oneSortOption="oneSortOptionActivity"
-                      docIndex={expIndex}
-                      buttonToOpenModal={
-                        <button className="threeDotsButton" type="button">
-                          <MoreVertIcon
-                            style={{
-                              color: "#606060",
-                              height: "16px",
-                              width: "16px",
-                            }}
-                          />
-                        </button>
-                      }
-                      modalWidth="180"
-                      sortSectionOne={[
-                        <p
-                          id="deleteExpOption"
-                          onClick={() =>
-                            deleteExpType(
-                              exception.ExceptionName,
-                              exception.ExceptionId
-                            )
-                          }
-                        >
-                          {t("delete")}
-                        </p>,
-                        <p
-                          id="modifyExpOption"
-                          onClick={() =>
-                            editDescription(
-                              group.GroupId,
-                              exception.ExceptionName,
-                              exception.Description,
-                              exception.ExceptionId
-                            )
-                          }
-                        >
-                          {t("modify")}
-                        </p>,
-                        <p id="moveExp_To_OtherGroup">
-                          {t("moveTo")}
-                          <DeleteModal
-                            addNewGroupFunc={() => {
-                              addGroupViaMoveTo(
-                                exception.ExceptionId,
+                    {/*code edited on 29 July 2022 for BugId 112407 */}
+                    {props.openProcessType === "L" ? (
+                      <DeleteModal
+                        backDrop={false}
+                        // Sent Exp ID to solve bug ID 109970
+                        open={showExpDelete == exception.ExceptionId}
+                        handleOpen={() =>
+                          setShowExpDelete(exception.ExceptionId)
+                        }
+                        handleClose={() => setShowExpDelete(null)}
+                        modalPaper="modalPaperActivity"
+                        sortByDiv="sortByDivActivity"
+                        oneSortOption="oneSortOptionActivity"
+                        docIndex={expIndex}
+                        buttonToOpenModal={
+                          <button className="threeDotsButton" type="button">
+                            <MoreVertIcon
+                              style={{
+                                color: "#606060",
+                                height: "16px",
+                                width: "16px",
+                                marginLeft: "auto",
+                              }}
+                            />
+                          </button>
+                        }
+                        modalWidth="180"
+                        sortSectionOne={[
+                          <p
+                            id="deleteExpOption"
+                            onClick={() =>
+                              deleteExpType(
                                 exception.ExceptionName,
-                                exception.Description,
-                                group.GroupId
-                              );
-                            }}
-                            getActionName={(targetGroupName) =>
-                              MoveToOtherGroup(
-                                targetGroupName,
-                                exception.ExceptionId,
-                                exception.ExceptionName,
-                                exception.Description,
-                                group.GroupId
+                                exception.ExceptionId
                               )
                             }
-                            backDrop={false}
-                            modalPaper="modalPaperActivity exceptionMoveTo"
-                            sortByDiv="sortByDivActivity"
-                            oneSortOption="oneSortOptionActivity"
-                            docIndex={expIndex}
-                            buttonToOpenModal={
-                              <button className="threeDotsButton" type="button">
-                                <ArrowForwardIosIcon
-                                  style={{
-                                    color: "#606060",
-                                    height: "12px",
-                                    width: "12px",
-                                  }}
-                                />
-                              </button>
+                          >
+                            {t("delete")}
+                          </p>,
+                          <p
+                            id="modifyExpOption"
+                            onClick={() =>
+                              editDescription(
+                                group.GroupId,
+                                exception.ExceptionName,
+                                exception.Description,
+                                exception.ExceptionId
+                              )
                             }
-                            modalWidth="180"
-                            sortSectionOne={[
-                              ...ExceptionGroup,
-                              <p id="addGroup">{t("newGroup")}</p>,
-                            ]}
-                          />
-                        </p>,
-                      ]}
-                    />
+                          >
+                            {t("modify")}
+                          </p>,
+                          <p id="moveExp_To_OtherGroup">
+                            {t("moveTo")}
+                            <DeleteModal
+                              addNewGroupFunc={() => {
+                                addGroupViaMoveTo(
+                                  exception.ExceptionId,
+                                  exception.ExceptionName,
+                                  exception.Description,
+                                  group.GroupId
+                                );
+                              }}
+                              getActionName={(targetGroupName) =>
+                                MoveToOtherGroup(
+                                  targetGroupName,
+                                  exception.ExceptionId,
+                                  exception.ExceptionName,
+                                  exception.Description,
+                                  group.GroupId
+                                )
+                              }
+                              backDrop={false}
+                              modalPaper="modalPaperActivity exceptionMoveTo"
+                              sortByDiv="sortByDivActivity"
+                              oneSortOption="oneSortOptionActivity"
+                              docIndex={expIndex}
+                              buttonToOpenModal={
+                                <button
+                                  className="threeDotsButton"
+                                  type="button"
+                                >
+                                  <ArrowForwardIosIcon
+                                    style={{
+                                      color: "#606060",
+                                      height: "12px",
+                                      width: "12px",
+                                    }}
+                                  />
+                                </button>
+                              }
+                              modalWidth="180"
+                              sortSectionOne={[
+                                ...ExceptionGroup,
+                                <p id="addGroup">{t("newGroup")}</p>,
+                              ]}
+                            />
+                          </p>,
+                        ]}
+                      />
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -1683,6 +1697,7 @@ function Exception(props) {
         newGroupToMove={newGroupToMove}
         screenHeading={t("navigationPanel.exceptions")}
         bGroupExists={bGroupExists}
+        showGroupNameError={showGroupNameError}
         setbGroupExists={setbGroupExists}
         addGroupToList={addGroupToList}
         addGroupModal={addGroupModal}

@@ -128,7 +128,7 @@ function IncludeFeature(props) {
       .catch(() => setIsLoading(false));
   }, [addNew]);
 
-  //code edited for BugId 110821
+  //code edited on 22 July 2022 for BugId 110821
   const handleDeleteFeature = (el, list, setFunc) => {
     let json = {
       interfaceId: el.InterfaceId,
@@ -261,8 +261,12 @@ function IncludeFeature(props) {
                                   margin: "1.2rem .5rem 1.031rem auto",
                                 }}
                                 onClick={() =>
-                                  //code added for BugId 110821
-                                  handleDeleteFeature(d, usedFeatures, setUsedFeatures)
+                                  //code added on 22 July 2022 for BugId 110821
+                                  handleDeleteFeature(
+                                    d,
+                                    usedFeatures,
+                                    setUsedFeatures
+                                  )
                                 }
                               />
                               <ClearOutlinedIcon
@@ -335,8 +339,12 @@ function IncludeFeature(props) {
                                 }}
                                 src={cancelIcon}
                                 onClick={() =>
-                                  //code added for BugId 110821
-                                  handleDeleteFeature(d, availableFeatures, setAvailableFeatures)
+                                  //code added on 22 July 2022 for BugId 110821
+                                  handleDeleteFeature(
+                                    d,
+                                    availableFeatures,
+                                    setAvailableFeatures
+                                  )
                                 }
                               />
                               <AddOutlinedIcon

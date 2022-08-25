@@ -5,6 +5,7 @@ import "./commonCallActivity.css";
 import Modal from "../../../../UI/Modal/Modal.js";
 import DocList from "./reusables/docList.js";
 import { store, useGlobalState } from "state-pool";
+import TabsHeading from "../../../../UI/TabsHeading/index.js";
 
 function ForwardMDoc(props) {
   const loadedProcessData = store.getState("loadedProcessData");
@@ -56,7 +57,9 @@ function ForwardMDoc(props) {
 
   const content = () => {
     return (
-      <div
+      <>
+      <TabsHeading heading={props?.heading} />
+        <div
         style={{
           backgroundColor: props.isDrawerExpanded ? "white" : null,
           width: props.isDrawerExpanded ? "144.3%" : "auto",
@@ -65,7 +68,7 @@ function ForwardMDoc(props) {
         <div className="forwardMapping_VariablesLabel">
           <p style={{ fontSize: "12px", color: "#606060" }}>FORWARD MAPPING</p>
           <p
-            style={{ fontSize: "11px", color: "#0072C6", cursor: "pointer" }}
+            style={{ fontSize: "11px", color: "var(--link_color)", cursor: "pointer" }}
             onClick={() => setShowDocsModal(true)}
           >
             Add Document(s)
@@ -147,6 +150,7 @@ function ForwardMDoc(props) {
             );
           })}
       </div>
+      </>
     );
   };
   return (

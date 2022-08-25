@@ -155,6 +155,7 @@ function SelectWithInput(props) {
                   }
             );
           }
+
           return filtered;
         }}
         className={
@@ -269,7 +270,7 @@ function SelectWithInput(props) {
   }, [isConstantAdded, selectedValue, constantValue]);
 
   return (
-    <div>
+    <div id="selectWithInput_TF" style={{ width: props.width || null }}>
       {(props.showConstValue &&
         selectedValue &&
         (props.optionKey ? selectedValue[props.optionKey] : selectedValue) ===

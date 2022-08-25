@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { store, useGlobalState } from "state-pool";
 import { getVariableType } from "../../../../utility/ProcessSettings/Triggers/getVariableType";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
+import { Tooltip } from "@material-ui/core";
 
 function ExpenseInitiation(props) {
   let { t } = useTranslation();
@@ -53,7 +54,6 @@ function ExpenseInitiation(props) {
     else if (!data.bRead && !data.bModify) temp = "S";
     else temp = "R";
 
-    console.log("bbbbbbbbbbbread", data);
     return temp;
   };
 
@@ -274,6 +274,10 @@ function ExpenseInitiation(props) {
 
   return (
     <div>
+      {
+        //added by mahtab
+        <div className="headingSectionTab">{<h4>{props?.heading}</h4>}</div>
+      }
       {showCreateSection ? (
         <div
           style={{
@@ -289,7 +293,9 @@ function ExpenseInitiation(props) {
               padding: "10px 10px 2px 10px",
             }}
           >
-            <p style={{ fontSize: "12px" }}>{t("displayName")}</p>
+            <p style={{ fontSize: "var(--base_text_font_size)" }}>
+              {t("displayName")}
+            </p>
             <input
               style={{ width: "150px", height: "22px", direction: direction }}
             />
@@ -302,7 +308,9 @@ function ExpenseInitiation(props) {
               padding: "10px 10px 2px 10px",
             }}
           >
-            <p style={{ fontSize: "12px" }}>{t("dataType")}</p>
+            <p style={{ fontSize: "var(--base_text_font_size)" }}>
+              {t("dataType")}
+            </p>
             <input
               style={{ width: "150px", height: "22px", direction: direction }}
             />
@@ -315,7 +323,9 @@ function ExpenseInitiation(props) {
               padding: "10px 10px 2px 10px",
             }}
           >
-            <p style={{ fontSize: "12px" }}>{t("dataObject")}</p>
+            <p style={{ fontSize: "var(--base_text_font_size)" }}>
+              {t("dataObject")}
+            </p>
             <input
               style={{ width: "150px", height: "22px", direction: direction }}
             />
@@ -334,18 +344,22 @@ function ExpenseInitiation(props) {
                 margin: direction === "rtl" ? "0 0 0 40px" : "0 40px 0 0",
               }}
             >
-              <p style={{ fontSize: "12px" }}>{t("read")}</p>
+              <p style={{ fontSize: "var(--base_text_font_size)" }}>
+                {t("read")}
+              </p>
               <Checkbox
-                size="small"
+                size="medium"
                 defaultChecked
                 color="primary"
                 inputProps={{ "aria-label": "secondary checkbox" }}
               />
             </div>
             <div style={{ display: "flex", alignItems: "center" }}>
-              <p style={{ fontSize: "12px" }}>{t("modify")}</p>
+              <p style={{ fontSize: "var(--base_text_font_size)" }}>
+                {t("modify")}
+              </p>
               <Checkbox
-                size="small"
+                size="medium"
                 defaultChecked
                 color="primary"
                 inputProps={{ "aria-label": "secondary checkbox" }}
@@ -362,7 +376,7 @@ function ExpenseInitiation(props) {
           >
             <a
               style={{
-                fontSize: "12px",
+                fontSize: "var(--base_text_font_size)",
                 color: "blue",
                 textDecoration: "underLine",
                 margin: direction === "rtl" ? "0 10px 0 0" : "0 0 0 10px",
@@ -440,7 +454,7 @@ function ExpenseInitiation(props) {
               >
                 <span
                   style={{
-                    fontSize: "12px",
+                    fontSize: "var(--base_text_font_size)",
                     marginTop: "10px",
                     fontWeight: "600",
                   }}
@@ -456,7 +470,7 @@ function ExpenseInitiation(props) {
               >
                 <span
                   style={{
-                    fontSize: "12px",
+                    fontSize: "var(--base_text_font_size)",
                     marginTop: "10px",
                     fontWeight: "600",
                   }}
@@ -472,7 +486,7 @@ function ExpenseInitiation(props) {
               >
                 <span
                   style={{
-                    fontSize: "12px",
+                    fontSize: "var(--base_text_font_size)",
                     marginTop: "10px",
                     fontWeight: "600",
                   }}
@@ -489,7 +503,7 @@ function ExpenseInitiation(props) {
               >
                 <span
                   style={{
-                    fontSize: "12px",
+                    fontSize: "var(--base_text_font_size)",
                     marginTop: "10px",
                     fontWeight: "600",
                   }}
@@ -498,7 +512,7 @@ function ExpenseInitiation(props) {
                     checked={allReadBool}
                     name="allRead"
                     onChange={allChangeHandler}
-                    size="small"
+                    size="medium"
                   />
                   {item.read}
                 </span>
@@ -512,16 +526,20 @@ function ExpenseInitiation(props) {
               >
                 <span
                   style={{
-                    fontSize: "12px",
+                    fontSize: "var(--base_text_font_size)",
                     marginTop: "10px",
                     fontWeight: "600",
                   }}
                 >
                   <Checkbox
                     checked={allModifyBool}
+                    disabled={
+                      props.cellActivityType === 2 &&
+                      props.cellActivitySubType === 1
+                    } //for endevent
                     name="allModify"
                     onChange={allChangeHandler}
-                    size="small"
+                    size="medium"
                   />
                   {item.modify}
                 </span>
@@ -545,17 +563,22 @@ function ExpenseInitiation(props) {
                   display: "flex",
                   flexDirection: "column",
                   width: "20%",
-                  //textAlign: direction === "rtl" ? "right" : "left",
                 }}
               >
-                <span
-                  style={{
-                    fontSize: "12px",
-                    marginTop: "10px",
-                  }}
-                >
-                  {item.name}
-                </span>
+                <Tooltip title={item.name} placement="bottom-start">
+                  <span
+                    style={{
+                      fontSize: "var(--base_text_font_size)",
+                      marginTop: "10px",
+                      overflow: "hidden",
+                      whiteSpace: "nowrap",
+                      textOverflow: "ellipsis",
+                      width: "90%",
+                    }}
+                  >
+                    {item.name}
+                  </span>
+                </Tooltip>
               </div>
               <div
                 style={{
@@ -567,8 +590,12 @@ function ExpenseInitiation(props) {
               >
                 <span
                   style={{
-                    fontSize: "12px",
+                    fontSize: "var(--base_text_font_size)",
                     marginTop: "10px",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                    textOverflow: "ellipsis",
+                    width: "90%",
                   }}
                 >
                   {getVariableType(item.type)}
@@ -584,8 +611,12 @@ function ExpenseInitiation(props) {
               >
                 <span
                   style={{
-                    fontSize: "12px",
+                    fontSize: "var(--base_text_font_size)",
                     marginTop: "10px",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                    textOverflow: "ellipsis",
+                    width: "90%",
                   }}
                 >
                   {item.length}
@@ -602,9 +633,8 @@ function ExpenseInitiation(props) {
               >
                 <Checkbox
                   checked={item.bRead}
-                  size="small"
+                  size="medium"
                   name="bRead"
-                  color="primary"
                   inputProps={{ "aria-label": "secondary checkbox" }}
                   onChange={(e) => changeDataFields(e, item)}
                 />
@@ -620,9 +650,12 @@ function ExpenseInitiation(props) {
               >
                 <Checkbox
                   checked={item.bModify}
-                  size="small"
+                  disabled={
+                    props.cellActivityType === 2 &&
+                    props.cellActivitySubType === 1
+                  } //for endevent
+                  size="medium"
                   name="bModify"
-                  color="primary"
                   inputProps={{ "aria-label": "secondary checkbox" }}
                   onChange={(e) => changeDataFields(e, item)}
                 />

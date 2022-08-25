@@ -5,13 +5,14 @@
 }
 
 .radiobtn svg {
-  width: 1rem;
-  height: 1rem;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
 }
 
 .radiobtn span {
   text-align: left;
   font: normal normal normal 11px/15px Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
   /* color: #707070; */
 }

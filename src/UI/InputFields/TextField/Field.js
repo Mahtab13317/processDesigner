@@ -15,32 +15,44 @@ const useStyles = makeStyles((theme) => ({
   inputTitle: {
     height: 27,
     backgroundColor: "white",
-    fontSize: "14px",
+    fontSize: "var(--subtitle_text_font_size)",
   },
   input: {
     height: 28,
     backgroundColor: "white",
-    fontSize: "12px",
+    fontSize: "var(--base_text_font_size)",
+    "& .Mui-focused": {
+      borderColor: "transparent",
+      borderWidth: "0px !important",
+    },
   },
 
   multilineInput: {
     backgroundColor: "white",
-    fontSize: 12,
+    fontSize: "var(--base_text_font_size)",
     "& focus": {
-      border: "0px solid #CECECE",
+      border: "0px solid #CECECE !important",
+    },
+    "& .Mui-focused": {
+      borderColor: "transparent",
+      borderWidth: "0px !important",
     },
     //overflowY: "scroll",
   },
-  label: { fontSize: 12, color: "#606060", fontWeight: 600 },
+  label: {
+    fontSize: "var(--base_text_font_size)",
+    color: "#606060",
+    fontWeight: 600,
+  },
   labelCheckbox: {
-    fontSize: "12px",
+    fontSize: "var(--base_text_font_size)",
     color: "#686868",
     opacity: 1,
     fontWeight: 450,
   },
   helperText: {
     color: "#606060",
-    fontSize: "10px",
+    fontSize: "var(--sub_text_font_size)",
   },
   colorPrimary: {
     // filter: getCssFilterFromHex(`${theme.palette.primary.main}`),

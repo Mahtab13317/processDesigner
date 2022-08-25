@@ -160,7 +160,7 @@ function ActivityModal(props) {
   }
 
   return (
-    <div className="modalPaperDocType">
+    <div className="modalPaperDocType" style={{width:'18rem'}}>
       <div
         style={{ display: "flex", flexDirection: "column", alignItems: "left" }}
       >

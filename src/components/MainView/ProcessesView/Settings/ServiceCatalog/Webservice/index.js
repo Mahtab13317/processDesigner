@@ -163,22 +163,23 @@ function Webservice(props) {
     setSelected(tempSelected);
   };
 
-  const validateSOAP = () => {
+  const validateSOAP = (status) => {
     let hasError = false;
-
-    webServiceList
-      ?.filter(
-        (el) =>
-          el.webserviceType === WEBSERVICE_SOAP && el.status === STATE_ADDED
-      )
-      ?.forEach((item) => {
-        if (item.MethodName === changedSelection.methodName.methodName) {
-          if (item.AppName === changedSelection.webServiceName) {
-            hasError = true;
+    //code added on 25 July 2022 for BugId 112018
+    if (status === ADD_CONSTANT) {
+      webServiceList
+        ?.filter(
+          (el) =>
+            el.webserviceType === WEBSERVICE_SOAP && el.status === STATE_ADDED
+        )
+        ?.forEach((item) => {
+          if (item.MethodName === changedSelection.methodName.methodName) {
+            if (item.AppName === changedSelection.webServiceName) {
+              hasError = true;
+            }
           }
-        }
-      });
-
+        });
+    }
     if (hasError) {
       dispatch(
         setToastDataFunc({
@@ -537,7 +538,7 @@ function Webservice(props) {
       statusConstant === DELETE_CONSTANT
         ? checkDependencies()
         : changedSelection.webserviceType === WEBSERVICE_SOAP
-        ? validateSOAP()
+        ? validateSOAP(statusConstant)
         : validateREST();
     if (isValid) {
       let json = {};

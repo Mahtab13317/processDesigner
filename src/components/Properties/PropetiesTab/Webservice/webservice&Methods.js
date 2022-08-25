@@ -51,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
     color: "black",
   },
   tableBodyCell: {
-    fontSize: 12,
+    fontSize: "var(--base_text_font_size)",
   },
 }));
 
@@ -120,10 +120,24 @@ export default function CustomizedTables(props) {
                 {row.method}
               </StyledTableCell>
               <StyledTableCell align="right" style={{ width: "2.5vw" }}>
-                <SwapHorizIcon onClick={() => mappingHandler(row)} />
+                <SwapHorizIcon
+                  style={{
+                    width: "1.75rem",
+                    height: "1.75rem",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => mappingHandler(row)}
+                />
               </StyledTableCell>
               <StyledTableCell align="right" style={{ width: "2.5vw" }}>
-                <DeleteIcon onClick={()=>props.handleAssociationDelete(row)}/>
+                <DeleteIcon
+                  style={{
+                    width: "1.75rem",
+                    height: "1.75rem",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => props.handleAssociationDelete(row)}
+                />
               </StyledTableCell>
             </StyledTableRow>
           ))}

@@ -1,36 +1,37 @@
 .logoSize {
-  height: 20px;
-  width: 20px;
-  margin-right: 4px;
+  height: 1.75rem;
+  width: 1.75rem;
 }
 
 .activityInput {
   border: none;
   width: 100%;
-  height: 1.2rem;
   margin-left: 0%;
   background-color: inherit;
+  height: 1.5rem;
+  font-size: var(--base_text_font_size) !important;
 }
 
 .newActivityDiv {
   margin-top: 2%;
-  width: 290px;
-  height: 30px;
-  background: rgb(246, 246, 246);
-  border: 0.05rem dashed rgb(196, 196, 196);
+  width: 23rem;
+  height: 29px;
+  background: white;
+  border: 0.05rem dashed #dadada;
   color: rgb(124, 124, 124);
-  font-size: 14px;
+  font-size: var(--base_text_font_size);
   cursor: pointer;
-  text-align: center;
-  padding-top: 0.2rem;
+  align-items: center;
+  display: flex;
+  justify-content: center;
 }
 
 .newAssociatedActivityDiv {
   margin: 0 4% 3%;
   width: 100%;
   height: 26px;
-  background: rgb(246, 246, 246);
-  border: 0.05rem dashed rgb(196, 196, 196);
+  background: white;
+  border: 0.05rem dashed #dadada;
   color: rgb(124, 124, 124);
   font-size: 13px;
   cursor: pointer;
@@ -40,42 +41,33 @@
 
 .newActivityDiv:hover,
 .newAssociatedActivityDiv:hover {
-  background: rgb(246, 246, 246);
-  border: 0.05rem dashed rgb(20, 52, 164);
-  color: rgb(20, 52, 164);
+  border: 0.05rem dashed var(--button_color);
+  color: var(--button_color);
 }
 
 .outlinedCard {
   position: relative;
   overflow: visible !important;
-  width: 290px;
-  border: 4px solid transparent !important;
+  width: 23rem;
+  border: 2px solid transparent !important;
   background: transparent !important;
-}
-
-.cardSelected {
-  border: 4px solid #cac6c6 !important;
-}
-
-.cardSelected .activityCard {
-  border-radius: 0;
 }
 
 .activityCard {
   border-radius: 4px;
-  padding: 7px 0 0 0 !important;
+  padding: 0.5rem 0 0 0 !important;
   position: relative;
   background: white;
 }
 
 .startActivityCard {
-  border: 1px solid #2db100;
-  border-left: 6px solid #2db100;
+  border: 1px solid #448047;
+  border-left: 6px solid #448047;
 }
 
 .workdeskActivityCard {
-  border: 1px solid #0072c6;
-  border-left: 6px solid #0072c6;
+  border: 1px solid #7642a7;
+  border-left: 6px solid #7642a7;
 }
 
 .gatewayActivityCard {
@@ -89,13 +81,13 @@
 }
 
 .endActivityCard {
-  border: 1px solid #d30000;
+  border: 1px solid #d30814;
   border-left: 6px solid #d30000;
 }
 
 .artefactActivityCard {
-  border: 1px solid #606060;
-  border-left: 6px solid #606060;
+  border: 1px solid #6e6e6e;
+  border-left: 6px solid #6e6e6e;
 }
 
 .closeTile {
@@ -275,7 +267,12 @@
   letter-spacing: 0px;
   color: #767676 !important;
   text-transform: capitalize !important;
-  font-size: 10px !important;
+  font-family: var(--font_family) !important;
+}
+
+.SwimlaneButton span {
+  font-size: var(--sub_text_font_size) !important;
+  line-height: var(--line_height);
 }
 
 .swimlaneCheckbox {
@@ -287,7 +284,7 @@
 }
 
 .swimlaneCheckIcon {
-  color: #1072c6 !important;
+  color: var(--checkbox_color) !important;
 }
 
 .oneSortOptionActivity {
@@ -314,13 +311,12 @@
 }
 
 .threeDotsButton {
-  width: 28px;
-  height: 28px;
   border: none !important;
-  padding: 5px;
   cursor: pointer;
   background-color: transparent;
   position: relative;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .sortByDiv_arabicActivity {
@@ -352,40 +348,38 @@
 }
 
 .dragIcon {
-  color: grey;
-  max-height: 27px;
-  padding: 0;
+  height: 1.75rem !important;
+  width: 1.75rem !important;
 }
 
 .moreVertIconDiv {
   margin-left: auto !important;
-  margin-right: 2%;
-  text-align: right;
+  margin-right: 0.75rem !important;
   position: relative;
 }
 
 .cardSelected .startActivityCard {
-  background-color: #eeffe8;
+  background-color: #44804724;
 }
 
 .cardSelected .workdeskActivityCard {
-  background-color: #ebf4fb;
+  background-color: #7642a724;
 }
 
 .cardSelected .gatewayActivityCard {
-  background: #ffffd9;
+  background: #c9c94b24;
 }
 
 .cardSelected .EventActivityCard {
-  background: #ffffd9;
+  background: #c9c94b24;
 }
 
 .cardSelected .endActivityCard {
-  background: #d308141a;
+  background: #d3081424;
 }
 
 .cardSelected .artefactActivityCard {
-  background: #a9a9a93b;
+  background: #6e6e6e24;
 }
 .openProcessModal {
   color: grey;

@@ -128,6 +128,7 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
 
         setProcessData((oldProcessData) => {
           //deep copy instead of shallow copy
+          //code edited on 5 August 2022 for Bug 113802
           let newProcessData = JSON.parse(JSON.stringify(oldProcessData));
           newProcessData.GroupBoxes = JSON.parse(
             JSON.stringify(oldProcessData.GroupBoxes)
@@ -153,6 +154,7 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
         });
 
         setProcessData((oldProcessData) => {
+          //code edited on 5 August 2022 for Bug 113802
           let newProcessData = JSON.parse(JSON.stringify(oldProcessData));
           newProcessData.Annotations = JSON.parse(
             JSON.stringify(oldProcessData.Annotations)
@@ -177,10 +179,12 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
         });
 
         setProcessData((oldProcessData) => {
+          //code edited on 5 August 2022 for Bug 113802
           let newProcessData = JSON.parse(JSON.stringify(oldProcessData));
           newProcessData.MSGAFS = JSON.parse(
             JSON.stringify(oldProcessData.MSGAFS)
           );
+
           newProcessData.MSGAFS.push({
             MsgAFId: messageId,
             xLeftLoc: xLeftLoc,
@@ -199,6 +203,7 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
         });
 
         setProcessData((oldProcessData) => {
+          //code edited on 5 August 2022 for Bug 113802
           let newProcessData = JSON.parse(JSON.stringify(oldProcessData));
           newProcessData.DataObjects = JSON.parse(
             JSON.stringify(oldProcessData.DataObjects)
@@ -239,6 +244,7 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
       let maxId = 0;
       let processDefId;
       setProcessData((prevProcessData) => {
+        //code edited on 5 August 2022 for Bug 113802
         let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
         processDefId = newProcessData.ProcessDefId;
         for (let i of newProcessData.Tasks) {
@@ -258,7 +264,10 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
           Repeatable: "N",
           TaskId: maxId + 1,
           TaskName: `${title}_${maxId + 1}`,
-          TaskType:  prototype.getStyle() === style.processTask ? TaskType.processTask: TaskType.globalTask,
+          TaskType:
+            prototype.getStyle() === style.processTask
+              ? TaskType.processTask
+              : TaskType.globalTask,
           TemplateId: -1,
           isActive: "true",
           xLeftLoc: vertexX,
@@ -296,7 +305,6 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
         }
         return newProcessData;
       });
-
       addTaskAPI(
         maxId + 1,
         `${title}_${maxId + 1}`,
@@ -339,6 +347,7 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
         return { ...oldIds, activityId: newActivityId };
       });
       setProcessData((prevProcessData) => {
+        //code edited on 5 August 2022 for Bug 113802
         newProcessData = JSON.parse(JSON.stringify(prevProcessData));
         newProcessData.MileStones?.forEach((mile) => {
           mile.Activities?.forEach((act) => {
@@ -366,6 +375,7 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
       processName = newProcessData.ProcessName;
 
       setProcessData((prevProcessData) => {
+        //code edited on 5 August 2022 for Bug 113802
         let newData = JSON.parse(JSON.stringify(prevProcessData));
         newData.MileStones?.forEach((milestone, index) => {
           if (milestone.iMileStoneId === mileId) {
@@ -520,6 +530,7 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
         return { ...oldIds, activityId: newActivityId };
       });
       setProcessData((prevProcessData) => {
+        //code edited on 5 August 2022 for Bug 113802
         newProcessData = JSON.parse(JSON.stringify(prevProcessData));
         return prevProcessData;
       });
@@ -544,6 +555,7 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
         );
       }
       setProcessData((prevProcessData) => {
+        //code edited on 5 August 2022 for Bug 113802
         //do not do shallow copy process Data, else original state will get change
         let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
         processDefId = newProcessData.ProcessDefId;
@@ -742,6 +754,39 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
               };
             }),
           };
+        }
+
+        if (!queueInfo.queueExist) {
+          newProcessData.Queue?.splice(0, 0, {
+            QueueFilter: "",
+            OrderBy: queueInfo?.orderBy,
+            AllowReassignment: queueInfo?.allowReassignment,
+            UG: [],
+            FilterOption: "0",
+            RefreshInterval: queueInfo?.refreshInterval,
+            QueueId: queueInfo?.queueId,
+            SortOrder: queueInfo?.sortOrder,
+            QueueName: queueInfo?.queueName,
+            QueueDescription: queueInfo?.QueueDescription,
+            QueueType: queueInfo?.queueType,
+            FilterValue: "",
+          });
+        }
+        if (+activityType === 41 && +activitySubType === 1) {
+          newProcessData.Queue?.splice(0, 0, {
+            QueueFilter: "",
+            OrderBy: startQueueObj?.orderBy,
+            AllowReassignment: startQueueObj?.allowReassignment,
+            UG: [],
+            FilterOption: "0",
+            RefreshInterval: startQueueObj?.refreshInterval,
+            QueueId: startQueueObj?.queueId,
+            SortOrder: startQueueObj?.sortOrder,
+            QueueName: startQueueObj?.queueName,
+            QueueDescription: startQueueObj?.QueueDescription,
+            QueueType: startQueueObj?.queueType,
+            FilterValue: "",
+          });
         }
 
         return newProcessData;

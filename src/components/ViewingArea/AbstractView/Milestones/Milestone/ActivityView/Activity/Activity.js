@@ -53,6 +53,7 @@ import { useHistory } from "react-router-dom";
 import { store, useGlobalState } from "state-pool";
 import { MoveActivity } from "../../../../../../../utility/CommonAPICall/MoveActivity";
 import { milestoneWidthToIncrease } from "../../../../../../../utility/abstarctView/addWorkstepAbstractView";
+import { getRenameActivityQueueObj } from "../../../../../../../utility/abstarctView/getRenameActQueueObj";
 
 function Activity(props) {
   let { t } = useTranslation();
@@ -117,16 +118,30 @@ function Activity(props) {
     } else return [t("Properties")];
   };
 
-  const renameActivityFunc = (mIndex, aIndex) => {
-    if (actNameValue !== props.activityName) {
+  const renameActivityFunc = () => {
+    let currentAct =
+      props.processData.MileStones[props.milestoneIndex].Activities[
+        props.activityindex
+      ];
+    // code added on 22 July 2022 for BugId 113305
+    if (actNameValue !== currentAct.ActivityName) {
+      let queueInfo = getRenameActivityQueueObj(
+        currentAct.ActivityType,
+        currentAct.ActivitySubType,
+        actNameValue,
+        props.processData,
+        currentAct.QueueId,
+        t
+      );
       renameActivity(
-        props.activityId,
-        props.activityName,
+        currentAct.ActivityId,
+        currentAct.ActivityName,
         actNameValue,
         props.setprocessData,
         props.processData.ProcessDefId,
         props.processData.ProcessName,
-        props.processData.MileStones[mIndex].Activities[aIndex].QueueId,
+        currentAct.QueueId,
+        queueInfo,
         false
       );
     }
@@ -583,20 +598,23 @@ function Activity(props) {
                     <Box
                       style={{
                         marginLeft: direction !== "rtl" ? "0.75rem" : "0",
-                        paddingLeft: direction !== "rtl" ? "0.75rem" : "0",
                         marginRight: direction == "rtl" ? "0.75rem" : "0",
-                        paddingRight: direction == "rtl" ? "0.75rem" : "0",
+                        marginBottom: "0.5rem"
                       }}
                     >
-                      <Grid container>
-                        <Grid item>
+                      <Grid container style={{ alignItems: "center" }}>
+                        <Grid item style={{ height: "1.75rem" }}>
                           {showDragIcon &&
                           props.processType === PROCESSTYPE_LOCAL ? (
                             <div
                               className="dragIcon"
                               {...provided.dragHandleProps}
                             >
-                              <DragIndicatorIcon />
+                              <DragIndicatorIcon  style={{
+                                    color: "#606060",
+                                    height: "1.75rem",
+                                    width: "1.75rem",
+                                  }}/>
                             </div>
                           ) : (
                             <img
@@ -605,7 +623,7 @@ function Activity(props) {
                             />
                           )}
                         </Grid>
-                        <Grid item>
+                        <Grid item id="activityInputId">
                           <input
                             id={
                               props.milestoneIndex + "_" + props.activityindex
@@ -651,15 +669,15 @@ function Activity(props) {
                             sortSectionFour={sortSectionFour}
                             sortSectionLocalProcess={sortSectionLocalProcess}
                             buttonToOpenModal={
-                              <button className="threeDotsButton" type="button">
+                              <div className="threeDotsButton">
                                 <MoreVertIcon
                                   style={{
                                     color: "#606060",
-                                    height: "16px",
-                                    width: "16px",
+                                    height: "1.25rem",
+                                    width: "1.25rem",
                                   }}
                                 />
-                              </button>
+                              </div>
                             }
                             modalWidth="180"
                             dividerLine="dividerLineActivity"
@@ -694,17 +712,15 @@ function Activity(props) {
                     <Box
                       style={{
                         marginLeft: direction !== "rtl" ? "0.75rem" : "0",
-                        paddingLeft: direction !== "rtl" ? "0.75rem" : "0",
                         marginRight: direction == "rtl" ? "0.75rem" : "0",
-                        paddingRight: direction == "rtl" ? "0.75rem" : "0",
                       }}
                       pt={1}
                       className="row"
                     >
-                      <Grid container>
+                      <Grid container style={{ alignItems: "center" }}>
                         <Grid item>
                           <Button
-                            className="SwimlaneButton"
+                            className="SwimlaneButton non-button"
                             onClick={() =>
                               props.processType === PROCESSTYPE_LOCAL
                                 ? setShowSwimlaneDropdown(true)
@@ -726,7 +742,6 @@ function Activity(props) {
                                   direction !== "rtl" ? "5px" : "none",
                                 marginRight:
                                   direction == "rtl" ? "5px" : "none",
-                                marginBottom: "2px",
                               }}
                             />
                           </Button>
@@ -754,7 +769,6 @@ function Activity(props) {
                           style={{
                             marginLeft: direction == "rtl" ? "10px" : "auto",
                             marginRight: direction == "rtl" ? "auto" : "0px",
-                            marginTop: "5px",
                           }}
                         >
                           {dropdownActivity ? (

@@ -47,7 +47,7 @@ function ProjectProperties(props) {
       .catch((err) => {
         console.log(err);
       });
-  }, []);
+  }, [props.projectId]);
 
   const saveHandler = () => {
     let jsonBody = {
@@ -77,7 +77,14 @@ function ProjectProperties(props) {
 
   return (
     <React.Fragment>
-      <div className="margin2" style={{ direction: direction }}>
+      <div
+        style={{
+          direction: direction,
+          margin: "1rem 1vw 0",
+          padding: "1rem 1vw",
+          background: "#fff",
+        }}
+      >
         <p
           className={
             direction === RTL_DIRECTION
@@ -120,25 +127,25 @@ function ProjectProperties(props) {
         </p>
 
         <div className="row">
-          <div className="row margin1">
+          <div className="row margin11 flex1">
             <p className="projectPropertiesLabel">{t("createdOn")}:</p>
             <p
               className={
                 direction === RTL_DIRECTION
-                  ? arabicStyles.projectPropertiesValue
-                  : "projectPropertiesValue"
+                  ? arabicStyles.projectPropertiesSubValue
+                  : "projectPropertiesSubValue"
               }
             >
               {createdOn}
             </p>
           </div>
-          <div className="row margin1">
+          <div className="row margin11 flex1">
             <p className="projectPropertiesLabel">{t("createdby")}:</p>
             <p
               className={
                 direction === RTL_DIRECTION
-                  ? arabicStyles.projectPropertiesValue
-                  : "projectPropertiesValue"
+                  ? arabicStyles.projectPropertiesSubValue
+                  : "projectPropertiesSubValue"
               }
             >
               {createdBy}
@@ -147,25 +154,25 @@ function ProjectProperties(props) {
         </div>
 
         <div className="row">
-          <div className="row margin1">
+          <div className="row margin11 flex1">
             <p className="projectPropertiesLabel">{t("modifiedOn")}</p>
             <p
               className={
                 direction === RTL_DIRECTION
-                  ? arabicStyles.projectPropertiesValue
-                  : "projectPropertiesValue"
+                  ? arabicStyles.projectPropertiesSubValue
+                  : "projectPropertiesSubValue"
               }
             >
               {lastModifiedOn}
             </p>
           </div>
-          <div className="row margin1">
+          <div className="row margin11 flex1">
             <p className="projectPropertiesLabel">{t("modifiedBy")}</p>
             <p
               className={
                 direction === RTL_DIRECTION
-                  ? arabicStyles.projectPropertiesValue
-                  : "projectPropertiesValue"
+                  ? arabicStyles.projectPropertiesSubValue
+                  : "projectPropertiesSubValue"
               }
             >
               {LastModifiedBy}
@@ -173,7 +180,7 @@ function ProjectProperties(props) {
           </div>
         </div>
 
-        <div className="row margin1">
+        <div className="row margin11 flex1">
           <p className="projectPropertiesLabel">{t("processCount")}:</p>
           <p
             className={
@@ -185,35 +192,34 @@ function ProjectProperties(props) {
             {processCount}
           </p>
         </div>
-
-        <div
+      </div>
+      <div
+        className={
+          direction === RTL_DIRECTION
+            ? arabicStyles.footerProjectProperties
+            : "footerProjectProperties"
+        }
+      >
+        <button
+          className={
+            direction === RTL_DIRECTION ? arabicStyles.cancel : "cancel"
+          }
+          onClick={cancelHandler}
+          id="cancelBtn_projectCreation"
+        >
+          {t("cancel")}
+        </button>
+        <button
           className={
             direction === RTL_DIRECTION
-              ? arabicStyles.footerProjectProperties
-              : "footerProjectProperties"
+              ? arabicStyles.createProperties
+              : "createProperties"
           }
+          onClick={saveHandler}
+          id="createBtn_projectProperties"
         >
-          <button
-            className={
-              direction === RTL_DIRECTION ? arabicStyles.cancel : "cancel"
-            }
-            onClick={cancelHandler}
-            id="cancelBtn_projectCreation"
-          >
-            {t("cancel")}
-          </button>
-          <button
-            className={
-              direction === RTL_DIRECTION
-                ? arabicStyles.createProperties
-                : "createProperties"
-            }
-            onClick={saveHandler}
-            id="createBtn_projectProperties"
-          >
-            {t("save")}
-          </button>
-        </div>
+          {t("save")}
+        </button>
       </div>
     </React.Fragment>
   );

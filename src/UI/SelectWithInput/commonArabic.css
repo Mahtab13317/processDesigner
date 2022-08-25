@@ -1,15 +1,15 @@
 .selectWithInputTextField_arabic .Mui-focused {
-  border: 1px solid#DADADA;
+  border: 1px solid #c4c4c4;
 }
 
 .selectWithInputTextField_arabic .MuiOutlinedInput-notchedOutline {
-  border: 1px solid#DADADA;
+  border: 1px solid #c4c4c4;
 }
 
 .selectWithInputTextField_arabic
   .MuiOutlinedInput-root:hover
   .MuiOutlinedInput-notchedOutline {
-  border: 1px solid#DADADA;
+  border: 1px solid #c4c4c4;
 }
 
 .selectWithInputTextField_arabic .MuiAutocomplete-inputRoot {

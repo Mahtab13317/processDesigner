@@ -6,7 +6,7 @@ import {
   iconsForMainView,
   defaultSelectedForMainView,
 } from "../../utility/navigationPanel";
-import { connect, useDispatch } from "react-redux";
+import { connect, useDispatch, useSelector } from "react-redux";
 import CreateProcessByTemplate from "./Create/CreateProcessByTemplate";
 import {
   CREATE_PROCESS_FLAG_FROM_PROCESS,
@@ -20,12 +20,14 @@ import { useHistory } from "react-router-dom";
 import { setUserRightsDataFunc } from "../../redux-store/slices/UserRightsSlice";
 import { userRightsData } from "./UserRightsData";
 import axios from "axios";
+import { projectCreationVal } from "../../redux-store/slices/projectCreationSlice";
 
 const MainView = (props) => {
   const dispatch = useDispatch();
   const [selectedNavigationPanel, setSelectedNavigationPanel] = useState(
     defaultSelectedForMainView
   );
+  const projectCreatedVal = useSelector(projectCreationVal);
   let history = useHistory();
   const inMemoryDB = store.getState("inMemoryDB");
   const [localinMemoryDB, setlocalinMemoryDB] = useGlobalState(inMemoryDB);
@@ -51,6 +53,13 @@ const MainView = (props) => {
       })
     );
   }, []);
+
+  //code edited on 28 July 2022 for BugId 111769
+  useEffect(() => {
+    if (projectCreatedVal.projectCreated) {
+      setSelectedNavigationPanel("navigationPanel.processes");
+    }
+  }, [projectCreatedVal.projectCreated]);
 
   // Function that returns an array of menu rights along with a show boolean.
   const getMenuRightsList = (menuRightsList) => {

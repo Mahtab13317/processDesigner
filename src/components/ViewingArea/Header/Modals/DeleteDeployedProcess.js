@@ -9,11 +9,13 @@ import {
 } from "../../../../Constants/appConstants";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 
 function DeleteProcess(props) {
   let { t } = useTranslation();
   const [comment, setComment] = useState("");
-
+  const dispatch = useDispatch();
   const history = useHistory();
   const deleteProcess = () => {
     let postBody = {
@@ -23,7 +25,14 @@ function DeleteProcess(props) {
     axios
       .post(SERVER_URL + ENDPOINT_DELETE_PROCESS_DEPLOYED, postBody)
       .then((response) => {
-        if (response.data.Status === 0) {
+        if (response.status === 200) {
+          dispatch(
+            setToastDataFunc({
+              message: t("operationSuccessful"),
+              severity: "success",
+              open: true,
+            })
+          );
           history.push("/");
         }
       })
@@ -35,8 +44,10 @@ function DeleteProcess(props) {
       <div className={styles.subHeader}>{t("beforeDeleteSurity")}</div>
       <p className={styles.deleteModalSubHeading}>
         <span className={styles.processHeading}>{t("processC")}</span>
-        <span className={styles.deleteProcessName}>
-          <span>{props.openProcessName}</span>
+        <span>
+          <span className={styles.deleteProcessName}>
+            {props.openProcessName}
+          </span>
           <span className={styles.deleteVersion}>
             {t("Version")} {props.existingVersion}
           </span>

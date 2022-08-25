@@ -44,6 +44,7 @@ import {
   TRIGGER_PRIORITY_MEDIUM,
 } from "../../../../Constants/triggerConstants.js";
 import { getSelectedCellType } from "../../../../utility/abstarctView/getSelectedCellType";
+import TabsHeading from "../../../../UI/TabsHeading";
 const makeFieldInputs = (value) => {
   return {
     value: value,
@@ -95,6 +96,7 @@ const useStyles = makeStyles((props) => ({
   GroupTitleMain: {
     fontWeight: 700,
     color: "#606060",
+    fontSize: "var(--subtitle_text_font_size)",
   },
   btnIcon: {
     cursor: "pointer",
@@ -105,9 +107,11 @@ const useStyles = makeStyles((props) => ({
   GroupTitleSecondary: {
     fontWeight: 600,
     color: "#000000",
+    fontSize: "var(--subtitle_text_font_size)",
   },
   bold: {
     fontWeight: 700,
+    fontSize: "var(--base_text_font_size)",
   },
 }));
 function TaskEscalationRules(props) {
@@ -728,18 +732,9 @@ function TaskEscalationRules(props) {
   };
 
   return (
-    <Grid
-      container
-      direction="column"
-      style={{
-        pointerEvents:
-          props.cellType === getSelectedCellType("TASKTEMPLATE")
-            ? "none"
-            : null,
-        opacity:
-          props.cellType === getSelectedCellType("TASKTEMPLATE") ? 0.6 : 1,
-      }}
-    >
+    <>
+    <TabsHeading heading={props?.heading} />
+      <Grid container direction="column">
       <Grid item style={{ paddingBottom: "1.5rem" }}>
         <div style={{ width: "100%", height: "100%" }}>
           <hr style={{ opacity: "0.5", width: "100%" }} />
@@ -777,7 +772,9 @@ function TaskEscalationRules(props) {
                   <Grid item>
                     <Grid container>
                       <Grid item>
-                        <Typography style={{ fontSize: "16px" }}>
+                        <Typography
+                          style={{ fontSize: "var(--title_text_font_size)" }}
+                        >
                           {allRules.length > 0
                             ? `${allRules.length} ${
                                 allRules.length === 1 ? "Rule is" : "Rules are"
@@ -787,9 +784,10 @@ function TaskEscalationRules(props) {
                       </Grid>
                       <Grid item style={{ marginLeft: "auto" }}>
                         <Button
-                          variant="outlined"
-                          color="primary"
-                          size="small"
+                          // variant="outlined"
+                          //color="primary"
+                          //size="small"
+                          className="secondary"
                           onClick={() => addNewRule()}
                           disabled={addingRule || modifyingRule}
                         >
@@ -809,7 +807,9 @@ function TaskEscalationRules(props) {
                       onClick={() => handleSelectedRule(rule)}
                       id={`taskEscalation_listItem${index}`}
                     >
-                      <Typography style={{ fontSize: ".75rem" }}>
+                      <Typography
+                        style={{ fontSize: "var(--base_text_font_size)" }}
+                      >
                         {Object.keys(rule).length === 0 ? (
                           "New Rule"
                         ) : (
@@ -821,7 +821,11 @@ function TaskEscalationRules(props) {
                                   )
                                 :
                            */}
-                            <span>ESCALATE TO WITH TRIGGER After</span>{" "}
+                            <span
+                              style={{ fontSize: "var(--base_text_font_size)" }}
+                            >
+                              ESCALATE TO WITH TRIGGER After
+                            </span>{" "}
                             <span className={classes.bold}>
                               {(rule.ruleOpList &&
                                 rule.ruleOpList[0]?.param2) ||
@@ -898,17 +902,13 @@ function TaskEscalationRules(props) {
                       {(addingRule || modifyingRule) && (
                         <Grid item style={{ marginLeft: "auto" }}>
                           <Button
-                            variant="contained"
-                            color="seconday"
-                            size="small"
+                            className="tertiary"
                             onClick={() => cancelAddingRuleToRules()}
                           >
                             {`${t("cancel")}`}
                           </Button>
                           <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
+                            className="primary"
                             onClick={() => addOrModifyRuleToRules()}
                             style={{ marginLeft: "8px" }}
                           >
@@ -1196,9 +1196,7 @@ function TaskEscalationRules(props) {
                           </Grid>
                           <Grid item xs={2} style={{ marginTop: "12px" }}>
                             <Button
-                              variant="outlined"
-                              color="primary"
-                              size="small"
+                              className="secondary"
                               onClick={() => addVarToSubContent()}
                             >
                               Add
@@ -1261,9 +1259,7 @@ function TaskEscalationRules(props) {
                           </Grid>
                           <Grid item xs={2} style={{ marginTop: "12px" }}>
                             <Button
-                              variant="outlined"
-                              color="primary"
-                              size="small"
+                              className="secondary"
                               onClick={() => addVarToMsgContent()}
                             >
                               {t("add")}
@@ -1291,6 +1287,7 @@ function TaskEscalationRules(props) {
         </div>
       </Grid>
     </Grid>
+    </>
   );
 }
 

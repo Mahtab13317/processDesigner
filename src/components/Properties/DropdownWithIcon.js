@@ -21,7 +21,7 @@ function DropdownWithIcon({ activityInfo, ...props }) {
     <Select
       disabled={props.disabled}
       IconComponent={ExpandMoreIcon}
-      style={{ width: "95%", height: "2rem" }}
+      style={{ width: "95%", height: "2.5rem" }}
       variant="outlined"
       value={selectedValue}
       onChange={getSelectedActivity}
@@ -30,7 +30,7 @@ function DropdownWithIcon({ activityInfo, ...props }) {
         <p
           style={{
             marginInline: "0.4rem",
-            font: "0.8rem Open Sans",
+            fontSize: "1rem",
           }}
         >
           {""}
@@ -62,7 +62,7 @@ function DropdownWithIcon({ activityInfo, ...props }) {
               <p
                 style={{
                   marginInline: "0.4rem",
-                  font: "0.8rem Open Sans",
+                  font: "1rem",
                 }}
               >
                 {item.name}

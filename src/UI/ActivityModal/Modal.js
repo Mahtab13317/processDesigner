@@ -94,10 +94,7 @@ export default function SimpleModal(props) {
             {commonPara(props.sortBy, sortSectionOne, selectedSortByIndex)}
           </ul>
           {props.sortSectionTwo && (
-            <ul
-              className={props.modalDiv ? props.modalDiv : "sortBy"}
-              // style={{ margin: "-3px 0px -10px" }}
-            >
+            <ul className={props.modalDiv ? props.modalDiv : "sortBy"}>
               <hr
                 className={
                   (props.dividerLine ? props.dividerLine : "dividerLine") +
@@ -112,10 +109,7 @@ export default function SimpleModal(props) {
             </ul>
           )}
           {props.sortSectionThree && (
-            <ul
-              className={props.modalDiv ? props.modalDiv : "sortBy"}
-              // style={{ margin: "-3px 0px -10px" }}
-            >
+            <ul className={props.modalDiv ? props.modalDiv : "sortBy"}>
               <hr
                 className={
                   (props.dividerLine ? props.dividerLine : "dividerLine") +

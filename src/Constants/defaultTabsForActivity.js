@@ -1,3 +1,5 @@
+// Changes to solve Bug 113567 - Export: Data tab in case of Export activity need not to be there.
+
 import { activityType, TaskType } from "./appConstants";
 import { propertiesTabsForActivities as Tab } from "../utility/propertiesTabsForActivity/propertiesTabsForActivity";
 
@@ -36,7 +38,7 @@ export const ActivityPropertyTabs = [
   },
   {
     name: activityType.timerStart,
-    components: [Tab(1), Tab(4), Tab(5), Tab(6), Tab(2), Tab(8)],
+    components: [Tab(1), Tab(27), Tab(5), Tab(6), Tab(2), Tab(8)],
   },
   {
     name: activityType.subProcess,
@@ -89,7 +91,7 @@ export const ActivityPropertyTabs = [
   },
   {
     name: activityType.export,
-    components: [Tab(1), Tab(4), Tab(5), Tab(19), Tab(2)],
+    components: [Tab(1), Tab(4), Tab(5), Tab(19)],
   },
   {
     name: activityType.query,
@@ -105,7 +107,7 @@ export const ActivityPropertyTabs = [
   },
   {
     name: activityType.responseConsumerSOAP,
-    components: [Tab(1), Tab(11), Tab(4), Tab(5), Tab(39), Tab(2)],
+    components: [Tab(1), Tab(11), Tab(4), Tab(5), Tab(2)],
   },
   {
     name: activityType.requestConsumerSOAP,
@@ -203,8 +205,6 @@ export const ActivityPropertyTabs = [
   },
   {
     name: TaskType.processTask,
-    components: localStorage.getItem("registeredProcessType")
-      ? [Tab(45), Tab(48), Tab(52), Tab(53), Tab(50), Tab(51)]
-      : [Tab(45), Tab(52), Tab(53), Tab(50), Tab(51)],
+    components: [Tab(45), Tab(52), Tab(53), Tab(50), Tab(51)],
   },
 ];

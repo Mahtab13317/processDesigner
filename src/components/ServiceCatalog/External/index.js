@@ -117,7 +117,6 @@ function ExternalMethods(props) {
         <AccordionSummaryStyled>
           <div
             className={styles.accordianHeadingDiv}
-            style={{ width: props.scope === GLOBAL_SCOPE ? "74vw" : "80vw" }}
           >
             <span
               className={
@@ -183,7 +182,6 @@ function ExternalMethods(props) {
         <AccordionSummaryStyled>
           <div
             className={styles.accordianHeadingDiv}
-            style={{ width: props.scope === GLOBAL_SCOPE ? "74vw" : "80vw" }}
           >
             <span
               className={

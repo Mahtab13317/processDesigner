@@ -1,3 +1,5 @@
+// #BugID - 112369
+// #BugDescription - Added provision to add constants in list with constants already made.
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "./index.module.css";
@@ -18,8 +20,12 @@ import {
   ADD_CONDITION_NO_LOGICALOP_VALUE,
   RULES_OTHERWISE_CONDITION,
   RTL_DIRECTION,
+  DATE_FORMAT,
+  CONSTANT,
 } from "../../../../../Constants/appConstants";
+import moment from "moment";
 import CustomizedDropdown from "../../../../../UI/Components_With_ErrrorHandling/Dropdown";
+import { isValueDateType } from "../CommonFunctions";
 
 function AddCondition(props) {
   let { t } = useTranslation();
@@ -42,6 +48,7 @@ function AddCondition(props) {
   } = props;
   const [loadedProcessData] = useGlobalState("loadedProcessData");
   const variableData = loadedProcessData.Variable;
+  const constantsData = loadedProcessData.DynamicConstant;
   const [variableType, setVariableType] = useState("");
   const [param1, setParam1] = useState(""); // State to store value for param 1 dropdown.
   const [param2, setParam2] = useState(""); // State to store value for param 2 dropdown.
@@ -54,6 +61,7 @@ function AddCondition(props) {
   const [param1DropdownOptions, setParam1DropdownOptions] = useState([]); // State to store the dropdown options for parameter 1.
   const [logicalOperator] = useState(logicalOperatorOptions); // State to store the dropdown options for logical operator.
   const [param2DropdownOptions, setParam2DropdownOptions] = useState([]); // State to store the dropdown options for parameter 2.
+  const [isParam2Const, setIsParam2Const] = useState(false); // State that tells whether constant option is selected in param2.
 
   const menuProps = {
     anchorOrigin: {
@@ -65,13 +73,29 @@ function AddCondition(props) {
       horizontal: "left",
     },
     getContentAnchorEl: null,
+    PaperProps: {
+      style: {
+        maxHeight: "10rem",
+      },
+    },
   };
 
   // Function that runs when the component renders.
   useEffect(() => {
     if (variableData) {
-      setParam1DropdownOptions(variableData);
-      setParam2DropdownOptions(variableData);
+      let variableWithConstants = [];
+      constantsData?.forEach((element) => {
+        let tempObj = {
+          VariableName: element.ConstantName,
+          VariableScope: "C",
+        };
+        variableWithConstants.push(tempObj);
+      });
+      variableData?.forEach((element) => {
+        variableWithConstants.push(element);
+      });
+      setParam1DropdownOptions(variableWithConstants);
+      setParam2DropdownOptions(variableWithConstants);
     }
   }, []);
 
@@ -87,12 +111,15 @@ function AddCondition(props) {
     const filteredParam2Options =
       param1DropdownOptions &&
       param1DropdownOptions.filter((element) => {
-        if (element.VariableType === variableType) {
+        if (
+          element.VariableType === variableType ||
+          element.VariableScope === "C"
+        ) {
           return element;
         }
       });
     setParam2DropdownOptions(filteredParam2Options);
-  }, [variableType, localRuleData.ruleCondList]);
+  }, [variableType, localRuleData.ruleCondList, param1DropdownOptions]);
 
   // Function to fill operator values based on the selected param1.
   const fillOperatorValues = () => {
@@ -108,25 +135,30 @@ function AddCondition(props) {
   // Function that handles the change when the user selects the param 1 dropdown.
   const handleParam1Value = (event) => {
     setParam1(event.target.value);
+    setParam2("");
+    setIsParam2Const(false);
+
     if (isRuleBeingCreated === false) {
       setIsRuleBeingModified(true);
     }
-    let varType, extObjId, varFieldId, variableId;
-    param1DropdownOptions.map((value) => {
+    let variableScope, extObjId, varFieldId, variableId;
+    param1DropdownOptions?.map((value) => {
       if (value.VariableName === event.target.value) {
-        varType = value.VariableType;
         extObjId = value.ExtObjectId;
-        varFieldId = value.VariableFieldId;
+        varFieldId = value.VarFieldId;
         variableId = value.VariableId;
+        variableScope = value.VariableScope;
         setVariableType(value.VariableType);
       }
     });
+
     setLocalRuleData((prevData) => {
       let temp = { ...prevData };
       temp.ruleCondList[index].param1 = event.target.value;
       temp.ruleCondList[index].extObjID1 = extObjId;
-      temp.ruleCondList[index].VarFieldId_1 = varFieldId;
-      temp.ruleCondList[index].VariableId_1 = variableId;
+      temp.ruleCondList[index].varFieldId_1 = varFieldId;
+      temp.ruleCondList[index].variableId_1 = variableId;
+      temp.ruleCondList[index].type1 = variableScope;
       return temp;
     });
   };
@@ -146,24 +178,34 @@ function AddCondition(props) {
 
   // Function that handles the change of the param 2 dropdown.
   const handleParam2Value = (event) => {
-    let extObjId, varFieldId, variableId;
-    param1DropdownOptions.map((value) => {
+    let variableScope, extObjId, varFieldId, variableId;
+    param2DropdownOptions.map((value) => {
       if (value.VariableName === event.target.value) {
         extObjId = value.ExtObjectId;
-        varFieldId = value.VariableFieldId;
+        varFieldId = value.VarFieldId;
         variableId = value.VariableId;
+        variableScope = value.VariableScope;
+      }
+      if (value.VariableScope === "C") {
+        extObjId = "0";
+        varFieldId = "0";
+        variableId = "0";
       }
     });
+
+    if (isParam2Const) {
+      variableScope = "C";
+    }
 
     setLocalRuleData((prevData) => {
       let temp = { ...prevData };
       temp.ruleCondList[index].param2 = event.target.value;
       temp.ruleCondList[index].extObjID2 = extObjId;
-      temp.ruleCondList[index].VarFieldId_2 = varFieldId;
-      temp.ruleCondList[index].VariableId_2 = variableId;
+      temp.ruleCondList[index].varFieldId_2 = varFieldId;
+      temp.ruleCondList[index].variableId_2 = variableId;
+      temp.ruleCondList[index].type2 = variableScope ? variableScope : "C";
       return temp;
     });
-
     setParam2(event.target.value);
     if (isRuleBeingCreated === false) {
       setIsRuleBeingModified(true);
@@ -198,11 +240,56 @@ function AddCondition(props) {
     }
   };
 
+  // Function that checks if value is a part of existing dropdown options or is it from a constant newly added.
+  const isConstIncluded = (value) => {
+    let isConstantIncluded = false;
+    if (value !== "") {
+      param1DropdownOptions?.forEach((element) => {
+        if (element.VariableName === value && element.VariableScope === "C") {
+          isConstantIncluded = true;
+        }
+      });
+    }
+    return isConstantIncluded;
+  };
+
   // Function that runs when the Rule condition data changes.
   useEffect(() => {
     setParam1(localRuleData.ruleCondList[index].param1);
-    setParam2(localRuleData.ruleCondList[index].param2);
-    setSelectedLogicalOperator(localRuleData.ruleCondList[index].logicalOp);
+    if (
+      isValueDateType(localRuleData.ruleCondList[index].param2).isValDateType
+    ) {
+      if (localRuleData.ruleCondList[index].type2 === "C") {
+        setParam2(
+          isValueDateType(localRuleData.ruleCondList[index].param2)
+            .convertedDate
+        );
+      }
+    } else {
+      setParam2(localRuleData.ruleCondList[index].param2);
+    }
+    if (
+      isConstIncluded(localRuleData.ruleCondList[index].param2) &&
+      param2DropdownOptions?.length > 0
+    ) {
+      setIsParam2Const(true);
+    } else {
+      setIsParam2Const(false);
+      if (localRuleData.ruleCondList[index].type2 === "C") {
+        setIsParam2Const(true);
+      }
+    }
+    let parsedDate = Date.parse(localRuleData.ruleCondList[index].param2);
+    if (isNaN(localRuleData.ruleCondList[index].param2) && !isNaN(parsedDate)) {
+      setIsParam2Const(true);
+    } else {
+      if (localRuleData.ruleCondList[index].type2 !== "C") {
+        setIsParam2Const(false);
+      }
+    }
+
+    if (+localRuleData.ruleCondList[index].param2)
+      setSelectedLogicalOperator(localRuleData.ruleCondList[index].logicalOp);
     if (
       localRuleData.ruleCondList[index].param1 === RULES_ALWAYS_CONDITION ||
       localRuleData.ruleCondList[index].param1 === RULES_OTHERWISE_CONDITION
@@ -237,19 +324,22 @@ function AddCondition(props) {
           showAllErrors={ruleConditionErrors}
           showAllErrorsSetterFunc={setRuleConditionErrors}
           isNotMandatory={isAlwaysRule}
+          menuItemStyles={styles.menuItemStyles}
         >
           {param1DropdownOptions &&
-            param1DropdownOptions.map((element) => {
-              return (
-                <MenuItem
-                  className={styles.menuItemStyles}
-                  key={element.VariableName}
-                  value={element.VariableName}
-                >
-                  {element.VariableName}
-                </MenuItem>
-              );
-            })}
+            param1DropdownOptions
+              .filter((element) => element.VariableScope !== "C")
+              ?.map((element) => {
+                return (
+                  <MenuItem
+                    className={styles.menuItemStyles}
+                    key={element.VariableName}
+                    value={element.VariableName}
+                  >
+                    {element.VariableName}
+                  </MenuItem>
+                );
+              })}
         </CustomizedDropdown>
 
         <CustomizedDropdown
@@ -267,6 +357,7 @@ function AddCondition(props) {
           showAllErrors={ruleConditionErrors}
           showAllErrorsSetterFunc={setRuleConditionErrors}
           isNotMandatory={isAlwaysRule}
+          menuItemStyles={styles.menuItemStyles}
         >
           {conditionalDropdown &&
             conditionalDropdown.map((element) => {
@@ -297,6 +388,11 @@ function AddCondition(props) {
           showAllErrors={ruleConditionErrors}
           showAllErrorsSetterFunc={setRuleConditionErrors}
           isNotMandatory={isAlwaysRule}
+          isConstant={isParam2Const}
+          setIsConstant={(val) => setIsParam2Const(val)}
+          showConstValue={param2DropdownOptions?.length > 0}
+          constType={variableType}
+          menuItemStyles={styles.menuItemStyles}
         >
           {param2DropdownOptions &&
             param2DropdownOptions.map((element) => {
@@ -339,7 +435,9 @@ function AddCondition(props) {
         </Select>
 
         <div className={styles.deleteIcon}>
-          {showDelIcon && !isProcessReadOnly ? (
+          {localRuleData &&
+          localRuleData?.ruleCondList?.length > 1 &&
+          !isProcessReadOnly ? (
             <DeleteOutlinedIcon id="AR_Delete_Row_Button" onClick={deleteRow} />
           ) : null}
         </div>

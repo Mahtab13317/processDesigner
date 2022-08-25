@@ -1,3 +1,4 @@
+// Made changes to solve bug ID - 111180, 112972 , 111162 and 111182
 import React, { useState, useEffect } from "react";
 import "./index.css";
 import axios from "axios";
@@ -7,37 +8,27 @@ import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import Checkbox from "@material-ui/core/Checkbox";
 import { store, useGlobalState } from "state-pool";
 import { addConstantsToString } from "../../../../../utility/ProcessSettings/Triggers/triggerCommonFunctions";
-import {
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  FormControl,
-} from "@material-ui/core";
+import { FormControlLabel } from "@material-ui/core";
 import FieldMapping from "./FieldMapping.js";
+import { setToastDataFunc } from "../../../../../redux-store/slices/ToastDataHandlerSlice";
 import {
   SERVER_URL,
   ARCHIEVE_CONNECT,
   ARCHIEVE_DISCONNECT,
   ASSOCIATE_DATACLASS_MAPPING,
-  FOLDERNAME_ARCHIEVE,
   propertiesLabel,
 } from "../../../../../Constants/appConstants";
-import {
-  setActivityPropertyChange,
-  ActivityPropertyChangeValue,
-} from "../../../../../redux-store/slices/ActivityPropertyChangeSlice";
+import { setActivityPropertyChange } from "../../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import {
   ActivityPropertySaveCancelValue,
   setSave,
 } from "../../../../../redux-store/slices/ActivityPropertySaveCancelClicked.js";
 import Modal from "../../../../../UI/Modal/Modal";
 import { connect } from "react-redux";
-import Button from "@material-ui/core/Button";
 import { ClickAwayListener } from "@material-ui/core";
 import ButtonDropdown from "../../../../../UI/ButtonDropdown/index";
 import { useDispatch, useSelector } from "react-redux";
-import { OpenProcessSliceValue } from "../../../../../redux-store/slices/OpenProcessSlice";
-import { drop } from "lodash";
+import TabsHeading from "../../../../../UI/TabsHeading";
 
 function DMSAdapter(props) {
   let { t } = useTranslation();
@@ -65,45 +56,9 @@ function DMSAdapter(props) {
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [selectedDocIndex, setSelectedDocIndex] = useState();
-  const [tempData, setTempData] = useState({
-    cabinet: "",
-    userName: "",
-    password: "",
-    folderName: "",
-    dataClass: "",
-    deleteAudit: false,
-    allDocCheckValue: false,
-    conversationValue: "",
-    conversationCheckValue: false,
-    auditTrailValue: "",
-    auditTrailCheckValue: false,
-    DocumentTypeList: [
-      {
-        DocTypeId: "1",
-        DocName: "AddressProof",
-        Print: true,
-        Create_P: false,
-        Email: false,
-        Create_E: false,
-        Fax: true,
-        Create_F: false,
-      },
-      {
-        DocTypeId: "2",
-        DocName: "AddressProof1",
-        Print: false,
-        Create_P: true,
-        Email: false,
-        Create_E: false,
-        Fax: true,
-        Create_F: false,
-      },
-    ],
-  });
   const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
   const [showRedBorder, setShowRedBorder] = useState(false);
   const [mapType, setMapType] = useState(null);
-  const ActivityPropertyBoolean = useSelector(ActivityPropertyChangeValue);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [docCheck, setDocCheck] = useState({});
   let defaultDocList = [
@@ -130,22 +85,28 @@ function DMSAdapter(props) {
           ""
       ) {
         setShowRedBorder(true);
-        dispatch(
-          setActivityPropertyChange({
-            [propertiesLabel.archive]: { isModified: true, hasError: true },
-          })
-        );
+        // dispatch(
+        //   setActivityPropertyChange({
+        //     [propertiesLabel.archive]: { isModified: true, hasError: true },
+        //   })
+        // );
       } else {
-        dispatch(
-          setActivityPropertyChange({
-            [propertiesLabel.archive]: { isModified: true, hasError: false },
-          })
-        );
+        // dispatch(
+        //   setActivityPropertyChange({
+        //     [propertiesLabel.archive]: { isModified: true, hasError: false },
+        //   })
+        // );
       }
       // });
       dispatch(setSave({ SaveClicked: false }));
     }
   }, [saveCancelStatus.SaveClicked]);
+
+  useEffect(() => {
+    let tempLocal = JSON.parse(JSON.stringify(localLoadedProcessData));
+    let tempDoclist = [...tempLocal?.DocumentTypeList, ...defaultDocList];
+    setDocList(tempDoclist);
+  }, [localLoadedProcessData]);
 
   useEffect(() => {
     setUserName(
@@ -217,11 +178,11 @@ function DMSAdapter(props) {
     temp.ActivityProperty.archiveInfo.folderInfo.folderName =
       addConstantsToString(folderNameInput, value.VariableName);
     setlocalLoadedActivityPropertyData(temp);
-    dispatch(
-      setActivityPropertyChange({
-        [propertiesLabel.archive]: { isModified: true, hasError: false },
-      })
-    );
+    // dispatch(
+    //   setActivityPropertyChange({
+    //     [propertiesLabel.archive]: { isModified: true, hasError: false },
+    //   })
+    // );
     // setShowDropdown(false);
     // setTempData((prevState) => {
     //   return { ...prevState, folderName: value.VariableName };
@@ -260,6 +221,13 @@ function DMSAdapter(props) {
 
     axios.post(SERVER_URL + ARCHIEVE_CONNECT, jsonBody).then((res) => {
       if (res.data.Status === 0) {
+        dispatch(
+          setToastDataFunc({
+            message: "Connected Sucessfully!",
+            severity: "success",
+            open: true,
+          })
+        );
         setDisconnectBody({ DMSAuthentication: res.data.DMSAuthentication });
         var x = document.getElementById("trigger_laInsert_Btn");
         if (x.innerHTML === "Connect") {
@@ -286,6 +254,13 @@ function DMSAdapter(props) {
 
   const handleDisconnectClick = () => {
     axios.post(SERVER_URL + ARCHIEVE_DISCONNECT, disconnectBody).then(() => {
+      dispatch(
+        setToastDataFunc({
+          message: "Disconnected Sucessfully!",
+          severity: "success",
+          open: true,
+        })
+      );
       var x = document.getElementById("trigger_laInsert_Btn");
       if (x.innerHTML === "Connect") {
         x.innerHTML = "Disconnect";
@@ -309,7 +284,6 @@ function DMSAdapter(props) {
     if (type == "archeive") {
       setSelectedDoc(document);
     }
-    console.log("ashii", associateDataClass);
     let dataDefIndex =
       type == "associate"
         ? localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo
@@ -365,11 +339,11 @@ function DMSAdapter(props) {
   };
 
   const handleCabinetChange = (value) => {
-    dispatch(
-      setActivityPropertyChange({
-        [propertiesLabel.archieve]: { isModified: true, hasError: false },
-      })
-    );
+    // dispatch(
+    //   setActivityPropertyChange({
+    //     [propertiesLabel.archieve]: { isModified: true, hasError: false },
+    //   })
+    // );
     let temp = { ...localLoadedActivityPropertyData };
     temp.ActivityProperty.archiveInfo.cabinetName = value;
     setlocalLoadedActivityPropertyData(temp);
@@ -380,25 +354,25 @@ function DMSAdapter(props) {
     temp.ActivityProperty.archiveInfo.authCred = event.target.value;
     setlocalLoadedActivityPropertyData(temp);
     setPassword(event.target.value);
-    dispatch(
-      setActivityPropertyChange({
-        [propertiesLabel.archive]: {
-          isModified: true,
-          hasError: false,
-        },
-      })
-    );
+    // dispatch(
+    //   setActivityPropertyChange({
+    //     [propertiesLabel.archive]: {
+    //       isModified: true,
+    //       hasError: false,
+    //     },
+    //   })
+    // );
   };
 
   const handleAssociateClassChange = (e) => {
-    dispatch(
-      setActivityPropertyChange({
-        [propertiesLabel.archive]: {
-          isModified: true,
-          hasError: false,
-        },
-      })
-    );
+    // dispatch(
+    //   setActivityPropertyChange({
+    //     [propertiesLabel.archive]: {
+    //       isModified: true,
+    //       hasError: false,
+    //     },
+    //   })
+    // );
     let tempIndex;
     associateDataClassList.map((el) => {
       if (el.dataDefName == e.target.value) {
@@ -414,14 +388,14 @@ function DMSAdapter(props) {
   };
 
   const handleCheckBoxChange = (e) => {
-    dispatch(
-      setActivityPropertyChange({
-        [propertiesLabel.archive]: {
-          isModified: true,
-          hasError: false,
-        },
-      })
-    );
+    // dispatch(
+    //   setActivityPropertyChange({
+    //     [propertiesLabel.archive]: {
+    //       isModified: true,
+    //       hasError: false,
+    //     },
+    //   })
+    // );
     setWorkItemCheck(!workItemCheck);
     let temp = { ...localLoadedActivityPropertyData };
     temp.ActivityProperty.archiveInfo.m_bDeleteWorkitemAudit = !workItemCheck;
@@ -430,158 +404,189 @@ function DMSAdapter(props) {
 
   const handleUserChange = (e) => {
     setUserName(e.target.value);
-    dispatch(
-      setActivityPropertyChange({
-        [propertiesLabel.archive]: {
-          isModified: true,
-          hasError: false,
-        },
-      })
-    );
+    // dispatch(
+    //   setActivityPropertyChange({
+    //     [propertiesLabel.archive]: {
+    //       isModified: true,
+    //       hasError: false,
+    //     },
+    //   })
+    // );
     let temp = { ...localLoadedActivityPropertyData };
     temp.ActivityProperty.archiveInfo.userName = e.target.value;
     setlocalLoadedActivityPropertyData(temp);
   };
 
+  let collapseContent = () => {
+    return (
+      <div>
+      <TabsHeading heading={props?.heading} />
+        <div className="dropDownSelectLabelDMS">
+          <p id="archieve_cabinet">Cabinet</p>
+          <div>
+            <Select
+              className="dropDownSelect"
+              style={{
+                marginRight: "10px",
+                marginLeft: null,
+              }}
+              MenuProps={{
+                anchorOrigin: {
+                  vertical: "bottom",
+                  horizontal: "left",
+                },
+                transformOrigin: {
+                  vertical: "top",
+                  horizontal: "left",
+                },
+                getContentAnchorEl: null,
+              }}
+              value={cabinet}
+              onChange={(event) => handleCabinetChange(event.target.value)}
+            >
+              {localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo?.m_strCabList?.map(
+                (el) => {
+                  return (
+                    <MenuItem
+                      className="statusSelect"
+                      value={el}
+                      style={{ fontSize: "12px" }}
+                    >
+                      {el}
+                    </MenuItem>
+                  );
+                }
+              )}
+            </Select>
+          </div>
+        </div>
+        <div className="dropDownSelectLabelDMS">
+          <p id="archieve_userName">UserName</p>
+          <span
+            style={{
+              color: "red",
+              padding: "0.35rem",
+              marginLeft: "-0.375rem",
+              marginTop: "-0.4rem",
+            }}
+          >
+            *
+          </span>
+          <div>
+            <input
+              value={userName}
+              className="userNameInput"
+              onChange={(event) => {
+                handleUserChange(event);
+              }}
+              style={{
+                border:
+                  !userName && showRedBorder == true ? "1px solid red" : null,
+              }}
+            ></input>
+            {!userName && showRedBorder == true ? (
+              <span style={{ color: "red", fontSize: "10px" }}>
+                Please Enter UserName
+              </span>
+            ) : null}
+          </div>
+        </div>
+        <div className="dropDownSelectLabelDMS">
+          <p id="archieve_password">Password</p>
+          <span
+            style={{
+              color: "red",
+              padding: "0.35rem",
+              marginLeft: "-0.375rem",
+              marginTop: "-0.4rem",
+            }}
+          >
+            *
+          </span>
+          <div>
+            <input
+              value={password}
+              className="passwordInput"
+              type="password"
+              onChange={(event) => {
+                handlePasswordChange(event);
+              }}
+              style={{
+                border:
+                  !password && showRedBorder == true ? "1px solid red" : null,
+              }}
+            ></input>
+            {!password && showRedBorder == true ? (
+              <span style={{ color: "red", fontSize: "10px" }}>
+                Please Enter Password
+              </span>
+            ) : null}
+          </div>
+        </div>
+        <button
+          id="trigger_laInsert_Btn"
+          className="triggerButton propertiesAddButton_connect"
+          onClick={
+            document.getElementById("trigger_laInsert_Btn")?.innerHTML ==
+            "Connect"
+              ? handleConnectClick
+              : handleDisconnectClick
+          }
+        >
+          {"Connect"}
+        </button>
+      </div>
+    );
+  };
+
+  const expandedContent = () => {
+    return (
+      <div>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <p id="archieve_userName">
+            UserName{" "}
+            <span
+              style={{
+                color: "red",
+                padding: "0.35rem",
+                marginLeft: "-0.375rem",
+                marginTop: "-0.4rem",
+              }}
+            >
+              *
+            </span>
+          </p>
+          <div>
+            <input
+              value={userName}
+              className="userNameInput"
+              onChange={(event) => {
+                handleUserChange(event);
+              }}
+              style={{
+                width: "290px",
+                height: "28px",
+                borderRadius: "1px",
+                border:
+                  !userName && showRedBorder == true
+                    ? "1px solid red"
+                    : "1px solid #CECECE",
+              }}
+            ></input>
+            {!userName && showRedBorder == true ? (
+              <span style={{ color: "red", fontSize: "10px" }}>
+                Please Enter UserName
+              </span>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="archieveScreen">
-      <div
-        className={
-          props.isDrawerExpanded
-            ? "dropDownSelectLabel_expanded"
-            : "dropDownSelectLabelDMS"
-        }
-      >
-        <p id="archieve_cabinet">Cabinet</p>
-        <div>
-          <Select
-            className={
-              props.isDrawerExpanded
-                ? "dropDownSelect_expandeddms"
-                : "dropDownSelect"
-            }
-            style={{
-              marginRight: "10px",
-              marginLeft: props.isDrawerExpanded ? "200px" : null,
-            }}
-            MenuProps={{
-              anchorOrigin: {
-                vertical: "bottom",
-                horizontal: "left",
-              },
-              transformOrigin: {
-                vertical: "top",
-                horizontal: "left",
-              },
-              getContentAnchorEl: null,
-            }}
-            value={cabinet}
-            onChange={(event) => handleCabinetChange(event.target.value)}
-          >
-            {localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo?.m_strCabList?.map(
-              (el) => {
-                return (
-                  <MenuItem
-                    className="statusSelect"
-                    value={el}
-                    style={{ fontSize: "12px" }}
-                  >
-                    {el}
-                  </MenuItem>
-                );
-              }
-            )}
-          </Select>
-        </div>
-      </div>
-      <div
-        className={
-          props.isDrawerExpanded
-            ? "dropDownSelectLabel_expanded"
-            : "dropDownSelectLabelDMS"
-        }
-      >
-        <p id="archieve_userName">UserName</p>
-        <span
-          style={{
-            color: "red",
-            padding: "0.35rem",
-            marginLeft: "-0.375rem",
-            marginTop: "-0.4rem",
-          }}
-        >
-          *
-        </span>
-        <div style={{ marginLeft: props.isDrawerExpanded ? "167px" : null }}>
-          <input
-            value={userName}
-            className="userNameInput"
-            onChange={(event) => {
-              handleUserChange(event);
-            }}
-            style={{
-              border:
-                !userName && showRedBorder == true ? "1px solid red" : null,
-            }}
-          ></input>
-          {!userName && showRedBorder == true ? (
-            <span style={{ color: "red", fontSize: "10px" }}>
-              Please Enter UserName
-            </span>
-          ) : null}
-        </div>
-      </div>
-      <div
-        className={
-          props.isDrawerExpanded
-            ? "dropDownSelectLabel_expanded"
-            : "dropDownSelectLabelDMS"
-        }
-      >
-        <p id="archieve_password">Password</p>
-        <span
-          style={{
-            color: "red",
-            padding: "0.35rem",
-            marginLeft: "-0.375rem",
-            marginTop: "-0.4rem",
-          }}
-        >
-          *
-        </span>
-        <div style={{ marginLeft: props.isDrawerExpanded ? "174px" : null }}>
-          <input
-            value={password}
-            className="passwordInput"
-            type="password"
-            onChange={(event) => {
-              handlePasswordChange(event);
-            }}
-            style={{
-              border:
-                !password && showRedBorder == true ? "1px solid red" : null,
-            }}
-          ></input>
-          {!password && showRedBorder == true ? (
-            <span style={{ color: "red", fontSize: "10px" }}>
-              Please Enter Password
-            </span>
-          ) : null}
-        </div>
-      </div>
-      <button
-        id="trigger_laInsert_Btn"
-        className="triggerButton propertiesAddButton_connect"
-        onClick={
-          document.getElementById("trigger_laInsert_Btn")?.innerHTML ==
-          "Connect"
-            ? handleConnectClick
-            : handleDisconnectClick
-        }
-        // disabled={readOnlyProcess}
-      >
-        {"Connect"}
-      </button>
+      {props.isDrawerExpanded ? expandedContent() : collapseContent()}
       <div style={{ display: "flex" }}>
         <p id="archieve_folderName">FolderName</p>
         <span
@@ -676,7 +681,7 @@ function DMSAdapter(props) {
                   <MenuItem
                     className="statusSelect"
                     value={dataClass.dataDefName}
-                    style={{fontSize:'12px'}}
+                    style={{ fontSize: "12px" }}
                   >
                     {dataClass.dataDefName}
                   </MenuItem>
@@ -753,7 +758,7 @@ function DMSAdapter(props) {
       <div style={{ marginTop: "10px" }}>
         {/*code added on 16 June 2022 for BugId 108976*/}
         <p id="archieve_docTypes">{t("ArchiveDocumentTypes")}</p>
-        <table className="table">
+        <table>
           <tr>
             <th style={{ width: "10vw" }}>
               <Checkbox
@@ -774,7 +779,6 @@ function DMSAdapter(props) {
             return (
               <tr>
                 <td style={{ width: "10vw" }}>
-                  {" "}
                   <Checkbox
                     size="small"
                     checked={

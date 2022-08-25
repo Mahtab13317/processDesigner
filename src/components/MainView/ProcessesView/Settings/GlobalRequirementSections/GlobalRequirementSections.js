@@ -1,3 +1,8 @@
+// Changes made to solve Bug 113434 - Requirement Section: spaces are not allowed while adding the description
+// Changes made to solve Bug 110715 (Global Requirement section: Buttons not visible while Adding section)
+// Changes made to solve Bug 113580 (if the requirements are on project level not on Global level then the message should be different)
+//  Changes made to solve Bug 110720, Global Requirement section: section with lengthy data was not added
+
 import { Button } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import styles from "./GlobalRequirementSections.module.css";
@@ -100,9 +105,9 @@ function AddNewSectionBox(props) {
       >
         <p
           style={{
-            fontSize: "16px",
+            fontSize: "var(--title_text_font_size)",
             marginBottom: "10px",
-            font: "normal normal 600 16px/22px Open Sans",
+            fontWeight: "600",
           }}
         >
           {props.sectionNo === "" || props.sectionNo === undefined
@@ -133,6 +138,8 @@ function AddNewSectionBox(props) {
           <input
             id="add_sectionName"
             value={sectionName}
+            type="text"
+            maxLength={255}
             onChange={(e) => setsectionName(e.target.value)}
             style={{
               width: "100%",
@@ -156,7 +163,8 @@ function AddNewSectionBox(props) {
           <textarea
             id="add_sectionDesc"
             value={desc}
-            onChange={(e) => setdesc(e.target.value.trim())}
+            maxLength={255}
+            onChange={(e) => setdesc(e.target.value)}
             style={{
               width: "100%",
               height: "5rem",
@@ -184,8 +192,8 @@ function AddNewSectionBox(props) {
           <Button
             id="add_cancel"
             variant="outlined"
-            className={styles.buttons}
             onClick={cancelButtonClick}
+            color="#87805E"
           >
             {t("cancel")}
           </Button>
@@ -195,7 +203,6 @@ function AddNewSectionBox(props) {
             variant="contained"
             className={styles.buttons}
             size="small"
-            color="primary"
             onClick={addHandler}
           >
             {t("addAnother")}
@@ -204,7 +211,6 @@ function AddNewSectionBox(props) {
             id="add_sectionClose"
             variant="contained"
             className={styles.buttons}
-            color="primary"
             onClick={addcloseHandler}
           >
             {t("add&Close")}
@@ -270,9 +276,9 @@ function EditSectionBox(props) {
       >
         <p
           style={{
-            fontSize: "16px",
+            fontSize: "var(--title_text_font_size)",
             marginBottom: "10px",
-            font: "normal normal 600 16px/22px Open Sans",
+            fontWeight: "600",
           }}
         >
           {t("edit")} {t("section")}
@@ -347,14 +353,13 @@ function EditSectionBox(props) {
             id="edit_cancel"
             variant="outlined"
             onClick={cancelButtonClick}
-            className={styles.buttons}
+            // className={styles.buttons}
           >
             {t("cancel")}
           </Button>
           <Button
             id="edit_save"
             variant="contained"
-            color="primary"
             className={styles.buttons}
             onClick={editSave}
           >
@@ -826,10 +831,14 @@ function GlobalRequirementSections(props) {
         <div className={styles.heading}>
           <div className={styles.headingBox}>
             <p className={styles.headingText}>
-              {t("globalRequirementSections")}
+              {props.callLocation == "ProcessLevel"
+                ? "Process Requirements Section"
+                : t("globalRequirementSections")}
             </p>
             <p className={styles.headingInfo}>
-              {t("gloablRequirementSectionsHeadingInfo")}
+              {props.callLocation == "ProcessLevel"
+                ? "Requirement sections which are defined here, will automatically appear in Requirements section of it's activities."
+                : t("gloablRequirementSectionsHeadingInfo")}
             </p>
           </div>
           <div>
@@ -837,7 +846,6 @@ function GlobalRequirementSections(props) {
               <Button
                 variant="contained"
                 size="medium"
-                color="primary"
                 className={styles.addSectionButton}
                 onClick={() => {
                   setshowExportImportModal(true);
@@ -851,7 +859,6 @@ function GlobalRequirementSections(props) {
               <Button
                 variant="contained"
                 size="medium"
-                color="primary"
                 className={styles.addSectionButton}
                 onClick={() => {
                   setshowExportImportModal(true);
@@ -864,7 +871,6 @@ function GlobalRequirementSections(props) {
             <Button
               variant="contained"
               size="medium"
-              color="primary"
               className={styles.addSectionButton}
               styles={{ width: "7rem" }}
               onClick={(e) => addSection(e, LEVEL1)}
@@ -953,7 +959,8 @@ function GlobalRequirementSections(props) {
                                                   style={{
                                                     padding: "0px 0 0 2px",
                                                     color: "#0072C6",
-                                                    fontSize: "0.875rem",
+                                                    fontSize:
+                                                      "var(--subtitle_text_font_size)",
                                                     fontWeight: "600",
                                                     fontFamily: "Open Sans",
                                                     width: "1.7rem",
@@ -972,10 +979,11 @@ function GlobalRequirementSections(props) {
                                                   }
                                                   style={{
                                                     fontWeight: "600",
-                                                    fontSize: "0.875rem",
+                                                    fontSize:
+                                                      "var(--subtitle_text_font_size)",
                                                     fontFamily: "Open Sans",
                                                     color: "#0072C6",
-                                                    marginLeft: "-7px",
+                                                    marginLeft: "0px",
                                                     marginTop: "0px",
                                                     borderLeft: "none",
                                                   }}
@@ -997,7 +1005,8 @@ function GlobalRequirementSections(props) {
                                                   }
                                                   style={{
                                                     color: "grey",
-                                                    height: "1.5rem",
+                                                    height: "1.9rem",
+                                                    width: "1.9rem",
                                                     cursor: "pointer",
                                                   }}
                                                 />
@@ -1005,7 +1014,8 @@ function GlobalRequirementSections(props) {
                                                   id="editIcon_1"
                                                   style={{
                                                     color: "grey",
-                                                    height: "1.3rem",
+                                                    height: "1.7rem",
+                                                    width: "1.7rem",
                                                     cursor: "pointer",
                                                   }}
                                                   onClick={(e) =>
@@ -1023,7 +1033,8 @@ function GlobalRequirementSections(props) {
                                                   }
                                                   style={{
                                                     color: "grey",
-                                                    height: "1.3rem",
+                                                    height: "1.7rem",
+                                                    width: "1.7rem",
                                                     cursor: "pointer",
                                                   }}
                                                 />
@@ -1037,7 +1048,7 @@ function GlobalRequirementSections(props) {
                                                   marginTop: "-5px",
 
                                                   width: "68vw",
-                                                  font: "0.8rem Open Sans",
+                                                  font: "var(--base_text_font_size) Open Sans",
                                                 }}
                                               >
                                                 {" "}
@@ -1158,7 +1169,7 @@ function GlobalRequirementSections(props) {
                                                                         color:
                                                                           "black",
                                                                         fontSize:
-                                                                          "0.875rem",
+                                                                          "var(--subtitle_text_font_size)",
                                                                         fontWeight:
                                                                           "600",
                                                                         fontFamily:
@@ -1183,13 +1194,13 @@ function GlobalRequirementSections(props) {
                                                                       id="sectionName_2"
                                                                       style={{
                                                                         fontSize:
-                                                                          "0.875rem",
+                                                                          "var(--subtitle_text_font_size)",
                                                                         fontWeight:
                                                                           "600",
                                                                         fontFamily:
                                                                           "Open Sans",
                                                                         margin:
-                                                                          "0px 0 0 0px",
+                                                                          "0px 0 0 10px",
                                                                         width:
                                                                           "58vw",
                                                                         borderLeft:
@@ -1220,7 +1231,9 @@ function GlobalRequirementSections(props) {
                                                                         color:
                                                                           "grey",
                                                                         height:
-                                                                          "1.5rem",
+                                                                          "1.9rem",
+                                                                        width:
+                                                                          "1.9rem",
                                                                         cursor:
                                                                           "pointer",
                                                                       }}
@@ -1241,7 +1254,9 @@ function GlobalRequirementSections(props) {
                                                                         color:
                                                                           "grey",
                                                                         height:
-                                                                          "1.3rem",
+                                                                          "1.7rem",
+                                                                        width:
+                                                                          "1.7rem",
                                                                         cursor:
                                                                           "pointer",
                                                                       }}
@@ -1262,7 +1277,9 @@ function GlobalRequirementSections(props) {
                                                                         color:
                                                                           "grey",
                                                                         height:
-                                                                          "1.3rem",
+                                                                          "1.7rem",
+                                                                        width:
+                                                                          "1.7rem",
                                                                         cursor:
                                                                           "pointer",
                                                                       }}
@@ -1273,7 +1290,7 @@ function GlobalRequirementSections(props) {
                                                                   <p
                                                                     id="description_2"
                                                                     style={{
-                                                                      font: "0.8rem Open Sans",
+                                                                      font: "var(--base_text_font_size) Open Sans",
                                                                       margin:
                                                                         "-5px 0 0 2px",
 
@@ -1412,7 +1429,7 @@ function GlobalRequirementSections(props) {
                                                                                             color:
                                                                                               "black",
                                                                                             fontSize:
-                                                                                              "0.875rem",
+                                                                                              "var(--subtitle_text_font_size)",
                                                                                             fontWeight:
                                                                                               "600",
                                                                                             fontFamily:
@@ -1443,7 +1460,7 @@ function GlobalRequirementSections(props) {
                                                                                           }
                                                                                           style={{
                                                                                             fontSize:
-                                                                                              "0.875rem",
+                                                                                              "var(--subtitle_text_font_size)",
                                                                                             fontWeight:
                                                                                               "600",
                                                                                             fontFamily:
@@ -1451,7 +1468,7 @@ function GlobalRequirementSections(props) {
                                                                                             width:
                                                                                               "55vw",
                                                                                             marginLeft:
-                                                                                              "0px",
+                                                                                              "10px",
                                                                                             borderLeft:
                                                                                               "none",
                                                                                           }}
@@ -1485,7 +1502,9 @@ function GlobalRequirementSections(props) {
                                                                                             color:
                                                                                               "grey",
                                                                                             height:
-                                                                                              "1.3rem",
+                                                                                              "1.7rem",
+                                                                                            width:
+                                                                                              "1.7rem",
                                                                                             cursor:
                                                                                               "pointer",
                                                                                           }}
@@ -1507,7 +1526,9 @@ function GlobalRequirementSections(props) {
                                                                                             color:
                                                                                               "grey",
                                                                                             height:
-                                                                                              "1.3rem",
+                                                                                              "1.7rem",
+                                                                                            width:
+                                                                                              "1.7rem",
                                                                                             cursor:
                                                                                               "pointer",
                                                                                           }}
@@ -1517,7 +1538,7 @@ function GlobalRequirementSections(props) {
                                                                                     <div>
                                                                                       <p
                                                                                         style={{
-                                                                                          font: "0.8rem Open Sans",
+                                                                                          font: "var(--base_text_font_size) Open Sans",
                                                                                           margin:
                                                                                             "-5px 0 0 2px",
                                                                                           width:

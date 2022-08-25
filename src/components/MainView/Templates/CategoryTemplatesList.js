@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import SearchBox from "../../../UI/Search Component";
 import SortButton from "../../../UI/SortingModal/Modal";
-import FilterImage from "../../../assets/ProcessView/SortIcon.svg";
+import FilterImage from "../../../assets/ProcessView/PT_Sorting.svg";
 import styles from "./template.module.css";
 import arabicStyles from "./templateArabicStyles.module.css";
 import {
@@ -119,9 +119,9 @@ function CategoryTemplatesList(props) {
               <SortButton
                 backDrop={true}
                 buttonToOpenModal={
-                  <button className="filterButton" type="button">
-                    <img src={FilterImage} />
-                  </button>
+                  <div className="filterButton1">
+                    <img src={FilterImage} style={{ width: "100%" }} />
+                  </div>
                 }
                 getActionName={sortSelection}
                 showTickIcon={true}
@@ -135,7 +135,7 @@ function CategoryTemplatesList(props) {
                 isArabic={direction === RTL_DIRECTION}
               />
             </div>
-            <div>
+            <div className="flex">
               <button
                 onClick={() => setView(TEMPLATE_LIST_VIEW)}
                 className={
@@ -147,11 +147,14 @@ function CategoryTemplatesList(props) {
               >
                 <MenuIcon
                   fontSize="small"
-                  style={
-                    view === TEMPLATE_LIST_VIEW
-                      ? { color: "black" }
-                      : { color: "#C4C4C4" }
-                  }
+                  style={{
+                    color:
+                      view === TEMPLATE_LIST_VIEW
+                        ? "var(--button_color)"
+                        : "#C4C4C4",
+                    width: "1.5rem",
+                    height: "1.5rem",
+                  }}
                 />
               </button>
               <button
@@ -165,11 +168,14 @@ function CategoryTemplatesList(props) {
               >
                 <AppsIcon
                   fontSize="small"
-                  style={
-                    view === TEMPLATE_GRID_VIEW
-                      ? { color: "black" }
-                      : { color: "#C4C4C4" }
-                  }
+                  style={{
+                    color:
+                      view === TEMPLATE_GRID_VIEW
+                        ? "var(--button_color)"
+                        : "#C4C4C4",
+                    width: "1.5rem",
+                    height: "1.5rem",
+                  }}
                 />
               </button>
             </div>

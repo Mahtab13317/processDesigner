@@ -1,3 +1,4 @@
+// Made changes to fix for Bug Ids  113431, 111550 & 110324
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import ReusableInputs from "./reusables/reusableInputs_Var.js";
@@ -17,6 +18,7 @@ import ErrorToast from "../../../../UI/ErrorToast";
 import { useDispatch, useSelector } from "react-redux";
 import { propertiesLabel } from "../../../../Constants/appConstants";
 import { useTranslation } from "react-i18next";
+import TabsHeading from "../../../../UI/TabsHeading/index.js";
 
 function ForwardMVariables(props) {
   const dispatch = useDispatch();
@@ -84,7 +86,7 @@ function ForwardMVariables(props) {
     let tempSelectedVariableList = [];
     let forwardVariableList =
       localLoadedActivityPropertyData &&
-      localLoadedActivityPropertyData.ActivityProperty.SubProcess.fwdVarMapping;
+      localLoadedActivityPropertyData?.ActivityProperty?.SubProcess?.fwdVarMapping;
     forwardVariableList &&
       forwardVariableList.map((variable) => {
         tempSelectedVariableList.push({
@@ -120,10 +122,11 @@ function ForwardMVariables(props) {
       });
     });
 
-    tempLocalState.ActivityProperty.SubProcess.fwdVarMapping = [
-      ...forwardMapArr,
-    ];
-
+    if (tempLocalState?.ActivityProperty) {
+      tempLocalState.ActivityProperty.SubProcess.fwdVarMapping = [
+        ...forwardMapArr,
+      ];
+    }
     dispatch(
       setActivityPropertyChange({
         [propertiesLabel.fwdVarMapping]: { isModified: true, hasError: false },
@@ -145,7 +148,7 @@ function ForwardMVariables(props) {
             : variable.mappedFieldName,
       });
       forwardMapArr.push({
-        m_bSelected:true,
+        m_bSelected: true,
         displayName: variable.SysName,
         importedVarId: variable.VarID,
         importedFieldName: variable.VarName,
@@ -157,9 +160,11 @@ function ForwardMVariables(props) {
       });
     });
     setSelectedVariableList(temp);
-    tempLocalState.ActivityProperty.SubProcess.fwdVarMapping = [
-      ...forwardMapArr,
-    ];
+    if (tempLocalState.ActivityProperty) {
+      tempLocalState.ActivityProperty.SubProcess.fwdVarMapping = [
+        ...forwardMapArr,
+      ];
+    }
     dispatch(
       setActivityPropertyChange({
         [propertiesLabel.fwdVarMapping]: { isModified: true, hasError: false },
@@ -178,7 +183,9 @@ function ForwardMVariables(props) {
 
   const content = () => {
     return (
-      <div
+      <>
+        <TabsHeading heading={props?.heading} />
+        <div
         style={{
           backgroundColor: props.isDrawerExpanded ? "white" : null,
           width: props.isDrawerExpanded ? "144.3%" : "auto",
@@ -187,7 +194,7 @@ function ForwardMVariables(props) {
         <div className="forwardMapping_VariablesLabel">
           <p style={{ fontSize: "12px", color: "#606060" }}>FORWARD MAPPING</p>
           <p
-            style={{ fontSize: "11px", color: "#0072C6", cursor: "pointer" }}
+            style={{ fontSize: "11px", color: "var(--link_color)", cursor: "pointer" }}
             onClick={() => setShowVariablesModal(true)}
           >
             Add Variable(s)
@@ -211,8 +218,8 @@ function ForwardMVariables(props) {
             <p className="targetProcess">Target process</p>
             <p className="processName_CallActivity">
               {
-                localLoadedActivityPropertyData.ActivityProperty.SubProcess
-                  .importedProcessName
+                localLoadedActivityPropertyData?.ActivityProperty?.SubProcess
+                  ?.importedProcessName
               }
             </p>
           </div>
@@ -270,6 +277,7 @@ function ForwardMVariables(props) {
             );
           })}
       </div>
+      </>
     );
   };
 

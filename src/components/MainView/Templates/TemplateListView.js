@@ -34,8 +34,7 @@ function TemplateListView(props) {
       font: "normal normal normal 12px/17px Open Sans",
       letterSpacing: "0px",
       color: "#000000",
-      zIndex: "100",
-      transform: "translate3d(0px, -0.125rem, 0px) !important",
+      transform: "translate3d(0px, -0.25rem, 0px) !important",
     },
     arrow: {
       "&:before": {
@@ -100,7 +99,7 @@ function TemplateListView(props) {
             ) : (
               ""
             )}
-            {el.Scope === SYSTEM_DEFINED_SCOPE ? (
+            {el.Scope == SYSTEM_DEFINED_SCOPE ? (
               <TemplateTooltip
                 arrow
                 title={t("predefinedTemplate")}
@@ -131,7 +130,7 @@ function TemplateListView(props) {
           <span className={styles.templateCreationDate}>
             {el.SameDate === "true"
               ? `at ${el.CreatedTime}`
-              : `on ${el.CreatedDate}`}
+              : `on ${el.CreatedDate} at ${el.CreatedTime}`}
           </span>
         </div>
         <div

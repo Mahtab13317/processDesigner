@@ -49,9 +49,10 @@ function PinnedProcessTile(props) {
                 </div>
                 <div className="titleDiv">
                   <p className="titlePinned">
-                    {props.name}
+                    <span className="titlePinnedName">{props.name}</span>
                     <span className="version">
-                      {t("v")} {props.versionNo}
+                      {t("v")}
+                      {props.versionNo}
                     </span>
                   </p>
                   <p className="processCat">{props.projectName}</p>
@@ -59,12 +60,15 @@ function PinnedProcessTile(props) {
               </div>
               <div className="pinnedProcessAlignment row">
                 <img
-                  style={{ height: "10px", width: "10px", marginTop: "3px" }}
+                  style={{ height: "0.75rem", width: "0.75rem" }}
                   src={t(tileProcess(props.processType)[0])}
                 />
                 <p className="processStatus">{processType}</p>
               </div>
-              <div className="pinnedProcessAlignment row">
+              <div
+                className="pinnedProcessAlignment row"
+                style={{ margin: "0 0 0.5rem 2.25vw" }}
+              >
                 <p className="processModification">
                   {t("lastModification")} {props.modifiedDate},
                   {props.modifiedTime}

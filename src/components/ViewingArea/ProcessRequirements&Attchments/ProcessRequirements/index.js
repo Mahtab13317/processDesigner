@@ -1,3 +1,5 @@
+// Changes made to solve 110715 (Global Requirement section: Buttons not visible while Adding section)
+
 import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Accordion from "@material-ui/core/Accordion";
@@ -8,12 +10,15 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import "./index.css";
 import axios from "axios";
+import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
 import {
   SERVER_URL,
   ENDPOINT_FETCHSYSTEMREQUIREMENTS,
 } from "../../../../Constants/appConstants";
 import RightSection from "./requirementsRightSection";
 import { connect } from "react-redux";
+import TabsHeading from "../../../../UI/TabsHeading";
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "white",
   },
   heading: {
-    fontSize: "14px",
+    fontSize: "var(--subtitle_text_font_size)",
     fontWeight: theme.typography.fontWeightRegular,
     color: "#606060",
   },
@@ -49,9 +54,13 @@ function ProcessRequirements(props) {
       if (res.status === 200) {
         setSections(res?.data?.Requirement);
         setSelectedOrder({
-          SectionId: res?.data?.Requirement[0]?.RequirementId,
+          SectionId: res?.data?.Requirement
+            ? res?.data?.Requirement[0]?.RequirementId
+            : null,
           SectionLevel: "0",
-          SectionName: res?.data?.Requirement[0]?.RequirementName,
+          SectionName: res?.data?.Requirement
+            ? res?.data?.Requirement[0]?.RequirementName
+            : null,
         });
       }
     }
@@ -59,13 +68,18 @@ function ProcessRequirements(props) {
   }, []);
 
   return (
-    <div style={{ display: "flex", height: "100%" }}>
+    <>
+      <TabsHeading heading={props.heading} />
+      <div style={{ display: "flex", height: "100%" }}>
+    
+    {props.isDrawerExpanded ? (
       <div className={classes.root}>
         <p
           style={{
-            fontSize: "14px",
+            fontSize: "var(--subtitle_text_font_size)",
             fontWeight: "700",
             backgroundColor: "white",
+            paddingLeft: "8px",
           }}
         >
           Sections
@@ -114,7 +128,8 @@ function ProcessRequirements(props) {
                           style={{
                             flexDirection: "row-reverse",
                             backgroundColor:
-                              secInner.RequirementId == selectedOrder?.SectionId
+                              secInner.RequirementId ==
+                              selectedOrder?.SectionId
                                 ? "#0072C626"
                                 : "white",
                             fontWeight:
@@ -142,7 +157,9 @@ function ProcessRequirements(props) {
                         <AccordionDetails
                           onClick={() => handleAccordionClick()}
                           style={{
-                            backgroundColor: props.isActive ? "#0072C626" : "",
+                            backgroundColor: props.isActive
+                              ? "#0072C626"
+                              : "",
                           }}
                         >
                           <Typography>
@@ -204,18 +221,24 @@ function ProcessRequirements(props) {
           );
         })}
       </div>
-      <div
-        style={{
-          padding: "10px 25px 17px 17px",
-          backgroundColor: "white",
-          width: "84%",
-          marginTop: "4px",
-          overflow: "scroll",
-        }}
-      >
-        <RightSection completeSections={sections} selectedOrder={selectedOrder} />
-      </div>
+    ) : null}
+    <div
+      style={{
+        padding: props.isDrawerExpanded ? "10px 25px 17px 17px" : "0px",
+        backgroundColor: "white",
+        width: props.isDrawerExpanded ? "84%" : "100%",
+        marginTop: "4px",
+        overflowY: "scroll",
+      }}
+    >
+      <RightSection
+        completeSections={sections}
+        selectedOrder={selectedOrder}
+      />
     </div>
+  </div>
+    </>
+    
   );
 }
 
@@ -227,6 +250,7 @@ const mapStateToProps = (state) => {
     templateId: state.openTemplateReducer.templateId,
     templateName: state.openTemplateReducer.templateName,
     openTemplateFlag: state.openTemplateReducer.openFlag,
+    isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
   };
 };
 

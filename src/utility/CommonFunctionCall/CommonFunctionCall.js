@@ -124,6 +124,7 @@ export const getAllVariableOptions = function GetAllVariableOption({
     value: item.VariableName,
   }));
 };
+
 export const getVariablesByScopes = function GetVariablesByScopes({
   variables,
   scopes = [],
@@ -139,6 +140,7 @@ export const getVariablesByScopes = function GetVariablesByScopes({
   }
   return [];
 };
+
 export const getVariableIdByName = function GetVariableId({ variables, name }) {
   const allVars = variables || [];
   const variable = allVars.find((item) => name === item.VariableName);
@@ -153,6 +155,7 @@ export const getVariableExtObjectIdByName = function GetVariableExtObjectId({
   const variable = allVars.find((item) => name === item.VariableName);
   return variable?.ExtObjectId || "0";
 };
+
 export const getVariableVarFieldIdByName = function GetVariableVarFieldId({
   variables,
   name,
@@ -161,6 +164,7 @@ export const getVariableVarFieldIdByName = function GetVariableVarFieldId({
   const variable = allVars.find((item) => name === item.VariableName);
   return variable?.VarFieldId || "0";
 };
+
 export const getVariableScopeByName = function GetVariableScope({
   variables,
   name,
@@ -180,6 +184,7 @@ export const createInstanceWithoutBearer = function (url) {
     },
   });
 };
+
 export const createInstance = function (url) {
   return axios.create({
     baseURL: url ? url : SERVER_URL,
@@ -190,6 +195,42 @@ export const createInstance = function (url) {
     },
   });
 };
+
 export const getLaunchpadKey = () => {
   return JSON.parse(localStorage.getItem("launchpadKey") || "{}")?.token;
+};
+
+export const getVarTypeAndIsArray = (varVal) => {
+  //return [varType, isArray];
+
+  switch (varVal) {
+    case "3":
+      return { variableType: "3", isArray: "N" };
+    case "13":
+      return { variableType: "3", isArray: "Y" };
+    case "4":
+      return { variableType: "4", isArray: "N" };
+    case "14":
+      return { variableType: "4", isArray: "Y" };
+    case "6":
+      return { variableType: "6", isArray: "N" };
+    case "16":
+      return { variableType: "6", isArray: "Y" };
+    case "8":
+      return { variableType: "8", isArray: "N" };
+    case "18":
+      return { variableType: "8", isArray: "Y" };
+    case "15":
+      return { variableType: "15", isArray: "N" };
+    case "115":
+      return { variableType: "15", isArray: "Y" };
+    case "10":
+      return { variableType: "10", isArray: "N" };
+    case "20":
+      return { variableType: "10", isArray: "Y" };
+    case "12":
+      return { variableType: "12", isArray: "N" };
+    default:
+      return { variableType: "10", isArray: "N" };
+  }
 };

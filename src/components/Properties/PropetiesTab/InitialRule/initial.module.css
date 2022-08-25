@@ -21,18 +21,23 @@
 
 .addAttachHeading {
   font: normal normal 700 14px/19px Open Sans;
+  font-size: var(--subtitle_text_font_size);
   letter-spacing: 0px;
   color: #000000;
 }
 
 .addAttachBtn {
-  background: #ffffff 0% 0% no-repeat padding-box;
-  border: 1px solid #0072c5;
+  /* background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #0072c5;*/
+  background-color: white !important;
+  color: var(--button_color) !important;
+  border: 1px solid var(--button_color) !important;
+  font-weight: 600 !important;
   border-radius: 2px;
   text-align: left;
   font: normal normal 600 12px/17px Open Sans;
   letter-spacing: 0px;
-  color: #0072c6;
+
   padding: 0.25rem 0.5vw;
   cursor: pointer;
 }
@@ -42,7 +47,7 @@
   width: 98%;
 }
 
-.collapsedView .tableDiv{
+.collapsedView .tableDiv {
   padding: 1rem 0.25vw;
   width: 100%;
 }
@@ -106,13 +111,16 @@
 
 .expandedView .divHead {
   text-align: left;
-  font: normal normal 600 14px/19px Open Sans;
+  font: normal normal 600 13px/18px Open Sans;
+  font-size: var(--subtitle_text_font_size);
   letter-spacing: 0.42px;
   color: #070707;
 }
 .collapsedView .divHead {
   text-align: left;
   font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--subtitle_text_font_size);
+
   letter-spacing: 0.42px;
   color: #070707;
   padding: 0.1rem;
@@ -121,17 +129,20 @@
 
 .expandedView .divBody {
   text-align: left;
-  font: normal normal normal 14px/19px Open Sans;
+  font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0.42px;
   color: #070707;
 }
 .collapsedView .divBody {
   text-align: left;
   font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0.42px;
   color: #070707;
 }
- .expandedView .downloadIcon {
+.expandedView .downloadIcon {
   width: 1.25rem !important;
   height: 1.25rem !important;
   margin: 0 1vw;
@@ -141,12 +152,12 @@
   height: 1rem !important;
   margin: 0 0.2vw;
 }
-.expandedView  .deleteIcon1 {
+.expandedView .deleteIcon1 {
   width: 1.25rem !important;
   height: 1.25rem !important;
   margin: 0 1vw;
 }
-.collapsedView  .deleteIcon1 {
+.collapsedView .deleteIcon1 {
   width: 1rem !important;
   height: 1rem !important;
   margin: 0 0.2vw;

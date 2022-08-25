@@ -1,15 +1,15 @@
 .importXmlBtn {
-  background: #0072c6 0% 0% no-repeat padding-box;
+  background: var(--button_color) 0% 0% no-repeat padding-box;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
-  width: 6rem;
-  height: 1.6rem;
-  font: normal normal 600 12px/17px Open Sans;
+  width: 10rem;
+  height: 2.6rem;
+  font: normal normal 600 var(--base_text_font_size)/17px Open Sans;
   letter-spacing: 0px;
   color: #ffffff;
   text-align: center;
-  margin-left: 1rem;
+  margin-left: 1.5rem;
   cursor: pointer;
 }
 
@@ -20,7 +20,7 @@
   opacity: 0.5;
   width: 6rem;
   height: 1.6rem;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size)/17px Open Sans;
   letter-spacing: 0px;
   color: #ffffff;
   text-align: center;
@@ -30,12 +30,12 @@
 .input {
   margin-left: 4rem;
   padding-left: 0.5rem;
-  height: 1.5rem;
+  height: 2.5rem;
 }
 .inputCollapse {
   margin-left: 1rem;
   padding-left: 0.5rem;
-  height: 1.5rem;
+  height: 2.5rem;
 }
 .destinationText {
   margin-left: 4rem;
@@ -46,12 +46,12 @@
 .message {
   margin-left: 2rem;
   width: 10rem;
-  font: normal normal 500 15px/17px Open Sans;
+  font: normal normal 500 var(--subtitle_text_font_size)/17px Open Sans;
 }
 .messageCollapse {
   margin-left: 2rem;
   width: 10rem;
-  font: normal normal 600 15px/17px Open Sans;
+  font: normal normal 600 var(--subtitle_text_font_size)/17px Open Sans;
   color: #0072c6;
   cursor: pointer;
   text-decoration: underline;
@@ -59,16 +59,16 @@
 .search {
   margin-left: 5rem;
   width: 6rem;
-  font: normal normal 500 15px/17px Open Sans;
+  font: normal normal 500 var(--subtitle_text_font_size)/17px Open Sans;
 }
 .update {
   margin-left: 5rem;
   width: 6rem;
-  font: normal normal 500 15px/17px Open Sans;
+  font: normal normal 500 var(--subtitle_text_font_size)/17px Open Sans;
 }
 .variable {
   margin-left: 5rem;
-  font: normal normal 500 15px/17px Open Sans;
+  font: normal normal 500 var(--subtitle_text_font_size)/17px Open Sans;
 }
 
 .addNewRule {
@@ -95,7 +95,7 @@
 }
 .inputXml {
   width: 85%;
-  height: 10rem;
+  height: 18rem;
   margin-left: 2rem;
   padding-top: 0 !important;
 }
@@ -105,13 +105,13 @@
   font: normal normal 600 14px/17px Open Sans;
 }
 .readXmlBtn {
-  background: #0072c6 0% 0% no-repeat padding-box;
+  background:  var(--button_color) 0% 0% no-repeat padding-box;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
-  width: 5rem;
-  height: 1.6rem;
-  font: normal normal 600 12px/17px Open Sans;
+  width: 9rem;
+  height: 2.6rem;
+  font: normal normal 600 var(--base_text_font_size)/17px Open Sans;
   letter-spacing: 0px;
   color: #ffffff;
   text-align: center;

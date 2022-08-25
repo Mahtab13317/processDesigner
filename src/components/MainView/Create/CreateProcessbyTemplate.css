@@ -59,7 +59,8 @@
   flex-direction: row !important;
   justify-content: flex-start !important;
   color: #000000 !important;
-  font: normal normal 600 14px/18px Open Sans !important;
+  /* font: normal normal 600 14px/18px Open Sans !important; */
+  font-weight: 700;
   letter-spacing: 0px;
   padding: 0 !important;
 }
@@ -74,7 +75,7 @@
 .allCatName {
   margin-top: 0.5rem;
   text-align: left;
-  font: normal normal 600 16px/22px Open Sans;
+  font-size: 1.3rem;
   letter-spacing: 0px;
   color: #000000;
 }
@@ -84,7 +85,7 @@
   margin-right: 15%;
   margin-top: 0.5rem;
   text-align: left;
-  font: normal normal 600 16px/22px Open Sans;
+  font-size: 1.2rem;
   letter-spacing: 0px;
   cursor: pointer;
 }
@@ -94,8 +95,8 @@
   font: normal normal 600 12px/17px Open Sans;
   letter-spacing: 0px;
   color: #ffffff;
-  border: #0072c6;
-  background: #0072c6 0% 0% no-repeat padding-box;
+  border: var(--button_color);
+  background: var(--button_color) 0% 0% no-repeat padding-box;
   margin: 0 0.25rem;
   cursor: pointer;
   height: 28px;

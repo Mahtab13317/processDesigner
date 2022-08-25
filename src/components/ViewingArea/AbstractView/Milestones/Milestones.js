@@ -70,6 +70,7 @@ const milestones = (props) => {
                       ? "mileActivityDiv"
                       : null
                   }
+                  style={{ height: "100%" }}
                 >
                   <ActivityView
                     caseEnabled={caseEnabled}

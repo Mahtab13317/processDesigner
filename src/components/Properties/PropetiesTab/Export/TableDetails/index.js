@@ -55,7 +55,14 @@ function TableDetails(props) {
   const [tableName, setTableName] = useState("");
   const [dateFormat, setDateFormat] = useState("yyyy-MM-dd");
   const [tableType, setTableType] = useState(EXPORT_DEFINED_TABLE_TYPE);
-  const [mappingDetails, setMappingDetails] = useState({});
+  const [mappingDetails, setMappingDetails] = useState({
+    alignment: "L",
+    exportAllDocsFlag: "N",
+    length: "0",
+    mappedField: "",
+    mappingType: "0",
+    quoteflag: "N",
+  });
   const [dataFields, setDataFields] = useState({});
   const [fieldName, setFieldName] = useState("");
   const [fieldType, setFieldType] = useState("10");
@@ -96,6 +103,12 @@ function TableDetails(props) {
     });
     return hasAtleastOneMapping;
   };
+
+  useEffect(() => {
+    if (!showInputFields) {
+      setFieldName("");
+    }
+  }, [showInputFields]);
 
   // Function that checks if the file details mandatory fields are filled or not.
   const checkFileDetailsFields = () => {
@@ -265,22 +278,6 @@ function TableDetails(props) {
           isTableUsable = false;
         }
       }
-
-      //Await issue in existing table.
-      //Mapping delete if field deletes.
-      // mandatoryColumns.forEach((element) => {
-      //   if (!columnNames.includes(element)) {
-      //     isTableUsable = false;
-      //   }
-      // });
-
-      //       Attribute: "UNIQUE"
-      // DefaultValue: ""
-      // Indentity: "F"
-      // Length: "50"
-      // Name: "Test1"
-      // Nullable: "Y"
-      // Type: "10"
     }
     await checkMandatoryColumns();
 
@@ -435,7 +432,7 @@ function TableDetails(props) {
 
           const dataMapObj = {
             m_objExportMappedFieldInfo: {
-              orderID: maxId + 1,
+              orderID: `${maxId + 1}`,
               fieldName: fieldName,
               mappedFieldName: mappingDetails?.mappedField || "",
               fieldLength: mappingDetails?.length,
@@ -464,7 +461,14 @@ function TableDetails(props) {
             precision: "0",
           });
           setConstraintType("");
-          setMappingDetails({});
+          setMappingDetails({
+            alignment: "L",
+            exportAllDocsFlag: "N",
+            length: "0",
+            mappedField: "",
+            mappingType: "0",
+            quoteflag: "N",
+          });
           dispatch(
             setActivityPropertyChange({
               [propertiesLabel.Export]: { isModified: true, hasError: false },
@@ -485,7 +489,16 @@ function TableDetails(props) {
 
   // Function to handle table type.
   const handleTableType = (event) => {
-    setTableType(event.target.value);
+    const { value } = event.target;
+    setTableName("");
+    setShowInputFields(false);
+    setTableType(value);
+    setDataFields((prevData) => {
+      let temp = { ...prevData };
+      temp.fieldList = [];
+      temp.mappingList = [];
+      return temp;
+    });
   };
 
   // Function that runs when the user changes the constraint type field.
@@ -542,12 +555,6 @@ function TableDetails(props) {
     setDataFields(temp);
     setActivityData((prevData) => {
       let tempObj = { ...prevData };
-      // let fieldIndex = 0;
-      // tempObj.mappingList.forEach((element, ind) => {
-      //   if (element.m_objExportMappedFieldInfo.fieldName === name) {
-      //     fieldIndex = ind;
-      //   }
-      // });
       tempObj.mappingList.splice(index, 1);
       setGlobalData(tempObj);
       return tempObj;
@@ -708,7 +715,15 @@ function TableDetails(props) {
         </div>
       </div>
 
-      <p className={styles.fieldDefinitionHeading}>{t("fieldDefinition")}</p>
+      <p
+        className={
+          direction === RTL_DIRECTION
+            ? arabicStyles.fieldDefinitionHeading
+            : styles.fieldDefinitionHeading
+        }
+      >
+        {t("fieldDefinition")}
+      </p>
       <div className={styles.headingsDiv}>
         <p
           className={
@@ -771,6 +786,7 @@ function TableDetails(props) {
             <InputFieldsStrip
               dataFields={dataFields}
               setValue={setMappingDetails}
+              mappingDetails={mappingDetails}
               inputBaseValue={fieldName}
               inputBaseHandler={setFieldName}
               dropdownValue={fieldType}

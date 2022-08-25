@@ -20,6 +20,7 @@ function MappingDataModal(props) {
     isProcessReadOnly,
     documentList,
     variablesList,
+    mappingDetails,
   } = props;
   const dispatch = useDispatch();
   const [typeValue, setTypeValue] = useState("0");
@@ -57,6 +58,18 @@ function MappingDataModal(props) {
       });
     }
   }, [dataFields]);
+
+  // Function that runs when the component loads.
+  useEffect(() => {
+    if (mappingDetails) {
+      setMappedField(mappingDetails?.mappedField);
+      setTypeValue(mappingDetails?.mappingType);
+      setQuoteFlag(mappingDetails?.quoteflag);
+      setAlignment(mappingDetails?.alignment);
+      setExportAllDocsFlag(mappingDetails?.exportAllDocsFlag);
+      setLength(mappingDetails?.length);
+    }
+  }, [mappingDetails]);
 
   // Function to get dropdown options.
   const getDataDropdownOptions = () => {

@@ -202,26 +202,26 @@ function GroupsTab(props) {
       </table>
       {/* -------------------------------------------------SHOW FILTER MODAL-------------------------------------------- */}
       {showFilterScreen ? (
-                    <Modal
-                      show={showFilterScreen}
-                      backDropStyle={{ backgroundColor: "black",opacity:'0.4' }}
-                      style={{
-                        top: "15%",
-                        left: "16%",
-                        position: "absolute",
-                        width: "499px",
-                        height: "342px",
-                        zIndex: "1500",
-                        boxShadow: "0px 3px 6px #00000029",
-                        border: "1px solid #D6D6D6",
-                        borderRadius: "3px",
-                      }}
-                      modalClosed={() => setShowFilterScreen(false)}
-                      children= {<FilterScreen setShowFilterScreen={setShowFilterScreen}/>}
-                    ></Modal>
-                  ) : null}
+        <Modal
+          show={showFilterScreen}
+          backDropStyle={{ backgroundColor: "black", opacity: "0.4" }}
+          style={{
+            top: "15%",
+            left: "16%",
+            position: "absolute",
+            width: "499px",
+            height: "342px",
+            zIndex: "1500",
+            boxShadow: "0px 3px 6px #00000029",
+            border: "1px solid #D6D6D6",
+            borderRadius: "3px",
+          }}
+          modalClosed={() => setShowFilterScreen(false)}
+          children={<FilterScreen setShowFilterScreen={setShowFilterScreen} />}
+        ></Modal>
+      ) : null}
 
-{/* -------------------------------------------------------END---------------------------------------------------- */}
+      {/* -------------------------------------------------------END---------------------------------------------------- */}
     </React.Fragment>
   );
 }

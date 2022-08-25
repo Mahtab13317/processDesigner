@@ -7,42 +7,42 @@ import {
   getDropdownOptions,
   getVariableIdFromSysDefinedName,
 } from "./TypeAndFieldMapping";
-import { BASE_URL, RTL_DIRECTION } from "../../../../Constants/appConstants";
-import { Checkbox, MenuItem } from "@material-ui/core";
+import { SERVER_URL, RTL_DIRECTION } from "../../../../Constants/appConstants";
+import { Checkbox } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 import DeleteOutlinedIcon from "@material-ui/icons/DeleteOutlined";
 import EmptyStateIcon from "../../../../assets/ProcessView/EmptyState.svg";
 import TypeAndFieldMapping from "../../../../UI/TypeAndFieldMapping";
-import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
+
 import Modal from "../../../../UI/Modal/Modal";
 import TableMappingModal from "./TableMappingModal";
 import ClearOutlinedIcon from "@material-ui/icons/ClearOutlined";
 import { store, useGlobalState } from "state-pool";
-import { connect } from "react-redux";
-import { SERVER_URL } from "../../../../Constants/appConstants";
+import { connect, useDispatch } from "react-redux";
+
 import EditIcon from "@material-ui/icons/Edit";
 import axios from "axios";
+import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 
 function Edit(props) {
   const {
     varData,
-    setUserDefinedVariables,
-    userDefinedVariables,
+
     editVarData,
   } = props;
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div>
       <EditIcon
-        className={
-          direction === RTL_DIRECTION
-            ? arabicStyles.infoIcon
-            : styles.dataInfoIcon
-        }
-        fontSize="small"
+        classes={{
+          root:
+            direction === RTL_DIRECTION
+              ? arabicStyles.infoIcon
+              : styles.dataInfoIcon, // class name, e.g. `classes-nesting-root-x`
+        }}
+        fontSize="medium"
         onClick={() => editVarData(varData)}
       />
 
@@ -78,17 +78,18 @@ function PrimaryVariables(props) {
   const {
     openProcessID,
     isProcessReadOnly,
-    bForInputStrip,
-    setBForInputStrip,
+
     setPrimaryVariableCount,
   } = props;
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData, setLocalLoadedProcessData] =
     useGlobalState(loadedProcessData);
   const direction = `${t("HTML_DIR")}`;
+  const dispatch = useDispatch();
   const [isDisabledDataType, setIsDisabledDataType] = useState(
     new Array(dataInputs.length).fill(false)
   );
+  const [bForInputStrip, setBForInputStrip] = useState(false);
   const [aliasName, setAliasName] = useState("");
   const [variableType, setVariableType] = useState("");
   const [complexDataJSON, setcomplexDataJSON] = useState({});
@@ -102,6 +103,7 @@ function PrimaryVariables(props) {
   const [isComplexSelected, setIsComplexSelected] = useState(false);
   const [modifyComplexJson, setModifyComplexJson] = useState({});
   const [modifyButtonDisableId, setmodifyButtonDisableId] = useState();
+  const [dataObjectTemplates, setdataObjectTemplates] = useState([]);
 
   const callbackMethod = (data) => {
     let temp = false;
@@ -115,6 +117,7 @@ function PrimaryVariables(props) {
     } else {
       handleVariableType(variableType, data);
     }
+    setArrayType(data?.arr_type_do === "Y" ? true : false);
     setcomplexDataJSON(data);
   };
 
@@ -125,7 +128,7 @@ function PrimaryVariables(props) {
     data_object_id: "",
     // default_category_name: "a_puneet",
     object_type: "P", //AP/P/C
-    //object_id: localLoadedProcessData.ProcessDefId,
+    object_id: localLoadedProcessData.ProcessDefId,
     // object_name: "a_puneet",
     parent_do: [
       {
@@ -209,6 +212,7 @@ function PrimaryVariables(props) {
         order_by: "2",
       },
     });
+    setdataObjectTemplates([...res.data.data.templates]);
   };
 
   const getUserDefinedVariables = (processData) => {
@@ -238,6 +242,9 @@ function PrimaryVariables(props) {
     setUserDefinedVariables(temp);
     //removeUsedDataFields(temp);
     setPrimaryVariableCount(temp.length);
+    if (temp.length > 0) {
+      setBForInputStrip(true);
+    }
   };
 
   // Function to remove the already used data fields.
@@ -315,6 +322,14 @@ function PrimaryVariables(props) {
         });
         setUserDefinedVariables(temp);
         setPrimaryVariableCount(temp.length);
+        if (temp.length === 0) setBForInputStrip(false);
+        dispatch(
+          setToastDataFunc({
+            message: t("variableDeleted"),
+            severity: "success",
+            open: true,
+          })
+        );
       }
     });
 
@@ -389,6 +404,18 @@ function PrimaryVariables(props) {
       setDataField(complexDataFields?.name);
     } else if (event !== 11 && complexDataFields?.hasOwnProperty("id")) {
       setDataField(complexDataFields?.name);
+    } else {
+      let dataFieldsForType = getDataFieldsForType(event);
+      if (dataFieldsForType.length > 0)
+        setDataField(getDataFieldsForType(event)[0]);
+      else
+        dispatch(
+          setToastDataFunc({
+            message: t("noSysDefinedVarPresentError"),
+            severity: "error",
+            open: true,
+          })
+        );
     }
 
     // if (
@@ -466,110 +493,134 @@ function PrimaryVariables(props) {
   // Function that runs when a user creates a variable using the create variable button.
   const handleCreateVariable = async () => {
     const userDefinedObj = {
-      aliasName: aliasName,
+      aliasName: aliasName.trim(),
       variableType: variableType,
       dataField: dataField,
       isArrayType: arrayType,
     };
-
-    let postBody = {
-      processDefId: props.openProcessID,
-      varName: aliasName,
-      variableId: getVariableIdFromSysDefinedName(dataField, variableType),
-      varType: variableType,
-      sysDefName: dataField,
-      defaultValue: "",
-      varLength: "0",
-      varPrecision: "0",
-      unbounded: arrayType ? "Y" : "N",
-      extObjectId: "0",
-    };
-    if (variableType !== "11" && !arrayType) {
-      axios.post(SERVER_URL + `/addVariable`, postBody).then((res) => {
-        if (res.status === 200 && res.data.Status === 0) {
-          let temp = [...userDefinedVariables];
-          temp.splice(0, 0, userDefinedObj);
-          setUserDefinedVariables(temp);
-          setPrimaryVariableCount(temp.length);
-          // Updating processData on adding Variable
-          let newProcessData = JSON.parse(
-            JSON.stringify(localLoadedProcessData)
-          );
-          newProcessData?.Variable?.push({
-            DefaultValue: "",
-            ExtObjectId: "0",
-            SystemDefinedName: dataField,
-            Unbounded: arrayType ? "Y" : "N",
-            VarFieldId: "0",
-            VarPrecision: "0",
-            VariableId: getVariableIdFromSysDefinedName(
-              dataField,
-              variableType
-            ),
-            VariableLength: "0",
-            VariableName: aliasName,
-            VariableScope: "U",
-            VariableType: variableType,
-          });
-          setLocalLoadedProcessData(newProcessData);
-        }
-      });
-      if (!isComplexSelected) {
-        const [dataInputObj] = dataInputs?.filter(
-          (d) => d.variableType === variableType
-        );
-        const availableDataFields = dataInputObj.dataFields?.filter(
-          (q) => q !== dataField
-        );
-        // dataInputs.forEach((element) => {
-        //   if (element.variableType === variableType) {
-        //     element.dataFields = availableDataFields;
-        //   }
-        // });
-        updateIsDisabledDataType();
-      }
-      setAliasName("");
-      setVariableType("");
-      setDataField("");
-      setArrayType(false);
-    } else {
-      const formData = new FormData();
-      let varData = {
-        variableType: variableType,
-        variableName: aliasName,
+    if (dataField !== "") {
+      let postBody = {
+        processDefId: props.openProcessID,
+        varName: aliasName,
+        variableId: getVariableIdFromSysDefinedName(dataField, variableType),
+        varType: variableType,
+        sysDefName: dataField,
+        defaultValue: "",
+        varLength: "0",
+        varPrecision: "0",
         unbounded: arrayType ? "Y" : "N",
-        processName: localLoadedProcessData.ProcessName,
+        extObjectId: "0",
       };
-      let modData = { ...complexDataJSON, ...varData };
-
-      let mystring = JSON.stringify(modData);
-      let myBlob = new Blob([mystring], {
-        type: "text/plain",
-      });
-      formData.append("file", myBlob);
-
-      if (modData.hasOwnProperty("id")) {
-        const response = await axios({
-          method: "post",
-          url: `/pmweb/saveVariable/${localLoadedProcessData.ProcessDefId}`,
-          data: formData,
-          headers: {
-            "Content-Type": "multipart/form-data",
-            // type: "application/json",
-          },
+      if (variableType !== "11" && !arrayType) {
+        axios.post(SERVER_URL + `/addVariable`, postBody).then((res) => {
+          if (res.status === 200 && res.data.Status === 0) {
+            let temp = [...userDefinedVariables];
+            temp.splice(0, 0, userDefinedObj);
+            setUserDefinedVariables(temp);
+            setPrimaryVariableCount(temp.length);
+            // Updating processData on adding Variable
+            let newProcessData = JSON.parse(
+              JSON.stringify(localLoadedProcessData)
+            );
+            newProcessData?.Variable?.push({
+              DefaultValue: "",
+              ExtObjectId: "0",
+              SystemDefinedName: dataField,
+              Unbounded: arrayType ? "Y" : "N",
+              VarFieldId: "0",
+              VarPrecision: "0",
+              VariableId: getVariableIdFromSysDefinedName(
+                dataField,
+                variableType
+              ),
+              VariableLength: "0",
+              VariableName: aliasName,
+              VariableScope: "U",
+              VariableType: variableType,
+            });
+            setLocalLoadedProcessData(newProcessData);
+            setToastDataFunc({
+              message: t("variableAdded"),
+              severity: "success",
+              open: true,
+            });
+          }
         });
-        if (response.data.Status === 0 && response.data.Variable.length !== 0) {
-          let temp = JSON.parse(JSON.stringify(localLoadedProcessData));
-          temp.Variable = [];
-          temp.Variable = [...response.data.Variable];
-          setLocalLoadedProcessData(temp);
-          getUserDefinedVariables(temp);
-          setAliasName("");
-          setVariableType("");
-          setDataField("");
-          setArrayType(false);
+        if (!isComplexSelected) {
+          const [dataInputObj] = dataInputs?.filter(
+            (d) => d.variableType === variableType
+          );
+          const availableDataFields = dataInputObj.dataFields?.filter(
+            (q) => q !== dataField
+          );
+          // dataInputs.forEach((element) => {
+          //   if (element.variableType === variableType) {
+          //     element.dataFields = availableDataFields;
+          //   }
+          // });
+          updateIsDisabledDataType();
+        }
+        setAliasName("");
+        setVariableType("");
+        setDataField("");
+        setArrayType(false);
+      } else {
+        const formData = new FormData();
+        let varData = {
+          variableType: variableType,
+          variableName: aliasName,
+          unbounded: complexDataJSON?.arr_type_do,
+          processName: localLoadedProcessData.ProcessName,
+        };
+
+        let modData = { ...complexDataJSON, ...varData };
+
+        let mystring = JSON.stringify(modData);
+        let myBlob = new Blob([mystring], {
+          type: "text/plain",
+        });
+        formData.append("file", myBlob);
+
+        if (modData.hasOwnProperty("id")) {
+          const response = await axios({
+            method: "post",
+            url: `/pmweb/saveVariable/${localLoadedProcessData.ProcessDefId}`,
+            data: formData,
+            headers: {
+              "Content-Type": "multipart/form-data",
+              // type: "application/json",
+            },
+          });
+          if (
+            response?.data?.Status === 0 &&
+            response?.data?.Variable.length !== 0
+          ) {
+            let temp = JSON.parse(JSON.stringify(localLoadedProcessData));
+            temp.Variable = [];
+            temp.Variable = [...response.data.Variable];
+            setLocalLoadedProcessData(temp);
+            getUserDefinedVariables(temp);
+            setAliasName("");
+            setVariableType("");
+            setDataField("");
+            setArrayType(false);
+            // setBForInputStrip(false);
+            setToastDataFunc({
+              message: t("variableAdded"),
+              severity: "success",
+              open: true,
+            });
+          }
         }
       }
+    } else {
+      dispatch(
+        setToastDataFunc({
+          message: t("noSysDefinedVarPresentError"),
+          severity: "error",
+          open: true,
+        })
+      );
     }
   };
 
@@ -590,18 +641,17 @@ function PrimaryVariables(props) {
     }
   };
 
-  const getDataFieldsForType = (type, isNewVar, dataField) => {
+  const getDataFieldsForType = (type) => {
     let temp = [];
-    dataInputs.forEach((data) => {
-      if (data.variableType === type) {
-        temp = data.dataFields;
-      }
-    });
+
+    temp = getDropdownOptions(type);
 
     localLoadedProcessData.Variable.forEach((_var) => {
-      const index = temp.indexOf(_var.SystemDefinedName);
-      if (index > -1) {
-        temp.splice(index, 1);
+      if (_var.VariableScope === "U" || _var.VariableScope === "I") {
+        const index = temp.indexOf(_var.SystemDefinedName);
+        if (index > -1) {
+          temp.splice(index, 1);
+        }
       }
     });
 
@@ -674,16 +724,7 @@ function PrimaryVariables(props) {
     // setUserDefinedVariables(temp);
   };
 
-  const getAllDataFieldsForType = (varType) => {
-    let temp = [];
-    dataInputs.forEach((data) => {
-      if (data.variableType === varType) {
-        temp = data.dataFields;
-      }
-    });
-    return temp;
-  };
-  console.log("vvvvvvvvvvvvvmodata", modifyComplexJson);
+  console.log("vvvvvvvvvvvvvmodata", complexDataJSON);
   const modifyVarDataHandler = async (varData) => {
     const formData = new FormData();
 
@@ -726,55 +767,66 @@ function PrimaryVariables(props) {
   return (
     <div className={styles.mainDiv}>
       <div className={styles.headerDiv}>
-        <Checkbox
-          className={
-            direction === RTL_DIRECTION
-              ? arabicStyles.mainCheckbox
-              : styles.mainCheckbox
-          }
-          checked={false}
-          size="small"
-        />
-        <p
-          className={
-            direction === RTL_DIRECTION
-              ? arabicStyles.aliasNameHeader
-              : styles.aliasNameHeader
-          }
-        >
-          {t("aliasName")}
-        </p>
-        <p
-          className={
-            direction === RTL_DIRECTION
-              ? arabicStyles.typeHeader
-              : styles.typeHeader
-          }
-        >
-          {t("type")}
-        </p>
-        <p
-          className={
-            direction === RTL_DIRECTION
-              ? arabicStyles.dataFieldHeader
-              : styles.dataFieldHeader
-          }
-        >
-          {t("dataField")}
-        </p>
-        <p
-          className={
-            direction === RTL_DIRECTION
-              ? arabicStyles.arrayHeader
-              : styles.arrayHeader
-          }
-        >
-          {t("allowMultipleEntries")}
-        </p>
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          <Checkbox
+            className={
+              direction === RTL_DIRECTION
+                ? arabicStyles.mainCheckbox
+                : styles.mainCheckbox
+            }
+            checked={false}
+            size="medium"
+          />
+          <p
+            className={
+              direction === RTL_DIRECTION
+                ? arabicStyles.aliasNameHeader
+                : styles.aliasNameHeader
+            }
+          >
+            {t("aliasName")}
+          </p>
+          <p
+            className={
+              direction === RTL_DIRECTION
+                ? arabicStyles.typeHeader
+                : styles.typeHeader
+            }
+          >
+            {t("type")}
+          </p>
+          <p
+            className={
+              direction === RTL_DIRECTION
+                ? arabicStyles.dataFieldHeader
+                : styles.dataFieldHeader
+            }
+          >
+            {t("dataField")}
+          </p>
+          <p
+            className={
+              direction === RTL_DIRECTION
+                ? arabicStyles.arrayHeader
+                : styles.arrayHeader
+            }
+          >
+            {t("allowMultipleEntries")}
+          </p>
+        </div>
+        {!isProcessReadOnly && !bForInputStrip ? (
+          <button
+            className={styles.addButton}
+            onClick={() => setBForInputStrip(true)}
+          >
+            {t("add")}
+          </button>
+        ) : null}
       </div>
       {bForInputStrip ? (
         <div className={styles.inputsDiv}>
           <TypeAndFieldMapping
+            dataObjectTemplates={dataObjectTemplates}
             microProps={microProps}
             autofocusInput={true}
             componentStyles={inputComponentStyles}
@@ -816,13 +868,6 @@ function PrimaryVariables(props) {
                 >
                   {/* {t("tableAndMapping")}
                   <br /> {t("autoCreated")}. */}
-                  <span
-                    id="view_or_edit_mapping"
-                    className={styles.viewAndEdit}
-                    onClick={openModal}
-                  >
-                    {t("viewOrEdit")}
-                  </span>
                 </p>
                 {isModalOpen ? (
                   <Modal
@@ -855,15 +900,20 @@ function PrimaryVariables(props) {
             <ClearOutlinedIcon
               id="primary_variables_close_input_strip"
               onClick={() => setBForInputStrip(false)}
-              className={
-                direction === RTL_DIRECTION
-                  ? arabicStyles.closeInputStrip
-                  : styles.closeInputStrip
-              }
+              classes={{
+                root:
+                  direction === RTL_DIRECTION
+                    ? arabicStyles.deleteIcon
+                    : styles.deleteIcon,
+              }}
             />
             <button
               id="primary_variables_create_variable"
-              disabled={aliasName === "" || variableType === ""}
+              disabled={
+                aliasName.trim() === "" ||
+                variableType === "" ||
+                dataField === ""
+              }
               className={
                 direction === RTL_DIRECTION
                   ? arabicStyles.createVariableButton
@@ -888,130 +938,137 @@ function PrimaryVariables(props) {
           </p>
         </div>
       ) : (
-        userDefinedVariables &&
-        userDefinedVariables.map((d, index) => {
-          return (
-            <div className={styles.dataDiv}>
-              <Checkbox
-                disabled={isProcessReadOnly}
-                id="primary_variables_data_checkbox"
-                className={
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.dataCheckbox
-                    : styles.dataCheckbox
-                }
-                checked={false}
-                size="small"
-              />
-              <TypeAndFieldMapping
-                modifyVariableData={(data) => {
-                  setModifyComplexJson(data);
-                  setmodifyButtonDisableId(d.variableId);
-                }}
-                bForDisabled={isProcessReadOnly}
-                componentStyles={dataComponentStyles}
-                aliasName={d.aliasName}
-                handleAliasName={(e) => handleModifyAliasName(e, d)}
-                variableType={d.variableType}
-                variableLength={d.variableLength}
-                handleVariableType={(event, complexDataFields) =>
-                  handleVariableTypeData(event, index, complexDataFields)
-                }
-                isDisabledDataType={isDisabledDataType}
-                dataField={d.dataField}
-                defaultValue={d.defaultValue}
-                dataTypeOnOpen={() => handleDataFieldData(index)}
-                handleDataType={(event) => handleDataFieldChange(event, index)}
-                dataTypeOptions={getDropdownOptions(d.variableType)}
-                isEditable={d.isEditable}
-                // selectDataTypeOption={
-                //   <MenuItem
-                //     className={menuStyles.menuItemStyles}
-                //     value={d.dataField}
-                //   >
-                //     {d.dataField}
-                //   </MenuItem>
-                // }
-                arrayType={d.arrayType}
-                localLoadedProcessData={localLoadedProcessData}
-                setarrayType={(e) => changeUnboundedType(e, d, index)}
-                varData={d}
-              />
+        <div style={{ width: "100%", height: "75%", overflowY: "scroll" }}>
+          {userDefinedVariables &&
+            userDefinedVariables.map((d, index) => {
+              return (
+                <div className={styles.dataDiv}>
+                  <Checkbox
+                    disabled={isProcessReadOnly}
+                    id="primary_variables_data_checkbox"
+                    className={
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.dataCheckbox
+                        : styles.dataCheckbox
+                    }
+                    checked={false}
+                    size="medium"
+                  />
+                  <TypeAndFieldMapping
+                    dataObjectTemplates={dataObjectTemplates}
+                    modifyVariableData={(data) => {
+                      setModifyComplexJson(data);
+                      setmodifyButtonDisableId(d.variableId);
+                    }}
+                    bForDisabled={isProcessReadOnly}
+                    componentStyles={dataComponentStyles}
+                    aliasName={d.aliasName}
+                    handleAliasName={(e) => handleModifyAliasName(e, d)}
+                    variableType={d.variableType}
+                    variableLength={d.variableLength}
+                    handleVariableType={(event, complexDataFields) =>
+                      handleVariableTypeData(event, index, complexDataFields)
+                    }
+                    isDisabledDataType={isDisabledDataType}
+                    dataField={d.dataField}
+                    defaultValue={d.defaultValue}
+                    dataTypeOnOpen={() => handleDataFieldData(index)}
+                    handleDataType={(event) =>
+                      handleDataFieldChange(event, index)
+                    }
+                    dataTypeOptions={getDropdownOptions(d.variableType)}
+                    isEditable={d.isEditable}
+                    // selectDataTypeOption={
+                    //   <MenuItem
+                    //     className={menuStyles.menuItemStyles}
+                    //     value={d.dataField}
+                    //   >
+                    //     {d.dataField}
+                    //   </MenuItem>
+                    // }
+                    arrayType={d.arrayType}
+                    localLoadedProcessData={localLoadedProcessData}
+                    setarrayType={(e) => changeUnboundedType(e, d, index)}
+                    varData={d}
+                  />
 
-              {d.variableType === "11" ? (
-                <>
-                  {!d.isEditable ? (
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "flex-end",
-                        width: "100%",
-                        paddingTop: "10px",
-                        paddingInline: "20px",
-                      }}
-                    >
-                      <Edit
-                        varData={d}
-                        userDefinedVariables={userDefinedVariables}
-                        setUserDefinedVariables={setUserDefinedVariables}
-                        editVarData={(varData) => editVarData(varData)}
-                      />
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "flex-end",
-                        width: "100%",
-                        marginTop: "10px",
-                      }}
-                    >
-                      <button
-                        className={styles.cancelButton}
-                        onClick={() => {
-                          getPreviousVarData(d);
-                          setModifyComplexJson({});
-                          setmodifyButtonDisableId(undefined);
-                        }}
-                      >
-                        {t("cancel")}
-                      </button>
-                      <button
-                        style={{
-                          background:
-                            d.variableId === modifyButtonDisableId
-                              ? "#0072C6"
-                              : "#0073c64c",
-                        }}
-                        className={styles.updateButton}
-                        onClick={() => modifyVarDataHandler(d)}
-                        disabled={!d.variableId === modifyButtonDisableId}
-                      >
-                        {t("update")}
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : null}
+                  {d.variableType === "11" ? (
+                    <>
+                      {!d.isEditable ? (
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "flex-end",
+                            width: "100%",
+                            paddingTop: "10px",
+                            paddingInline: "20px",
+                          }}
+                        >
+                          <Edit
+                            style={{ width: "1.7rem", height: "1.7rem" }}
+                            varData={d}
+                            userDefinedVariables={userDefinedVariables}
+                            setUserDefinedVariables={setUserDefinedVariables}
+                            editVarData={(varData) => editVarData(varData)}
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "flex-end",
+                            width: "100%",
+                            marginTop: "10px",
+                          }}
+                        >
+                          <button
+                            className={styles.cancelButton}
+                            onClick={() => {
+                              getPreviousVarData(d);
+                              setModifyComplexJson({});
+                              setmodifyButtonDisableId(undefined);
+                            }}
+                          >
+                            {t("cancel")}
+                          </button>
+                          <button
+                            style={{
+                              background:
+                                d.variableId === modifyButtonDisableId
+                                  ? "#0072C6"
+                                  : "#0073c64c",
+                            }}
+                            className={styles.updateButton}
+                            onClick={() => modifyVarDataHandler(d)}
+                            disabled={!d.variableId === modifyButtonDisableId}
+                          >
+                            {t("update")}
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  ) : null}
 
-              {!isProcessReadOnly && !d.isEditable ? (
-                <DeleteOutlinedIcon
-                  id="primary_variables_delete_variable"
-                  className={
-                    direction === RTL_DIRECTION
-                      ? arabicStyles.deleteIcon
-                      : styles.deleteIcon
-                  }
-                  onClick={() => handleVariableDelete(index, d)}
-                />
-              ) : null}
-            </div>
-          );
-        })
+                  {!isProcessReadOnly && !d.isEditable ? (
+                    <DeleteOutlinedIcon
+                      id="primary_variables_delete_variable"
+                      classes={{
+                        root:
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.deleteIcon
+                            : styles.deleteIcon,
+                      }}
+                      onClick={() => handleVariableDelete(index, d)}
+                    />
+                  ) : null}
+                </div>
+              );
+            })}
+        </div>
       )}
     </div>
   );

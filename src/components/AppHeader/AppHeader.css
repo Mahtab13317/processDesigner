@@ -2,81 +2,54 @@
   display: flex;
   flex-direction: row;
   width: 100%;
-  border-bottom: 2px solid #f36a10;
-  padding-right: 5px;
-}
-
-.newgenLogo {
-  margin-left: 1rem;
-  margin-top: 0.5rem;
-  height: 29px;
-}
-
-.newgenLogo_rtl {
-  margin-right: 1rem;
-  margin-top: 0.5rem;
-  height: 29px;
-}
-
-.vr {
-  height: 27px;
-  border: 1px solid #dadada;
-  margin-left: 1rem;
-  margin-top: 0.5rem;
-}
-
-.vr_rtl {
-  height: 27px;
-  border: 1px solid #dadada;
-  margin-right: 1rem;
-  margin-top: 0.5rem;
-}
-
-.heading {
-  margin: 0 1rem;
-  color: #000000;
-  margin-top: 0.7rem;
-  text-align: left;
-  font: normal normal bold 16px/22px Open Sans;
-}
-
-.heading_rtl {
-  margin: 0 1rem;
-  color: #000000;
-  margin-top: 0.7rem;
-  text-align: right;
-  font: normal normal bold 16px/22px Open Sans;
-}
-
-.ibps {
-  color: #000000;
-  margin-top: 0.5rem;
-  text-align: left;
-  font: normal normal normal 16px/22px Open Sans;
-}
-
-.AppHeaderIcon {
-  margin-block: 0.75rem;
-  width: 1.5rem;
-  height: 1.5rem;
-}
-
-.AppHeaderIcon1 {
-  margin-left: 1rem;
-  margin-top: 1rem;
+  justify-content: space-between;
+  border-bottom: 0.2rem solid var(--brand_color1);
+  padding: 0 var(--spacing_h);
 }
 
 .headerLogoName {
   display: flex;
+  align-items: center;
 }
 
-.usericon {
+.newgenLogo {
+  height: 2.5rem;
+}
+
+.vr {
+  height: 3rem;
+  border: 0.0625rem solid #dadada;
   margin-left: 1rem;
-  margin-top: 0.5rem;
-  height: 35px;
-  width: 30px;
-  border-radius: 50%;
-  background-color: blue;
+}
+
+.vr_rtl {
+  height: 2rem;
+  border: 0.0625rem solid #dadada;
+  margin-right: 1rem;
+}
+
+.heading {
+  margin: 0 var(--spacing_h);
+  color: #000000;
+  padding: 0.25rem 0 0;
+  text-align: left;
+  font: normal normal bold var(--title_text_font_size) / var(--line_height)
+    var(--font_family);
+}
+
+.heading_rtl {
+  margin: 0 var(--spacing_h);
+  color: #000000;
+  padding: 0.25rem 0 0;
+  text-align: right;
+  font: normal normal bold var(--title_text_font_size) / var(--line_height)
+    var(--font_family);
+}
+
+.AppHeaderIcon {
+  margin: 0 0.25rem;
+  width: 2rem;
+  height: 2rem;
 }
 
 select {
@@ -84,86 +57,56 @@ select {
   border: none;
 }
 
-.Searchbox {
-  width: 209px;
-  height: 24px;
-  background: #f36a10 0% 0% no-repeat padding-box;
-  border: 1px solid #e6e6e6;
-  border-radius: 2px;
-}
-
 .title {
-  height: 48px;
+  height: 100%;
   cursor: pointer;
   border-top: 3px solid transparent;
 }
 
 .pdActive {
   background: rgba(243, 106, 16, 0.1);
-  border-top: 3px solid #f36a10;
+  border-top: 3px solid var(--brand_color1);
   cursor: pointer;
 }
 
 .titleTabs {
   width: auto;
-  height: 48px;
-  margin: 0 0.5vw;
+  height: 100%;
+  margin: 0 0.25vw;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   cursor: pointer;
+  padding: 0 0.125rem 0 0.5rem;
   border-top: 3px solid transparent;
-  align-items: center;
+  /* align-items: center; */
 }
 
 .activeTab {
   background: rgba(243, 106, 16, 0.1);
-  border-top: 3px solid #f36a10;
+  border-top: 3px solid var(--brand_color1);
   cursor: pointer;
 }
 
-.titleText {
-  height: 19px;
-  text-align: left;
-  font: normal normal 600 14px/14px Open Sans;
-  letter-spacing: 0.42px;
-  color: #1b1b1b;
-  text-transform: capitalize;
-  margin-top: 1rem;
-  margin-left: 15%;
-}
-
 .titleTextTabs {
-  font-family: "Open Sans";
-  font-weight: 600;
-  font-size: 1rem;
-  letter-spacing: 0.42px;
+  margin: 0 0.5rem;
   color: #1b1b1b;
-  width: auto;
-  height: auto;
-  padding: 12px 5px 10px 4px;
-  margin-bottom: 5px;
+  padding: 0.25rem 0 0;
+  text-align: left;
+  max-width: 10vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: normal normal 600 var(--title_text_font_size) / var(--line_height)
+    var(--font_family);
 }
 
 .collabTypeLogo_Home {
   display: flex;
-  width: 1.875rem;
-  height: 1.875rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: 50%;
   position: relative;
-  margin: auto 0.5rem auto 0.25rem;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.collabTypeLogo_Home_rtl {
-  display: flex;
-  width: 1.875rem;
-  height: 1.875rem;
-  border-radius: 50%;
-  position: relative;
-  margin: auto 0.25rem auto 0.5rem;
+  margin: 0 0.25rem;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -171,9 +114,14 @@ select {
 
 .collabName_Home {
   text-align: center;
-  font-family: Open Sans;
+  font-family: var(--font_family);
   letter-spacing: 0px;
   color: #ffffff;
+  font-size: var(--subtitle_text_font_size);
   font-size: 0.75rem;
   font-weight: 600;
+}
+
+.titleCloseIcon {
+  height: 100%;
 }

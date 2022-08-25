@@ -1,3 +1,4 @@
+// Made changes to solve bug ID - 111180, 112972 , 111162 and 111182
 import React, { useState, useEffect } from "react";
 import { Select, MenuItem } from "@material-ui/core";
 import { store, useGlobalState } from "state-pool";
@@ -156,7 +157,7 @@ function FieldMapping(props) {
 
   return (
     <div>
-      <table className="table">
+      <table>
         <tr>
           <th style={{ display: "flex", alignItems: "center" }}>
             {"Associated Field(s)"}

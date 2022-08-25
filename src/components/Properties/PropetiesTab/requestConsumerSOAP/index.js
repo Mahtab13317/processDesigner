@@ -11,7 +11,7 @@ import {
   ActivityPropertyChangeValue,
 } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import { propertiesLabel } from "../../../../Constants/appConstants";
-import TableRequestConsumer from './TableRequestConsumer.js';
+import TableRequestConsumer from "./TableRequestConsumer.js";
 import "../../Properties.css";
 import { Select, MenuItem } from "@material-ui/core";
 import { store, useGlobalState } from "state-pool";
@@ -32,6 +32,7 @@ import "./index.css";
 import SwapHorizIcon from "@material-ui/icons/SwapHoriz";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { Checkbox } from "@material-ui/core";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -141,6 +142,7 @@ function RequestConsumerSoap(props) {
 
   return (
     <div>
+      <TabsHeading heading={props?.heading} />
       <div style={{ padding: "0px 10px 10px 10px" }}>
         <p className="requestConsumerHead">Request Consumer Soap</p>
         <div
@@ -222,7 +224,7 @@ function RequestConsumerSoap(props) {
           </FormControl>
         </div>
       </div>
-      <TableRequestConsumer/>
+      <TableRequestConsumer />
     </div>
   );
 }

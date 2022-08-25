@@ -38,6 +38,7 @@
   width: 100%;
   text-align: right;
   font: normal normal normal 12px/17px Open Sans !important;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
   color: #000000;
   opacity: 1;

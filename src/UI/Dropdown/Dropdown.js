@@ -8,8 +8,9 @@ const StyledMenu = withStyles({
   paper: {
     border: "1px solid #d3d4d5",
     color: "#000000",
-    fontFamily: "Open Sans",
-    fontSize: "12px",
+    fontFamily: "var(--font_family)",
+    fontSize: "var(--base_text_font_size)",
+    marginLeft: "0.5rem",
     "& ul": {
       paddingRight: "0px !important",
     },
@@ -34,9 +35,6 @@ const StyledMenuItem = withStyles((theme) => ({
   root: {
     "&:focus": {
       backgroundColor: "#F8F8F8 0% 0% no-repeat padding-box",
-      "& .MuiListItemIcon-root, & .MuiListItemText-primary": {
-        color: "#000000",
-      },
     },
   },
 }))(MenuItem);
@@ -87,6 +85,7 @@ export default function CustomizedMenus(props) {
               handleMenuItemClick(event, option.id, option.callbackFunction)
             }
             style={props.style}
+            className="pinnedListDropdown"
           >
             {option.value}
           </StyledMenuItem>

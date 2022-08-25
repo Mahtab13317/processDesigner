@@ -165,7 +165,13 @@ function VariableList(props) {
             alignItems: "center",
           }}
         >
-          <p style={{ fontSize: "11px", color: "black", marginLeft: "15px" }}>
+          <p
+            style={{
+              fontSize: "var(--base_text_font_size)",
+              color: "black",
+              marginLeft: "15px",
+            }}
+          >
             Select All
           </p>
         </div>
@@ -210,7 +216,12 @@ function VariableList(props) {
                     marginLeft: "15px",
                   }}
                 >
-                  <p style={{ fontSize: "11px", color: "black" }}>
+                  <p
+                    style={{
+                      fontSize: "var(--base_text_font_size)",
+                      color: "black",
+                    }}
+                  >
                     {document.DocName}
                   </p>
                   {/* <span style={{ fontSize: "10px", color: "#B2B1B9" }}>
@@ -218,7 +229,14 @@ function VariableList(props) {
                   </span> */}
                 </div>
               </div>
-              <p style={{ fontSize: "10px", color: "black" }}>STRING</p>
+              <p
+                style={{
+                  fontSize: "var(--sub_text_font_size)",
+                  color: "black",
+                }}
+              >
+                STRING
+              </p>
             </div>
           );
         })}
@@ -234,7 +252,8 @@ function VariableList(props) {
         }}
       >
         <Button
-          variant="outlined"
+          //variant="outlined"
+          className="tertiary"
           onClick={() => props.setShowVariablesModal(false)}
           id="close_AddVariableModal_CallActivity"
         >
@@ -243,8 +262,9 @@ function VariableList(props) {
         <Button
           id="add_AddVariableModal_CallActivity"
           onClick={() => addVariablesToList()}
-          variant="contained"
-          color="primary"
+          className="primary"
+          //variant="contained"
+          //</div></div>color="primary"
         >
           Add
         </Button>

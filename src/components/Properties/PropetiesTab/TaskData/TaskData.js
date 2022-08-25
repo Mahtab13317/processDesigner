@@ -43,6 +43,7 @@ import {
 } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 import { getSelectedCellType } from "../../../../utility/abstarctView/getSelectedCellType";
 import axios from "axios";
+import TabsHeading from "../../../../UI/TabsHeading";
 const makeFieldInputs = (value) => {
   return {
     value: value,
@@ -94,6 +95,7 @@ const useStyles = makeStyles((props) => ({
   GroupTitleMain: {
     fontWeight: 700,
     color: "#606060",
+    fontSize: "var(--subtitle_text_font_size)",
   },
   btnIcon: {
     cursor: "pointer",
@@ -104,14 +106,15 @@ const useStyles = makeStyles((props) => ({
   GroupTitleSecondary: {
     fontWeight: 600,
     color: "#000000",
+    fontSize: "var(--subtitle_text_font_size)",
   },
   disabled: {
     pointerEvents: "none",
   },
   deleteBtn: {
-    marginTop: "1rem",
-    width: "1.7rem",
-    height: "1.7rem",
+    marginTop: "1.2rem",
+    width: "2.5rem",
+    height: "2.5rem",
   },
   starIcon: {
     color: "#d12c2c",
@@ -568,6 +571,7 @@ function TaskData(props) {
 
   return (
     <div style={{ width: "100%", height: "100%" }}>
+    <TabsHeading heading={props?.heading} />
       {spinner ? (
         <CircularProgress style={{ marginTop: "30vh", marginLeft: "40%" }} />
       ) : (
@@ -595,7 +599,7 @@ function TaskData(props) {
                 </Typography>
               </Grid>
               <Grid item>
-                <Grid container>
+                <Grid container alignItems="center">
                   <Grid item>
                     <Field
                       radio={true}
@@ -618,9 +622,10 @@ function TaskData(props) {
                       }}
                     >
                       <Button
-                        variant="outlined"
-                        color="primary"
-                        size="small"
+                        // variant="outlined"
+                        //color="primary"
+                        //size="small"
+                        className="secondary"
                         onClick={() => handlePreviewHtml()}
                         style={{ marginTop: "1.2rem" }}
                       >
@@ -632,9 +637,10 @@ function TaskData(props) {
                       <Grid container spacing={1}>
                         <Grid item>
                           <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
+                            // variant="outlined"
+                            //color="primary"
+                            //size="small"
+                            className="secondary"
                             onClick={() => fileRef?.current?.click()}
                             style={{ marginTop: "1.2rem" }}
                           >
@@ -651,9 +657,10 @@ function TaskData(props) {
                         />
                         <Grid item>
                           <Button
-                            variant="outlined"
-                            color="primary"
-                            size="small"
+                            //  variant="outlined"
+                            // color="primary"
+                            // size="small"
+                            className="secondary"
                             onClick={() => handleFormLauncher()}
                             style={{ marginTop: "1.2rem" }}
                           >
@@ -684,10 +691,10 @@ function TaskData(props) {
                   }}
                 >
                   <Button
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                    fontW
+                    // variant="outlined"
+                    // color="primary"
+                    // size="small"
+                    className="secondary"
                     onClick={() => addVariable()}
                   >
                     {`+ ${t("add")} ${t("variable")}`}

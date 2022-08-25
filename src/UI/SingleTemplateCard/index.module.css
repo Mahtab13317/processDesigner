@@ -30,7 +30,7 @@
 
 .cardHeading {
   text-align: left;
-  font: normal normal 600 20px/27px Open Sans;
+  font: normal normal 600 20px/27px var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   display: flex;
@@ -52,7 +52,7 @@
 
 .templateUsageCount {
   text-align: left;
-  font: italic normal normal 11px/15px Open Sans;
+  font: italic normal normal 11px/15px var(--font_family);
   letter-spacing: 0px;
   color: #727272;
   margin-right: 1vw;
@@ -64,9 +64,10 @@
 }
 
 .cardDesc {
-  margin: 0.75rem 0;
+  margin: 0rem 0 0.75rem;
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   padding: 0 1rem;
@@ -103,27 +104,26 @@
   background: #ffffff 0% 0% no-repeat padding-box;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
   color: #606060;
   text-align: center;
-  margin: 0 0.25rem;
-  padding: 0 0.75vw;
+  margin: var(--spacing_v) 0.25vw !important;
+  padding: 0 0.75vw !important;
   cursor: pointer;
 }
 
 .selectButton {
   height: 1.9rem;
   background: #ffffff 0% 0% no-repeat padding-box;
-  border: 1px solid #338ed1;
+  border: 1px solid var(--button_color);
   border-radius: 2px;
-  text-align: left;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
-  color: #0072c6;
+  color: var(--button_color);
   text-align: center;
-  margin: 0 0.25rem;
-  padding: 0 0.75vw;
+  margin: var(--spacing_v) 0.25vw !important;
+  padding: 0 0.75vw !important;
   cursor: pointer;
 }
 
@@ -132,10 +132,10 @@
   background: rgba(239, 239, 239, 0.7) 0% 0% no-repeat padding-box;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
   color: #606060;
   text-align: center;
-  margin: 0 0.25rem;
-  padding: 0 0.75vw;
+  margin: var(--spacing_v) 0.25vw !important;
+  padding: 0 0.75vw !important;
 }

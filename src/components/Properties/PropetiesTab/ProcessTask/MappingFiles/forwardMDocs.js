@@ -22,6 +22,7 @@ import Modal from "../../../../../UI/Modal/Modal";
 import DocumentsList from "../MappingLists/docListForward";
 import DeleteIcon from "@material-ui/icons/Delete";
 import "./index.css";
+import TabsHeading from "../../../../../UI/TabsHeading";
 
 function ForwardForDocuments(props) {
   // Process Data
@@ -94,7 +95,10 @@ function ForwardForDocuments(props) {
   const oneLineForMap = () => {
     return forwardDocsList?.map((el) => {
       return (
-        <div
+       <>
+         <TabsHeading heading={props?.heading} />
+         <div
+          id="processTaskId1"
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -161,6 +165,7 @@ function ForwardForDocuments(props) {
           </div>
           <div style={{ marginTop: "5px", flex: "0.2", textAlign: "center" }}>
             <DeleteIcon
+              className="deleteIconProcessTask"
               style={{
                 cursor: "pointer",
               }}
@@ -168,6 +173,7 @@ function ForwardForDocuments(props) {
             />
           </div>
         </div>
+       </>
       );
     });
   };

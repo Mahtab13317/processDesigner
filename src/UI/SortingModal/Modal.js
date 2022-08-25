@@ -120,24 +120,26 @@ export default function SimpleModal(props) {
         )}
       </ul>
       {props.sortSectionTwo || props.sortOrderOptionsForName ? (
-        <ul className="sortBy" style={{ margin: "-3px 0px -10px" }}>
+        <ul className="sortBy">
           <hr
+            style={{ marginBottom: "0.25rem" }}
             className={
               (props.dividerLine ? props.dividerLine : "dividerLine") +
               (props.isArabic ? "_arabic" : "")
             }
           ></hr>
           {commonPara(
-          props.sortOrder,
-          sortOrderOptions,
-          selectedSortOrderIndex,
-          handleSortOrderOption
-        )}
+            props.sortOrder,
+            sortOrderOptions,
+            selectedSortOrderIndex,
+            handleSortOrderOption
+          )}
         </ul>
       ) : null}
       {props.sortSectionThree ? (
-        <ul className="sortBy" style={{ margin: "-3px 0px -10px" }}>
+        <ul className="sortBy">
           <hr
+            style={{ marginBottom: "0.25rem" }}
             className={
               (props.dividerLine ? props.dividerLine : "dividerLine") +
               (props.isArabic ? "_arabic" : "")
@@ -149,6 +151,7 @@ export default function SimpleModal(props) {
       {props.sortSectionFour ? (
         <ul className="sortBy">
           <hr
+            style={{ marginBottom: "0.25rem" }}
             className={
               (props.dividerLine ? props.dividerLine : "dividerLine") +
               (props.isArabic ? "_arabic" : "")

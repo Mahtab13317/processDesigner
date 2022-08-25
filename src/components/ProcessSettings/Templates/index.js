@@ -55,9 +55,9 @@ function Templates(props) {
 
       .then((res) => {
         let temp = [...templateData];
-        console.log("vvvvvvvvvvbefore", templateData);
+
         temp.splice(index, 1);
-        console.log("vvvvvvvvvv", temp);
+
         setTemplateData(temp);
       });
   };

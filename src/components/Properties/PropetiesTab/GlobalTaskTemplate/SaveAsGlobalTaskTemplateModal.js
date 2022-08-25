@@ -109,7 +109,6 @@ const SaveAsGlobalTaskTemplateModal = (props) => {
     const axiosInstance = createInstance();
     setIsCreating(true);
 
-    console.log(localLoadedActivityPropertyData);
     try {
       var res = await axiosInstance.post(`${ENDPOINT_ADD_GLOBAL_TEMPLATE}`, {
         ...localLoadedActivityPropertyData,

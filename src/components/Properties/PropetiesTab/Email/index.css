@@ -1,20 +1,23 @@
 .marginAllAround {
-  margin: 2%;
-  height: 22rem;
+  height: 32rem;
   overflow: auto;
+  padding: 1rem 1vw;
+  background: white;
 }
+
 .marginAllAround::-webkit-scrollbar {
   display: none; /* for Chrome, Safari, and Opera */
 }
 
 .varUsedLabel {
   text-align: left;
-  font: normal normal normal 12px/15px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #798777;
-  opacity: 1;
-  margin-top: 10px;
+  margin-top: 0.5rem;
 }
+
 .menuItemStylesDropdown {
   text-align: left;
   font: normal normal normal 12px/24px Open Sans !important;
@@ -22,17 +25,17 @@
   color: #000000;
   opacity: 1;
 }
+
 .dropdownEmail {
-  width: 200px;
-  height: 28px;
+  width: 15vw;
+  height: var(--line_height);
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal 12px/15px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   border: 1px solid #c4c4c4;
   border-radius: 2px;
-  opacity: 1;
-  margin-right: 10px;
-  border-radius: 1px;
 }
+
 .document {
   text-align: left;
   font: normal normal normal 14px/16px Open Sans;
@@ -57,31 +60,42 @@
   width: 18rem;
   vertical-align: middle;
 }
+
 .addbtnEmail {
-  width: 40px;
-  height: 28px;
+  min-width: 4vw;
   background: #ffffff 0% 0% no-repeat padding-box;
-  border: 1px solid #0072c5;
+  border: 1px solid var(--button_color);
   border-radius: 2px;
   text-align: center;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
-  color: #0072c6;
-  opacity: 1;
+  color: var(--button_color);
   cursor: pointer;
 }
+
 .boldText {
   text-align: left;
-  font: normal normal bold 14px/16px Open Sans;
+  font: normal normal 600 var(--subtitle_text_font_size) / 19px
+    var(--font_family);
   color: #070707;
-  opacity: 1;
-  width: 15rem;
   vertical-align: middle;
-  margin-top: 2rem;
+  margin-top: 1rem;
   margin-bottom: 1rem;
 }
+
 .hrLineSend {
   border: 0.5px solid #c4c4c4;
-  opacity: 1;
   width: 100%;
+  margin: 1rem 0;
+}
+
+.emailCheck svg {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+.starIcon {
+  color: red;
+  margin-left: 0.25vw;
+  font-size: 1rem;
 }

@@ -49,10 +49,12 @@
 .okBtn {
   text-align: left;
   font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px;
   color: #ffffff;
-  background: #0072c6 0% 0% no-repeat padding-box;
-  border: 1px solid #0072c6;
+  background: var(--button_color) 0% 0% no-repeat padding-box;
+  border: 1px solid var(--button_color);
   border-radius: 2px;
   padding: 0.25rem 1rem;
   margin-left: 45vw;
@@ -62,6 +64,7 @@
 .CancelBtn {
   text-align: left;
   font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
   color: #606060;
   background: #c4c4c4 0% 0% no-repeat padding-box;

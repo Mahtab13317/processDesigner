@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import StarRateIcon from "@material-ui/icons/StarRate";
 import Button from "@material-ui/core/Button";
 import { useTranslation } from "react-i18next";
 import styles from "./template.module.css";
@@ -184,7 +183,13 @@ function AddCategoryModal(props) {
             onClick={() => {
               addCategoryFunc(BTN_TYPE_EDIT_CLOSE);
             }}
-            disabled={nameInput.trim() === "" || !nameInput || errorMessage}
+            disabled={
+              nameInput.trim() === "" ||
+              !nameInput ||
+              errorMessage ||
+              (nameInput === props.categoryToBeEdited.CategoryName &&
+                descriptionInput === props.categoryToBeEdited.Description)
+            }
           >
             {t("save")} {t("changes")}
           </Button>

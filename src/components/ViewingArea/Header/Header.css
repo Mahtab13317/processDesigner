@@ -1,47 +1,45 @@
 .header_processes {
   display: flex;
-  padding: 0px 15px;
+  padding: 0px 1vw;
   background: #ffffff 0% 0% no-repeat padding-box;
-  height: 40px;
 }
 
 .leftHeader {
   flex: 1;
   display: flex;
-  padding: 7px 0;
+  padding: 0.5rem 0;
+  align-items: center;
 }
 
 .rightHeader {
   flex: 1;
   text-align: right;
-  padding: 7px 0;
+  padding: 0.5rem 0;
   justify-content: flex-end;
   display: flex;
+  align-items: center;
 }
 
 .processName {
   text-align: left;
   letter-spacing: 0px;
-  margin-left: 10px;
+  margin-left: 0.5vw;
   color: #000000;
-  font-weight: bolder;
-  font-size: 19px;
-  margin-right: 10px;
+  font-weight: bold;
+  font-size: var(--title_text_font_size);
+  margin-right: 0.5vw;
 }
 
 .versionName {
   text-align: left;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
   color: #606060;
-  opacity: 1;
-  margin-top: 2px;
-  padding: 5px 10px 2px;
-  font-size: 12px;
+  padding: 0 0.5vw;
   cursor: pointer;
 }
 .versionCard {
-  height: 14rem;
+  height: 20rem;
   width: 22rem;
   position: absolute;
   left: 8%;
@@ -63,19 +61,19 @@
 }
 .processType {
   display: flex;
-  padding: 2px 15px;
-  margin-top: 4px;
+  padding: 0 0.5vw;
   border-left: 1px solid #606060;
+  align-items: center;
 }
 
 .processTypeName {
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   text-transform: capitalize;
-  opacity: 1;
-  margin: 1px 0 0 1px;
+  margin: 0 0.25vw;
 }
 
 .processTypeLogo {
@@ -177,21 +175,22 @@
 }
 
 .deployIcon {
-  margin-top: 5px;
+  margin-top: 1rem;
 }
 
 .deployButton {
-  background: #0072c6 0% 0% no-repeat padding-box;
+  background: var(--button_color) 0% 0% no-repeat padding-box;
   border-radius: 2px;
-  opacity: 1;
-  display: inline-flex;
-  padding: 0px 15px;
+  display: flex;
+  align-items: center;
+  padding: 0 0.5vw 0 0.5vw !important;
   margin-right: 10px;
   border: none;
+  cursor: pointer;
+  width: 6.3rem;
 }
 
 .deployText {
-  margin-top: 4px;
   margin-left: 2px;
   text-align: left;
   font: normal normal normal 12px/17px Open Sans;
@@ -202,12 +201,11 @@
 
 .moreButton {
   background: white;
-  opacity: 1;
-  display: inline-flex;
+  display: flex;
+  align-items: center;
   padding: 0.5px 15px 0 20px;
   margin-right: 5px;
   border: none;
-  /* border-left: 1px solid #606060; */
 }
 
 .moreBtnDropdown {
@@ -218,10 +216,10 @@
   z-index: 5;
   right: 10%;
   width: 12vw;
-  top: 120%;
+  top: 100%;
   text-align: left;
-  padding: 0 0 0.45rem 0rem;
-  font: normal normal 600 12px/16px Open Sans;
+  padding: 0 0 0.5rem 0rem;
+  font: normal normal 600 var(--base_text_font_size)/17px var(--font_family);
   letter-spacing: 0px;
   color: #000000d9;
   cursor: pointer;
@@ -232,19 +230,18 @@
 }
 
 .moreBtnDropdown ul li {
-  padding: 0.125rem 0.5vw;
+  padding: 0.25rem 0.5vw;
   align-items: center;
   display: flex;
 }
 
 .moreText {
-  margin-top: 4px;
-  margin-left: 6px;
+  margin-left: 0.5vw;
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #606060;
-  opacity: 1;
 }
 
 .collabDiv {

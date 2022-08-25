@@ -213,7 +213,7 @@ export const TaskInActivity = (props) => {
           style={{
             textAlign: direction == "rtl" ? "left" : "right",
             flex: "1",
-            marginTop: "3px",
+            marginTop: "4px",
           }}
         >
           <span style={{ position: "relative" }}>

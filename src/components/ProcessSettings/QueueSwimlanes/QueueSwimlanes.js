@@ -11,7 +11,11 @@ import styles from "./QueueSwimlanes.module.css";
 import { useGlobalState } from "state-pool";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
-import { PROCESSTYPE_LOCAL, ENDPOINT_DEFAULTQUEUE, SERVER_URL } from "../../../Constants/appConstants";
+import {
+  PROCESSTYPE_LOCAL,
+  ENDPOINT_DEFAULTQUEUE,
+  SERVER_URL,
+} from "../../../Constants/appConstants";
 import axios from "axios";
 
 function QueueSwimlanes(props) {
@@ -20,32 +24,50 @@ function QueueSwimlanes(props) {
   const [localLoadedProcess, setLocalLoadedProcess, updateLocalLoadedProcess] =
     useGlobalState("loadedProcessData");
   const [lanes, setLanes] = useState([]);
-  const [defaultDropdown, setdefaultDropdown] = useState(1);
+  const [defaultDropdown, setdefaultDropdown] = useState();
+  const [lanesQueueInfoArr, setlanesQueueInfoArr] = useState([]);
 
   React.useEffect(() => {
-    const lanesWithoutTaskLane = localLoadedProcess.Lanes?.filter(
-      (item) => item.LaneId !== -99
-    ); //removing tasklane from lanes
-    setLanes(lanesWithoutTaskLane);
-   
-  }, [localLoadedProcess.Lanes]);
+    async function fetchDefaultValuesForLanes() {
+      const res = await axios.get(
+        `${SERVER_URL}${ENDPOINT_DEFAULTQUEUE}/${localLoadedProcess.ProcessDefId}/${localLoadedProcess.ProcessType}`
+      );
+      if (res.status === 200 && res.data.Status === 0) {
+        const lanesWithoutTaskLane = localLoadedProcess.Lanes?.filter(
+          (item) => item.LaneId !== -99
+        ).map((lane) => {
+          res.data?.LaneQueueConfig.forEach((queueInfo) => {
+            if (lane.LaneId + "" === queueInfo.LaneId + "") {
+              lane.DefaultQueue = queueInfo.DefaultQueue;
+            }
+          });
+          return lane;
+        });
+        setLanes(lanesWithoutTaskLane);
+      }
+    }
 
-//   React.useEffect(() => {
-//     async function fetchDefaultValuesForLanes(){
-// const data = await axios.get(`${SERVER_URL}${ENDPOINT_DEFAULTQUEUE}/${localLoadedProcess.ProcessDefId}/${localLoadedProcess.ProcessType}`)
-//     }
+    fetchDefaultValuesForLanes();
+  }, []);
 
-//     fetchDefaultValuesForLanes();
-//   }, [])
   const handleChange = async (event, row) => {
-    setdefaultDropdown(event.target.value);
-    
-    // const data = await axios.post(SERVER_URL + ENDPOINT_DEFAULTQUEUE, {
-    //   processDefId: localLoadedProcess.ProcessDefId,
-    //   laneName: row.LaneName,
-    //   laneId: row.LaneId,
-    //   m_bDefaultQueueActs: event.target.value === 1 ? false : true,
-    // });
+    const res = await axios.post(SERVER_URL + ENDPOINT_DEFAULTQUEUE, {
+      processDefId: localLoadedProcess.ProcessDefId,
+      laneName: row.LaneName,
+      laneId: row.LaneId,
+      m_bDefaultQueueActs: event.target.value === "N" ? false : true,
+    });
+    if (res.data.status === 0) {
+      setLanes((prev) => {
+        let temp = structuredClone(prev);
+        temp.forEach((lane) => {
+          if (lane.LaneId + "" === row.LaneId + "") {
+            lane.DefaultQueue = event.target.value;
+          }
+        });
+        return temp;
+      });
+    }
   };
 
   const direction = `${t("HTML_DIR")}`;
@@ -111,8 +133,8 @@ function QueueSwimlanes(props) {
                   <Select
                     variant="outlined"
                     //autoWidth
-                    value={defaultDropdown}
-                    onChange={(e)=>handleChange(e, row)}
+                    value={row.DefaultQueue}
+                    onChange={(e) => handleChange(e, row)}
                     className={styles.dropDown}
                     disabled={
                       props.processType !== PROCESSTYPE_LOCAL ? true : ""
@@ -120,7 +142,7 @@ function QueueSwimlanes(props) {
                   >
                     <MenuItem
                       style={{ width: "16rem", margin: "0.5rem" }}
-                      value={1} //1 is set as default value for this selectbox
+                      value={"N"}
                     >
                       <p style={{ font: "0.8rem Open Sans" }}>
                         {t("swimLaneQueue")}
@@ -128,7 +150,7 @@ function QueueSwimlanes(props) {
                     </MenuItem>
                     <MenuItem
                       style={{ width: "16rem", margin: "0.5rem" }}
-                      value={2} //2 is the value for this selectbox
+                      value={"Y"}
                     >
                       <p style={{ font: "0.8rem Open Sans" }}>
                         {t("activitySpecificQueue")}

@@ -163,6 +163,11 @@ export const ENDPOINT_RULE_PACKAGE_VERSION = "/ruleSetVersionList";
 //sharepoint archive url
 export const ENDPOINT_GET_LIBRARY_LIST = "/libraryProperty/";
 
+//data rights
+
+export const ENDPOINT_GET_DATA_ASSOCIATE = "/dataAssoc";
+export const ENDPOINT_SAVE_DATA_ASSOCIATE = "/saveDataAssoc";
+
 export const ENDPOINT_GETREGISTRATIONPROPERTY = "/registrationProperty";
 export const PMWEB_CONTEXT = "/pmweb";
 export const LAUNCHPAD_CONTEXT = "/launchpad";
@@ -218,6 +223,7 @@ export const ENDPOINT_FETCHPROCESSREQUIREMENTS = "/processRequirement";
 export const ENDPOINT_FETCHPROJECTREQUIREMENTS = "/projectRequirement";
 export const ENDPOINT_DEFAULTQUEUE = "/defaultQueue";
 export const ENDPOINT_DELETE_CATEGORY = "/removeCategory";
+export const ENDPOINT_DELETE_PROJECT = "/deleteproject";
 export const ENDPOINT_DELETE_TEMPLATE = "/deleteTemplate";
 export const ENDPOINT_EDIT_CATEGORY = "/modifyCategory";
 export const ENDPOINT_GET_ACTIVITY_PROPERTY = "/activityProperty/";
@@ -239,6 +245,8 @@ export const ENDPOINT_GET_GLOBALTASKTEMPLATES = "/globalTemplate";
 export const ENDPOINT_GET_EXPORTTEMPLATES = "/exportTaskTemplate";
 export const ENDPOINT_SAVE_MINOR = "/saveMinor";
 export const ENDPOINT_CHECKOUT = "/checkOutProcess";
+export const ENDPOINT_ENABLE = "/enableProcess";
+export const ENDPOINT_DISABLE = "/disableProcess";
 export const ENDPOINT_CHECKIN = "/checkInProcess";
 export const ENDPOINT_UNDO_CHECKOUT = "/undoCheckOutProcess";
 export const ENDPOINT_SAVE_LOCAL = "/saveLocal";
@@ -534,7 +542,7 @@ export const COMMIT_OPERATION_TYPE = "16";
 export const ASSIGNED_TO_OPERATION_TYPE = "18";
 export const SET_PARENT_DATA_OPERATION_TYPE = "19";
 export const CALL_OPERATION_TYPE = "22";
-export const SET_AND_EXECUTE_OPERATION_TYPE = "23";
+export const SET_AND_EXECUTE_OPERATION_TYPE = "23"; //addded by mahtab
 export const ESCALATE_TO_OPERATION_TYPE = "24";
 export const ESCALATE_WITH_TRIGGER_OPERATION_TYPE = "26";
 export const ROUTE_TO_OPERATION_TYPE = "4";
@@ -542,6 +550,7 @@ export const REINITIATE_OPERATION_TYPE = "10";
 export const ROLLBACK_OPERATION_TYPE = "17";
 export const AUDIT_OPERATION_TYPE = "25";
 export const DISTRIBUTE_TO_OPERATION_TYPE = "21";
+export const REMINDER_OPERATION_TYPE = "39";
 
 export const STRING_VARIABLE_TYPE = 10;
 export const BOOLEAN_VARIABLE_TYPE = 12;
@@ -561,7 +570,7 @@ export const EDIT_OPTION = 1;
 export const ENDPOINT_QUEUEASSOCIATION_GROUPLIST = "/groupList";
 export const ENDPOINT_QUEUELIST = "/queueData";
 export const ENDPOINT_QUEUEASSOCIATION_MODIFY = "/modifyQueueData";
-
+export const SAVE_QUEUEDATA = "/saveQueueData";
 export const ENDPOINT_SAP_FUNCTION = "/sapFunction";
 export const ENDPOINT_REGISTER_SAP = "/registerSapDetails";
 export const ENDPOINT_SAVE_FUNCTION_SAP = "/saveSapFunction";
@@ -593,6 +602,7 @@ export const ATTACHMENT_TYPE = "A";
 export const propertiesLabel = {
   basicDetails: "BasicDetails",
   EntrySetting: "EntrySetting",
+  EntryDetails: "EntryDetails",
   requirements: "Requirements",
   attachments: "Attachments",
   templates: "templates",
@@ -645,6 +655,63 @@ export const propertiesLabel = {
   taskOptions: "taskOptions",
   taskData: "taskData",
   sharePointArchive: "sharepoint_Archive",
+};
+
+//added for headings in tabs
+
+export const tabsHeading = {
+  1: "Basic Details",
+  2: "Data Fields",
+  3: "Initial Rules",
+  4: "Requirements",
+  5: "Attachments",
+  6: "Workdesk",
+  7: "",
+  8: "",
+  9: "Forward Variable Mapping",
+  10: "Reverse Variable Mapping",
+  11: "Entry Settings",
+  12: "Streams",
+  13: "Options",
+  14: "",
+  15: "",
+  16: "Task",
+  17: "Receive Invocation",
+  18: "Output Variables",
+  19: "Export",
+  20: "Search Variable",
+  21: "Search Results",
+  22: "Webservice",
+  23: "Business Rule",
+  24: "Archive",
+  25: "Templates",
+  26: "",
+  27: 11,
+  28: "JMS Producer",
+  29: "JMS Consumer",
+  30: "Timer",
+  31: "Reminder",
+  32: 11,
+  33:"Collect",
+  34:11,
+  35:"Initiate Workstep",
+  36:"Data Exchange",
+  37:"SAP",
+  38:"Response Consumer JMS",
+  39:13,
+  40:"Request consumer SOAP",
+  41:"Restful",
+  42:"Forward DocType Mapping",
+  43:"Reverse DocType Mapping",
+  44:"Send",
+  45:"Task Details",
+  46:"Escalation Rule(s)",
+  47:13,
+  48:"Data",
+  49:24,
+  50:42,
+  51:43,
+  
 };
 
 export const WEBSERVICE_SOAP = "0";

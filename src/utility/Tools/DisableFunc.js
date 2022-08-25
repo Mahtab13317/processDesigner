@@ -7,8 +7,8 @@ export const DisableCheckBox = (activity, props) => {
       act.activityType === props.activityType &&
       act.subActivity === props.subActivity
     ) {
-      if (props.hasOwnProperty("toDoIsMandatory")) {
-        if (props.toDoIsMandatory === false) {
+      if (props?.hasOwnProperty("toDoIsMandatory")) {
+        if (props?.toDoIsMandatory === false) {
           temp = false;
         } else temp = true;
       } else temp = true;
@@ -19,15 +19,15 @@ export const DisableCheckBox = (activity, props) => {
 
 export const disableToDoChecks = (props, type) => {
   let temp = false;
-  if (props.hasOwnProperty("toDoIsMandatory")) {
-    if (props.toDoIsMandatory && type === "View") {
+  if (props?.hasOwnProperty("toDoIsMandatory")) {
+    if (props?.toDoIsMandatory && type === "View") {
       temp = true;
     }
-    if (props.toDoIsMandatory && type === "All" && (props.activityType === 2 || props.activityType === 3 || props.activityType === 11)) {
+    if (props?.toDoIsMandatory && type === "All" && (props?.activityType === 2 || props?.activityType === 3 || props?.activityType === 11)) {
       temp = true;
     }
   }
-  if ((props.activityType === 2 || props.activityType === 3 || props.activityType === 11) && type === "Modify") {
+  if ((props?.activityType === 2 || props?.activityType === 3 || props?.activityType === 11) && type === "Modify") {
     temp = true;
   }
   return temp;

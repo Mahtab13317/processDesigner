@@ -6,23 +6,26 @@
 }
 
 .checkBoxShowAlways {
-  font: normal normal 500 12px/17px Open Sans;
+  font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
   margin-top: 10px;
 }
 .commonInterface {
   font: normal normal 600 12px/17px Open Sans;
-  width: 15rem;
-  margin-top: 10px;
+  font-size: var(--base_text_font_size);
+  margin-left: 10px;
 }
 
 .tableDataRow {
   display: flex;
   flex-direction: row;
+  margin: 1%;
+
   flex-wrap: wrap;
 }
 .commonInterfaceTableRow {
   font: normal normal normal 12px/17px Open Sans;
-  width: 15rem;
+
   margin-left: 1rem;
 }
 .addButton {

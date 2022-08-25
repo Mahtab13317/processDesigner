@@ -6,48 +6,26 @@ import { useTranslation } from "react-i18next";
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { Select, MenuItem } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core";
+import { makeStyles, Typography } from "@material-ui/core";
 import RadioGroups from "./RadioButtonsGroup";
+import { useGlobalState } from "state-pool";
 import dropdown from "../../../../assets/subHeader/dropdown.svg";
 import AddToListDropdown from "../../../../UI/AddToListDropdown/AddToListDropdown";
-import styles from "../DocTypes/index.module.css";
-import arabicStyles from "../DocTypes/arabicStyles.module.css";
 import { RTL_DIRECTION } from "../../../../Constants/appConstants";
+import styles from "../DocTypes/index.module.css";
 import CloseIcon from "@material-ui/icons/Close";
-
-const useStyles = makeStyles((theme) => ({
-  select: {
-    width: "138px",
-    height: "28px",
-    background: "#FFFFFF 0% 0% no-repeat padding-box",
-    font: "normal normal normal 12px/17px Open Sans",
-    border: "1px solid #C4C4C4",
-    borderRadius: "2px",
-    opacity: "1",
-    marginRight: "10px",
-    marginTop: "10px",
-  },
-  dropdownData: {
-    height: "17px",
-    textAlign: "left",
-    font: "normal normal normal 12px/17px Open Sans",
-    letterSpacing: "0px",
-    color: "#000000",
-    opacity: "1",
-    marginTop: "8px",
-    paddingLeft: "10px !important",
-    marginLeft: "0px",
-  },
-}));
+import arabicStyles from "../DocTypes/arabicStyles.module.css";
+import "../Exception/Exception.css";
 
 function AddToDo(props) {
-  const associateFields = ["CalendarName", "Status"];
-  const classes = useStyles({});
+  const [loadedVariables] = useGlobalState("variableDefinition");
+  const associateFields = ["CalenderName", "Status"];
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const [nameInput, setNameInput] = useState("");
   const [descriptionInput, setDescriptionInput] = useState("");
   const [mandatoryValue, setMandatoryValue] = useState(false);
+  const [todoTypeValue, setTodoTypeValue] = useState(null);
   const [associateField, setAssociateField] = useState("defaultValue");
   const [selectedGroup, setselectedGroup] = useState([]);
   const [showGroupDropdown, setShowGroupDropdown] = useState(false);
@@ -64,6 +42,21 @@ function AddToDo(props) {
 
   const setNameFunc = (e) => {
     setNameInput(e.target.value);
+    if (e.target.value !== "") {
+      if (props.setShowNameError) {
+        props.setShowNameError(false);
+      }
+      // Changes made to solve bug ID 105828
+      props?.toDoData?.TodoGroupLists?.map((group, groupIndex) => {
+        group.ToDoList.map((todo) => {
+          if (todo.ToDoName.toLowerCase() == e.target.value) {
+            props.setbToDoExists(true);
+          } else {
+            props.setbToDoExists(false);
+          }
+        });
+      });
+    }
   };
 
   const onSelect = (e) => {
@@ -80,7 +73,7 @@ function AddToDo(props) {
 
   const handleTriggerSelection = (triggerName) => {
     props.selectedTriggerName(triggerName);
-    if ((triggerName !== "none" || triggerName) && props.setShowTriggerError) {
+    if (triggerName !== "none" || triggerName) {
       props.setShowTriggerError(false);
     }
   };
@@ -147,111 +140,132 @@ function AddToDo(props) {
         />
       </div>
       <div
-        className={`row ${styles.modalSubHeader}`}
-        style={{ justifyContent: "start", gap: "2vw" }}
+        className={`${styles.modalSubHeader} flex`}
+        style={{ gap: "0.25vw" }}
       >
-        <div style={{ flex: "1" }}>
-          <div>
-            <label className="nameInputlabel">
-              {t("todoName")}
-              <StarRateIcon
-                style={{ height: "15px", width: "15px", color: "red" }}
-              />
-            </label>
+        <div style={{ flex: "1.2" }}>
+          <label className={styles.modalLabel}>
+            {t("todoName")}
+            <span className={styles.starIcon}>*</span>
+          </label>
+          <form>
             <input
               id="ToDoNameInput"
               value={nameInput}
               onChange={(e) => setNameFunc(e)}
-              className="nameInput"
-              disabled={props.toDoNameToModify}
+              className={styles.modalInput}
             />
-          </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <label className="nameInputlabel">
-              {t("description")}
-              <StarRateIcon
-                style={{ height: "15px", width: "15px", color: "red" }}
-              />
-            </label>
+          </form>
+          {props.showNameError ? (
+            <span
+              style={{
+                color: "red",
+                fontSize: "10px",
+                marginTop: "-0.25rem",
+                marginBottom: "0.5rem",
+                display: "block",
+              }}
+            >
+              {t("filltheName")}
+            </span>
+          ) : null}
+          {props.bToDoExists ? (
+            <span
+              style={{
+                color: "red",
+                fontSize: "10px",
+                marginTop: "-0.25rem",
+                marginBottom: "0.5rem",
+                display: "block",
+              }}
+            >
+              {t("todoAlreadyExists")}
+            </span>
+          ) : null}
+
+          <label className={styles.modalLabel}>
+            {t("description")}
+            <span className={styles.starIcon}>*</span>
+          </label>
+          <form>
             <textarea
               id="ToDoDescInput"
               value={descriptionInput}
               onChange={(e) => setDescriptionFunc(e)}
-              className="descriptionInput"
+              className={styles.modalTextArea}
             />
-            {props.showDescError ? (
-              <span
-                style={{ color: "red", fontSize: "10px", marginBottom: "7px" }}
-              >
-                Please fill the Description.
-              </span>
-            ) : null}
-          </div>
+          </form>
+          {props.showDescError ? (
+            <span
+              style={{
+                color: "red",
+                fontSize: "10px",
+                marginTop: "-0.25rem",
+                marginBottom: "0.5rem",
+                display: "block",
+              }}
+            >
+              {t("filltheDesc")}
+            </span>
+          ) : null}
           {props.calledFromWorkdesk ? (
-            <div className="row" style={{ marginTop: "7px" }}>
-              <p className="nameInputlabel" style={{ marginBottom: "0" }}>
+            <div style={{ width: "75%", marginBottom: "0.5rem" }}>
+              <label className={styles.modalLabel}>
                 {t("groupName")}
-              </p>
-              <Button
-                className="SwimlaneButton"
-                onClick={() => setShowGroupDropdown(true)}
-                style={{
-                  marginLeft: "20px",
-                  fontSize: "12px !important",
-                  border: "1px solid #e6e6e6",
-                  width: "6rem",
-                }}
-              >
-                <span style={{ fontSize: "12px" }}>
-                  {grpList &&
-                    grpList.map((item) => {
+                <span className={styles.starIcon}>*</span>
+              </label>
+              <div className="relative">
+                <button
+                  className={styles.groupDropdown}
+                  onClick={() => setShowGroupDropdown(true)}
+                >
+                  <span style={{ fontSize: "12px" }}>
+                    {grpList?.map((item) => {
                       if (selectedGroup.includes(item.id)) {
                         return item.GroupName;
                       }
                     })}
-                </span>
-                <span style={{ height: "15px", marginLeft: "auto" }}>
-                  <img
-                    src={dropdown}
-                    width="5px"
-                    height="15px"
-                    style={{
-                      marginBottom: "2px",
-                    }}
+                  </span>
+                  <span
+                    style={{ position: "absolute", right: "0.5vw", top: "10%" }}
+                  >
+                    <img
+                      src={dropdown}
+                      style={{ width: "0.5rem", height: "0.5rem" }}
+                    />
+                  </span>
+                </button>
+                {showGroupDropdown ? (
+                  <AddToListDropdown
+                    processData={props.processData}
+                    completeList={grpList}
+                    checkedCheckBoxStyle="exceptionGroupChecked"
+                    associatedList={selectedGroup}
+                    checkIcon="exceptionGroup_checkIcon"
+                    onChange={onSelectGroup}
+                    addNewLabel={t("newGroup")}
+                    noDataLabel={t("noGroupAdded")}
+                    labelKey="GroupName"
+                    handleClickAway={() => setShowGroupDropdown(false)}
+                    style={{ top: "100%", left: "0", width: "100%" }}
+                    onKeydown={(val) => {
+                      let maxId = 0;
+                      grpList &&
+                        grpList.map((el) => {
+                          if (el.id > maxId) {
+                            maxId = +el.id + 1;
+                          }
+                        });
+                      setselectedGroup([maxId]);
+                      props.addGroupToList(val);
+                    }} // funtion for api call
+                    calledFromWorkdesk={true}
                   />
-                </span>
-              </Button>
-              {showGroupDropdown ? (
-                <AddToListDropdown
-                  processData={props.processData}
-                  completeList={grpList}
-                  checkboxStyle="swimlaneCheckbox"
-                  checkedCheckBoxStyle="swimlaneChecked"
-                  associatedList={selectedGroup}
-                  checkIcon="swimlaneCheckIcon"
-                  onChange={onSelectGroup}
-                  addNewLabel={t("newGroup")}
-                  noDataLabel={t("noGroupAdded")}
-                  onKeydown={(val) => {
-                    let maxId = 0;
-                    grpList &&
-                      grpList.map((el) => {
-                        if (el.id > maxId) {
-                          maxId = +el.id + 1;
-                        }
-                      });
-                    setselectedGroup([maxId]);
-                    props.addGroupToList(val);
-                  }} // funtion for api call
-                  labelKey="GroupName"
-                  handleClickAway={() => setShowGroupDropdown(false)}
-                  calledFromWorkdesk={true}
-                />
-              ) : null}
+                ) : null}
+              </div>
             </div>
           ) : null}
-
-          <div className="associateFieldDiv">
+          <div style={{ marginBottom: "0.5rem" }}>
             <FormControlLabel
               control={
                 <Checkbox
@@ -260,62 +274,74 @@ function AddToDo(props) {
                   onChange={(e) => handleMandatoryValue(e)}
                 />
               }
+              className={styles.properties_radioButton}
               label="Mandatory"
             />
-            <p style={{ fontSize: "12px" }}>{t("associatedFeild")}</p>
-            <Select
-              onChange={onSelect}
-              className={classes.select}
-              MenuProps={{
-                anchorOrigin: {
-                  vertical: "bottom",
-                  horizontal: "left",
-                },
-                transformOrigin: {
-                  vertical: "top",
-                  horizontal: "left",
-                },
-                getContentAnchorEl: null,
-              }}
-              value={associateField}
-            >
-              <MenuItem className={classes.dropdownData} value="defaultValue">
-                {props.toDoAssoFieldToModify
-                  ? props.toDoAssoFieldToModify
-                  : `<${t("processView.noneWord")}>`}
-              </MenuItem>
-              {associateFields.map((x) => {
-                return (
-                  <MenuItem className={classes.dropdownData} key={x} value={x}>
-                    {x}
-                  </MenuItem>
-                );
-              })}
-            </Select>
           </div>
+          <label className={styles.modalLabel}>{t("associatedFeild")}</label>
+          <Select
+            onChange={onSelect}
+            className={styles.modalSelect}
+            MenuProps={{
+              anchorOrigin: {
+                vertical: "bottom",
+                horizontal: "left",
+              },
+              transformOrigin: {
+                vertical: "top",
+                horizontal: "left",
+              },
+              getContentAnchorEl: null,
+            }}
+            value={associateField}
+          >
+            <MenuItem value="defaultValue" className={styles.modalDropdownData}>
+              {t("processView.noneWord")}
+            </MenuItem>
+            {associateFields.map((x) => {
+              return (
+                <MenuItem
+                  key={x}
+                  value={x}
+                  className={styles.modalDropdownData}
+                >
+                  {x}
+                </MenuItem>
+              );
+            })}
+          </Select>
         </div>
-        <div className="selectedToDoTypeModal">
-          <div className="selectedToDoTypeDiv">
-            <h5>{t("type")}</h5>
-            <div className="radioGroupsDiv">
-              <RadioGroups
-                toDoToModifyTrigger={props.toDoToModifyTrigger}
-                toDoTypeToModify={props.toDoTypeToModify}
-                addPickList={props.addPickList}
-                selectTrigger={props.selectTrigger}
-                toDoType={handleToDoTypeSelection}
-                selectedTrigger={handleTriggerSelection}
-                triggerList={props.triggerList}
-                todoName={props.todoName}
-                setTodoName={props.setTodoName}
-              />
-            </div>
-            {props.showTriggerError ? (
-              <span style={{ fontSize: "10px", color: "red" }}>
-                Please select Trigger
-              </span>
-            ) : null}
+        <div className="selectedToDoTypeDiv" style={{ flex: "1" }}>
+          <label className={styles.modalLabel}>{t("type")}</label>
+          <div className="radioGroupsDiv">
+            <RadioGroups
+              toDoToModifyTrigger={props.toDoToModifyTrigger}
+              toDoTypeToModify={props.toDoTypeToModify}
+              addPickList={props.addPickList}
+              selectTrigger={props.selectTrigger}
+              toDoType={handleToDoTypeSelection}
+              selectedTrigger={handleTriggerSelection}
+              triggerList={props.triggerList}
+              todoName={props.todoName}
+              setTodoName={props.setTodoName}
+              setTodoTypeValue={setTodoTypeValue}
+              pickList={props.pickList}
+              setPickList={props.setPickList}
+            />
           </div>
+          {props.showTriggerError ? (
+            <span
+              style={{
+                color: "red",
+                fontSize: "10px",
+                marginTop: "-0.25rem",
+                marginBottom: "0.5rem",
+                display: "block",
+              }}
+            >
+              Please select Trigger
+            </span>
+          ) : null}
         </div>
       </div>
       <div
@@ -332,9 +358,11 @@ function AddToDo(props) {
               : styles.cancelButton
           }
           onClick={() => props.handleClose()}
+          id="close_AddTodoModal_Button"
         >
           {t("cancel")}
         </button>
+
         {props.toDoNameToModify ? null : (
           <button
             id="addAnotherTodo_Button"
@@ -342,7 +370,7 @@ function AddToDo(props) {
               props.addToDoToList(
                 nameInput,
                 "addAnother",
-                props.groupId ? props.groupId : selectedGroup[0],
+                props.groupId ? props.groupId : selectedGroup[0], // code edited on 2 August 2022 for BugId 113565
                 descriptionInput
               )
             }
@@ -358,7 +386,7 @@ function AddToDo(props) {
               props.addToDoToList(
                 nameInput,
                 "add",
-                props.groupId ? props.groupId : selectedGroup[0],
+                props.groupId ? props.groupId : selectedGroup[0], // code edited on 2 August 2022 for BugId 113565
                 descriptionInput
               )
             }
@@ -368,19 +396,22 @@ function AddToDo(props) {
           </button>
         )}
 
-        {/* code edited on 4 July 2022 for BugId 111567*/}
         {props.toDoNameToModify ? (
           <button
-            id="addNclose_AddTodoModal_Button"
-            onClick={(e) =>
+            onClick={(e) => {
+              /*code added on 4 August 2022 for BugId 113920 */
               props.modifyToDoFromList(
                 nameInput,
-                "add",
-                props.groupId ? props.groupId : selectedGroup[0],
-                descriptionInput
-              )
-            }
+                props.groupId ? props.groupId : selectedGroup[0], // code edited on 2 August 2022 for BugId 113565
+                descriptionInput,
+                props.toDoIdToModify,
+                mandatoryValue,
+                associateField,
+                todoTypeValue
+              );
+            }}
             className={styles.okButton}
+            id="addNclose_AddTodoModal_Button"
           >
             {t("save")}
           </button>

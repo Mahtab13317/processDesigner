@@ -4,6 +4,7 @@ import { renameSwimlane } from "../CommonAPICall/RenameSwimlane";
 import { renameActivity } from "../CommonAPICall/RenameActivity";
 import { maxLabelCharacter, style } from "../../Constants/bpmnView";
 import { renameTask } from "../CommonAPICall/RenameTask";
+import { getRenameActivityQueueObj } from "../abstarctView/getRenameActQueueObj";
 
 const mxgraphobj = require("mxgraph")({
   mxImageBasePath: "mxgraph/javascript/src/images",
@@ -444,7 +445,9 @@ export function cellEditor(graph, displayMessage, setProcessData, translation) {
               //cell edited is milestone
               let oldMilestoneName, processDefId;
               setProcessData((prevProcessData) => {
-                let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+                let newProcessData = JSON.parse(
+                  JSON.stringify(prevProcessData)
+                );
                 newProcessData.MileStones.forEach((milestone, idx) => {
                   if (milestone.iMileStoneId === id) {
                     oldMilestoneName = milestone.MileStoneName;
@@ -466,7 +469,9 @@ export function cellEditor(graph, displayMessage, setProcessData, translation) {
               //cell edited is swimlane
               let oldLaneName, queueId, processDefId, processName;
               setProcessData((prevProcessData) => {
-                let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+                let newProcessData = JSON.parse(
+                  JSON.stringify(prevProcessData)
+                );
                 newProcessData.Lanes.forEach((swimlane, idx) => {
                   if (swimlane.LaneId === id) {
                     oldLaneName = swimlane.LaneName;
@@ -499,7 +504,9 @@ export function cellEditor(graph, displayMessage, setProcessData, translation) {
               //cell edited is task
               let oldTaskName, processDefId;
               setProcessData((prevProcessData) => {
-                let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+                let newProcessData = JSON.parse(
+                  JSON.stringify(prevProcessData)
+                );
                 newProcessData.Tasks.forEach((task, idx) => {
                   if (task.TaskId === id) {
                     oldTaskName = task.TaskName;
@@ -517,19 +524,41 @@ export function cellEditor(graph, displayMessage, setProcessData, translation) {
             ) {
               //cell edited is activity
               let oldActName, queueId, processDefId, processName;
+              let queueInfo = {};
+              // code added on 22 July 2022 for BugId 113305
               setProcessData((prevProcessData) => {
-                let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
+                let newProcessData = JSON.parse(
+                  JSON.stringify(prevProcessData)
+                );
                 newProcessData.MileStones.forEach((milestone, idx) => {
                   milestone.Activities.forEach((activity, actidx) => {
                     if (activity.ActivityId === id) {
+                      queueInfo = getRenameActivityQueueObj(
+                        activity.ActivityType,
+                        activity.ActivitySubType,
+                        value,
+                        newProcessData,
+                        activity.QueueId,
+                        translation
+                      );
                       oldActName = activity.ActivityName;
-                      queueId = activity.queueId;
+                      queueId = activity.QueueId;
                       newProcessData.MileStones[idx].Activities[
                         actidx
                       ].ActivityName = value;
                     }
                   });
                 });
+                if (!queueInfo.queueExist) {
+                  newProcessData.Queue?.forEach((el, index) => {
+                    if (+queueId === +el.QueueId) {
+                      newProcessData.Queue[index].QueueName =
+                        queueInfo?.queueName;
+                      newProcessData.Queue[index].QueueDescription =
+                        queueInfo?.QueueDescription;
+                    }
+                  });
+                }
                 processDefId = prevProcessData.ProcessDefId;
                 processName = prevProcessData.ProcessName;
                 return newProcessData;
@@ -542,8 +571,8 @@ export function cellEditor(graph, displayMessage, setProcessData, translation) {
                 processDefId,
                 processName,
                 queueId,
-                true,
-                state
+                queueInfo,
+                true
               );
             }
           }

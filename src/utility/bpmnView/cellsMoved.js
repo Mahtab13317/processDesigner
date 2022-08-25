@@ -133,7 +133,10 @@ export const cellRepositioned = (graph, setProcessData, caseEnabled) => {
         let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
         let cellStyle = cell.getStyle();
         if (cellStyle === style.dataObject) {
-          newProcessData.DataObjects = [...prevProcessData.DataObjects];
+          // code edited on 29 July 2022 for BugId 113146
+          newProcessData.DataObjects = JSON.parse(
+            JSON.stringify(prevProcessData.DataObjects)
+          );
           for (let itr of newProcessData.DataObjects) {
             if (itr.DataObjectId === parseInt(cell.getId())) {
               //update x and y location value when id matches
@@ -143,7 +146,10 @@ export const cellRepositioned = (graph, setProcessData, caseEnabled) => {
             }
           }
         } else if (cellStyle === style.message) {
-          newProcessData.MSGAFS = [...prevProcessData.MSGAFS];
+          // code edited on 29 July 2022 for BugId 113146
+          newProcessData.MSGAFS = JSON.parse(
+            JSON.stringify(prevProcessData.MSGAFS)
+          );
           for (let itr of newProcessData.MSGAFS) {
             if (itr.MsgAFId === parseInt(cell.getId())) {
               //update x and y location value when id matches
@@ -153,7 +159,10 @@ export const cellRepositioned = (graph, setProcessData, caseEnabled) => {
             }
           }
         } else if (cellStyle === style.textAnnotations) {
-          newProcessData.Annotations = [...prevProcessData.Annotations];
+          // code edited on 29 July 2022 for BugId 113146
+          newProcessData.Annotations = JSON.parse(
+            JSON.stringify(prevProcessData.Annotations)
+          );
           for (let itr of newProcessData.Annotations) {
             if (itr.AnnotationId === parseInt(cell.getId())) {
               //update x and y location value when id matches
@@ -163,7 +172,10 @@ export const cellRepositioned = (graph, setProcessData, caseEnabled) => {
             }
           }
         } else if (cellStyle === style.groupBox) {
-          newProcessData.GroupBoxes = [...prevProcessData.GroupBoxes];
+          // code edited on 29 July 2022 for BugId 113146
+          newProcessData.GroupBoxes = JSON.parse(
+            JSON.stringify(prevProcessData.GroupBoxes)
+          );
           for (let itr of newProcessData.GroupBoxes) {
             if (itr.GroupBoxId === parseInt(cell.getId())) {
               //update x and y location value when id matches
@@ -198,7 +210,10 @@ export const cellRepositioned = (graph, setProcessData, caseEnabled) => {
           newProcessData.MileStones?.forEach((mile) => {
             mileWidth = mileWidth + +mile.Width;
           });
-          newProcessData.Tasks = [...prevProcessData.Tasks];
+          // code edited on 29 July 2022 for BugId 113146
+          newProcessData.Tasks = JSON.parse(
+            JSON.stringify(prevProcessData.Tasks)
+          );
           for (let itr of newProcessData.Tasks) {
             if (itr.TaskId === parseInt(cell.getId())) {
               //update x and y location value when id matches
@@ -485,6 +500,7 @@ export const cellRepositioned = (graph, setProcessData, caseEnabled) => {
               });
 
               seqId = seqIdArray.length <= 0 ? 1 : Math.max(...seqIdArray) + 1;
+              // code edited on 29 July 2022 for BugId 113146
               newProcessData.Lanes?.forEach((lane) => {
                 if (lane.LaneId === targetSwimlane.id) {
                   isLaneFound = true;
@@ -522,8 +538,11 @@ export const cellRepositioned = (graph, setProcessData, caseEnabled) => {
                 });
                 mileWidth = mileWidth + +mile.Width;
               });
-
-              newProcessData.Lanes = [...prevProcessData.Lanes];
+              // code edited on 29 July 2022 for BugId 113146
+              newProcessData.Lanes = JSON.parse(
+                JSON.stringify(prevProcessData.Lanes)
+              );
+              // code edited on 29 July 2022 for BugId 113146
               newProcessData.Lanes?.forEach((swimlane, index) => {
                 swimlane["oldHeight"] = swimlane.Height;
                 if (swimlane.LaneId === parentCellId) {
@@ -594,7 +613,7 @@ export const cellRepositioned = (graph, setProcessData, caseEnabled) => {
                 });
               }
               seqId = seqIdArray.length <= 0 ? 1 : Math.max(...seqIdArray) + 1;
-              prevProcessData.Lanes?.forEach((lane) => {
+              newProcessData.Lanes?.forEach((lane) => {
                 if (lane.LaneId === targetSwimlane.id) {
                   isLaneFound = true;
                 }
@@ -632,7 +651,7 @@ export const cellRepositioned = (graph, setProcessData, caseEnabled) => {
                 });
                 mileWidth = mileWidth + +mile.Width;
               });
-              prevProcessData.Lanes?.forEach((swimlane, index) => {
+              newProcessData.Lanes?.forEach((swimlane, index) => {
                 swimlane["oldHeight"] = swimlane.Height;
                 if (swimlane.LaneId === parentCellId) {
                   if (+newHeight !== +swimlaneAtXY.geometry.height) {
@@ -746,9 +765,6 @@ export const cellRepositioned = (graph, setProcessData, caseEnabled) => {
         if (res.data.Status === 0) {
           return 0;
         }
-      })
-      .catch((err) => {
-        console.log(err);
       });
   };
 

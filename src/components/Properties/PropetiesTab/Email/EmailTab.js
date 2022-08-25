@@ -20,9 +20,65 @@ import {
 } from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 import { OpenProcessSliceValue } from "../../../../redux-store/slices/OpenProcessSlice";
+import { withStyles, makeStyles } from "@material-ui/core/styles";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Paper from "@material-ui/core/Paper";
+
+const StyledTableCell = withStyles((theme) => ({
+  head: {
+    backgroundColor: theme.palette.common.black,
+    color: theme.palette.common.white,
+  },
+  body: {
+    fontSize: 14,
+  },
+}))(TableCell);
+
+const StyledTableRow = withStyles((theme) => ({
+  root: {
+    "&:nth-of-type(even)": {
+      backgroundColor: "#fff",
+    },
+  },
+}))(TableRow);
+
+const useStyles = makeStyles((theme) => ({
+  table: {
+    height: 40,
+    borderSpacing: "0 0.125rem",
+  },
+  tableContainer: {
+    padding: "1.5rem 0 0",
+    height: 270,
+  },
+  tableRow: {
+    height: 40,
+  },
+  tableHeader: {
+    fontWeight: 600,
+    fontSize: 13,
+    backgroundColor: "#f8f8f8",
+    borderTop: "1px solid #f8f8f8",
+    borderBottom: "1px solid #f8f8f8",
+    borderRadius: "0.125rem",
+    color: "black",
+    padding: "0 1vw",
+  },
+  tableBodyCell: {
+    fontSize: "var(--base_text_font_size) !important",
+    fontWeight: "500 !important",
+    padding: "0 1vw",
+  },
+}));
 
 function EmailTab(props) {
   let { t } = useTranslation();
+  const classes = useStyles();
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const loadedActivityPropertyData = store.getState("activityPropertyData");
@@ -35,19 +91,25 @@ function EmailTab(props) {
   const [toConstant, settoConstant] = useState(false);
   const [ccConstant, setccConstant] = useState(false);
   const [bccConstant, setbccConstant] = useState(false);
-  const [Subject, setSubject] = useState(null);
-  const [Message, setMessage] = useState(null);
-  const [priority, setPriority] = useState(null);
-  const [data, setData] = useState({});
+  const [Subject, setSubject] = useState("");
+  const [Message, setMessage] = useState("");
+  const [priority, setPriority] = useState("");
+  const [data, setData] = useState({
+    from: "",
+    to: "",
+    bcc: "",
+    cc: "",
+  });
   const [contentSubject, setcontentSubject] = useState("");
   const [contentMessage, setcontentMessage] = useState("");
   const [checked, setChecked] = useState({});
-  const [priorityDropdown, setpriorityDropdown] = useState([
-    "Low",
-    "Medium",
-    "High",
-  ]);
+  const priorityDropdown = ["Low", "Medium", "High"];
   const openProcessData = useSelector(OpenProcessSliceValue);
+  const DropdownOptions = ["Status"];
+  const [varDocSelected, setVarDocSelected] = useState(DropdownOptions[0]);
+  const [allChecked, setAllChecked] = useState(false);
+  const [isStatusCreated, setIsStatusCreated] = useState(null);
+  const [isDefaultVal, setIsDefaultVal] = useState(true);
   const menuProps = {
     anchorOrigin: {
       vertical: "bottom",
@@ -82,11 +144,42 @@ function EmailTab(props) {
 
   useEffect(() => {
     setDropdown(localLoadedProcessData?.Variable);
-  }, [localLoadedProcessData]);
+  }, [localLoadedProcessData?.Variable]);
 
   useEffect(() => {
-    let temp = {};
-    openProcessData.loadedData?.DocumentTypeList.forEach((el) => {
+    let tempList =
+      localLoadedActivityPropertyData?.ActivityProperty?.sendInfo?.emailInfo
+        ?.mapselectedprintDocList;
+    let temp = {
+      [`-998`]: {
+        createDoc: "N",
+        docTypeId: "-998",
+        m_bCreateCheckbox: false,
+        m_bPrint: false,
+        varFieldId: "0",
+        variableId: "0",
+        DocName: "Conversation",
+      },
+    };
+    if (tempList && tempList["v_42_0"]) {
+      temp = {
+        ...temp,
+        ["v_42_0"]: {
+          docTypeId: "0",
+          DocName: "Status",
+          createDoc: "N",
+          m_bCreateCheckbox: false,
+          m_bPrint: false,
+          varFieldId: "0",
+          variableId: "42",
+        },
+      };
+      if (isStatusCreated === null) {
+        setIsStatusCreated(true);
+      }
+    }
+    let tempLocal = JSON.parse(JSON.stringify(openProcessData.loadedData));
+    tempLocal?.DocumentTypeList.forEach((el) => {
       temp = {
         ...temp,
         [`d_${el.DocTypeId}`]: {
@@ -101,33 +194,32 @@ function EmailTab(props) {
       };
     });
     setAllData(temp);
-    let tempList =
-      localLoadedActivityPropertyData.ActivityProperty?.sendInfo?.emailInfo
-        ?.mapselectedprintDocList;
-    Object.keys(tempList).forEach((el) => {
-      tempList[el] = { ...tempList[el] };
-    });
-
     let tempCheck = {};
-    Object.keys(tempList).forEach((el) => {
+    let isEmailAllChecked = true;
+    Object.keys(temp)?.forEach((el) => {
       tempCheck = {
         ...tempCheck,
         [el]: {
-          m_bCreateCheckbox: tempList[el].m_bCreateCheckbox,
-          m_bPrint: tempList[el].m_bPrint,
+          m_bCreateCheckbox: tempList[el]?.m_bCreateCheckbox
+            ? tempList[el].m_bCreateCheckbox
+            : false,
+          m_bPrint: tempList[el]?.m_bPrint ? tempList[el].m_bPrint : false,
         },
       };
+      if (!tempList[el]?.m_bPrint) {
+        isEmailAllChecked = false;
+      }
     });
     setChecked(tempCheck);
+    setAllChecked(isEmailAllChecked);
 
-    //-------
     let tempData = {};
     let mailInfo =
-      localLoadedActivityPropertyData.ActivityProperty?.sendInfo?.emailInfo
+      localLoadedActivityPropertyData?.ActivityProperty?.sendInfo?.emailInfo
         ?.mailInfo;
     if (mailInfo.m_bFromConst) {
       setFromConstant(true);
-      tempData = { ...tempData, from: mailInfo.fromUser };
+      tempData = { ...tempData, from: mailInfo.fromConstant };
     } else {
       setFromConstant(false);
       tempData = {
@@ -140,7 +232,7 @@ function EmailTab(props) {
     }
     if (mailInfo.m_bToConst) {
       settoConstant(true);
-      tempData = { ...tempData, to: mailInfo.toUser };
+      tempData = { ...tempData, to: mailInfo.toConstant };
     } else {
       settoConstant(false);
       tempData = {
@@ -152,8 +244,8 @@ function EmailTab(props) {
       };
     }
     if (mailInfo.m_bCcConst) {
-      tempData = { ...tempData, cc: mailInfo.ccUser };
       setccConstant(true);
+      tempData = { ...tempData, cc: mailInfo.ccConstant };
     } else {
       setccConstant(false);
       tempData = {
@@ -165,8 +257,8 @@ function EmailTab(props) {
       };
     }
     if (mailInfo.m_bBCcConst) {
-      tempData = { ...tempData, bcc: mailInfo.bccUser };
       setbccConstant(true);
+      tempData = { ...tempData, bcc: mailInfo.bccConstant };
     } else {
       setbccConstant(false);
       tempData = {
@@ -177,23 +269,12 @@ function EmailTab(props) {
         ),
       };
     }
+    setIsDefaultVal(true);
     setData(tempData);
-    if (mailInfo.priority == "1") {
-      setPriority("Low");
-    } else if (mailInfo.priority == "2") {
-      setPriority("Medium");
-    } else if (mailInfo.priority == "3") {
-      setPriority("High");
-    } else {
-      setPriority("");
-    }
+    setPriority(mailInfo.priority);
     setcontentSubject(mailInfo.subject);
     setcontentMessage(mailInfo.message);
-  }, [openProcessData.loadedData]);
-
-  useEffect(() => {
-    setActivityData(data);
-  }, [data]);
+  }, [openProcessData.loadedData, localLoadedActivityPropertyData]);
 
   useEffect(() => {
     let isValidObj = validateFunc();
@@ -206,19 +287,117 @@ function EmailTab(props) {
     }
   }, [localLoadedActivityPropertyData]);
 
-  const CheckHandler = (e, el) => {
-    let tempCheck = { ...checked };
-    tempCheck[el] = {};
+  useEffect(() => {
+    if (!isDefaultVal) {
+      setActivityData(data);
+    }
+  }, [data, priority, contentSubject, contentMessage]);
+
+  const addHandler = () => {
+    let temp1 = { ...allData };
+    if (temp1["v_42_0"]) {
+      dispatch(
+        setToastDataFunc({
+          message: t("docAlreadyAdded"),
+          severity: "error",
+          open: true,
+        })
+      );
+    } else {
+      let tempdata = {
+        docTypeId: "0",
+        DocName: "Status",
+        createDoc: "N",
+        m_bCreateCheckbox: false,
+        m_bPrint: false,
+        varFieldId: "0",
+        variableId: "42",
+      };
+      temp1 = { ...temp1, ["v_42_0"]: tempdata }; // key = [v_${variableId}_${varFieldId}]
+      setAllData(temp1);
+
+      let temp = { ...localLoadedActivityPropertyData };
+      let SavePrint = {
+        ...temp.ActivityProperty?.sendInfo?.emailInfo?.mapselectedprintDocList,
+      };
+      temp.ActivityProperty.sendInfo.emailInfo.mapselectedprintDocList = {
+        ...SavePrint,
+        [`v_42_0`]: tempdata,
+      };
+      setlocalLoadedActivityPropertyData(temp);
+    }
   };
 
-  const priorityTypeHandler = (e) => {
-    setPriority(e.target.value);
-  };
-  const SubjectTypeHandler = (e) => {
-    setSubject(e.target.value);
-  };
-  const messageTypeHandler = (e) => {
-    setMessage(e.target.value);
+  const CheckHandler = (e, el) => {
+    let tempCheck = { ...checked };
+    let isPrintAllChecked = true;
+    if (e.target.name === "m_bPrint" && !e.target.checked) {
+      tempCheck[el] = {
+        ...tempCheck[el],
+        [e.target.name]: e.target.checked,
+        m_bCreateCheckbox: false,
+      };
+    } else {
+      tempCheck[el] = { ...tempCheck[el], [e.target.name]: e.target.checked };
+    }
+    Object.keys(allData)?.forEach((el) => {
+      if (!tempCheck[el].m_bPrint) {
+        isPrintAllChecked = false;
+      }
+    });
+    setChecked(tempCheck);
+    setAllChecked(isPrintAllChecked);
+    let temp = { ...localLoadedActivityPropertyData };
+    let SavePrint = {
+      ...temp.ActivityProperty?.sendInfo?.emailInfo?.mapselectedprintDocList,
+    };
+    if (el === "-998") {
+      temp.ActivityProperty.sendInfo.emailInfo.mapselectedprintDocList = {
+        ...SavePrint,
+        [`${allData[el].docTypeId}`]: {
+          createDoc: allData[el].createDoc,
+          docTypeId: allData[el].docTypeId,
+          m_bCreateCheckbox: tempCheck[el].m_bCreateCheckbox ? true : false,
+          m_bPrint: tempCheck[el].m_bPrint ? true : false,
+          varFieldId: allData[el].varFieldId,
+          variableId: allData[el].variableId,
+        },
+      };
+    } else if (el === "v_42_0") {
+      setIsStatusCreated(false);
+      temp.ActivityProperty.sendInfo.emailInfo.mapselectedprintDocList = {
+        ...SavePrint,
+        [`v_42_0`]: {
+          createDoc: tempCheck[el].m_bCreateCheckbox
+            ? "Y"
+            : allData[el].createDoc,
+          docTypeId: allData[el].docTypeId,
+          m_bCreateCheckbox: tempCheck[el].m_bCreateCheckbox ? true : false,
+          m_bPrint: tempCheck[el].m_bPrint ? true : false,
+          varFieldId: allData[el].varFieldId,
+          variableId: allData[el].variableId,
+        },
+      };
+    } else {
+      temp.ActivityProperty.sendInfo.emailInfo.mapselectedprintDocList = {
+        ...SavePrint,
+        [`d_${allData[el].docTypeId}`]: {
+          createDoc: allData[el].createDoc,
+          docTypeId: allData[el].docTypeId,
+          m_bCreateCheckbox: tempCheck[el].m_bCreateCheckbox ? true : false,
+          m_bPrint: tempCheck[el].m_bPrint ? true : false,
+          varFieldId: allData[el].varFieldId,
+          variableId: allData[el].variableId,
+        },
+      };
+    }
+
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.send]: { isModified: true, hasError: false },
+      })
+    );
   };
 
   const setActivityData = (tempData) => {
@@ -237,7 +416,7 @@ function EmailTab(props) {
     } else {
       newObj = {
         ...newObj,
-        fromUser: tempData.from,
+        fromConstant: tempData.from,
         variableIdFrom: "0",
         varFieldIdFrom: "0",
         varFieldTypeFrom: TRIGGER_CONSTANT,
@@ -258,7 +437,7 @@ function EmailTab(props) {
     } else {
       newObj = {
         ...newObj,
-        toUser: tempData.to,
+        toConstant: tempData.to,
         variableIdTo: "0",
         varFieldIdTo: "0",
         varFieldTypeTo: TRIGGER_CONSTANT,
@@ -279,7 +458,7 @@ function EmailTab(props) {
     } else {
       newObj = {
         ...newObj,
-        ccUser: tempData.cc,
+        ccConstant: tempData.cc,
         variableIdCC: "0",
         varFieldIdCC: "0",
         varFieldTypeCC: TRIGGER_CONSTANT,
@@ -300,7 +479,7 @@ function EmailTab(props) {
     } else {
       newObj = {
         ...newObj,
-        bccUser: tempData.bcc,
+        bccConstant: tempData.bcc,
         variableIdBCC: "0",
         varFieldIdBCC: "0",
         varFieldTypeBCC: TRIGGER_CONSTANT,
@@ -330,6 +509,7 @@ function EmailTab(props) {
     statement = statement + "&" + Subject + "&";
     setcontentSubject(statement);
   };
+
   const addMsgHandler = () => {
     let statement = contentMessage;
     statement = statement + "&" + Message + "&";
@@ -338,25 +518,25 @@ function EmailTab(props) {
 
   const validateFunc = () => {
     let mailInfo =
-      localLoadedActivityPropertyData.ActivityProperty?.sendInfo?.emailInfo
+      localLoadedActivityPropertyData?.ActivityProperty?.sendInfo?.emailInfo
         ?.mailInfo;
     if (mailInfo.m_bFromConst) {
-      if (!mailInfo.fromUser || mailInfo.fromUser?.trim() === "") {
+      if (!mailInfo.fromConstant || mailInfo.fromConstant?.trim() === "") {
         return false;
       }
     }
     if (mailInfo.m_bToConst) {
-      if (!mailInfo.toUser || mailInfo.toUser?.trim() === "") {
+      if (!mailInfo.toConstant || mailInfo.toConstant?.trim() === "") {
         return false;
       }
     }
     if (mailInfo.m_bCcConst) {
-      if (!mailInfo.ccUser || mailInfo.ccUser?.trim() === "") {
+      if (!mailInfo.ccConstant || mailInfo.ccConstant?.trim() === "") {
         return false;
       }
     }
     if (mailInfo.m_bBCcConst) {
-      if (!mailInfo.bccUser || mailInfo.bccUser?.trim() === "") {
+      if (!mailInfo.bccConstant || mailInfo.bccConstant?.trim() === "") {
         return false;
       }
     }
@@ -366,7 +546,87 @@ function EmailTab(props) {
   const onChange = (field, val) => {
     let tempData = { ...data };
     tempData = { ...tempData, [field]: val };
+    setIsDefaultVal(false);
     setData(tempData);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.send]: { isModified: true, hasError: false },
+      })
+    );
+  };
+
+  const docTypeHandler = (e) => {
+    setVarDocSelected(e.target.value);
+  };
+
+  const handleAllCheck = (e) => {
+    setIsStatusCreated(false);
+    setAllChecked(e.target.checked);
+    let tempCheck = { ...checked };
+    Object.keys(allData)?.forEach((el) => {
+      if (!e.target.checked) {
+        tempCheck[el] = {
+          ...tempCheck[el],
+          m_bPrint: e.target.checked,
+          m_bCreateCheckbox: false,
+        };
+      } else {
+        tempCheck[el] = { ...tempCheck[el], m_bPrint: e.target.checked };
+      }
+    });
+    setChecked(tempCheck);
+    let temp = { ...localLoadedActivityPropertyData };
+    let SavePrint = {
+      ...temp.ActivityProperty?.sendInfo?.emailInfo?.mapselectedprintDocList,
+    };
+    let tempLocalCheck = {};
+    Object.keys(allData)?.forEach((el) => {
+      if (el === "-998") {
+        tempLocalCheck = {
+          ...tempLocalCheck,
+          [`${allData[el].docTypeId}`]: {
+            createDoc: allData[el].createDoc,
+            docTypeId: allData[el].docTypeId,
+            m_bCreateCheckbox: tempCheck[el].m_bCreateCheckbox ? true : false,
+            m_bPrint: tempCheck[el].m_bPrint ? true : false,
+            varFieldId: allData[el].varFieldId,
+            variableId: allData[el].variableId,
+          },
+        };
+      } else if (el === "v_42_0") {
+        tempLocalCheck = {
+          ...tempLocalCheck,
+          [`v_42_0`]: {
+            createDoc: tempCheck[el].m_bCreateCheckbox
+              ? "Y"
+              : allData[el].createDoc,
+            docTypeId: allData[el].docTypeId,
+            m_bCreateCheckbox: tempCheck[el].m_bCreateCheckbox ? true : false,
+            m_bPrint: tempCheck[el].m_bPrint ? true : false,
+            varFieldId: allData[el].varFieldId,
+            variableId: allData[el].variableId,
+          },
+        };
+      } else {
+        tempLocalCheck = {
+          ...tempLocalCheck,
+          [`d_${allData[el].docTypeId}`]: {
+            createDoc: allData[el].createDoc,
+            docTypeId: allData[el].docTypeId,
+            m_bCreateCheckbox: tempCheck[el].m_bCreateCheckbox ? true : false,
+            m_bPrint: tempCheck[el].m_bPrint ? true : false,
+            varFieldId: allData[el].varFieldId,
+            variableId: allData[el].variableId,
+          },
+        };
+      }
+    });
+
+    temp.ActivityProperty.sendInfo.emailInfo.mapselectedprintDocList = {
+      ...SavePrint,
+      ...tempLocalCheck,
+    };
+    setlocalLoadedActivityPropertyData(temp);
     dispatch(
       setActivityPropertyChange({
         [propertiesLabel.send]: { isModified: true, hasError: false },
@@ -376,76 +636,89 @@ function EmailTab(props) {
 
   return (
     <div className="marginAllAround">
-      <div className="row">
-        <div>
-          <p className="varUsedLabel">{t("from")}*</p>
-          <SelectWithInput
-            dropdownOptions={dropdown}
-            optionKey="VariableName"
-            setIsConstant={(val) => {
-              setFromConstant(val);
-            }}
-            setValue={(val) => onChange("from", val)}
-            value={data.from}
-            isConstant={fromConstant}
-            showEmptyString={false}
-            showConstValue={true}
-            id="from_select_input"
-          />
-        </div>
-        <div>
-          <p className="varUsedLabel">{t("to")}*</p>
-          <SelectWithInput
-            dropdownOptions={dropdown}
-            optionKey="VariableName"
-            setIsConstant={settoConstant}
-            setValue={(val) => onChange("to", val)}
-            value={data.to}
-            isConstant={toConstant}
-            showEmptyString={false}
-            showConstValue={true}
-            id="to_select_input"
-          />
-        </div>
-        <div>
-          <p className="varUsedLabel">{t("CC")}</p>
-          <SelectWithInput
-            dropdownOptions={dropdown}
-            optionKey="VariableName"
-            setIsConstant={setccConstant}
-            setValue={(val) => onChange("cc", val)}
-            value={data.cc}
-            isConstant={ccConstant}
-            showEmptyString={false}
-            showConstValue={true}
-            id="cc_select_input" //code edited on 21 June 2022 for BugId 110973
-          />
-        </div>
-        <div>
-          <p className="varUsedLabel">{t("BCC")}</p>
-          <SelectWithInput
-            dropdownOptions={dropdown}
-            optionKey="VariableName"
-            setIsConstant={setbccConstant}
-            setValue={(val) => onChange("bcc", val)}
-            value={data.bcc}
-            isConstant={bccConstant}
-            showEmptyString={false}
-            showConstValue={true}
-            id="bcc_select_input" //code edited on 21 June 2022 for BugId 110973
-          />
-        </div>
-        <div>
-          <p className="varUsedLabel">{t("Priority")}</p>
-          <Select
-            className="dropdownEmail"
-            MenuProps={menuProps}
-            value={priority}
-            onChange={(event) => priorityTypeHandler(event)}
-            id="priority_email"
-          >
-            {priorityDropdown &&
-              priorityDropdown.map((element) => {
+      <div>
+        <div
+          className="row"
+          style={{ justifyContent: "space-between", gap: "2vw" }}
+        >
+          <div style={{ flex: "1" }}>
+            <p className="varUsedLabel">
+              {t("from")}
+              <span className="starIcon">*</span>
+            </p>
+            <SelectWithInput
+              dropdownOptions={dropdown}
+              optionKey="VariableName"
+              setIsConstant={(val) => {
+                setFromConstant(val);
+              }}
+              setValue={(val) => onChange("from", val)}
+              value={data.from}
+              isConstant={fromConstant}
+              showEmptyString={false}
+              showConstValue={true}
+              id="from_select_input"
+            />
+          </div>
+          <div style={{ flex: "1" }}>
+            <p className="varUsedLabel">
+              {t("to")}
+              <span className="starIcon">*</span>
+            </p>
+            <SelectWithInput
+              dropdownOptions={dropdown}
+              optionKey="VariableName"
+              setIsConstant={settoConstant}
+              setValue={(val) => onChange("to", val)}
+              value={data.to}
+              isConstant={toConstant}
+              showEmptyString={false}
+              showConstValue={true}
+              id="to_select_input"
+            />
+          </div>
+          <div style={{ flex: "1" }}>
+            <p className="varUsedLabel">{t("CC")}</p>
+            <SelectWithInput
+              dropdownOptions={dropdown}
+              optionKey="VariableName"
+              setIsConstant={setccConstant}
+              setValue={(val) => onChange("cc", val)}
+              value={data.cc}
+              isConstant={ccConstant}
+              showEmptyString={false}
+              showConstValue={true}
+              id="cc_select_input" //code edited on 21 June 2022 for BugId 110973
+            />
+          </div>
+          <div style={{ flex: "1" }}>
+            <p className="varUsedLabel">{t("BCC")}</p>
+            <SelectWithInput
+              dropdownOptions={dropdown}
+              optionKey="VariableName"
+              setIsConstant={setbccConstant}
+              setValue={(val) => onChange("bcc", val)}
+              value={data.bcc}
+              isConstant={bccConstant}
+              showEmptyString={false}
+              showConstValue={true}
+              id="bcc_select_input" //code edited on 21 June 2022 for BugId 110973
+            />
+          </div>
+          <div style={{ flex: "1" }}>
+            <p className="varUsedLabel">{t("Priority")}</p>
+            <Select
+              className="dropdownEmail"
+              MenuProps={menuProps}
+              value={priority}
+              onChange={(e) => {
+                setPriority(e.target.value);
+                setIsDefaultVal(false);
+              }}
+              id="priority_email"
+              style={{ marginBottom: "1rem" }}
+            >
+              {priorityDropdown?.map((element) => {
                 return (
                   <MenuItem
                     className="menuItemStylesDropdown"
@@ -456,32 +729,30 @@ function EmailTab(props) {
                   </MenuItem>
                 );
               })}
-          </Select>
+            </Select>
+          </div>
         </div>
       </div>
-
       <p className="boldText">{t("Subject")}</p>
       <p className="varUsedLabel">{t("includeVariable")}</p>
-      <div className="row">
+      <div className="row" style={{ gap: "1vw" }}>
         <Select
           className="dropdownEmail"
           MenuProps={menuProps}
           id="includeVar_email"
           value={Subject}
-          onChange={(event) => SubjectTypeHandler(event)}
+          onChange={(e) => setSubject(e.target.value)}
         >
-          {dropdown &&
-            dropdown.map((element) => {
-              return (
-                <MenuItem
-                  className="menuItemStylesDropdown"
-                  key={element.VariableName}
-                  value={element.VariableName}
-                >
-                  {element.VariableName}
-                </MenuItem>
-              );
-            })}
+          {dropdown?.map((element) => {
+            return (
+              <MenuItem
+                className="menuItemStylesDropdown"
+                value={element.VariableName}
+              >
+                {element.VariableName}
+              </MenuItem>
+            );
+          })}
         </Select>
         <button className="addbtnEmail" onClick={addSubjectHandler}>
           {t("add")}
@@ -492,30 +763,31 @@ function EmailTab(props) {
         style={{ width: "80%", height: "5rem", border: "1px solid #c4c4c4" }}
         id="content_email"
         value={contentSubject}
+        onChange={(e) => setcontentSubject(e.target.value)}
       />
-
       <p className="boldText">{t("msg")}</p>
       <p className="varUsedLabel">{t("includeVariable")}</p>
-      <div className="row">
+      <div className="row" style={{ gap: "1vw" }}>
         <Select
           className="dropdownEmail"
           MenuProps={menuProps}
           id="msgInclude_email"
           value={Message}
-          onChange={(event) => messageTypeHandler(event)}
+          onChange={(e) => {
+            setMessage(e.target.value);
+            setIsDefaultVal(false);
+          }}
         >
-          {dropdown &&
-            dropdown.map((element) => {
-              return (
-                <MenuItem
-                  className="menuItemStylesDropdown"
-                  key={element.VariableName}
-                  value={element.VariableName}
-                >
-                  {element.VariableName}
-                </MenuItem>
-              );
-            })}
+          {dropdown?.map((element) => {
+            return (
+              <MenuItem
+                className="menuItemStylesDropdown"
+                value={element.VariableName}
+              >
+                {element.VariableName}
+              </MenuItem>
+            );
+          })}
         </Select>
         <button className="addbtnEmail" onClick={addMsgHandler}>
           {t("add")}
@@ -526,83 +798,137 @@ function EmailTab(props) {
         style={{ width: "80%", height: "5rem", border: "1px solid #c4c4c4" }}
         id="email_content_msg"
         value={contentMessage}
+        onChange={(e) => {
+          setcontentMessage(e.target.value);
+          setIsDefaultVal(false);
+        }}
       />
       <hr className="hrLineSend" />
 
-      <p className="varUsedLabel">{t("varUsedForDocType")}</p>
-
-      <div className="row">
-        <Select
-          className="dropdownEmail"
-          MenuProps={menuProps}
-          id="varUsedForDocType_email"
-        >
-          {/*code edited on 20 June 2022 for BugId 110972 */}
-          {dropdown &&
-            dropdown.map((element) => {
+      <div className="row" style={{ alignItems: "end", gap: "1vw" }}>
+        <div>
+          <p className="varUsedLabel">{t("DocType")}</p>
+          <Select
+            className="dropdownEmail"
+            MenuProps={menuProps}
+            value={varDocSelected}
+            onChange={(event) => docTypeHandler(event)}
+            style={{ margin: "var(--spacing_v) 0" }}
+          >
+            {DropdownOptions?.map((element) => {
               return (
                 <MenuItem
                   className="menuItemStylesDropdown"
-                  key={element.VariableName}
-                  value={element.VariableName}
+                  key={element}
+                  value={element}
                 >
-                  {element.VariableName}
+                  {element}
                 </MenuItem>
               );
             })}
-        </Select>
-
-        <button className="addbtnEmail">{t("add")}</button>
+          </Select>
+        </div>
+        <button
+          className="addbtnEmail"
+          style={{ margin: "0 !important" }}
+          onClick={addHandler}
+        >
+          {t("add")}
+        </button>
       </div>
 
-      <table style={{ marginTop: "1.5rem" }}>
-        <tr style={{ background: "#F8F8F8", height: "40px" }}>
-          <td className="document" style={{ fontWeight: "600" }}>
-            {t("Document")}
-          </td>
-          <td className="print" style={{ fontWeight: "600" }}>
-            {t("Print")}
-          </td>
-          <td className="notFound" style={{ fontWeight: "600" }}>
-            {t("Create if not found")}
-          </td>
-        </tr>
-        <tbody>
-          {Object.keys(allData)?.map((el) => {
-            return (
-              <tr
-                style={{
-                  height: "30px",
-                  padding: "12px",
-                  //   background: index % 2 ? "#f8f8f8" : null,
-                }}
+      <TableContainer component={Paper} className={classes.tableContainer}>
+        <Table
+          className={`${classes.table} ${
+            props.isDrawerExpanded
+              ? "webServicePropertiestableEx"
+              : "webServicePropertiestableCo"
+          } webServicePropertiestable`}
+          style={{ width: "60%" }}
+          aria-label="customized table"
+          stickyHeader
+        >
+          <TableHead>
+            <StyledTableRow className={classes.tableRow}>
+              <StyledTableCell
+                className={classes.tableHeader}
+                style={{ width: "32vw" }}
               >
-                <td className="document">{allData[el].DocName}</td>
-                <td className="print" style={{ paddingLeft: "10px" }}>
+                {t("Document")}
+              </StyledTableCell>
+              <StyledTableCell
+                className={classes.tableHeader}
+                style={{ width: "32vw" }}
+              >
+                <Checkbox
+                  className="emailCheck"
+                  checked={allChecked}
+                  onChange={(e) => handleAllCheck(e)}
+                />
+                {t("email")}
+              </StyledTableCell>
+              <StyledTableCell
+                className={classes.tableHeader}
+                style={{ width: "32vw" }}
+              >
+                <Checkbox className="emailCheck" disabled />
+                {t("CreateIfNotFound")}
+              </StyledTableCell>
+            </StyledTableRow>
+          </TableHead>
+          <TableBody className="associatedTemplateDiv">
+            {Object.keys(allData).map((el) => (
+              <StyledTableRow
+                key={allData[el].DocId}
+                className={classes.tableRow}
+              >
+                <StyledTableCell
+                  className={classes.tableBodyCell}
+                  component="th"
+                  scope="row"
+                  style={{ width: "32vw" }}
+                >
+                  {allData[el].DocName}
+                </StyledTableCell>
+
+                <StyledTableCell
+                  className={classes.tableBodyCell}
+                  style={{ width: "32vw" }}
+                >
                   <Checkbox
-                    style={{
-                      height: "14px",
-                      width: "14px",
-                    }}
+                    className="emailCheck"
+                    name="m_bPrint"
                     checked={checked[el]?.m_bPrint}
                     onChange={(e) => CheckHandler(e, el)}
                   />
-                </td>
-                <td className="notFound" style={{ paddingLeft: "50px" }}>
+                </StyledTableCell>
+                <StyledTableCell
+                  className={classes.tableBodyCell}
+                  style={{ width: "32vw" }}
+                >
                   <Checkbox
-                    style={{
-                      height: "14px",
-                      width: "14px",
-                    }}
-                    checked={checked[el]?.m_bCreateCheckbox}
+                    className="emailCheck"
+                    name="m_bCreateCheckbox"
+                    disabled={
+                      allData[el].DocName !== "Status"
+                        ? true
+                        : isStatusCreated && allData[el].DocName === "Status"
+                        ? true
+                        : !checked[el]?.m_bPrint
+                        ? true
+                        : false
+                    }
+                    checked={
+                      isStatusCreated ? false : checked[el]?.m_bCreateCheckbox
+                    }
                     onChange={(e) => CheckHandler(e, el)}
                   />
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                </StyledTableCell>
+              </StyledTableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
   );
 }

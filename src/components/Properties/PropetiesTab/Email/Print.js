@@ -4,25 +4,88 @@ import CustomizedDropdown from "../../../../UI/Components_With_ErrrorHandling/Dr
 import "./index.css";
 import { Select, MenuItem } from "@material-ui/core";
 import { Checkbox } from "@material-ui/core";
-import { useDispatch, useSelector } from "react-redux";
+import { connect, useDispatch, useSelector } from "react-redux";
 import { store, useGlobalState } from "state-pool";
 import arabicStyles from "./ArabicStyles.module.css";
-import { RTL_DIRECTION } from "../../../../Constants/appConstants";
+import {
+  propertiesLabel,
+  RTL_DIRECTION,
+} from "../../../../Constants/appConstants";
 import { OpenProcessSliceValue } from "../../../../redux-store/slices/OpenProcessSlice";
+import { withStyles, makeStyles } from "@material-ui/core/styles";
+import Table from "@material-ui/core/Table";
+import TableBody from "@material-ui/core/TableBody";
+import TableCell from "@material-ui/core/TableCell";
+import TableContainer from "@material-ui/core/TableContainer";
+import TableHead from "@material-ui/core/TableHead";
+import TableRow from "@material-ui/core/TableRow";
+import Paper from "@material-ui/core/Paper";
+import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
+import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
+
+const StyledTableCell = withStyles((theme) => ({
+  head: {
+    backgroundColor: theme.palette.common.black,
+    color: theme.palette.common.white,
+  },
+  body: {
+    fontSize: 14,
+  },
+}))(TableCell);
+
+const StyledTableRow = withStyles((theme) => ({
+  root: {
+    "&:nth-of-type(even)": {
+      backgroundColor: "#fff",
+    },
+  },
+}))(TableRow);
+
+const useStyles = makeStyles((theme) => ({
+  table: {
+    height: 40,
+    borderSpacing: "0 0.125rem",
+  },
+  tableContainer: {
+    padding: "1.5rem 0 0",
+    height: 270,
+  },
+  tableRow: {
+    height: 40,
+  },
+  tableHeader: {
+    fontWeight: 600,
+    fontSize: 13,
+    backgroundColor: "#f8f8f8",
+    borderTop: "1px solid #f8f8f8",
+    borderBottom: "1px solid #f8f8f8",
+    borderRadius: "0.125rem",
+    color: "black",
+    padding: "0 1vw",
+  },
+  tableBodyCell: {
+    fontSize: "var(--base_text_font_size) !important",
+    fontWeight: "500 !important",
+    padding: "0 1vw",
+  },
+}));
 
 function Print(props) {
   let { t } = useTranslation();
+  const classes = useStyles();
+  const dispatch = useDispatch();
   const direction = `${t("HTML_DIR")}`;
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
-  const [varDocSelected, setVarDocSelected] = useState("");
+  const DropdownOptions = ["Status"];
+  const [varDocSelected, setVarDocSelected] = useState(DropdownOptions[0]);
   const [checked, setChecked] = useState({});
+  const [allChecked, setAllChecked] = useState(false);
   const openProcessData = useSelector(OpenProcessSliceValue);
-
-  let DropdownOptions = ["Status"];
-
+  const [isStatusCreated, setIsStatusCreated] = useState(null);
   const [allData, setAllData] = useState({});
+
   const docTypeHandler = (e) => {
     setVarDocSelected(e.target.value);
   };
@@ -41,25 +104,84 @@ function Print(props) {
     },
     getContentAnchorEl: null,
   };
-  const dispatch = useDispatch();
 
   const addHandler = () => {
-    let tempdata = {
-      docTypeId: "0",
-      DocName: "Status",
-      createDoc: "N",
-      m_bCreateCheckbox: false,
-      m_bPrint: false,
-      varFieldId: "0",
-      variableId: "42",
-    };
-    let temp = { ...allData };
-    temp = { ...temp, ["v_42_0"]: tempdata };
-    setAllData(temp);
+    let temp1 = { ...allData };
+    if (temp1["v_42_0"]) {
+      dispatch(
+        setToastDataFunc({
+          message: t("docAlreadyAdded"),
+          severity: "error",
+          open: true,
+        })
+      );
+    } else {
+      let tempdata = {
+        docTypeId: "0",
+        DocName: "Status",
+        createDoc: "N",
+        m_bCreateCheckbox: false,
+        m_bPrint: false,
+        varFieldId: "0",
+        variableId: "42",
+      };
+
+      temp1 = { ...temp1, ["v_42_0"]: tempdata }; // key = [v_${variableId}_${varFieldId}]
+      setAllData(temp1);
+
+      let temp = { ...localLoadedActivityPropertyData };
+      let SavePrint = {
+        ...temp.ActivityProperty?.sendInfo?.printInfo?.mapselectedprintDocList,
+      };
+      temp.ActivityProperty.sendInfo.printInfo.mapselectedprintDocList = {
+        ...SavePrint,
+        [`v_42_0`]: tempdata,
+      };
+      setlocalLoadedActivityPropertyData(temp);
+    }
   };
 
   useEffect(() => {
-    let temp = {};
+    let tempList =
+      localLoadedActivityPropertyData?.ActivityProperty?.sendInfo?.printInfo
+        ?.mapselectedprintDocList;
+    let temp = {
+      [`-998`]: {
+        createDoc: "N",
+        docTypeId: "-998",
+        m_bCreateCheckbox: false,
+        m_bPrint: false,
+        varFieldId: "0",
+        variableId: "0",
+        DocName: "Conversation",
+      },
+      [`-999`]: {
+        createDoc: "N",
+        docTypeId: "-999",
+        m_bCreateCheckbox: false,
+        m_bPrint: false,
+        varFieldId: "0",
+        variableId: "0",
+        DocName: "Audit Trail",
+      },
+    };
+    if (tempList && tempList["v_42_0"]) {
+      temp = {
+        ...temp,
+        ["v_42_0"]: {
+          docTypeId: "0",
+          DocName: "Status",
+          createDoc: "N",
+          m_bCreateCheckbox: false,
+          m_bPrint: false,
+          varFieldId: "0",
+          variableId: "42",
+        },
+      };
+      if (isStatusCreated === null) {
+        setIsStatusCreated(true);
+      }
+    }
     let tempLocal = JSON.parse(JSON.stringify(openProcessData.loadedData));
     tempLocal?.DocumentTypeList.forEach((el) => {
       temp = {
@@ -77,29 +199,171 @@ function Print(props) {
     });
     setAllData(temp);
 
-    let tempList =
-      localLoadedActivityPropertyData?.ActivityProperty?.sendInfo?.printInfo
-        ?.mapselectedprintDocList;
-    Object.keys(tempList).forEach((el) => {
-      tempList[el] = { ...tempList[el] };
-    });
-
     let tempCheck = {};
-    Object.keys(tempList).forEach((el) => {
+    let isPrintAllChecked = true;
+    Object.keys(temp)?.forEach((el) => {
       tempCheck = {
         ...tempCheck,
         [el]: {
-          m_bCreateCheckbox: tempList[el].m_bCreateCheckbox,
-          m_bPrint: tempList[el].m_bPrint,
+          m_bCreateCheckbox: tempList[el]?.m_bCreateCheckbox
+            ? tempList[el].m_bCreateCheckbox
+            : false,
+          m_bPrint: tempList[el]?.m_bPrint ? tempList[el].m_bPrint : false,
         },
       };
+      if (!tempList[el]?.m_bPrint) {
+        isPrintAllChecked = false;
+      }
     });
     setChecked(tempCheck);
-  }, [openProcessData.loadedData]);
+    setAllChecked(isPrintAllChecked);
+  }, [openProcessData.loadedData, localLoadedActivityPropertyData]);
 
   const CheckHandler = (e, el) => {
     let tempCheck = { ...checked };
-    tempCheck[el] = {};
+    let isPrintAllChecked = true;
+    if (e.target.name === "m_bPrint" && !e.target.checked) {
+      tempCheck[el] = {
+        ...tempCheck[el],
+        [e.target.name]: e.target.checked,
+        m_bCreateCheckbox: false,
+      };
+    } else {
+      tempCheck[el] = { ...tempCheck[el], [e.target.name]: e.target.checked };
+    }
+    Object.keys(allData)?.forEach((el) => {
+      if (!tempCheck[el].m_bPrint) {
+        isPrintAllChecked = false;
+      }
+    });
+    setChecked(tempCheck);
+    setAllChecked(isPrintAllChecked);
+    let temp = { ...localLoadedActivityPropertyData };
+    let SavePrint = {
+      ...temp.ActivityProperty?.sendInfo?.printInfo?.mapselectedprintDocList,
+    };
+    if (el === "-998" || el === "-999") {
+      temp.ActivityProperty.sendInfo.printInfo.mapselectedprintDocList = {
+        ...SavePrint,
+        [`${allData[el].docTypeId}`]: {
+          createDoc: allData[el].createDoc,
+          docTypeId: allData[el].docTypeId,
+          m_bCreateCheckbox: tempCheck[el].m_bCreateCheckbox ? true : false,
+          m_bPrint: tempCheck[el].m_bPrint ? true : false,
+          varFieldId: allData[el].varFieldId,
+          variableId: allData[el].variableId,
+        },
+      };
+    } else if (el === "v_42_0") {
+      setIsStatusCreated(false);
+      temp.ActivityProperty.sendInfo.printInfo.mapselectedprintDocList = {
+        ...SavePrint,
+        [`v_42_0`]: {
+          createDoc: tempCheck[el].m_bCreateCheckbox
+            ? "Y"
+            : allData[el].createDoc,
+          docTypeId: allData[el].docTypeId,
+          m_bCreateCheckbox: tempCheck[el].m_bCreateCheckbox ? true : false,
+          m_bPrint: tempCheck[el].m_bPrint ? true : false,
+          varFieldId: allData[el].varFieldId,
+          variableId: allData[el].variableId,
+        },
+      };
+    } else {
+      temp.ActivityProperty.sendInfo.printInfo.mapselectedprintDocList = {
+        ...SavePrint,
+        [`d_${allData[el].docTypeId}`]: {
+          createDoc: allData[el].createDoc,
+          docTypeId: allData[el].docTypeId,
+          m_bCreateCheckbox: tempCheck[el].m_bCreateCheckbox ? true : false,
+          m_bPrint: tempCheck[el].m_bPrint ? true : false,
+          varFieldId: allData[el].varFieldId,
+          variableId: allData[el].variableId,
+        },
+      };
+    }
+
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.send]: { isModified: true, hasError: false },
+      })
+    );
+  };
+
+  const handleAllCheck = (e) => {
+    setIsStatusCreated(false);
+    setAllChecked(e.target.checked);
+    let tempCheck = { ...checked };
+    Object.keys(allData)?.forEach((el) => {
+      if (!e.target.checked) {
+        tempCheck[el] = {
+          ...tempCheck[el],
+          m_bPrint: e.target.checked,
+          m_bCreateCheckbox: false,
+        };
+      } else {
+        tempCheck[el] = { ...tempCheck[el], m_bPrint: e.target.checked };
+      }
+    });
+    setChecked(tempCheck);
+    let temp = { ...localLoadedActivityPropertyData };
+    let SavePrint = {
+      ...temp.ActivityProperty?.sendInfo?.printInfo?.mapselectedprintDocList,
+    };
+    let tempLocalCheck = {};
+    Object.keys(allData)?.forEach((el) => {
+      if (el === "-998" || el === "-999") {
+        tempLocalCheck = {
+          ...tempLocalCheck,
+          [`${allData[el].docTypeId}`]: {
+            createDoc: allData[el].createDoc,
+            docTypeId: allData[el].docTypeId,
+            m_bCreateCheckbox: tempCheck[el].m_bCreateCheckbox ? true : false,
+            m_bPrint: tempCheck[el].m_bPrint ? true : false,
+            varFieldId: allData[el].varFieldId,
+            variableId: allData[el].variableId,
+          },
+        };
+      } else if (el === "v_42_0") {
+        tempLocalCheck = {
+          ...tempLocalCheck,
+          [`v_42_0`]: {
+            createDoc: tempCheck[el].m_bCreateCheckbox
+              ? "Y"
+              : allData[el].createDoc,
+            docTypeId: allData[el].docTypeId,
+            m_bCreateCheckbox: tempCheck[el].m_bCreateCheckbox ? true : false,
+            m_bPrint: tempCheck[el].m_bPrint ? true : false,
+            varFieldId: allData[el].varFieldId,
+            variableId: allData[el].variableId,
+          },
+        };
+      } else {
+        tempLocalCheck = {
+          ...tempLocalCheck,
+          [`d_${allData[el].docTypeId}`]: {
+            createDoc: allData[el].createDoc,
+            docTypeId: allData[el].docTypeId,
+            m_bCreateCheckbox: tempCheck[el].m_bCreateCheckbox ? true : false,
+            m_bPrint: tempCheck[el].m_bPrint ? true : false,
+            varFieldId: allData[el].varFieldId,
+            variableId: allData[el].variableId,
+          },
+        };
+      }
+    });
+
+    temp.ActivityProperty.sendInfo.printInfo.mapselectedprintDocList = {
+      ...SavePrint,
+      ...tempLocalCheck,
+    };
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.send]: { isModified: true, hasError: false },
+      })
+    );
   };
 
   return (
@@ -111,30 +375,28 @@ function Print(props) {
             : "varUsedLabel"
         }
       >
-        {t("varUsedForDocType")}
+        {t("DocType")}
       </p>
 
-      <div className="row">
+      <div className="row" style={{ gap: "1vw" }}>
         <CustomizedDropdown
           className="dropdownEmail"
           MenuProps={menuProps}
           value={varDocSelected}
           onChange={(event) => docTypeHandler(event)}
         >
-          {DropdownOptions &&
-            DropdownOptions.map((element) => {
-              return (
-                <MenuItem
-                  className="menuItemStylesDropdown"
-                  key={element}
-                  value={element}
-                >
-                  {element}
-                </MenuItem>
-              );
-            })}
+          {DropdownOptions?.map((element) => {
+            return (
+              <MenuItem
+                className="menuItemStylesDropdown"
+                key={element}
+                value={element}
+              >
+                {element}
+              </MenuItem>
+            );
+          })}
         </CustomizedDropdown>
-
         <button
           className={
             direction === RTL_DIRECTION
@@ -147,56 +409,106 @@ function Print(props) {
         </button>
       </div>
 
-      <table style={{ marginTop: "1.5rem" }}>
-        <tr style={{ background: "#F8F8F8", height: "40px" }}>
-          <td className="document" style={{ fontWeight: "600" }}>
-            {t("Document")}
-          </td>
-          <td className="print" style={{ fontWeight: "600" }}>
-            {t("Print")}
-          </td>
-          <td className="notFound" style={{ fontWeight: "600" }}>
-            {t("Create if not found")}
-          </td>
-        </tr>
-        <tbody>
-          {Object.keys(allData)?.map((el) => {
-            return (
-              <tr
-                style={{
-                  height: "30px",
-                  padding: "12px",
-                  //   background: index % 2 ? "#f8f8f8" : null,
-                }}
+      <TableContainer component={Paper} className={classes.tableContainer}>
+        <Table
+          className={`${classes.table} ${
+            props.isDrawerExpanded
+              ? "webServicePropertiestableEx"
+              : "webServicePropertiestableCo"
+          } webServicePropertiestable`}
+          style={{ width: "60%" }}
+          aria-label="customized table"
+          stickyHeader
+        >
+          <TableHead>
+            <StyledTableRow className={classes.tableRow}>
+              <StyledTableCell
+                className={classes.tableHeader}
+                style={{ width: "32vw" }}
               >
-                <td className="document">{allData[el].DocName}</td>
-                <td className="print" style={{ paddingLeft: "10px" }}>
+                {t("Document")}
+              </StyledTableCell>
+              <StyledTableCell
+                className={classes.tableHeader}
+                style={{ width: "32vw" }}
+              >
+                <Checkbox
+                  className="emailCheck"
+                  checked={allChecked}
+                  onChange={(e) => handleAllCheck(e)}
+                />
+                {t("Print")}
+              </StyledTableCell>
+              <StyledTableCell
+                className={classes.tableHeader}
+                style={{ width: "32vw" }}
+              >
+                <Checkbox className="emailCheck" disabled />
+                {t("CreateIfNotFound")}
+              </StyledTableCell>
+            </StyledTableRow>
+          </TableHead>
+          <TableBody className="associatedTemplateDiv">
+            {Object.keys(allData).map((el) => (
+              <StyledTableRow
+                key={allData[el].DocId}
+                className={classes.tableRow}
+              >
+                <StyledTableCell
+                  className={classes.tableBodyCell}
+                  component="th"
+                  scope="row"
+                  style={{ width: "32vw" }}
+                >
+                  {allData[el].DocName}
+                </StyledTableCell>
+
+                <StyledTableCell
+                  className={classes.tableBodyCell}
+                  style={{ width: "32vw" }}
+                >
                   <Checkbox
-                    style={{
-                      height: "14px",
-                      width: "14px",
-                    }}
+                    className="emailCheck"
+                    name="m_bPrint"
                     checked={checked[el]?.m_bPrint}
                     onChange={(e) => CheckHandler(e, el)}
                   />
-                </td>
-                <td className="notFound" style={{ paddingLeft: "50px" }}>
+                </StyledTableCell>
+                <StyledTableCell
+                  className={classes.tableBodyCell}
+                  style={{ width: "32vw" }}
+                >
                   <Checkbox
-                    style={{
-                      height: "14px",
-                      width: "14px",
-                    }}
-                    checked={checked[el]?.m_bCreateCheckbox}
+                    className="emailCheck"
+                    name="m_bCreateCheckbox"
+                    disabled={
+                      allData[el].DocName !== "Status"
+                        ? true
+                        : isStatusCreated && allData[el].DocName === "Status"
+                        ? true
+                        : !checked[el]?.m_bPrint
+                        ? true
+                        : false
+                    }
+                    checked={
+                      isStatusCreated ? false : checked[el]?.m_bCreateCheckbox
+                    }
                     onChange={(e) => CheckHandler(e, el)}
                   />
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                </StyledTableCell>
+              </StyledTableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
   );
 }
 
-export default Print;
+const mapStateToProps = (state) => {
+  return {
+    isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
+  };
+};
+
+export default connect(mapStateToProps, null)(Print);

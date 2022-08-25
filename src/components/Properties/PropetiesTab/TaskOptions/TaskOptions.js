@@ -28,6 +28,7 @@ import Field from "../../../../UI/InputFields/TextField/Field.js";
 import TurnAroundTime from "../../../../UI/InputFields/TurnAroundTime/TurnAroundTime.js";
 import { getSelectedCellType } from "../../../../utility/abstarctView/getSelectedCellType";
 import { OpenProcessSliceValue } from "../../../../redux-store/slices/OpenProcessSlice";
+import TabsHeading from "../../../../UI/TabsHeading";
 const makeFieldInputs = (value) => {
   return {
     value: value,
@@ -79,6 +80,7 @@ const useStyles = makeStyles((props) => ({
   GroupTitleMain: {
     fontWeight: 700,
     color: "#606060",
+    fontSize: "var(--subtitle_text_font_size)",
   },
   btnIcon: {
     cursor: "pointer",
@@ -89,6 +91,7 @@ const useStyles = makeStyles((props) => ({
   GroupTitleSecondary: {
     fontWeight: 600,
     color: "#000000",
+    fontSize: "var(--subtitle_text_font_size)",
   },
   disabled: {
     pointerEvents: "none",
@@ -372,18 +375,9 @@ function TaskOptions(props) {
     );
   };
   return (
-    <Grid
-      container
-      direction="column"
-      style={{
-        pointerEvents:
-          props.cellType === getSelectedCellType("TASKTEMPLATE")
-            ? "none"
-            : null,
-        opacity:
-          props.cellType === getSelectedCellType("TASKTEMPLATE") ? 0.6 : 1,
-      }}
-    >
+   <>
+     <TabsHeading heading={props?.heading} />
+     <Grid container direction="column">
       <Grid item style={{ paddingBottom: "1.5rem" }}>
         <div style={{ width: "100%", height: "100%" }}>
           <hr style={{ opacity: "0.5", width: "100%" }} />
@@ -586,6 +580,7 @@ function TaskOptions(props) {
         </div>
       </Grid>
     </Grid>
+   </>
   );
 }
 

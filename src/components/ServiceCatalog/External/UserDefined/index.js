@@ -143,14 +143,8 @@ function UserDefined(props) {
           methodName: "",
           returnType: "",
           isGlobal: false,
-          paramList: [
-            {
-              paramId: 1,
-              paramName: "",
-              paramType: "",
-              isArray: false,
-            },
-          ],
+          // code edited on 26 July 2022 for BugId 111099
+          paramList: [],
         });
         //code added on 16 June 2022 for BugId 110949
         if (scope === GLOBAL_SCOPE) {
@@ -178,9 +172,12 @@ function UserDefined(props) {
         dataStructureId: param.DataStructureId,
       };
     });
+    // code edited on 26 July 2022 for Bug 111880
     let json = {
-      processDefId: props.openProcessID,
-      processType: props.openProcessType,
+      processDefId:
+        scope === GLOBAL_SCOPE ? DEFAULT_GLOBAL_ID : props.openProcessID,
+      processType:
+        scope === GLOBAL_SCOPE ? DEFAULT_GLOBAL_TYPE : props.openProcessType,
       methodName: editMethod.MethodName,
       methodIndex: editMethod.MethodIndex,
       methodType: editMethod.MethodType,
@@ -211,9 +208,12 @@ function UserDefined(props) {
   };
 
   const deleteExternalMethod = (externalMethod) => {
+    // code edited on 26 July 2022 for Bug 111880
     let json = {
-      processDefId: props.openProcessID,
-      processType: props.openProcessType,
+      processDefId:
+        scope === GLOBAL_SCOPE ? DEFAULT_GLOBAL_ID : props.openProcessID,
+      processType:
+        scope === GLOBAL_SCOPE ? DEFAULT_GLOBAL_TYPE : props.openProcessType,
       methodName: externalMethod.MethodName,
       methodIndex: externalMethod.MethodIndex,
       methodType: externalMethod.MethodType,
@@ -254,7 +254,7 @@ function UserDefined(props) {
   };
 
   const onParamChangeInEditMethod = (index, e, value) => {
-    let newParamList = [...editMethod.Parameter];
+    let newParamList = editMethod.Parameter ? [...editMethod.Parameter] : [];
     newParamList[index] = {
       ...newParamList[index],
       [e.target.name]: value,
@@ -284,7 +284,7 @@ function UserDefined(props) {
   };
 
   const addParamInEditMethod = () => {
-    let newParamList = [...editMethod.Parameter];
+    let newParamList = editMethod.Parameter ? [...editMethod.Parameter] : [];
     let maxId = 0;
     newParamList?.forEach((param) => {
       if (+param.ParamIndex > +maxId) {
@@ -313,7 +313,7 @@ function UserDefined(props) {
   };
 
   const removeParamInEditMethod = (index) => {
-    let newParamList = [...editMethod.Parameter];
+    let newParamList = editMethod.Parameter ? [...editMethod.Parameter] : [];
     newParamList.splice(index, 1);
     setEditMethod((prev) => {
       return { ...prev, Parameter: newParamList };

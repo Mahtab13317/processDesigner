@@ -12,6 +12,7 @@ import {
   RTL_DIRECTION,
 } from "../../../../Constants/appConstants";
 import emptyStatePic from "../../../../assets/ProcessView/EmptyState.svg";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 function OutputVariables(props) {
   let { t } = useTranslation();
@@ -136,6 +137,8 @@ function OutputVariables(props) {
   };
 
   return (
+   <>
+     <TabsHeading heading={props?.heading} />
     <div className="flexColumn">
       {spinner ? (
         <CircularProgress
@@ -178,8 +181,8 @@ function OutputVariables(props) {
                 <span
                   className={
                     direction === RTL_DIRECTION
-                      ? `${arabicStyles.outputHeadDiv} ${styles.outputCheck}`
-                      : `${styles.outputHeadDiv} ${styles.outputCheck}`
+                      ? `${arabicStyles.outputHeadDiv} ${styles.outputCheck} flex`
+                      : `${styles.outputHeadDiv} ${styles.outputCheck} flex`
                   }
                 >
                   <Checkbox
@@ -199,7 +202,7 @@ function OutputVariables(props) {
               <div className={styles.outputTableBody}>
                 {activityDetails.map((item) => {
                   return (
-                    <div className={styles.outputTableRow}>
+                    <div className={`${styles.outputTableRow} flex`}>
                       <span
                         className={
                           direction === RTL_DIRECTION
@@ -242,6 +245,7 @@ function OutputVariables(props) {
         </React.Fragment>
       )}
     </div>
+   </>
   );
 }
 

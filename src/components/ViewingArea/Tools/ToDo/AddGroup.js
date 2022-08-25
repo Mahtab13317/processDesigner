@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import StarRateIcon from "@material-ui/icons/StarRate";
-import Button from "@material-ui/core/Button";
 import "../Interfaces.css";
 import { useTranslation } from "react-i18next";
+import styles from "../DocTypes/index.module.css";
+import CloseIcon from "@material-ui/icons/Close";
+import arabicStyles from "../DocTypes/arabicStyles.module.css";
+import { RTL_DIRECTION } from "../../../../Constants/appConstants";
 
 function AddGroup(props) {
   let { t } = useTranslation();
@@ -20,45 +22,94 @@ function AddGroup(props) {
 
   return (
     <div className="addDocs">
-      <p className="addDocsHeading">{t("addGroup")}</p>
-      <div>
-        <label className="nameInputlabel">
+      <div className={styles.modalHeader}>
+        <h3
+          className={
+            direction === RTL_DIRECTION
+              ? arabicStyles.modalHeading
+              : styles.modalHeading
+          }
+        >
+          {t("addGroup")}
+        </h3>
+        <CloseIcon
+          onClick={() => props.handleClose()}
+          className={styles.closeIcon}
+        />
+      </div>
+      <div className={styles.modalSubHeader} style={{ paddingBottom: "2rem" }}>
+        <label className={styles.modalLabel}>
           {t("groupName")}
-          <StarRateIcon
-            style={{ height: "15px", width: "15px", color: "red" }}
-          />
+          <span className={styles.starIcon}>*</span>
         </label>
+        <form>
           <input
             id="todo_groupNameId"
             value={nameInput}
             onChange={(e) => setNameFunc(e)}
-            className="nameInput"
+            className={styles.modalInput}
           />
+        </form>
+        {props.bGroupExists ? (
+          <span
+            style={{
+              color: "red",
+              fontSize: "10px",
+              marginTop: "-0.25rem",
+              marginBottom: "0.5rem",
+              display: "block",
+            }}
+          >
+            {t("GroupAlreadyExists")}
+          </span>
+        ) : null}
+        {props.showGroupNameError ? (
+          <span
+            style={{
+              color: "red",
+              fontSize: "10px",
+              marginTop: "-0.25rem",
+              marginBottom: "0.5rem",
+              display: "block",
+            }}
+          >
+            {t("filltheName")}
+          </span>
+        ) : null}
       </div>
-      <div className="buttons_add">
-        <Button
-          variant="outlined"
+      <div
+        className={
+          direction === RTL_DIRECTION
+            ? arabicStyles.modalFooter
+            : styles.modalFooter
+        }
+      >
+        <button
+          className={
+            direction === RTL_DIRECTION
+              ? arabicStyles.cancelButton
+              : styles.cancelButton
+          }
           onClick={() => props.handleClose()}
-          id="close_AddTodoGroup_Modal"
         >
           {t("cancel")}
-        </Button>
-        <Button
-          id="addAnother_AddTodoGroup_Modal"
+        </button>
+
+        <button
+          id="addAnotherDocTypes_Button"
           onClick={(e) => props.addGroupToList(nameInput, "addAnother")}
-          variant="contained"
-          color="primary"
+          className={styles.okButton}
         >
           {t("addAnother")}
-        </Button>
-        <Button
-          id="addNclose_AddTodoGroup_Modal"
-          variant="contained"
+        </button>
+
+        <button
+          id="addNclose_AddDocModal_Button"
           onClick={(e) => props.addGroupToList(nameInput, "add")}
-          color="primary"
+          className={styles.okButton}
         >
           {t("add&Close")}
-        </Button>
+        </button>
       </div>
     </div>
   );

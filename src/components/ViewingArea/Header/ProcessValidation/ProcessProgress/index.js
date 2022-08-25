@@ -1,3 +1,6 @@
+// Code changed to solve - Unable to deploy process if we validate it first - 111108 and
+// View Details link while Deploying not working - 110762
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CloseIcon from "@material-ui/icons/Close";
@@ -7,7 +10,7 @@ import WarningIcon from "@material-ui/icons/Warning";
 import Button from "@material-ui/core/Button";
 import MinimizeIcon from "@material-ui/icons/Minimize";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
-import deploy from "../../../../../assets/Header/deploy.svg";
+import deploy from "../../../../../assets/Header/deploy.png";
 import "./index.css";
 import Modal from "../../../../../UI/Modal/Modal.js";
 import {
@@ -22,7 +25,6 @@ import { template } from "suneditor/src/plugins";
 import { useTranslation } from "react-i18next";
 import DeployProcess from "../../../../../components/DeployProcess/DeployProcess.js";
 import ProcessDeployment from "../../ProcessValidation/ProcessDeployment/DeploySucessModal.js";
-import ProcessDeploymentFailed from "../../ProcessValidation/ProcessDeployment/DeployFailedModal.js";
 import { UserRightsValue } from "../../../../../redux-store/slices/UserRightsSlice";
 import { getMenuNameFlag } from "../../../../../utility/UserRightsFunctions";
 
@@ -236,9 +238,9 @@ function ProcessValidation(props) {
                 width: "63px",
                 height: "28px",
                 background: "#FFFFFF 0% 0% no-repeat padding-box",
-                border: "1px solid #338ED1",
+                border: "1px solid var(--link_color)",
                 borderRadius: "2px",
-                color: "#338ED1",
+                color: "var(--link_color)",
                 padding: "2px",
                 textTransform: "none",
               }}
@@ -275,9 +277,11 @@ function ProcessValidation(props) {
               onClick={() => setAction(MENUOPTION_DEPLOY)}
               id="header_deploy_btn"
             >
-              <span className="deployIcon">
-                <img src={deploy} width="14px" height="13px" alt="" />
-              </span>
+              <img
+                src={deploy}
+                style={{ width: "1.75rem", height: "1.75rem" }}
+                alt=""
+              />
               <span className="deployText">Deploy</span>
             </button>
           ) : null}
@@ -300,7 +304,7 @@ function ProcessValidation(props) {
           ) : null}
           <CloseIcon
             style={{ height: "14px", width: "14px", cursor: "pointer" }}
-            onClick={props.toggleDrawer()}
+            onClick={() => props.toggleDrawer()}
           />
         </div>
       </div>
@@ -355,7 +359,7 @@ function ProcessValidation(props) {
           </div>
           <p
             style={{
-              color: "#0072C6",
+              color: "var(--link_color)",
               fontSize: "12px",
               position: "absolute",
               right: "25%",
@@ -380,6 +384,11 @@ function ProcessValidation(props) {
           modalClosed={() => setAction(null)}
           children={
             <DeployProcess
+              showDeployModal={props.showDeployModal}
+              setShowDeployModal={props.setShowDeployModal}
+              setShowDeployFailModal={props.setShowDeployFailModal}
+              showDeployFailModal={props.showDeployFailModal}
+              toggleDrawer={() => props.toggleDrawer("bottom", false)}
               setModalClosed={() => setAction(null)}
               buttonFrom={buttonFrom}
               setErrorVariables={setErrorVariables}

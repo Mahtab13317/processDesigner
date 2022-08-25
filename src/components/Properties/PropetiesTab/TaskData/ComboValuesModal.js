@@ -195,7 +195,7 @@ const ComboValuesModal = (props) => {
       onClick2={onClick2}
       // btn2Disabled={formHasError}
       closeModal={handleClose}
-      containerHeight={378}
+      containerHeight={317}
       containerWidth={640}
     />
   );
@@ -259,9 +259,10 @@ const Content = ({
               </Grid>
               <Grid item xs={2}>
                 <Button
-                  variant="outlined"
-                  color="primary"
-                  size="small"
+                  // variant="outlined"
+                  //color="primary"
+                  //size="small"
+                  className="secondary"
                   onClick={() => handleComboValueList()}
                   style={{ marginBottom: "5px" }}
                 >

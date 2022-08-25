@@ -23,6 +23,7 @@ import { getSelectedCellType } from "../../../utility/abstarctView/getSelectedCe
 import { pasteFunction } from "../../../utility/bpmnView/createPopupMenu";
 import ObjectDependencies from "../../../UI/ObjectDependencyModal";
 import Modal from "../../../UI/Modal/Modal";
+import QueueAssociation from "../../Properties/PropetiesTab/QueueAssociation";
 
 let swimlaneLayer, milestoneLayer, rootLayer;
 let buttons = {};
@@ -37,6 +38,10 @@ function Graph(props) {
   let [graph, setGraphObj] = useState(null);
   let [openDeployedProcess, setOpenDeployedProcess] = useState(null);
   const [showDependencyModal, setShowDependencyModal] = useState(false);
+  const [showQueueModal, setShowQueueModal] = useState({
+    show: false,
+    queueId: null
+  });
   const [taskAssociation, setTaskAssociation] = useState([]);
 
   const history = useHistory();
@@ -61,6 +66,7 @@ function Graph(props) {
     if (graph) {
       //code to select particular entity on bpmn graph
       let obj = await getSelectedCell(graph, props.processData);
+
       if (obj) {
         if (obj.type === getSelectedCellType("TASK")) {
           props.selectedTask(obj.id, obj.name, obj.taskType, obj.type);
@@ -128,7 +134,8 @@ function Graph(props) {
         caseEnabled,
         setOpenDeployedProcess,
         setTaskAssociation,
-        setShowDependencyModal
+        setShowDependencyModal,
+        setShowQueueModal
       ),
     ];
     setGraphObj(tempGraph);
@@ -203,6 +210,23 @@ function Graph(props) {
               processAssociation={taskAssociation}
               cancelFunc={() => setShowDependencyModal(false)}
             />
+          }
+        />
+      ) : null}
+      
+      {showQueueModal.show ? (
+        <Modal
+          show={showQueueModal.show}
+          style={{
+            width: "45vw",
+            left: "28%",
+            top: "21.5%",
+            padding: "0",
+            height:'475px'
+          }}
+          modalClosed={() => setShowQueueModal(false)}
+          children={
+            <QueueAssociation queueType='0' queueFrom='graph' showQueueModal={showQueueModal} setShowQueueModal={setShowQueueModal}/>
           }
         />
       ) : null}

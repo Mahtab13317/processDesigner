@@ -8,10 +8,7 @@ function DataObject() {
   useEffect(() => {
     let microProps = {
       source: "P", //PD_EXT
-      // data_object_alias_name: localLoadedProcessData.DataObjectAliasName, // Mandatory in props in PD_EXT
-      // data_object_name: localLoadedProcessData.DataObjectName, // Mandatory in props in PD_EXT
-      // data_object_id: localLoadedProcessData.DataObjectId,
-      // default_category_name: "a_puneet",
+
       object_type: "P", //AP/P/C
       object_id: localLoadedProcessData.ProcessDefId,
       object_name: localLoadedProcessData.ProcessName,
@@ -56,7 +53,7 @@ function DataObject() {
 
       data_types: [1, 2, 3, 4, 5, 8, 9, 10],
     };
-    console.log("nnnnnnnnnnnnnprops", microProps);
+
     window.MdmDataModel(microProps);
   }, []);
   return (

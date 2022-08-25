@@ -159,6 +159,10 @@
   align-items: center;
 }
 
+.alignEnd {
+  align-items: flex-end;
+}
+
 .justifyCenter {
   justify-content: center;
 }
@@ -179,17 +183,17 @@
   flex: 4;
 }
 
-.MuiRadio-colorSecondary.Mui-checked {
-  color: #0075ff !important;
+.MuiRadio-root.Mui-checked {
+  color: var(--radio_color) !important;
 }
 
-.MuiCheckbox-colorPrimary.Mui-checked {
-  color: #0072c6 !important;
+.MuiCheckbox-root.Mui-checked {
+  color: var(--checkbox_color) !important;
 }
 
-.MuiRadio-colorSecondary.Mui-disabled,
-.MuiCheckbox-colorPrimary.Mui-disabled {
-  color: rgba(0, 0, 0, 0.26) !important;
+.MuiRadio-root.Mui-disabled,
+.MuiCheckbox-root.Mui-disabled {
+  color: #727272 !important;
 }
 
 textarea {
@@ -234,31 +238,75 @@ textarea {
 }
 
 .MuiTabs-indicator {
-  background: #0072c6 !important;
+  background: var(--selected_tab_color) !important;
 }
 
 ::-webkit-scrollbar {
   background-color: transparent;
-  width: 0.375rem;
-  height: 0.6rem;
+  width: 0.8rem;
+  height: 1.5rem;
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background-color: transparent;
-  border-radius: 0.6rem;
+  background-color: transparent !important;
+  border-radius: 0.7rem;
 }
 
 :hover::-webkit-scrollbar {
   overflow-y: scroll;
-  width: 0.375rem;
-  height: 0.6rem;
+  width: 0.8rem;
+  height: 1.5rem;
 }
 :hover::-webkit-scrollbar-thumb {
-  background: #8c8c8c 0% 0% no-repeat padding-box;
-  border-radius: 0.313rem;
+  background: #8c8c8c 0% 0% no-repeat padding-box !important;
+  border-radius: 0.7rem;
 }
+
 .MuiTab-wrapped {
   display: flex !important;
   flex-direction: row !important;
+}
+
+/*added to give border to all dropdowns*/
+.MuiMenu-paper {
+  border: 1px solid #d7d7d7 !important;
+}
+
+/*added to change dropdown selection color as per theme*/
+.MuiMenuItem-root.Mui-selected,
+.MuiMenuItem-root.Mui-selected:hover {
+  background: var(--dropdown_selection_color) !important;
+  color: white !important;
+}
+
+/*added to overwrite theme css on search component input field*/
+#searchBoxId
+  input:not([type="button"]):not([type="submit"]):not([readonly="readonly"]):not([type="checkbox"]):focus {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/*added for checkbox check-uncheck issue after applying theme*/
+.MuiIconButton-label {
+  position: relative;
+}
+
+/*added for dropdown icon in Select*/
+.MuiSelect-icon {
+  top: calc(50% - 10px) !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+}
+
+.MuiCheckbox-root .MuiSvgIcon-root {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+.headingSectionTab{
+  margin: 8px;
+    font-family: var(--font_family);
+    font-size: var(--subtitle_text_font_size);
+    width:100%;
 }

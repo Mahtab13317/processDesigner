@@ -8,7 +8,7 @@ import { addSwimLane } from "../CommonAPICall/AddSwimlane";
 import { PROCESSTYPE_LOCAL } from "../../Constants/appConstants";
 
 var addButton = (graph, horizontal, x, y, t, processType) => {
-  let button = document.createElement("button");
+  let button = document.createElement("div");
   if (horizontal) {
     button.title = t("addMilestone");
   } else {
@@ -32,6 +32,7 @@ var addButton = (graph, horizontal, x, y, t, processType) => {
   button.style.background = "#FFFFFF33 0% 0% no-repeat padding-box";
   button.style.border = "2px dashed #C4C4C4";
   button.style.borderRadius = "1px";
+  button.style.cursor = "pointer";
   span.style.fontSize = "1.5rem";
   span.style.color = "#767676";
 

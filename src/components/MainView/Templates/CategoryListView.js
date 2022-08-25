@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import SearchBox from "../../../UI/Search Component";
 import SortButton from "../../../UI/SortingModal/Modal";
-import FilterImage from "../../../assets/ProcessView/SortIcon.svg";
+import FilterImage from "../../../assets/ProcessView/PT_Sorting.svg";
 import TableData from "../../../UI/ProjectTableData/TableData";
 import FileIcon from "../../../assets/HomePage/processIcon.svg";
 import styles from "./template.module.css";
@@ -34,11 +34,11 @@ function CategoryListView(props) {
       background: "#FFFFFF 0% 0% no-repeat padding-box",
       boxShadow: "0px 3px 6px #00000029",
       border: "1px solid #70707075",
-      font: "normal normal normal 12px/17px Open Sans",
+      fontSize:"var(--base_text_font_size)",
+      fontWeight:"400 !important",
       letterSpacing: "0px",
       color: "#000000",
-      zIndex: "100",
-      transform: "translate3d(0px, -0.125rem, 0px) !important",
+      transform: "translate3d(0px, -0.25rem, 0px) !important",
     },
     arrow: {
       "&:before": {
@@ -53,12 +53,12 @@ function CategoryListView(props) {
     tooltip: {
       background: "#FFFFFF 0% 0% no-repeat padding-box",
       boxShadow: "0px 3px 6px #00000029",
+      fontSize:"var(--base_text_font_size)",
       border: "1px solid #70707075",
-      font: "normal normal normal 12px/17px Open Sans",
       letterSpacing: "0px",
+      fontWeight:"400 !important",
       color: "#000000",
-      zIndex: "100",
-      transform: "translate3d(0px, -0.125rem, 0px) !important",
+      transform: "translate3d(0px, -0.25rem, 0px) !important",
       width: "11vw",
     },
     arrow: {
@@ -198,7 +198,7 @@ function CategoryListView(props) {
       >
         <div className={styles.templateCount}>
           <img src={processIcon} className={styles.templateLogo} />
-          {category.Templates ? category.Templates.length : 0}
+          <span>{category.Templates ? category.Templates.length : 0}</span>
         </div>
       </TemplateCountTooltip>
     ),
@@ -260,9 +260,9 @@ function CategoryListView(props) {
           <SortButton
             backDrop={true}
             buttonToOpenModal={
-              <button className="filterButton" type="button">
-                <img src={FilterImage} />
-              </button>
+              <div className="filterButton1">
+                <img src={FilterImage} style={{ width: "100%" }} />
+              </div>
             }
             showTickIcon={true}
             getActionName={sortSelection}
@@ -320,7 +320,6 @@ function CategoryListView(props) {
           show={action === t("delete")}
           style={{
             width: "30vw",
-            height: "14rem",
             left: "37%",
             top: "25%",
             padding: "0",

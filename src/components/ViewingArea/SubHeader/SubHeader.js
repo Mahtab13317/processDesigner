@@ -23,6 +23,10 @@ import { hideIcons } from "../../../utility/bpmnView/cellOnMouseClick";
 import { removeContextMenu } from "../../../utility/bpmnView/getContextMenu";
 import { removeToolDivCell } from "../../../utility/bpmnView/getToolDivCell";
 import { pasteFunctionality } from "../../../utility/SubHeader/pasteFunctionality";
+import abstractIcon from "../../../assets/abstractView/abstractView.svg";
+import selectedAbstractIcon from "../../../assets/abstractView/abstractViewSelected.svg";
+import bpmnIcon from "../../../assets/abstractView/bpmnView.svg";
+import selectedBpmnIcon from "../../../assets/abstractView/bpmnViewSelected.svg";
 
 const SubHeader = (props) => {
   let { t } = useTranslation();
@@ -75,10 +79,25 @@ const SubHeader = (props) => {
   return (
     <div class="sub-header">
       <div class="leftDiv">
-        <button className="subProcessBtn" onClick={subProcessHandler}>
-          {t("subprocess")}
-          <span className="subProcessCount">{subProcessCount}</span>
-        </button>
+        <FloatingTab
+          tabs={[
+            {
+              tabName: view.abstract,
+              icon: abstractIcon,
+              selectedIcon: selectedAbstractIcon,
+            },
+            {
+              tabName: view.bpmn,
+              icon: bpmnIcon,
+              selectedIcon: selectedBpmnIcon,
+            },
+          ]}
+          tabClassName="FloatButton"
+          selectedTab={props.viewType}
+          changeTab={props.changeViewType}
+          setExpandedView={props.setExpandedView}
+          maxHeight={props.floatButtonHeight}
+        />
         {/*code commented on 7 June 2022 for BugId 110180*/}
         {/* <div> */}
         {/*<select value="Subprocesses" className="subprocessDropdown">*/}
@@ -114,17 +133,16 @@ const SubHeader = (props) => {
             <img src={redo} width="15px" height="15px" />
           </button>
         </div> */}
-
-        <div
+        {/*code commented on 7 June 2022 for BugId 110180*/}
+        {/* <div
           class="copyDiv"
           style={{
             display: isDisable ? "none" : "",
           }}
         >
-          {/*code commented on 7 June 2022 for BugId 110180*/}
-          {/* <button class="buttonImg">
+          <button class="buttonImg">
             <img src={cut} width="15px" height="15px" />
-          </button> */}
+          </button>
           {props.viewType !== view.abstract.langKey ? (
             <button
               class={
@@ -213,7 +231,7 @@ const SubHeader = (props) => {
           >
             <img src={deleteIcon} width="16px" height="16px" />
           </button>
-        </div>
+        </div> */}
         {/*code commented on 7 June 2022 for BugId 110180*/}
         {/* <div
           class="selectDiv"
@@ -236,39 +254,42 @@ const SubHeader = (props) => {
             <img src={dropdown} width="5px" height="15px" />
           </button>
         </div> */}
-        <FloatingTab
-          tabs={[view.abstract, view.bpmn]}
-          tabClassName="FloatButton"
-          selectedTab={props.viewType}
-          changeTab={props.changeViewType}
-          setExpandedView={props.setExpandedView}
-          maxHeight={props.floatButtonHeight}
-        />
-      </div>
-      {showSubprocessModal ? (
-        <Modal
-          show={showSubprocessModal}
-          style={{
-            width: "19vw",
-            height: "10rem",
-            left: "7.5%",
-            top: "24%",
-            padding: ".5%",
-            textAlign: "center",
-          }}
-          backDropStyle={{
-            backgroundColor: "transparent",
-          }}
-          modalClosed={() => setShowSubprocessModal(false)}
-          children={
-            <SubProcesses
-              callActivity={callActivity}
-              embededSubProcess={embededSubProcess}
-              subProcessCount={subProcessCount}
+        <div className="relative">
+          <button className="subProcessBtn" onClick={subProcessHandler}>
+            {t("subprocess")} ({subProcessCount})
+            <button class="icon-button buttonImg">
+              <img src={dropdown} width="5px" height="15px" style={{margin:"0 0.25vw"}}/>
+            </button>
+          </button>
+          {showSubprocessModal ? (
+            <Modal
+              show={showSubprocessModal}
+              style={{
+                width: "19vw",
+                height: "10rem",
+                position: "absolute",
+                left: "unset",
+                right: "var(--spacing_h)",
+                top: "95%",
+                padding: "0.5rem 0.5vw",
+                textAlign: "center",
+                boxShadow: "none",
+              }}
+              backDropStyle={{
+                backgroundColor: "transparent",
+              }}
+              modalClosed={() => setShowSubprocessModal(false)}
+              children={
+                <SubProcesses
+                  callActivity={callActivity}
+                  embededSubProcess={embededSubProcess}
+                  subProcessCount={subProcessCount}
+                />
+              }
             />
-          }
-        />
-      ) : null}
+          ) : null}
+        </div>
+      </div>
     </div>
   );
 };

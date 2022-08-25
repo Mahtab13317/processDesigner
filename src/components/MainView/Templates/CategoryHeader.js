@@ -32,8 +32,7 @@ function CategoryHeader(props) {
       font: "normal normal normal 12px/17px Open Sans",
       letterSpacing: "0px",
       color: "#000000",
-      zIndex: "100",
-      transform: "translate3d(0px, -0.125rem, 0px) !important",
+      transform: "translate3d(0px, -0.25rem, 0px) !important",
     },
     arrow: {
       "&:before": {
@@ -52,7 +51,10 @@ function CategoryHeader(props) {
   return (
     <div className={styles.categoryHeader}>
       <div className={styles.categoryHeaderDisplay} id="categoryDiv">
-        <img src={FileIcon} style={{ marginTop: "4px" }} />
+        <img
+          src={FileIcon}
+          style={{ marginTop: "4px", width: "1.25rem", height: "1.25rem" }}
+        />
         <div>
           <p
             className={
@@ -167,7 +169,6 @@ function CategoryHeader(props) {
           show={action === t("delete")}
           style={{
             width: "30vw",
-            height: "14rem",
             left: "37%",
             top: "25%",
             padding: "0",

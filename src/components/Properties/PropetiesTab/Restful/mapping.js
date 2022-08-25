@@ -29,8 +29,8 @@ function Mapping(props) {
   const checkForModifyRights = (data) => {
     let temp = false;
     localLoadedActivityPropertyData?.ActivityProperty?.m_objDataVarMappingInfo?.dataVarList?.forEach(
-      (item, i) => {
-        if (item?.processVarInfo?.variableId === data.VariableId) {
+      (item) => {
+        if (+item?.processVarInfo?.variableId === +data.VariableId) {
           if (item?.m_strFetchedRights === "O") {
             temp = true;
           }
@@ -44,7 +44,7 @@ function Mapping(props) {
     let temp = false;
     localLoadedActivityPropertyData?.ActivityProperty?.m_objDataVarMappingInfo?.dataVarList?.forEach(
       (item, i) => {
-        if (item?.processVarInfo?.variableId === data.VariableId) {
+        if (+item?.processVarInfo?.variableId === +data.VariableId) {
           if (
             item?.m_strFetchedRights === "O" ||
             item?.m_strFetchedRights === "R"
@@ -201,7 +201,6 @@ function Mapping(props) {
         }
       }
     });
-
     selectedMethod?.InputParameters?.PrimitiveComplexType?.forEach((param) => {
       if (param.ParamType == "11") {
         CreateParamKey(
@@ -282,7 +281,7 @@ function Mapping(props) {
           } else if (el.mappingType === "R") {
             tempReverseList?.forEach((param) => {
               if (
-                (el.dataStructureId === param.fieldDataStructID &&
+                (+el.dataStructureId === +param.fieldDataStructID &&
                   el.dataStructureId !== "0") ||
                 (el.dataStructureId === "0" &&
                   el.parameterName === param.fieldName)
@@ -358,10 +357,13 @@ function Mapping(props) {
     let doExists = false;
     let idx = null;
     forwardArr?.forEach((arr, index) => {
+      //code edited on 19 Aug 2022 for BugId 114451
       if (
-        (+arr.dataStructureId !== 0 &&
+        ((+arr.dataStructureId !== 0 &&
           +arr.dataStructureId === +list.fieldDataStructID) ||
-        (+arr.dataStructureId === 0 && arr.parameterName === list.fieldName)
+          (+arr.dataStructureId === 0 &&
+            arr.parameterName === list.fieldName)) &&
+        arr.mappingType === "F"
       ) {
         doExists = true;
         idx = index;
@@ -457,10 +459,10 @@ function Mapping(props) {
     let doExists = false;
     let idx = null;
     ReverseArr?.forEach((arr, index) => {
+      //code edited on 19 Aug 2022 for BugId 114451
       if (
-        (+arr.dataStructureId !== 0 &&
-          +arr.dataStructureId === +list.fieldDataStructID) ||
-        (+arr.dataStructureId === 0 && arr.parameterName === list.fieldName)
+        +arr.variableId === +list.fieldName.VariableId &&
+        arr.mappingType === "R"
       ) {
         doExists = true;
         idx = index;
@@ -564,7 +566,7 @@ function Mapping(props) {
   return (
     <div style={{ padding: "1rem 1vw 0", width: "40%" }}>
       <div>
-        <p style={{ fontSize: "12px", color: "#886F6F" }}>
+        <p style={{ fontSize: "var(--base_text_font_size)", color: "#886F6F" }}>
           {t("TimeOut")}
           <span className="starIcon">*</span>
         </p>
@@ -581,8 +583,22 @@ function Mapping(props) {
           onChange={handleChange}
           TabIndicatorProps={{ style: { background: "#0072C5" } }}
         >
-          <Tab className={value === 0 && "tabLabel"} label="Forward Mapping" />
-          <Tab className={value === 1 && "tabLabel"} label="Reverse Mapping" />
+          <Tab
+            className={value === 0 && "tabLabel"}
+            label={
+              <p>
+                {t("forwardMapping")} <span className="starIcon">*</span>
+              </p>
+            }
+          />
+          <Tab
+            className={value === 1 && "tabLabel"}
+            label={
+              <p>
+                {t("reverseMapping")} <span className="starIcon">*</span>
+              </p>
+            }
+          />
         </Tabs>
       </div>
       <div className="tabPanelStyles">
@@ -598,11 +614,11 @@ function Mapping(props) {
             >
               <div
                 style={{
-                  height: "30px",
+                  height: "var(--line_height)",
                   flex: "1",
                   backgroundColor: "#F4F4F4",
                   marginRight: "30px",
-                  fontSize: "12px",
+                  fontSize: "var(--base_text_font_size)",
                   padding: "7px",
                   fontWeight: "600",
                 }}
@@ -611,10 +627,10 @@ function Mapping(props) {
               </div>
               <div
                 style={{
-                  height: "30px",
+                  height: "var(--line_height)",
                   flex: "1",
                   backgroundColor: "#F4F4F4",
-                  fontSize: "12px",
+                  fontSize: "var(--base_text_font_size)",
                   padding: "7px",
                   fontWeight: "600",
                 }}
@@ -654,11 +670,11 @@ function Mapping(props) {
             >
               <div
                 style={{
-                  height: "30px",
+                  height: "var(--line_height)",
                   flex: "1",
                   backgroundColor: "#F4F4F4",
                   marginRight: "30px",
-                  fontSize: "12px",
+                  fontSize: "var(--base_text_font_size)",
                   padding: "7px",
                   fontWeight: "600",
                 }}
@@ -667,10 +683,10 @@ function Mapping(props) {
               </div>
               <div
                 style={{
-                  height: "30px",
+                  height: "var(--line_height)",
                   flex: "1",
                   backgroundColor: "#F4F4F4",
-                  fontSize: "12px",
+                  fontSize: "var(--base_text_font_size)",
                   padding: "7px",
                   fontWeight: "600",
                 }}

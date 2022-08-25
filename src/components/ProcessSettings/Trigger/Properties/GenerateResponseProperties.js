@@ -90,6 +90,7 @@ function GenerateResponseProperties(props) {
             </span>
           </div>
           <SelectWithInput
+            width={"29%"}
             dropdownOptions={props.templateList}
             optionKey="DocName"
             value={file}
@@ -128,6 +129,7 @@ function GenerateResponseProperties(props) {
             </span>
           </div>
           <SelectWithInput
+            width={"29%"}
             dropdownOptions={localLoadedProcessData.DocumentTypeList}
             optionKey="DocName"
             value={document}

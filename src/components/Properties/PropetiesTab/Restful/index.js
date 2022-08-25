@@ -16,7 +16,10 @@ import CatalogScreenModal from "../Webservice/CatalogScreenModal.js";
 import { useTranslation } from "react-i18next";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice.js";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice.js";
-import { ActivityPropertySaveCancelValue, setSave } from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked.js";
+import {
+  ActivityPropertySaveCancelValue,
+  setSave,
+} from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked.js";
 
 function Restful(props) {
   let { t } = useTranslation();
@@ -44,7 +47,7 @@ function Restful(props) {
             open: true,
           })
         );
-      }else if (!isValidObj.isValid && isValidObj.type === "RW") {
+      } else if (!isValidObj.isValid && isValidObj.type === "RW") {
         dispatch(
           setToastDataFunc({
             message: `${t("PleaseDefineAtleastOneReverseMapping")}`,
@@ -171,13 +174,27 @@ function Restful(props) {
         });
         // Saving Data
         let temp = { ...localLoadedActivityPropertyData };
-        if (temp?.ActivityProperty?.restFullInfo?.assocMethodList) {
-          temp.ActivityProperty.restFullInfo.assocMethodList.push({
-            mappingInfoList: [],
-            methodIndex: selectedMethod,
-            methodName: methodName,
-            timeoutInterval: "10",
-          });
+        if (temp?.ActivityProperty?.restFullInfo) {
+          if (temp?.ActivityProperty?.restFullInfo?.assocMethodList) {
+            temp.ActivityProperty.restFullInfo.assocMethodList.push({
+              mappingInfoList: [],
+              methodIndex: selectedMethod,
+              methodName: methodName,
+              timeoutInterval: "10",
+            });
+          } else {
+            temp.ActivityProperty.restFullInfo = {
+              ...temp.ActivityProperty.restFullInfo,
+              assocMethodList: [
+                {
+                  mappingInfoList: [],
+                  methodIndex: selectedMethod,
+                  methodName: methodName,
+                  timeoutInterval: "10",
+                },
+              ],
+            };
+          }
         } else {
           temp.ActivityProperty = {
             ...temp.ActivityProperty,
@@ -269,7 +286,7 @@ function Restful(props) {
             >
               <p
                 style={{
-                  fontSize: "14px",
+                  fontSize: "var(--subtitle_text_font_size)",
                   color: "#000000",
                   fontWeight: "700",
                 }}
@@ -278,8 +295,8 @@ function Restful(props) {
               </p>
               <p
                 style={{
-                  fontSize: "12px",
-                  color: "#0072C6",
+                  fontSize: "var(--base_text_font_size)",
+                  color: "var(--link_color)",
                   fontWeight: "600",
                   cursor: "pointer",
                 }}
@@ -304,7 +321,7 @@ function Restful(props) {
                 }}
               >
                 <p
-                  style={{ fontSize: "12px", color: "#886F6F", width: "100%" }}
+                  style={{ fontSize: "var(--base_text_font_size)", color: "#886F6F", width: "100%" }}
                 >
                   {t("method")}
                 </p>
@@ -312,7 +329,7 @@ function Restful(props) {
                   className="select_webService"
                   onChange={(e) => setSelectedMethod(e.target.value)}
                   style={{
-                    fontSize: "12px",
+                    fontSize: "var(--base_text_font_size)",
                     border:
                       !selectedMethod && associateButtonClicked
                         ? "1px solid red"
@@ -343,7 +360,7 @@ function Restful(props) {
                         key={method.MethodIndex}
                         value={method.MethodIndex}
                         style={{
-                          fontSize: "12px",
+                          fontSize: "var(--base_text_font_size)",
                           padding: "4px",
                         }}
                       >
@@ -358,6 +375,7 @@ function Restful(props) {
                   display: "flex",
                   justifyContent: props.isDrawerExpanded ? "start" : "end",
                   flex: 3,
+                  marginBottom: "0.75rem",
                 }}
               >
                 <button
@@ -381,7 +399,7 @@ function Restful(props) {
             >
               <p
                 style={{
-                  fontSize: "13px",
+                  fontSize: "1.05rem",
                   color: "#000000",
                   fontWeight: "600",
                 }}

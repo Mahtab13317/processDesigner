@@ -23,9 +23,7 @@ const store = createStore(reducers, applyMiddleware(thunk));
 
 window.loadIntegrator = function () {
   const scriptInt = document.createElement("script");
-
   scriptInt.type = "text/javascript";
-
   scriptInt.src = "/integration/integration.js";
   scriptInt.onload = () => {
     console.log("inside integration compo");
@@ -33,20 +31,26 @@ window.loadIntegrator = function () {
 
   document.body.appendChild(scriptInt);
 };
+
 window.MdmDataModel = function (props) {
   if (window && window?.loadMicroFrontend) {
     window.loadMicroFrontend(props);
   }
 };
+window.loadUserGroupMF = function (props) {
+  if (window && window?.loadMicroFrontend) {
+    window.loadMicroFrontend(props);
+  }
+};
 
-window.loadActivityStream = function () {
+window.loadActivityStream = function (callback) {
   window.lpweb_containerId_mf = "mf_activitystream_lpweb";
   var props = {
     Module: "LPWEB",
     Component: "ActivityStream",
     InFrame: false,
     ContainerId: "mf_activitystream_lpweb",
-    Callback: null,
+    Callback: callback,
     passedData: { componentId: "PMWEB" },
     Renderer: "renderActivityStream",
   };
@@ -76,6 +80,7 @@ window.loadFormTemplates = function (callback) {
     window.loadMicroFrontend(props);
   }
 };
+
 window.loadForm_INT_DES = function (callback) {
   window.appdesigner_containerId_mf = "mf_formsOtherProcesses";
   var props = {
@@ -126,6 +131,7 @@ window.loadFormBuilder = function (containerId, passedData) {
     window.loadMicroFrontend(props);
   }
 };
+
 window.loadFormBuilderPreview = function (passedData, containerId) {
   window.formBuilder_containerId_mf = containerId;
   var props = {

@@ -30,7 +30,12 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     outline: 0,
   },
-  title: { color: "#000000", opacity: 1, fontSize: 14, fontWeight: 600 },
+  title: {
+    color: "#000000",
+    opacity: 1,
+    fontSize: "var(--subtitle_text_font_size)",
+    fontWeight: 600,
+  },
   modalHeader: {
     paddingBottom: 14,
     flexDirection: "row",
@@ -282,8 +287,9 @@ const ModalForm = (props) => {
                       <Grid item style={{ marginRight: "4px" }}>
                         <Button
                           style={customStyle.btn1}
-                          variant="outlined"
-                          size="small"
+                          //  variant="outlined"
+                          //  size="small"
+                          className="tertiary"
                           onClick={props.onClick1}
                         >
                           {props.btn1Title}
@@ -299,7 +305,7 @@ const ModalForm = (props) => {
                               style={{ fontSize: "12px" }}
                               variant="contained"
                               size="small"
-                              color="primary"
+                              //color="primary"
                             >
                               <CircularProgress
                                 color="#FFFFFF"
@@ -315,9 +321,10 @@ const ModalForm = (props) => {
                           ) : (
                             <Button
                               style={{ fontSize: "12px" }}
-                              variant="contained"
-                              size="small"
-                              color="primary"
+                              // variant="contained"
+                              //size="small"
+                              //color="primary"
+                              className="primary"
                               sx={{
                                 position: "relative",
                                 display: "inline-flex",
@@ -374,7 +381,7 @@ const ModalForm = (props) => {
                               style={{ fontSize: "12px" }}
                               variant="contained"
                               size="small"
-                              color="primary"
+                              // color="primary"
                               onClick={props.onClick2}
                             >
                               {props.btn2Title}
@@ -382,9 +389,10 @@ const ModalForm = (props) => {
                           ) : (
                             <Button
                               style={{ fontSize: "12px" }}
-                              variant="contained"
-                              size="small"
-                              color="primary"
+                              //  variant="contained"
+                              // size="small"
+                              //color="primary"
+                              className="primary"
                               onClick={props.onClick2}
                               disabled={props.btn2Disabled}
                             >

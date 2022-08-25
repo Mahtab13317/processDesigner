@@ -20,25 +20,33 @@ const useStyles = makeStyles((theme) => ({
   inputTitle: {
     height: 27,
     backgroundColor: "white",
-    fontSize: "14px",
+    fontSize: "var(--subtitle_text_font_size)",
   },
   input: {
     height: 28,
     backgroundColor: "white",
-    fontSize: "12px",
+    fontSize: "var(--base_text_font_size)",
   },
 
   multilineInput: {
     backgroundColor: "white",
-    fontSize: 12,
+    fontSize: "var(--base_text_font_size)",
     overflowY: "scroll",
   },
-  label: { fontSize: 12, color: "#606060", fontWeight: 600 },
-  labelAfter: { fontSize: 12, color: "#000000", fontWeight: 500 },
+  label: {
+    fontSize: "var(--base_text_font_size)",
+    color: "#606060",
+    fontWeight: 600,
+  },
+  labelAfter: {
+    fontSize: "var(--base_text_font_size)",
+    color: "#000000",
+    fontWeight: 500,
+  },
 
   helperText: {
     color: "#606060",
-    fontSize: "10px",
+    fontSize: "var(--sub_text_font_size)",
   },
 
   required: {

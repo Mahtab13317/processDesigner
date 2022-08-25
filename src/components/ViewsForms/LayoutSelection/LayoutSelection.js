@@ -183,15 +183,18 @@ function LayoutSelection(props) {
 
           display: "flex",
           alignItems: "center",
-          paddingInline: "0.6rem",
+          paddingInline: "1.4rem",
           direction: direction,
-          justifyContent: "space-between",
         }}
       >
-        <p style={{ fontSize: "14px", fontWeight: "bold" }}>
+        <p
+          style={{
+            fontSize: "var(--title_text_font_size)",
+            fontWeight: "bold",
+          }}
+        >
           {t("settingUpYourWorkitemView")}
         </p>
-        <button onClick={() => setrulesModalOpen(true)}>Rules</button>
       </div>
 
       <div
@@ -232,7 +235,7 @@ function LayoutSelection(props) {
           <Button
             id="add_cancel"
             variant="outlined"
-            className={styles.cancelButton}
+            className={styles.pmwebcancelButton}
             onClick={() => props.closeModal()}
             //   style={{ background: "#0072c6" }}
           >
@@ -241,11 +244,10 @@ function LayoutSelection(props) {
           <Button
             id="add_cancel"
             variant="outlined"
-            className={styles.buttons}
+            className={styles.pmwebbuttons}
             onClick={() =>
               activeStep === 1 ? handleSaveChanges() : handleNextStep()
             }
-            style={{ background: "#0072c6" }}
           >
             {t("next")}
           </Button>
@@ -255,7 +257,7 @@ function LayoutSelection(props) {
           <Button
             id="add_cancel"
             variant="outlined"
-            className={styles.cancelButton}
+            className={styles.pmwebcancelButton}
             onClick={() => handlePreviousStep()}
             style={{ background: "#0072c6" }}
           >

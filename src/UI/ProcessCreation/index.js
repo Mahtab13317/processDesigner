@@ -99,34 +99,29 @@ function ProcessCreation(props) {
       projectName: isProjectNameConstant ? projectName : "",
       templateId: selectedTemplate ? selectedTemplate.Id : -1,
     };
-    axios
-      .post(SERVER_URL + ENDPOINT_ADD_PROCESS, jsonBody)
-      .then((res) => {
-        if (res.data.Status === 0) {
-          props.openProcessClick(
-            res.data.OpenProcess.ProcessDefId,
-            res.data.OpenProcess.ProjectName,
-            res.data.OpenProcess.ProcessType,
-            res.data.OpenProcess.VersionNo,
-            res.data.OpenProcess.ProcessName
-          );
-          props.openTemplate(null, null, false);
-          history.push("/process");
-          props.CreateProcessClickFlag(null);
-          props.setTemplatePage(null);
-        } else {
-          dispatch(
-            setToastDataFunc({
-              message: res.data.Message,
-              severity: "error",
-              open: true,
-            })
-          );
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    axios.post(SERVER_URL + ENDPOINT_ADD_PROCESS, jsonBody).then((res) => {
+      if (res?.data?.Status === 0) {
+        props.openProcessClick(
+          res.data.OpenProcess.ProcessDefId,
+          res.data.OpenProcess.ProjectName,
+          res.data.OpenProcess.ProcessType,
+          res.data.OpenProcess.VersionNo,
+          res.data.OpenProcess.ProcessName
+        );
+        props.openTemplate(null, null, false);
+        history.push("/process");
+        props.CreateProcessClickFlag(null);
+        props.setTemplatePage(null);
+      } else if (res?.data?.Status === -2) {
+        dispatch(
+          setToastDataFunc({
+            message: res.data.Message,
+            severity: "error",
+            open: true,
+          })
+        );
+      }
+    });
   };
 
   useEffect(() => {

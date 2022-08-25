@@ -102,6 +102,7 @@ function ExceptionProperties(props) {
               </span>
             </div>
             <SelectWithInput
+              width={"70%"}
               dropdownOptions={localLoadedProcessData.ExceptionList}
               optionKey="ExceptionName"
               value={exception}

@@ -167,7 +167,9 @@ function TriggerType(props) {
 
   return (
     <div style={{ marginLeft: "1rem" }}>
-      <h4>{t("triggerTypes")}</h4>
+      <h4 style={{ fontSize: "var(--subtitle_text_font_size)" }}>
+        {t("triggerTypes")}
+      </h4>
       <p className={styles.subheader}>{t("listOfTrigger")}</p>
 
       <div className={styles.headerDiv}>
@@ -209,7 +211,7 @@ function TriggerType(props) {
               ? arabicStyles.aliasNameHeader
               : styles.aliasNameHeader
           }
-          style={{ marginLeft: "3.2rem" }}
+          style={{ marginLeft: "3.2rem", marginRight: "15rem" }}
         >
           {t("tableName")}
         </p>
@@ -271,7 +273,12 @@ function TriggerType(props) {
             name="tableNames"
             onChange={onDataChange}
           />
-          <button className={styles.cancelButton} onClick={cancelHandler}>
+          <button
+           
+            className={styles.cancelButton}
+           
+            onClick={cancelHandler}
+          >
             {t("cancel")}
           </button>
           <button
@@ -351,6 +358,7 @@ function TriggerType(props) {
               {edited == index ? (
                 <>
                   <button
+                    style={{ margin: "0rem 2rem !important" }}
                     className={styles.cancelButton}
                     onClick={() => cancelChanges(index)}
                   >

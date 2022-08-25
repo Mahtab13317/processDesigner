@@ -13,31 +13,39 @@ function FormAssociationType(props) {
   }, [selectedFormAssoc]);
 
   return (
-    <div id="formScreen" className={styles.mainDiv} style={{direction: direction}}>
+    <div
+      id="formScreen"
+      className={styles.mainDiv}
+      style={{ direction: direction }}
+    >
       <div
         className={styles.box}
         style={{
           border:
             selectedFormAssoc === "single"
-              ? "2px solid #0172C6"
+              ? "2px solid var(--brand_color1)"
               : "1px solid #DBDBDB",
-              direction: direction
+          direction: direction,
         }}
         onClick={() => setselectedFormAssoc("single")}
       >
-        <p className={styles.formLabel}>{t("Single form for complete process")}</p>
+        <p className={styles.formLabel}>
+          {t("Single form for complete process")}
+        </p>
       </div>
       <div
         className={styles.box}
         style={{
           border:
             selectedFormAssoc === "multiple"
-              ? "2px solid #0172C6"
+              ? "2px solid var(--brand_color1)"
               : "1px solid #DBDBDB",
         }}
         onClick={() => setselectedFormAssoc("multiple")}
       >
-        <p className={styles.formLabel}>{t("Workstep wise Form Association")}</p>
+        <p className={styles.formLabel}>
+          {t("Workstep wise Form Association")}
+        </p>
       </div>
     </div>
   );

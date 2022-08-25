@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
       display: "flex",
       maxWidth: props.width ? props.width : "289px",
       background: "#FFFFFF",
-      border: "1px solid #C4C4C4",
+      border: "1px solid #d7d7d7",
       borderRadius: "2px",
       height: props.height,
       width: props.width ? props.width : "289px",
@@ -39,8 +39,8 @@ const useStyles = makeStyles((theme) => ({
   cancelIcon: {
     position: "absolute",
     top: "50%",
-    right: (props) => (props.direction === RTL_DIRECTION ? "unset" : "1.5rem"),
-    left: (props) => (props.direction === RTL_DIRECTION ? "1.5rem" : "unset"),
+    right: (props) => (props.direction === RTL_DIRECTION ? "unset" : "2rem"),
+    left: (props) => (props.direction === RTL_DIRECTION ? "2rem" : "unset"),
     transform: "translateY(-50%)",
     display: "grid",
     placeItems: "center",
@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "12px",
     height: "5px",
     marginBottom: "2px",
-    background: "#fff",
+    //background: "#fff",
     transition: theme.transitions.create("width"),
     overflow: "hidden",
     whiteSpace: "nowrap",
@@ -73,7 +73,7 @@ const useStyles = makeStyles((theme) => ({
     left: "-1px",
     width: (props) => (props.width ? props.width : "200px"),
     boxShadow: " 0px 3px 6px #00000029",
-    border: "1px solid #C4C4C4",
+    border: "1px solid #d7d7d7",
     borderRadius: "2px",
     zIndex: 999,
     opacity: 1,
@@ -109,11 +109,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const SearchBox = (props) => {
- 
   const {
     name,
     width = "200px",
-    height = "28px",
+    height = "2.7rem",
     placeholder = "Search",
     onSearchChange = null,
     onSearchSubmit = null,
@@ -139,11 +138,6 @@ const SearchBox = (props) => {
   useEffect(() => {
     if (haveRecents) if (onLoadRecents !== null) onLoadRecents();
   }, []);
-
-  useEffect(() => {
-    console.log('TEST', props.searchTerm)
-  }, [props.searchTerm])
-  
 
   useEffect(() => {
     function onClickEvent(event) {
@@ -257,7 +251,8 @@ const SearchBox = (props) => {
           root: classes.inputRoot,
           input: classes.inputInput,
         }}
-        style={{ width: `calc(${width} - 42px)` }}
+        autoComplete="off"
+        style={{ width: `calc(${width} - 42px)`, border: "none !important" }}
         inputProps={{ "aria-label": "search" }}
         onFocus={onFocusHandler}
         onChange={onChangeHandler}

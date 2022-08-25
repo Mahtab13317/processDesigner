@@ -93,6 +93,7 @@ function SetFilterConditionStrip(props) {
     setSelectedOperator(localData.Operator);
   }, [localData]);
 
+  console.log('parentIndex', props.parentIndex, logicalOperator);
   const handleParam1Value = (event) => {
     setParam1(event.target.value);
     let varType, extObjId, varFieldId, variableId;
@@ -245,7 +246,31 @@ function SetFilterConditionStrip(props) {
         >
           {t(logicalOperator)}
         </button>
-
+{/* -------------- */}
+        <Select
+          data-testid="select"
+          //   disabled={isProcessReadOnly}
+          className={styles.dropdown}
+          MenuProps={menuProps}
+          value={param1}
+          onChange={(event) => handleParam1Value(event)}
+          //   disabled={disabled}
+        >
+          {param1DropdownOptions &&
+            param1DropdownOptions.map((element) => {
+              return (
+                <MenuItem
+                  className={styles.menuItemStyles}
+                  key={element.VariableName}
+                  value={element.VariableName}
+                  data-testid="select-option"
+                >
+                  {element.VariableName}
+                </MenuItem>
+              );
+            })}
+        </Select>
+{/* ----------------- */}
         <div className={styles.deleteIcon}>
           {props.showDelIcon ? (
             <DeleteOutlinedIcon id="AR_Delete_Row_Button" onClick={deleteRow} />

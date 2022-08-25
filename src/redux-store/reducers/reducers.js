@@ -22,7 +22,9 @@ import LaunchpadTokenReducer from "../slices/LaunchpadTokenSlice";
 import globalTaskTemplateReducer from "./Properties/GlobalTaskTemplateReducer";
 import OpenProcessSliceReducer from "../slices/OpenProcessSlice";
 import UserRightsDataHandlerReducer from "../slices/UserRightsSlice";
-import ProcessTaskTypeReducer from "../slices/ProcessTaskTypeSlice"
+import WebserviceChangeReducer from "../slices/webserviceChangeSlice";
+import ProjectCreationReducer from "../slices/projectCreationSlice";
+import ProcessTaskTypeReducer from "../slices/ProcessTaskTypeSlice";
 
 export default combineReducers({
   processTypesReducer: processTypesReducer,
@@ -48,5 +50,7 @@ export default combineReducers({
   launchpadTokenSlice: LaunchpadTokenReducer,
   globalTaskTemplate: globalTaskTemplateReducer,
   userRightsDataHandlerSlice: UserRightsDataHandlerReducer,
+  webserviceChange: WebserviceChangeReducer,
+  projectCreation: ProjectCreationReducer,
   processTaskTypeSlice: ProcessTaskTypeReducer,
 });

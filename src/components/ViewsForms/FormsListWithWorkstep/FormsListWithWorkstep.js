@@ -2,9 +2,16 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { store, useGlobalState } from "state-pool";
 import { BASE_URL } from "../../../Constants/appConstants";
-
+import "./FormsListWithWorkstep.css";
 import { VisibilityOutlined, VisibilityOffOutlined } from "@material-ui/icons";
-import { Radio, Tab, Tabs, TextField, withStyles } from "@material-ui/core";
+import {
+  Button,
+  Radio,
+  Tab,
+  Tabs,
+  TextField,
+  withStyles,
+} from "@material-ui/core";
 import styles from "./FormsListWithWorkstep.module.css";
 import moment from "moment";
 import { useTranslation } from "react-i18next";
@@ -13,6 +20,7 @@ import FormsOtherProcesses from "../FormsOtherProcesses/FormsOtherProcesses";
 import { LaunchpadTokenSliceValue } from "../../../redux-store/slices/LaunchpadTokenSlice";
 import { useSelector } from "react-redux";
 import { makeStyles } from "@material-ui/styles";
+import { CloseIcon } from "../../../utility/AllImages/AllImages";
 
 function FormsListWithWorkstep(props) {
   let { t } = useTranslation();
@@ -52,12 +60,11 @@ function FormsListWithWorkstep(props) {
   const CustomRadio = withStyles({
     root: {
       "&$checked": {
-        color: "#0172C6",
+        color: "var(--radio_color)",
       },
-      marginInline: "0.4rem",
     },
     checked: {},
-  })((props) => <Radio color="default" {...props} />);
+  })((props) => <Radio type="radio" color="default" {...props} />);
   const useStyles = makeStyles({
     input: {
       height: "2rem",
@@ -69,28 +76,29 @@ function FormsListWithWorkstep(props) {
     root: {
       borderBottom: "1px solid #e8e8e8",
       width: "70%",
-      maxHeight: 25,
+      maxHeight: 40,
       minHeight: 10,
+      fontSize: "var(--title_text_font_size)",
     },
     indicator: {
-      backgroundColor: "#1890ff",
+      backgroundColor: "var(--nav_primary_color)",
     },
   })(Tabs);
 
   const AntTab = withStyles((theme) => ({
     root: {
-      textTransform: "none",
       minWidth: 50,
       minHeight: 10,
-      maxHeight: 25,
+      maxHeight: 40,
       fontWeight: theme.typography.fontWeightRegular,
       //marginRight: theme.spacing(4),
       whiteSpace: "nowrap",
-      fontSize: "0.875rem",
+      fontSize: "var(--title_text_font_size)",
 
       "&$selected": {
-        color: "#1890ff",
+        color: "var(--selected_tab_color)",
         fontWeight: theme.typography.fontWeightMedium,
+        fontSize: "var(--title_text_font_size)",
       },
     },
     selected: {},
@@ -224,7 +232,7 @@ function FormsListWithWorkstep(props) {
             display: "flex",
             alignItems: "center",
             paddingInline: "15px",
-            fontSize: "0.875rem",
+            fontSize: "var(--base_text_font_size)",
             fontWeight: "bold",
           }}
         >
@@ -239,13 +247,20 @@ function FormsListWithWorkstep(props) {
             flexDirection: "column",
 
             paddingInline: "15px",
-            fontSize: "0.8rem",
+
             fontWeight: "500",
             paddingTop: "3%",
             color: "#606060",
           }}
         >
-          <p style={{ marginBottom: "5px" }}>{t("formName")}</p>
+          <p
+            style={{
+              marginBottom: "5px",
+              fontSize: "var(--title_text_font_size)",
+            }}
+          >
+            {t("formName")}
+          </p>
           <TextField
             value={newFormName}
             onChange={(e) => setnewFormName(e.target.value)}
@@ -257,6 +272,7 @@ function FormsListWithWorkstep(props) {
             size="small"
             autoFocus={true}
             variant="outlined"
+            style={{ fontSize: "var(--base_text_font_size)" }}
           />
         </div>
         <div
@@ -268,7 +284,7 @@ function FormsListWithWorkstep(props) {
             flexDirection: "row-reverse",
             alignItems: "center",
             // paddingInline: "10px",
-            fontSize: "0.8rem",
+            fontSize: "var(--base_text_font_size)",
             fontWeight: "bold",
           }}
         >
@@ -279,7 +295,9 @@ function FormsListWithWorkstep(props) {
               width: "50px",
               height: "25px",
               background:
-                newFormName.trim() === "" ? "rgb(0, 114, 198, 0.5)" : "#0072C6",
+                newFormName.trim() === ""
+                  ? "rgb(0, 114, 198, 0.5)"
+                  : "var(--button_color)",
               border: "none",
               color: "white",
             }}
@@ -325,8 +343,8 @@ function FormsListWithWorkstep(props) {
     return (
       <div
         style={{
-          width: "100%",
-          height: "100%",
+          width: "98vw",
+          height: "98vh",
           position: "fixed",
           top: "50%",
           left: "50%",
@@ -341,28 +359,27 @@ function FormsListWithWorkstep(props) {
         <div
           style={{
             width: "100%",
-            height: "10%",
+            height: "8%",
             display: "flex",
-            flexDirection: "row-reverse",
+            flexDirection: "row",
             alignItems: "center",
-            justifyContent: "flex-start",
+            justifyContent: "space-between",
+            paddingInline: "1.5rem",
           }}
         >
-          <button
-            style={{
-              width: "60px",
-              height: "1.75rem",
-              marginInline: "10px",
-              color: "#0072C6",
-              border: "1px solid #0072C6",
-              borderRadius: "0.125rem",
-            }}
+          <p style={{ fontSize: "var(--title_text_font_size)" }}>
+            Form Builder
+          </p>
+          <CloseIcon
             onClick={() => setopenCustomiseForm(false)}
-          >
-            {t("close")}
-          </button>
+            style={{
+              width: "1.3rem",
+              height: "1.3rem",
+              cursor: "pointer",
+            }}
+          />
         </div>
-        <div style={{ width: "100%", height: "90%", overflow: "hidden" }}>
+        <div style={{ width: "100%", height: "92%", overflow: "hidden" }}>
           <div id="mf_forms_customise" style={{ height: "inherit" }}></div>
         </div>
       </div>
@@ -438,9 +455,9 @@ function FormsListWithWorkstep(props) {
             {formAssociationType === "single" ? (
               <p
                 style={{
-                  fontSize: "0.8rem",
+                  fontSize: "var(--subtitle_text_font_size)",
                   fontWeight: "600",
-                  color: "#0172C6",
+                  color: "var(--brand_color1)",
                   cursor: "pointer",
                 }}
                 onClick={() => setformAssociationType("multiple")}
@@ -450,9 +467,9 @@ function FormsListWithWorkstep(props) {
             ) : (
               <p
                 style={{
-                  fontSize: "0.8rem",
+                  fontSize: "var(--subtitle_text_font_size)",
                   fontWeight: "600",
-                  color: "#0172C6",
+                  color: "var(--brand_color1)",
                   cursor: "pointer",
                 }}
                 onClick={() => setformAssociationType("single")}
@@ -516,7 +533,7 @@ function FormsListWithWorkstep(props) {
                           ? "1px solid #0172C6"
                           : "1px solid transparent",
                       marginBlock: "2px",
-                      // color: "#0072C6",
+                      // color: "var(--button_color)",
                       fontWeight: "600",
                       background: "#FFFFFF 0% 0% no-repeat padding-box",
                       display: "flex",
@@ -531,15 +548,15 @@ function FormsListWithWorkstep(props) {
                         display: "flex",
                         flexDirection: "row",
                         alignItems: "center",
-                        fontSize: "0.8rem",
+                        // fontSize: "0.8rem",
                         justifyContent: "flex-start",
                         paddingLeft: "18px",
                         fontWeight: "500",
                       }}
                     >
                       <CustomRadio
-                        // type="radio"
-                        size="small"
+                        type="radio"
+                        // size="small"
                         checked={selectedFormRadio === form.formId}
                         onChange={handleRadioClickForm}
                         value={form.formId}
@@ -547,7 +564,7 @@ function FormsListWithWorkstep(props) {
                       />
                       <p
                         style={{
-                          fontSize: "0.875rem",
+                          fontSize: "var(--base_text_font_size)",
                           fontWeight: "bold",
                         }}
                       >
@@ -555,7 +572,7 @@ function FormsListWithWorkstep(props) {
                       </p>
                       <p
                         style={{
-                          fontSize: "0.875rem",
+                          fontSize: "var(--base_text_font_size)",
                           fontWeight: "500",
                           marginInline: "0.6rem",
                         }}
@@ -564,92 +581,111 @@ function FormsListWithWorkstep(props) {
                       </p>
                     </div>
                     {!showViewFormMF ? (
-                      <div
-                        style={{
-                          width: "30%",
-                          display: "flex",
-                          alignItems: "flex-start",
-                          flexDirection: "column",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <p
-                          style={{
-                            fontSize: "0.75rem",
-                            fontWeight: "500",
-                          }}
-                        >
-                          {form.createdby}
-                        </p>
-                        <p
-                          style={{
-                            fontSize: "0.75rem",
-                            fontWeight: "500",
-                            opacity: "0.7",
-                          }}
-                        >
-                          at {moment(form.createddatetime).format("h:mm A")}
-                        </p>
-                      </div>
+                      <>
+                        {form.formId !== -1 ? (
+                          <div
+                            style={{
+                              width: "30%",
+                              display: "flex",
+                              alignItems: "flex-start",
+                              flexDirection: "column",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <p
+                              style={{
+                                fontSize: "var(--base_text_font_size)",
+                                fontWeight: "500",
+                              }}
+                            >
+                              {form.createdby}
+                            </p>
+                            <p
+                              style={{
+                                fontSize: "var(--base_text_font_size)",
+                                fontWeight: "500",
+                                opacity: "0.7",
+                              }}
+                            >
+                              at {moment(form.createddatetime).format("h:mm A")}
+                            </p>
+                          </div>
+                        ) : null}
+                      </>
                     ) : null}
                     {!showViewFormMF ? (
+                      <>
+                        {form.formId !== -1 ? (
+                          <div
+                            style={{
+                              width: "30%",
+                              display: "flex",
+                              alignItems: "flex-start",
+                              flexDirection: "column",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <p
+                              style={{
+                                fontSize: "var(--base_text_font_size)",
+                                fontWeight: "500",
+                              }}
+                            >
+                              {moment(form.lastModifiedOn).format("MMM DD")}
+                            </p>
+                            <p
+                              style={{
+                                fontSize: "var(--base_text_font_size)",
+                                fontWeight: "500",
+                                opacity: "0.7",
+                              }}
+                            >
+                              Edited by {form.lastModifiedby} at{" "}
+                              {moment(form.lastModifiedOn).format("h:mm A")}
+                            </p>
+                          </div>
+                        ) : null}
+                      </>
+                    ) : null}
+                    {form.formId !== -1 ? (
                       <div
                         style={{
-                          width: "30%",
+                          height: "100%",
                           display: "flex",
-                          alignItems: "flex-start",
-                          flexDirection: "column",
-                          justifyContent: "center",
+                          flexDirection: "row",
+                          alignItems: "center",
+                          padding: "5px",
+                          justifyContent: "flex-end",
                         }}
                       >
-                        <p
-                          style={{
-                            fontSize: "0.75rem",
-                            fontWeight: "500",
-                          }}
-                        >
-                          {moment(form.lastModifiedOn).format("MMM DD")}
-                        </p>
-                        <p
-                          style={{
-                            fontSize: "0.75rem",
-                            fontWeight: "500",
-                            opacity: "0.7",
-                          }}
-                        >
-                          Edited by {form.lastModifiedby} at{" "}
-                          {moment(form.lastModifiedOn).format("h:mm A")}
-                        </p>
+                        {mfFormId === form.formId ? (
+                          <VisibilityOffOutlined
+                            onClick={() => {
+                              setshowViewFormMF((prev) => !prev);
+                              setmfFormId(null);
+                            }}
+                            fontSize="medium"
+                            style={{
+                              color: "black",
+                              opacity: "0.5",
+                              width: "1.6rem",
+                              height: "1.6rem",
+                            }}
+                          />
+                        ) : (
+                          <VisibilityOutlined
+                            onClick={() => handleViewForm(form)}
+                            fontSize="medium"
+                            style={{
+                              color: "black",
+                              opacity: "0.5",
+                              width: "1.6rem",
+                              height: "1.6rem",
+                            }}
+                          />
+                        )}
                       </div>
                     ) : null}
-
-                    <div
-                      style={{
-                        height: "100%",
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        padding: "5px",
-                        justifyContent: "flex-end",
-                      }}
-                    >
-                      {mfFormId === form.formId ? (
-                        <VisibilityOffOutlined
-                          onClick={() => {
-                            setshowViewFormMF((prev) => !prev);
-                            setmfFormId(null);
-                          }}
-                          fontSize="medium"
-                          style={{ color: "black", opacity: "0.5" }}
-                        />
-                      ) : (
-                        <VisibilityOutlined
-                          onClick={() => handleViewForm(form)}
-                          fontSize="medium"
-                          style={{ color: "black", opacity: "0.5" }}
-                        />
-                      )}
-                    </div>
                   </div>
                 ))}
               </div>
@@ -678,7 +714,7 @@ function FormsListWithWorkstep(props) {
             >
               <p
                 style={{
-                  fontSize: "0.875rem",
+                  fontSize: "var(--title_text_font_size)",
                   color: "#606060",
                   fontWeight: "600",
                 }}
@@ -687,7 +723,7 @@ function FormsListWithWorkstep(props) {
               </p>
               <p
                 style={{
-                  fontSize: "0.875rem",
+                  fontSize: " var(--title_text_font_size)",
                   color: "#606060",
                   fontWeight: "600",
                 }}
@@ -700,34 +736,40 @@ function FormsListWithWorkstep(props) {
 
                   flexDirection: !showViewFormMF ? "row" : "column",
                   alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "24rem",
                 }}
               >
-                {/* <button className={styles.button}>Import from PC</button> */}
-                <form>
-                  <label
-                    className={styles.button}
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <input
-                      type="file"
-                      style={{ display: "none" }}
-                      onChange={(e) => handleFile(e)}
-                      accept="application/x-zip-compressed"
-                    />
-                    {t("Import From Pc")}
-                  </label>
-                </form>
-                <button
-                  style={{ marginInline: "0.8rem" }}
+                <label
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "11rem",
+                    whiteSpace: "nowrap",
+                    height: "2.3rem",
+                    fontSize: "var(--base_text_font_size)",
+                    border: "1px solid var(--button_color)",
+                    color: "var(--button_color)",
+                  }}
+                >
+                  <input
+                    type="file"
+                    style={{ display: "none" }}
+                    onChange={(e) => handleFile(e)}
+                    accept="application/x-zip-compressed"
+                  />
+                  {t("Import From Pc")}
+                </label>
+
+                <Button
+                  // style={{ marginInline: "0.8rem" }}
                   className={styles.button}
+                  variant="outlined"
                   onClick={handleNewFormCreate}
                 >
                   Create New Form
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -738,7 +780,7 @@ function FormsListWithWorkstep(props) {
                 flexDirection: "column",
                 width: "50%",
                 height: "100%",
-                fontSize: "14px",
+                fontSize: "var(--title_text_font_size)",
                 background: "#0172C61A",
                 alignItems: "center",
               }}
@@ -762,8 +804,8 @@ function FormsListWithWorkstep(props) {
                     width: "150px",
                     height: "1.75rem",
                     marginInline: "10px",
-                    color: "#0072C6",
-                    border: "1px solid #0072C6",
+                    color: "var(--button_color)",
+                    border: "1px solid var(--button_color)",
                     borderRadius: "0.125rem",
                   }}
                   onClick={() => setopenCustomiseForm(true)}
@@ -803,7 +845,8 @@ function FormsListWithWorkstep(props) {
       return temp;
     };
 
-    const handleFormAssocChange = async (e, actId, actName, formName) => {
+    const handleFormAssocChange = (e, actId, actName, formName) => {
+      console.log("bbbbbbbbbbbbbbbbbb", e.target.value, actId, actName);
       let temp = JSON.parse(JSON.stringify(formAssociationData));
       temp?.some((assocData) => {
         if (assocData.activity.actId == actId) {
@@ -866,7 +909,7 @@ function FormsListWithWorkstep(props) {
               {formAssociationType === "single" ? (
                 <p
                   style={{
-                    fontSize: "0.8rem",
+                    fontSize: "var(--subtitle_text_font_size)",
                     fontWeight: "600",
                     color: "#0172C6",
                     cursor: "pointer",
@@ -878,7 +921,7 @@ function FormsListWithWorkstep(props) {
               ) : (
                 <p
                   style={{
-                    fontSize: "0.8rem",
+                    fontSize: "var(--subtitle_text_font_size)",
                     fontWeight: "600",
                     color: "#0172C6",
                     cursor: "pointer",
@@ -912,7 +955,7 @@ function FormsListWithWorkstep(props) {
                 >
                   <p
                     style={{
-                      fontSize: "0.75rem",
+                      fontSize: "var(--base_text_font_size)",
                       fontWeight: "bold",
                       marginBottom: "0",
                     }}
@@ -920,7 +963,8 @@ function FormsListWithWorkstep(props) {
                     {form.formName}
                   </p>
                   {form.formId === hoverForm?.formId &&
-                  form.formName !== "Workstep Name" ? (
+                  form.formName !== "Workstep Name" &&
+                  form.formId !== -1 ? (
                     <VisibilityOutlined
                       onClick={() => handleViewForm(form)}
                       fontSize="medium"
@@ -939,14 +983,25 @@ function FormsListWithWorkstep(props) {
                   {" "}
                   <div
                     className={styles.multipleTableContainer}
-                    style={{ textAlign: "left" }}
+                    // style={{ textAlign: "left" }}
                   >
-                    <p style={{ fontSize: "0.75rem", fontWeight: "bold" }}>
+                    <p
+                      style={{
+                        fontSize: "var(--base_text_font_size)",
+                        fontWeight: "bold",
+                      }}
+                    >
                       {act.ActivityName}
                     </p>
                   </div>
+                  {/* <div
+                    className={styles.multipleTableContainer}
+                    style={{ textAlign: "left" }}
+                  > */}
                   {allFormsList.map((form) => (
-                    <div className={styles.multipleTableContainer}>
+                    <div
+                      className={`${styles.multipleTableContainer} radioAlign`}
+                    >
                       <Radio
                         value={form.formId + ""}
                         checked={getCheckBoolFormAssoc(
@@ -974,7 +1029,7 @@ function FormsListWithWorkstep(props) {
             <div
               style={{
                 width: "100%",
-                height: "20%",
+                height: "25%",
                 border: "1px dashed #606060",
                 display: "flex",
                 flexDirection: "row",
@@ -985,7 +1040,7 @@ function FormsListWithWorkstep(props) {
             >
               <p
                 style={{
-                  fontSize: "0.875rem",
+                  fontSize: "var(--title_text_font_size)",
                   color: "#606060",
                   fontWeight: "600",
                 }}
@@ -994,7 +1049,7 @@ function FormsListWithWorkstep(props) {
               </p>
               <p
                 style={{
-                  fontSize: "0.875rem",
+                  fontSize: " var(--title_text_font_size)",
                   color: "#606060",
                   fontWeight: "600",
                 }}
@@ -1007,34 +1062,40 @@ function FormsListWithWorkstep(props) {
 
                   flexDirection: !showViewFormMF ? "row" : "column",
                   alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "24rem",
                 }}
               >
-                {/* <button className={styles.button}>Import from PC</button> */}
-                <form>
-                  <label
-                    className={styles.button}
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <input
-                      type="file"
-                      style={{ display: "none" }}
-                      onChange={(e) => handleFile(e)}
-                      accept="application/x-zip-compressed"
-                    />
-                    {t("Import From Pc")}
-                  </label>
-                </form>
-                <button
-                  style={{ marginInline: "0.8rem" }}
+                <label
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "11rem",
+                    whiteSpace: "nowrap",
+                    height: "2.3rem",
+                    fontSize: "var(--base_text_font_size)",
+                    border: "1px solid var(--button_color)",
+                    color: "var(--button_color)",
+                  }}
+                >
+                  <input
+                    type="file"
+                    style={{ display: "none" }}
+                    onChange={(e) => handleFile(e)}
+                    accept="application/x-zip-compressed"
+                  />
+                  {t("Import From Pc")}
+                </label>
+
+                <Button
+                  // style={{ marginInline: "0.8rem" }}
                   className={styles.button}
+                  variant="outlined"
                   onClick={handleNewFormCreate}
                 >
                   Create New Form
-                </button>
+                </Button>
               </div>
             </div>
           ) : null}
@@ -1046,7 +1107,7 @@ function FormsListWithWorkstep(props) {
               flexDirection: "column",
               width: "50%",
               height: "100%",
-              fontSize: "14px",
+              fontSize: "var(--title_text_font_size)",
               background: "#0172C61A",
               alignItems: "center",
             }}
@@ -1070,8 +1131,8 @@ function FormsListWithWorkstep(props) {
                   width: "150px",
                   height: "1.75rem",
                   marginInline: "10px",
-                  color: "#0072C6",
-                  border: "1px solid #0072C6",
+                  color: "var(--button_color)",
+                  border: "1px solid var(--button_color)",
                   borderRadius: "0.125rem",
                 }}
                 // onClick={() => window.loa(true)}
@@ -1093,8 +1154,6 @@ function FormsListWithWorkstep(props) {
       </div>
     );
   };
-
-  // const ustomizeFormPopover
 
   return (
     <div

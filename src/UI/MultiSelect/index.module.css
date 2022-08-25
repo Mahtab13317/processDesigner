@@ -65,7 +65,7 @@
 
 .multiSelect_listItem label {
   margin-right: 0;
-  width: 110% !important;
+  width: 100%;
   display: flex;
 }
 

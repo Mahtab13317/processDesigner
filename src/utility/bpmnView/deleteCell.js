@@ -38,86 +38,91 @@ export function deleteCell(
   for (var j of selectedCells) {
     let cell = j;
     if (graph.isSwimlane(cell) === false) {
-      //don't delete swimlane /milestone add button
-      let id = cell.getId();
-      if (cell.isVertex()) {
-        if (
-          cell.getStyle() === style.taskTemplate ||
-          cell.getStyle() === style.newTask ||
-          cell.getStyle() === style.processTask
-        ) {
-          let selectedTask = null,
-            processDefId,
-            processType;
-          setProcessData((prevProcessData) => {
-            prevProcessData.Tasks?.forEach((task) => {
-              if (task.TaskId === +id) {
-                selectedTask = task;
-              }
-            });
-            processDefId = prevProcessData.ProcessDefId;
-            processType = prevProcessData.ProcessType;
-            return prevProcessData;
-          });
-          getTaskDependency(
-            id,
-            selectedTask.TaskName,
-            processDefId,
-            processType,
-            setTaskAssociation,
-            setShowDependencyModal,
-            setProcessData
-          );
-        } else if (
-          cell.getStyle() !== style.taskTemplate &&
-          cell.getStyle() !== style.newTask &&
-          cell.getStyle() !== style.processTask
-        ) {
-          let processDefId, activityName;
-          setProcessData((prevProcessData) => {
-            prevProcessData.MileStones.forEach((milestone) => {
-              milestone.Activities.forEach((activity) => {
-                if (activity.ActivityId === Number(id)) {
-                  activityName = activity.ActivityName;
+      //code added on 22 August 2022 for BugId 114452
+      if (cell.getStyle() !== "layer") {
+        //don't delete swimlane /milestone add button
+        let id = cell.getId();
+        if (cell.isVertex()) {
+          if (
+            cell.getStyle() === style.taskTemplate ||
+            cell.getStyle() === style.newTask ||
+            cell.getStyle() === style.processTask
+          ) {
+            let selectedTask = null,
+              processDefId,
+              processType;
+            setProcessData((prevProcessData) => {
+              prevProcessData.Tasks?.forEach((task) => {
+                if (task.TaskId === +id) {
+                  selectedTask = task;
                 }
               });
+              processDefId = prevProcessData.ProcessDefId;
+              processType = prevProcessData.ProcessType;
+              return prevProcessData;
             });
-            processDefId = prevProcessData.ProcessDefId;
-            return prevProcessData;
-          });
-          deleteActivity(id, activityName, processDefId, setProcessData);
-        }
-      } else if (cell.isEdge()) {
-        let processDefId, processMode;
-        setProcessData((prevProcessData) => {
-          processDefId = prevProcessData.ProcessDefId;
-          processMode = prevProcessData.ProcessType;
-          return prevProcessData;
-        });
-        let json = {
-          processDefId: processDefId,
-          processMode: processMode,
-          connId: Number(id),
-          connType: "D",
-        };
-        axios
-          .post(SERVER_URL + ENDPOINT_DELETE_CONNECTION, json)
-          .then((response) => {
-            if (response.data.Status === 0) {
-              setProcessData((prevProcessData) => {
-                let newProcessData = JSON.parse(JSON.stringify(prevProcessData));
-                newProcessData.Connections?.forEach((connection, index) => {
-                  if (connection.ConnectionId === Number(id)) {
-                    newProcessData.Connections.splice(index, 1);
+            getTaskDependency(
+              id,
+              selectedTask.TaskName,
+              processDefId,
+              processType,
+              setTaskAssociation,
+              setShowDependencyModal,
+              setProcessData
+            );
+          } else if (
+            cell.getStyle() !== style.taskTemplate &&
+            cell.getStyle() !== style.newTask &&
+            cell.getStyle() !== style.processTask
+          ) {
+            let processDefId, activityName;
+            setProcessData((prevProcessData) => {
+              prevProcessData.MileStones.forEach((milestone) => {
+                milestone.Activities.forEach((activity) => {
+                  if (activity.ActivityId === Number(id)) {
+                    activityName = activity.ActivityName;
                   }
                 });
-                return newProcessData;
               });
-            }
-          })
-          .catch((err) => {
-            console.log(err);
+              processDefId = prevProcessData.ProcessDefId;
+              return prevProcessData;
+            });
+            deleteActivity(id, activityName, processDefId, setProcessData);
+          }
+        } else if (cell.isEdge()) {
+          let processDefId, processMode;
+          setProcessData((prevProcessData) => {
+            processDefId = prevProcessData.ProcessDefId;
+            processMode = prevProcessData.ProcessType;
+            return prevProcessData;
           });
+          let json = {
+            processDefId: processDefId,
+            processMode: processMode,
+            connId: Number(id),
+            connType: "D",
+          };
+          axios
+            .post(SERVER_URL + ENDPOINT_DELETE_CONNECTION, json)
+            .then((response) => {
+              if (response.data.Status === 0) {
+                setProcessData((prevProcessData) => {
+                  let newProcessData = JSON.parse(
+                    JSON.stringify(prevProcessData)
+                  );
+                  newProcessData.Connections?.forEach((connection, index) => {
+                    if (connection.ConnectionId === Number(id)) {
+                      newProcessData.Connections.splice(index, 1);
+                    }
+                  });
+                  return newProcessData;
+                });
+              }
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        }
       }
     } else {
       //delete only if there is atleast one swimlane and milestone present

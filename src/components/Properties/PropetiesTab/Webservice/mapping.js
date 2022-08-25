@@ -1,3 +1,4 @@
+// Changes made to fix Bug 111083 - webservice -> no validation message for webservice and the fields should have a mandatory mark as given in design
 import React, { useState, useEffect } from "react";
 import { Select, MenuItem } from "@material-ui/core";
 import "./index.css";
@@ -16,11 +17,12 @@ import { useTranslation } from "react-i18next";
 function Mapping(props) {
   let { t } = useTranslation();
   const dispatch = useDispatch();
+  //code added on 22 Aug 2022 for BugId 112019
+  const { value, setValue } = props;
   const openProcessData = useSelector(OpenProcessSliceValue);
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [invocationType, setInvocationType] = useState(null);
-  const [value, setValue] = useState(0); // Function to handle tab change.
   const [forwardMappingList, setForwardMappingList] = useState([]);
   const [reverseMappingList, setReverseMappingList] = useState([]);
   const [reverseDropdownOptions, setReverseDropdownOptions] = useState([]);
@@ -594,7 +596,9 @@ function Mapping(props) {
         }}
       >
         <div style={{ flex: "1" }}>
-          <p style={{ fontSize: "12px", color: "#886F6F" }}>
+          <p
+            style={{ fontSize: "var(--base_text_font_size)", color: "#886F6F" }}
+          >
             {t("InvocationType")}
           </p>
           <Select
@@ -602,7 +606,7 @@ function Mapping(props) {
             onChange={(e) => handleInvocationTypeChange(e)}
             value={invocationType}
             style={{
-              fontSize: "12px",
+              fontSize: "var(--base_text_font_size)",
             }}
             MenuProps={{
               anchorOrigin: {
@@ -618,7 +622,7 @@ function Mapping(props) {
           >
             <MenuItem
               style={{
-                fontSize: "12px",
+                fontSize: "var(--base_text_font_size)",
                 padding: "4px",
               }}
               value="F"
@@ -627,7 +631,7 @@ function Mapping(props) {
             </MenuItem>
             <MenuItem
               style={{
-                fontSize: "12px",
+                fontSize: "var(--base_text_font_size)",
                 padding: "4px",
               }}
               value="A"
@@ -636,7 +640,7 @@ function Mapping(props) {
             </MenuItem>
             <MenuItem
               style={{
-                fontSize: "12px",
+                fontSize: "var(--base_text_font_size)",
                 padding: "4px",
               }}
               value="S"
@@ -647,7 +651,12 @@ function Mapping(props) {
         </div>
         {invocationType == "A" ? (
           <div style={{ flex: "1" }}>
-            <p style={{ fontSize: "12px", color: "#886F6F" }}>
+            <p
+              style={{
+                fontSize: "var(--base_text_font_size)",
+                color: "#886F6F",
+              }}
+            >
               {t("JMS/SOAPTarget")}
               <span className="starIcon">*</span>
             </p>
@@ -656,7 +665,7 @@ function Mapping(props) {
               onChange={(e) => setSelectedDropDownActivity(e.target.value)}
               value={selectedDropDownActivity}
               style={{
-                fontSize: "12px",
+                fontSize: "var(--base_text_font_size)",
               }}
               MenuProps={{
                 anchorOrigin: {
@@ -674,7 +683,7 @@ function Mapping(props) {
                 return (
                   <MenuItem
                     style={{
-                      fontSize: "12px",
+                      fontSize: "var(--base_text_font_size)",
                       padding: "4px",
                     }}
                     value={activity.ActivityName}
@@ -687,7 +696,9 @@ function Mapping(props) {
           </div>
         ) : null}
         <div style={{ flex: `${invocationType == "A" ? "0.5" : "1.55"}` }}>
-          <p style={{ fontSize: "12px", color: "#886F6F" }}>
+          <p
+            style={{ fontSize: "var(--base_text_font_size)", color: "#886F6F" }}
+          >
             {t("TimeOut")}
             <span className="starIcon">*</span>
           </p>
@@ -705,8 +716,26 @@ function Mapping(props) {
           onChange={handleChange}
           TabIndicatorProps={{ style: { background: "#0072C5" } }}
         >
-          <Tab className={value === 0 && "tabLabel"} label="Forward Mapping" />
-          <Tab className={value === 1 && "tabLabel"} label="Reverse Mapping" />
+          <Tab
+            className={value === 0 && "tabLabel"}
+            label={
+              <p>
+                {t("forwardMapping")} <span className="starIcon">*</span>
+              </p>
+            }
+          />{" "}
+          <Tab
+            className={value === 1 && "tabLabel"}
+            label={
+              invocationType == "F" ? (
+                <p>{t("reverseMapping")}</p>
+              ) : (
+                <p>
+                  {t("reverseMapping")} <span className="starIcon">*</span>
+                </p>
+              )
+            }
+          />
         </Tabs>
       </div>
       <div className="tabPanelStyles">
@@ -722,11 +751,11 @@ function Mapping(props) {
             >
               <div
                 style={{
-                  height: "30px",
+                  height: "var(--line_height)",
                   flex: "1",
                   backgroundColor: "#F4F4F4",
                   marginRight: "30px",
-                  fontSize: "12px",
+                  fontSize: "var(--base_text_font_size)",
                   padding: "7px",
                   fontWeight: "600",
                 }}
@@ -735,10 +764,10 @@ function Mapping(props) {
               </div>
               <div
                 style={{
-                  height: "30px",
+                  height: "var(--line_height)",
                   flex: "1",
                   backgroundColor: "#F4F4F4",
-                  fontSize: "12px",
+                  fontSize: "var(--base_text_font_size)",
                   padding: "7px",
                   fontWeight: "600",
                 }}
@@ -778,11 +807,11 @@ function Mapping(props) {
             >
               <div
                 style={{
-                  height: "30px",
+                  height: "var(--line_height)",
                   flex: "1",
                   backgroundColor: "#F4F4F4",
                   marginRight: "30px",
-                  fontSize: "12px",
+                  fontSize: "var(--base_text_font_size)",
                   padding: "7px",
                   fontWeight: "600",
                 }}
@@ -791,10 +820,10 @@ function Mapping(props) {
               </div>
               <div
                 style={{
-                  height: "30px",
+                  height: "var(--line_height)",
                   flex: "1",
                   backgroundColor: "#F4F4F4",
-                  fontSize: "12px",
+                  fontSize: "var(--base_text_font_size)",
                   padding: "7px",
                   fontWeight: "600",
                 }}

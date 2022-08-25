@@ -15,7 +15,7 @@ import {
   ENDPOINT_UPLOAD_ATTACHMENT,
   propertiesLabel,
   ENDPOINT_DOWNLOAD_ATTACHMENT,
-  RTL_DIRECTION
+  RTL_DIRECTION,
 } from "../../../../Constants/appConstants";
 import { connect, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -23,6 +23,7 @@ import { setActivityPropertyChange } from "../../../../redux-store/slices/Activi
 import axios from "axios";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 import arabicStyles from "./arabicStyles.module.css";
+import TabsHeading from "../../../../UI/TabsHeading/index.js";
 function InitialRule(props) {
   let { t } = useTranslation();
   const dispatch = useDispatch();
@@ -30,10 +31,8 @@ function InitialRule(props) {
   const [showAttach, setShowAttach] = useState(false);
   const localActivityPropertyData = store.getState("activityPropertyData");
   const [spinner, setspinner] = useState(true);
-  const [
-    localLoadedActivityPropertyData,
-    setlocalLoadedActivityPropertyData
-  ] = useGlobalState(localActivityPropertyData);
+  const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
+    useGlobalState(localActivityPropertyData);
   const [attachList, setAttachList] = useState([]);
 
   useEffect(() => {
@@ -59,9 +58,9 @@ function InitialRule(props) {
     setShowAttach(false);
   };
 
-  const handleRemoveFields = i => {
+  const handleRemoveFields = (i) => {
     const values = [...attachList];
-    values.forEach(val => {
+    values.forEach((val) => {
       if (val.docId === i) {
         val.status = "D";
       }
@@ -71,7 +70,7 @@ function InitialRule(props) {
     let tempPropertyData = { ...localLoadedActivityPropertyData };
     let attachTempList = [
       ...tempPropertyData?.ActivityProperty?.m_objPMAttachmentDetails
-        ?.attachmentList
+        ?.attachmentList,
     ];
     attachTempList?.forEach((el, idx) => {
       if (el.docId === i) {
@@ -85,16 +84,16 @@ function InitialRule(props) {
       setActivityPropertyChange({
         [propertiesLabel.initialRules]: {
           isModified: true,
-          hasError: false
-        }
+          hasError: false,
+        },
       })
     );
   };
-  const handleDownload = docId => {
+  const handleDownload = (docId) => {
     let payload = {
       processDefId: props.openProcessID,
       docId: docId,
-      repoType: props.openProcessType
+      repoType: props.openProcessType,
     };
     try {
       const response = axios({
@@ -102,10 +101,10 @@ function InitialRule(props) {
         url: "/pmweb" + ENDPOINT_DOWNLOAD_ATTACHMENT,
         data: payload,
         responseType: "blob",
-      }).then(res => {
+      }).then((res) => {
         const url = window.URL.createObjectURL(
           new Blob([res.data], {
-            type: res.headers["content-type"]
+            type: res.headers["content-type"],
           })
         );
         var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
@@ -136,7 +135,7 @@ function InitialRule(props) {
       actName: props.cellName,
       sAttachName: description.value,
       sAttachType: RULE_TYPE,
-      repoType: props.openProcessType
+      repoType: props.openProcessType,
     };
 
     const formData = new FormData();
@@ -145,7 +144,7 @@ function InitialRule(props) {
     formData.append(
       "attachInfo",
       new Blob([JSON.stringify(payload)], {
-        type: "application/json"
+        type: "application/json",
       })
     );
 
@@ -155,12 +154,12 @@ function InitialRule(props) {
         url: "/pmweb" + ENDPOINT_UPLOAD_ATTACHMENT,
         data: formData,
         headers: {
-          "Content-Type": "multipart/form-data"
-        }
+          "Content-Type": "multipart/form-data",
+        },
       });
       if (response.status === 200 && response.data.Output) {
         handleClose();
-        setAttachList(prev => {
+        setAttachList((prev) => {
           return [
             ...prev,
             {
@@ -170,25 +169,26 @@ function InitialRule(props) {
               requirementId: response.data.Output.reqId,
               sAttachName: response.data.Output.sAttachName,
               sAttachType: response.data.Output.sAttachType,
-              status: "T"
-            }
+              status: "T",
+            },
           ];
         });
 
         let tempPropertyData = { ...localLoadedActivityPropertyData };
-        tempPropertyData.ActivityProperty.m_objPMAttachmentDetails.attachmentList = [
-          ...tempPropertyData.ActivityProperty.m_objPMAttachmentDetails
-            .attachmentList,
-          {
-            docExt: result,
-            docId: response.data.Output.docId,
-            docName: response.data.Output.docName,
-            requirementId: response.data.Output.reqId,
-            sAttachName: response.data.Output.sAttachName,
-            sAttachType: response.data.Output.sAttachType,
-            status: "T"
-          }
-        ];
+        tempPropertyData.ActivityProperty.m_objPMAttachmentDetails.attachmentList =
+          [
+            ...tempPropertyData.ActivityProperty.m_objPMAttachmentDetails
+              .attachmentList,
+            {
+              docExt: result,
+              docId: response.data.Output.docId,
+              docName: response.data.Output.docName,
+              requirementId: response.data.Output.reqId,
+              sAttachName: response.data.Output.sAttachName,
+              sAttachType: response.data.Output.sAttachType,
+              status: "T",
+            },
+          ];
         setlocalLoadedActivityPropertyData(tempPropertyData);
       }
     } catch (error) {
@@ -199,8 +199,8 @@ function InitialRule(props) {
       setActivityPropertyChange({
         [propertiesLabel.initialRules]: {
           isModified: true,
-          hasError: false
-        }
+          hasError: false,
+        },
       })
     );
   };
@@ -215,6 +215,8 @@ function InitialRule(props) {
             props.isDrawerExpanded ? styles.expandedView : styles.collapsedView
           }`}
         >
+        
+         <TabsHeading heading={props.heading} />
           <div className={`${styles.attachmentHeader} row`}>
             <p className={styles.addAttachHeading}>{t("attachedRule")}</p>
             <button
@@ -265,7 +267,7 @@ function InitialRule(props) {
             <tbody>
               {attachList
                 ?.filter(
-                  el =>
+                  (el) =>
                     el.sAttachType === RULE_TYPE &&
                     (el.status === STATUS_TYPE_TEMP ||
                       el.status === STATUS_TYPE_ADDED)
@@ -323,7 +325,7 @@ function InitialRule(props) {
                 width: "40vw",
                 left: "30%",
                 top: "20%",
-                padding: "0"
+                padding: "0",
               }}
               modalClosed={handleClose}
               children={
@@ -340,16 +342,13 @@ function InitialRule(props) {
   );
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
     openProcessID: state.openProcessClick.selectedId,
     cellID: state.selectedCellReducer.selectedId,
     cellName: state.selectedCellReducer.selectedName,
-    openProcessType: state.openProcessClick.selectedType
+    openProcessType: state.openProcessClick.selectedType,
   };
 };
-export default connect(
-  mapStateToProps,
-  null
-)(InitialRule);
+export default connect(mapStateToProps, null)(InitialRule);

@@ -8,7 +8,7 @@ import {
   ClickAwayListener,
 } from "@material-ui/core";
 import CheckIcon from "@material-ui/icons/Check";
-import CancelOutlinedIcon from "@material-ui/icons/CancelOutlined";
+import CloseIcon from "@material-ui/icons/Close";
 import "./AddToListDropdown.css";
 import { useTranslation } from "react-i18next";
 
@@ -82,18 +82,7 @@ function AddToListDropdown(props) {
             ? `${props.dropdownClass} altd_dropdownDiv`
             : `altd_dropdownDiv`
         }
-        style={{
-          right: direction === "rtl" ? "0" : "none",
-          top: props.calledFromWorkdesk
-            ? "60%"
-            : props.calledFromWorkdeskExp
-            ? "20%"
-            : null,
-          left:
-            props.calledFromWorkdesk || props.calledFromWorkdeskExp
-              ? "114px"
-              : null,
-        }}
+        style={{ ...props.style }}
       >
         <FormControl style={{ width: "100%" }}>
           <div
@@ -101,7 +90,9 @@ function AddToListDropdown(props) {
             style={{ borderBottom: "1px solid #C4C4C4" }}
           >
             {showInput ? (
-              <div>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "0.5vw" }}
+              >
                 <input
                   className={`altd_inputField`}
                   autoFocus
@@ -125,8 +116,8 @@ function AddToListDropdown(props) {
                   //   }
                   // }}
                 />
-                <CancelOutlinedIcon
-                  style={{ width: "13px", height: "13px", color: "#414141" }}
+                <CloseIcon
+                  style={{ width: "1.25rem", height: "1.25rem", color: "#414141" }}
                   onClick={() => setshowInput(false)}
                 />
               </div>

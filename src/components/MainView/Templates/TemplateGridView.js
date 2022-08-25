@@ -42,19 +42,27 @@ function TemplateGridView(props) {
   return (
     <div className={styles.templateGridView}>
       {props.templateList?.length > 0 ? (
-        props.templateList.map((template) => {
+        props.templateList.map((template, index) => {
           return (
             <SingleTemplateCard
               item={template}
-              cardWidth="49%"
+              cardWidth="49.5%"
               cardActivityMaxWidth="25%"
               style={
                 direction === RTL_DIRECTION
-                  ? { marginTop: 0, marginLeft: "1%", marginBottom: "1rem" }
-                  : { marginTop: 0, marginRight: "1%", marginBottom: "1rem" }
+                  ? {
+                      marginTop: 0,
+                      marginLeft: index % 2 === 0 ? "0.5vw" : "0",
+                      marginBottom: "1rem",
+                    }
+                  : {
+                      marginTop: 0,
+                      marginRight: index % 2 === 0 ? "0.5vw" : "0",
+                      marginBottom: "1rem",
+                    }
               }
               cardHeadingStyle={{
-                font: "normal normal 600 18px/23px Open Sans",
+                font: "normal normal 600 var(--title_text_font_size)/23px var(--font_family)",
               }}
               bOpenBtn={true}
               bCreateProcessBtn={true}

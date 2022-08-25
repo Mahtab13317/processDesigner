@@ -22,8 +22,8 @@ function ProcessListByProjectMainTab(props) {
   );
 
   const arr = [
-    { label: t("processList.AUDIT_TRAIL"), component: "Drafts" },
-    { label: t("processList.PROJECT_SETTINGS"), component: "Deployed" },
+    // { label: t("processList.AUDIT_TRAIL"), component: <div>Drafts</div> },
+    // { label: t("processList.PROJECT_SETTINGS"), component: "Deployed" },
     {
       label: t("properties"),
       component: (
@@ -39,6 +39,7 @@ function ProcessListByProjectMainTab(props) {
         <GlobalRequirementSections
           selectedProjectId={props.selectedProjectId}
           selectedProcessCode={props.selectedProcessCode}
+          calledFromProcessesTab={true}
         />
       ),
     },

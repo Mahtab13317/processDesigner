@@ -64,13 +64,13 @@
 
 .toolTypeContainerExpanded .MuiListItem-button {
   height: 0px !important;
-  padding: 0.5rem !important;
+  padding: 0.75rem !important;
   margin: 0.5rem 0 0;
 }
 
 .expandedList ul {
-  margin-bottom: 0.25rem;
-  padding: 0.25rem !important;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem !important;
 }
 
 .toolTypeContainerExpanded .MuiListItemText-primary {
@@ -135,7 +135,7 @@ input:focus::-webkit-input-placeholder {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0.125rem 0.25rem;
+  margin: 0.25rem 0.5rem;
 }
 
 .iconLabel {
@@ -177,7 +177,6 @@ input:focus::-webkit-input-placeholder {
   height: 28px;
   z-index: 100;
   background: #ffffff 0% 0% no-repeat padding-box;
-  box-shadow: 0px 3px 6px #0072c629;
   border: 1px solid #dadada;
   border-radius: 2px;
 }
@@ -233,5 +232,10 @@ input:focus::-webkit-input-placeholder {
 .tooltypeHeading {
   color: #3a3a3a;
   text-transform: uppercase;
-  font: normal normal 500 11px/15px Open Sans;
+  font: normal normal 500 var(--base_text_font_size) / 17px var(--font_family);
+}
+
+#userInput_expanded {
+  border: none !important;
+  box-shadow: none !important;
 }

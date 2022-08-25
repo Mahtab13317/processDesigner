@@ -6,7 +6,17 @@ import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
 import { makeStyles } from "@material-ui/core/styles";
 const useStyles = makeStyles((theme) => ({
-  label: { fontSize: "12px", color: "#111111", opacity: 1 },
+  label: {
+    fontSize: "var(--base_text_font_size)",
+    color: "#111111",
+    opacity: 1,
+  },
+  radioSize: {
+    "& .MuiSvgIcon-root": {
+      width: "1.5rem !important",
+      height: "1.5rem !important",
+    },
+  },
 }));
 
 const RadioButtonGroup = ({
@@ -36,9 +46,16 @@ const RadioButtonGroup = ({
               key={button.label}
               className={classes.label}
               value={button.value}
-              control={<Radio color="primary" />}
+              control={<Radio color="primary" className={classes.radioSize} />}
               label={
-                <span style={{ fontSize: "12px" }}>{button.label || ""}</span>
+                <span
+                  style={{
+                    fontSize: "var(--base_text_font_size)",
+                    fontWeight: 600,
+                  }}
+                >
+                  {button.label || ""}
+                </span>
               }
             />
           ))}

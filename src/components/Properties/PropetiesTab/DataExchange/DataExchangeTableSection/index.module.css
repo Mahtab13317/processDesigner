@@ -4,7 +4,8 @@
 
 .subHeader {
   text-align: left;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 1.0625rem
+    var(--font_family) !important;
   letter-spacing: 0px;
   color: #606060;
   text-transform: uppercase;
@@ -28,7 +29,7 @@
 
 .fieldTitle {
   text-align: left;
-  font: normal normal 600 12px/24px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 1.5rem var(--font_family) !important;
   letter-spacing: 0px;
   color: #606060;
   opacity: 1;
@@ -36,7 +37,7 @@
 
 .asterisk {
   color: red;
-  margin-top: 4px;
+  margin-top: 1px;
   margin-left: 2px;
   font-size: 0.75rem;
 }
@@ -46,21 +47,23 @@
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
-  width: 8.75rem;
+  width: 140px !important;
   height: 28px;
   margin-right: 0.75rem;
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 1.0625rem
+    var(--font_family) !important;
 }
 
 .cancelBtn {
   background-color: #ffffff;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 1.0625rem
+    var(--font_family) !important;
   letter-spacing: 0px;
   cursor: pointer;
   height: 28px;
   width: 60px;
-  margin-top: 24px;
+  margin-top: 21px !important;
   border: 1px solid #c4c4c4;
   padding: 2px;
   border-radius: 2px;
@@ -69,16 +72,17 @@
 }
 
 .addBtn {
-  background: #0072c6 0% 0% no-repeat padding-box !important;
+  background: var(--button_color) 0% 0% no-repeat padding-box !important;
   border-radius: 2px !important;
-  border: 1px solid #0072c6 !important;
+  border: 1px solid var(--button_color) !important;
   text-align: center;
-  font: normal normal 600 12px/17px Open Sans !important;
+  font: normal normal 600 var(--base_text_font_size) / 1.0625rem
+    var(--font_family) !important;
   letter-spacing: 0px !important;
   color: #ffffff !important;
   padding: 2px;
   height: 28px;
-  margin-top: auto;
+  margin-top: 30px !important;
   margin-left: 10px;
   width: 40px;
   cursor: pointer;
@@ -96,7 +100,7 @@
 
 .headers {
   text-align: left;
-  font: normal normal 600 12px/16px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 1rem var(--font_family) !important;
   letter-spacing: 0px;
   color: #000000;
   opacity: 1;
@@ -123,7 +127,8 @@
 }
 
 .mappingValueDataFont {
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 1.0625rem
+    var(--font_family) !important;
 }
 
 .alignMarginTop {
@@ -143,11 +148,14 @@
   color: red;
   margin: 6px 26px 7px auto;
   cursor: pointer;
+  height: 1.75rem !important;
+  width: 1.75rem !important;
 }
 
 .menuItemStyles {
   text-align: left;
-  font: normal normal normal 12px/24px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 1.5rem
+    var(--font_family) !important;
   letter-spacing: 0px;
   color: #000000;
   opacity: 1;

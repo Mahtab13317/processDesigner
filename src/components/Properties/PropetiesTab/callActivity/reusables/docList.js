@@ -177,7 +177,8 @@ function VariableList(props) {
           style={{
             fontSize: "12px",
             paddingBottom: "5px",
-            // borderBottom: selectedVariableType == 0 ? "3px solid blue" : null,
+            borderBottom: "3px solid var(--selected_tab_color)"
+
           }}
         >
           Documents

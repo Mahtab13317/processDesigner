@@ -12,11 +12,13 @@
   text-align: center;
 }
 .addRuleButton {
-  background: #0072c6 0% 0% no-repeat padding-box !important;
-  border-radius: 2px !important;
-  border: 1px solid #0072c6 !important;
+  background-color: var(--button_color) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border: 1px solid var(--button_color);
   text-align: left;
   font: normal normal 600 12px/17px Open Sans !important;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px !important;
   color: #ffffff !important;
   text-transform: none !important;
@@ -35,7 +37,8 @@
 }
 .LeftPannel {
   height: 100%;
-  width: 17.4375rem;
+  padding-left: 18px;
+  width: 21.4375rem;
   margin-top: 4rem;
   display: flex;
   flex-direction: column;
@@ -44,12 +47,13 @@
   height: 100%;
   width: 80%;
   margin-top: 0.625rem;
-  margin-left: 1.1875rem;
+  margin-left: 2.1875rem;
 }
 
 .vl {
   border-left: 2px solid #c4c4c4;
   height: 100%;
+  z-index: 1;
 }
 
 .noRuleDefined {
@@ -58,7 +62,7 @@
   letter-spacing: 0px;
   color: #000000;
   opacity: 1;
-  margin-top: 5%;
+  margin-top: 18%;
   margin-bottom: 3%;
 }
 
@@ -101,9 +105,10 @@
   cursor: pointer;
 }
 .addHeaderBtn {
-  background: #0072c6 0% 0% no-repeat padding-box;
-  border: 1px solid #c4c4c4;
-  border-radius: 2px;
+  background-color: var(--button_color) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border: 1px solid var(--button_color);
   opacity: 1;
   width: 4.2rem;
   height: 1.8rem;
@@ -115,15 +120,19 @@
   cursor: pointer;
 }
 .addnavBtn {
-  background: #0072c6 0% 0% no-repeat padding-box;
-  border: 1px solid #c4c4c4;
+  /* background: #0072c6 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;*/
+  background-color: var(--button_color) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border: 1px solid var(--button_color);
   border-radius: 2px;
   opacity: 1;
   width: 4.2rem;
   height: 1.6rem;
-  font: normal normal 600 12px/17px Open Sans;
+
   letter-spacing: 0px;
-  color: #ffffff;
+
   text-align: center;
   margin: 0.5rem 0.75rem 0 auto;
   cursor: pointer;

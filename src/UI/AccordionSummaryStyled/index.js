@@ -8,7 +8,7 @@ export const AccordionSummaryStyled = styled((props) => (
     expandIcon={
       <KeyboardArrowUpOutlinedIcon
         className={styles.arrowIcon}
-        fontSize="small"
+        // fontSize="small"
       />
     }
     {...props}
@@ -20,7 +20,7 @@ export const AccordionSummaryStyled = styled((props) => (
       ? "rgba(255, 255, 255, .05)"
       : "rgba(0, 0, 0, .03)",
   flexDirection: "row-reverse",
-  height: "1.875rem",
+  height: "3rem",
   minHeight: "0rem !important",
   "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": {
     transform: "rotate(90deg)",

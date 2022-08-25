@@ -17,6 +17,7 @@ import DragIndicatorOutlinedIcon from "@material-ui/icons/DragIndicatorOutlined"
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import arabicStyles from "./ArabicStyles.module.css";
 import { RTL_DIRECTION } from "../../../../Constants/appConstants.js";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 function SearchVariable(props) {
   let { t } = useTranslation();
@@ -175,6 +176,7 @@ function SearchVariable(props) {
 
   return (
     <React.Fragment>
+    <TabsHeading heading={props?.heading} />
       <div className={styles.SearchVariable} style={{ direction: direction }}>
         <div style={{ width: "50%" }}>
           <p

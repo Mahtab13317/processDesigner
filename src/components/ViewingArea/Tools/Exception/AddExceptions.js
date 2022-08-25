@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from "react";
-import StarRateIcon from "@material-ui/icons/StarRate";
-import Button from "@material-ui/core/Button";
 import "../Interfaces.css";
 import { useTranslation } from "react-i18next";
-import { Select, MenuItem } from "@material-ui/core";
-import { makeStyles, Typography } from "@material-ui/core";
 import dropdown from "../../../../assets/subHeader/dropdown.svg";
 import AddToListDropdown from "../../../../UI/AddToListDropdown/AddToListDropdown";
 import axios from "axios";
@@ -14,35 +10,13 @@ import {
   SERVER_URL,
 } from "../../../../Constants/appConstants";
 import { connect } from "react-redux";
-
-const useStyles = makeStyles((theme) => ({
-  select: {
-    width: "138px",
-    height: "28px",
-    background: "#FFFFFF 0% 0% no-repeat padding-box",
-    font: "normal normal normal 12px/17px Open Sans",
-    border: "1px solid #C4C4C4",
-    borderRadius: "2px",
-    opacity: "1",
-    marginRight: "10px",
-    marginTop: "10px",
-  },
-  dropdownData: {
-    height: "17px",
-    textAlign: "left",
-    font: "normal normal normal 12px/17px Open Sans",
-    letterSpacing: "0px",
-    color: "#000000",
-    opacity: "1",
-    marginTop: "8px",
-    paddingLeft: "10px !important",
-    marginLeft: "0px",
-  },
-}));
+import "./Exception.css";
+import styles from "../DocTypes/index.module.css";
+import CloseIcon from "@material-ui/icons/Close";
+import arabicStyles from "../DocTypes/arabicStyles.module.css";
 
 function AddException(props) {
   let { t } = useTranslation();
-  const classes = useStyles({});
   const direction = `${t("HTML_DIR")}`;
   const [nameInput, setNameInput] = useState("");
   const [descriptionInput, setDescriptionInput] = useState("");
@@ -65,14 +39,24 @@ function AddException(props) {
 
   const setNameFunc = (e) => {
     setNameInput(e.target.value);
-    if (e.target.value !== "" && props.setShowNameError) {
+    if (e.target.value !== "") {
       props.setShowNameError(false);
+      // Changes made to solve bug ID 109977
+      props.expData.ExceptionGroups.map((group) => {
+        group.ExceptionList.map((exception) => {
+          if (exception.ExceptionName.toLowerCase() == e.target.value) {
+            props.setbExpExists(true);
+          } else {
+            props.setbExpExists(false);
+          }
+        });
+      });
     }
   };
 
   const setDescriptionFunc = (e) => {
     setDescriptionInput(e.target.value);
-    if (e.target.value !== "" && props.setShowDescError) {
+    if (e.target.value !== "") {
       props.setShowDescError(false);
     }
   };
@@ -105,6 +89,13 @@ function AddException(props) {
 
   const onSelectGroup = (grp) => {
     setselectedGroup([grp.id]);
+  };
+
+  const handleCloseFunc = () => {
+    props.handleClose();
+    props.setShowNameError(false);
+    props.setShowDescError(false);
+    props.setbExpExists(false);
   };
 
   const addnewGroup = (GroupToAdd, button_type, newGroupToMoveExp) => {
@@ -170,172 +161,202 @@ function AddException(props) {
   };
 
   return (
-    <div
-      className="addDocs"
-      style={{
-        height: "20rem",
-        width: "430px",
-        margin: "5px",
-        direction: direction,
-      }}
-    >
-      <p className="addDocsHeading">{expModalHead}</p>
-
-      {props.calledFromWorkdesk ? (
-        <div className="row" style={{ marginTop: "7px" }}>
-          <p className="nameInputlabel" style={{ marginBottom: "0" }}>
-            {t("groupName")}
-          </p>
-          <Button
-            className="SwimlaneButton"
-            onClick={() => setShowGroupDropdown(true)}
+    <div className="addDocs">
+      <div className={styles.modalHeader}>
+        <h3
+          className={
+            direction === RTL_DIRECTION
+              ? arabicStyles.modalHeading
+              : styles.modalHeading
+          }
+        >
+          {expModalHead}
+        </h3>
+        <CloseIcon
+          onClick={() => handleCloseFunc()}
+          className={styles.closeIcon}
+        />
+      </div>
+      <div className={styles.modalSubHeader}>
+        {props.calledFromWorkdesk ? (
+          <div
+            className="flex"
             style={{
-              marginLeft: "20px",
-              fontSize: "12px !important",
-              border: "1px solid #e6e6e6",
-              width: "6rem",
+              width: "75%",
+              justifyContent: "space-between",
+              marginBottom: "1rem",
             }}
           >
-            <span style={{ fontSize: "12px" }}>
-              {grpList &&
-                grpList.map((item) => {
-                  if (selectedGroup.includes(item.id)) {
-                    return item.GroupName;
-                  }
-                })}
-            </span>
-            <span style={{ height: "15px", marginLeft: "auto" }}>
-              <img
-                src={dropdown}
-                width="5px"
-                height="15px"
-                style={{
-                  marginBottom: "2px",
-                }}
-              />
-            </span>
-          </Button>
-          {showGroupDropdown ? (
-            <AddToListDropdown
-              processData={props.processData}
-              completeList={grpList}
-              checkboxStyle="swimlaneCheckbox"
-              checkedCheckBoxStyle="swimlaneChecked"
-              associatedList={selectedGroup}
-              checkIcon="swimlaneCheckIcon"
-              onChange={onSelectGroup}
-              addNewLabel={t("newGroup")}
-              noDataLabel={t("noGroupAdded")}
-              onKeydown={addnewGroup} // funtion for api call
-              labelKey="GroupName"
-              handleClickAway={() => setShowGroupDropdown(false)}
-              calledFromWorkdeskExp={true}
-            />
-          ) : null}
-        </div>
-      ) : null}
-
-      <div>
-        <label className="nameInputlabel">
+            <label className={styles.modalLabel} style={{ flex: "1" }}>
+              {t("groupName")}
+              <span className={styles.starIcon}>*</span>
+            </label>
+            <div className="relative" style={{ flex: "2" }}>
+              <button
+                className={styles.groupDropdown}
+                onClick={() => setShowGroupDropdown(true)}
+              >
+                <span style={{ fontSize: "var(--base_text_font_size)" }}>
+                  {grpList?.map((item) => {
+                    if (selectedGroup.includes(item.id)) {
+                      return item.GroupName;
+                    }
+                  })}
+                </span>
+                <span
+                  style={{ position: "absolute", right: "0.5vw", top: "10%" }}
+                >
+                  <img
+                    src={dropdown}
+                    style={{ width: "0.5rem", height: "0.5rem" }}
+                  />
+                </span>
+              </button>
+              {showGroupDropdown ? (
+                <AddToListDropdown
+                  processData={props.processData}
+                  completeList={grpList}
+                  checkedCheckBoxStyle="exceptionGroupChecked"
+                  associatedList={selectedGroup}
+                  checkIcon="exceptionGroup_checkIcon"
+                  onChange={onSelectGroup}
+                  addNewLabel={t("newGroup")}
+                  noDataLabel={t("noGroupAdded")}
+                  onKeydown={addnewGroup} // funtion for api call
+                  labelKey="GroupName"
+                  handleClickAway={() => setShowGroupDropdown(false)}
+                  calledFromWorkdeskExp={true}
+                  style={{ top: "100%", left: "0", width: "100%" }}
+                />
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+        <label className={styles.modalLabel}>
           {t("exceptionName")}
-          <StarRateIcon
-            style={{ height: "15px", width: "15px", color: "red" }}
-          />
+          <span className={styles.starIcon}>*</span>
         </label>
         <form>
           <input
             id="ExceptionNameInput"
             value={nameInput}
             onChange={(e) => setNameFunc(e)}
-            className="nameInput"
+            className={styles.modalInput}
           />
         </form>
         {props.showNameError ? (
-          <span style={{ color: "red", fontSize: "10px", marginBottom: "7px" }}>
-            Please fill the Name.
+          <span
+            style={{
+              color: "red",
+              fontSize: "var(--sub_text_font_size)",
+              marginTop: "-0.25rem",
+              marginBottom: "0.5rem",
+              display: "block",
+            }}
+          >
+            {t("filltheName")}
           </span>
         ) : null}
-      </div>
-      <div>
-        <label className="nameInputlabel">
+        {props.bExpExists ? (
+          <span
+            style={{
+              color: "red",
+              fontSize: "var(--sub_text_font_size)",
+              marginTop: "-0.25rem",
+              marginBottom: "0.5rem",
+              display: "block",
+            }}
+          >
+            {t("excepAlreadyExists")}
+          </span>
+        ) : null}
+        <label className={styles.modalLabel}>
           {t("description")}
-          <StarRateIcon
-            style={{ height: "15px", width: "15px", color: "red" }}
-          />
+          <span className={styles.starIcon}>*</span>
         </label>
-        <form>
-          <textarea
-            id="ExceptionDescInput"
-            value={descriptionInput}
-            onChange={(e) => setDescriptionFunc(e)}
-          />
-        </form>
+        <textarea
+          id="ExceptionDescInput"
+          value={descriptionInput}
+          onChange={(e) => setDescriptionFunc(e)}
+          className={styles.modalTextArea}
+        />
         {props.showDescError ? (
-          <span style={{ color: "red", fontSize: "10px", marginBottom: "7px" }}>
-            Please fill the Description.
+          <span
+            style={{
+              color: "red",
+              fontSize: "10px",
+              marginTop: "-0.25rem",
+              marginBottom: "0.5rem",
+              display: "block",
+            }}
+          >
+            {t("filltheDesc")}
           </span>
         ) : null}
       </div>
       <div
-        className="buttons_add"
-        style={{ marginTop: "1rem", textAlign: "right", marginRight: "1rem" }}
+        className={
+          direction === RTL_DIRECTION
+            ? arabicStyles.modalFooter
+            : styles.modalFooter
+        }
       >
-        <Button
-          variant="outlined"
-          onClick={() => props.handleClose()}
-          id="close_AddExpModal_Button"
+        <button
+          className={
+            direction === RTL_DIRECTION
+              ? arabicStyles.cancelButton
+              : styles.cancelButton
+          }
+          onClick={() => handleCloseFunc()}
         >
           {t("cancel")}
-        </Button>
+        </button>
         {props.expNameToModify ? null : (
-          <Button
-            id="addAnotherException_Button"
+          <button
+            id="addAnotherDocTypes_Button"
             onClick={(e) =>
               props.addExceptionToList(
                 nameInput,
                 "addAnother",
-                props.groupId,
+                props.groupId ? props.groupId : selectedGroup[0],
                 descriptionInput
               )
             }
-            variant="contained"
-            color="primary"
+            className={styles.okButton}
           >
             {t("addAnother")}
-          </Button>
+          </button>
         )}
         {props.expNameToModify ? null : (
-          <Button
-            id="addNclose_AddExceptionModal_Button"
-            variant="contained"
-            onClick={(e) => {
+          <button
+            id="addNclose_AddDocModal_Button"
+            onClick={(e) =>
               props.addExceptionToList(
                 nameInput,
                 "add",
-                props.groupId,
+                props.groupId ? props.groupId : selectedGroup[0],
                 descriptionInput
-              );
-            }}
-            color="primary"
+              )
+            }
+            className={styles.okButton}
           >
             {t("add&Close")}
-          </Button>
+          </button>
         )}
         {props.expNameToModify ? (
-          <Button
-            variant="contained"
+          <button
             onClick={(e) => {
               props.modifyDescription(
                 nameInput,
-                props.groupId,
+                props.groupId ? props.groupId : selectedGroup[0],
                 descriptionInput,
                 props.expIdToModify
               );
             }}
-            color="primary"
+            className={styles.okButton}
           >
-            {t("save")}
-          </Button>
+            {"save"}
+          </button>
         ) : null}
       </div>
     </div>

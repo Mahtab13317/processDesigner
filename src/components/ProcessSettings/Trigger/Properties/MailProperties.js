@@ -126,7 +126,7 @@ function MailProperties(props) {
   };
 
   return (
-    <div className={styles.propertiesMainView}>
+    <div className={styles.propertiesMainView} id="mail_trigger">
       <div
         className={
           direction === RTL_DIRECTION
@@ -156,6 +156,7 @@ function MailProperties(props) {
             </span>
           </div>
           <SelectWithInput
+            width={"75%"}
             dropdownOptions={variableDefinition}
             optionKey="VariableName"
             setIsConstant={(val) => {
@@ -194,6 +195,7 @@ function MailProperties(props) {
             </span>
           </div>
           <SelectWithInput
+            width={"75%"}
             dropdownOptions={variableDefinition}
             optionKey="VariableName"
             setIsConstant={(val) => {
@@ -221,6 +223,7 @@ function MailProperties(props) {
             {t("CC")}
           </div>
           <SelectWithInput
+            width={"75%"}
             dropdownOptions={variableDefinition}
             optionKey="VariableName"
             setIsConstant={(val) => {
@@ -248,6 +251,7 @@ function MailProperties(props) {
             {t("BCC")}
           </div>
           <SelectWithInput
+            width={"75%"}
             dropdownOptions={variableDefinition}
             optionKey="VariableName"
             setIsConstant={(val) => {
@@ -275,6 +279,7 @@ function MailProperties(props) {
             {t("Priority")}
           </div>
           <SelectWithInput
+            width={"75%"}
             dropdownOptions={priority}
             setValue={(val) => {
               onChange("priorityInput", val);

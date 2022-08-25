@@ -18,12 +18,11 @@ function ReusableOneMap(props) {
       <div
         style={{
           flex: "1",
-          height: "30px",
+          height: "var(--line_height)",
           border: "1px solid #F3F3F3",
           borderRadius: "2px",
-          opacity: "1",
           marginRight: "10px",
-          fontSize: "12px",
+          fontSize: "var(--base_text_font_size)",
           padding: "7px",
           textOverflow: "ellipsis",
           overflow: "hidden",
@@ -42,12 +41,13 @@ function ReusableOneMap(props) {
         onChange={(e) => handleFieldMapping(e)}
         style={{
           flex: "1",
-          height: "30px",
+          height: "var(--line_height)",
           border: "1px solid #F3F3F3",
           borderRadius: "2px",
           padding: "7px",
-          fontSize: "12px",
-          overflow: "hidden"
+          fontSize: "var(--base_text_font_size)",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
         }}
         value={selectedMappingField}
         MenuProps={{
@@ -73,8 +73,9 @@ function ReusableOneMap(props) {
               className="InputPairDiv_CommonList"
               value={loadedVar}
               style={{
-                fontSize: "12px",
-                padding: "4px",
+                fontSize: "var(--base_text_font_size)",
+                width: "100%",
+                padding: "4px 7px",
               }}
             >
               {loadedVar[props.dropDownKey]}

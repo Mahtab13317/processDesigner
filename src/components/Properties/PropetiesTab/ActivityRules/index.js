@@ -4,9 +4,16 @@
 // #BugDescription - Fixed issues for restore changes function by passing correct values.
 // #BugID - 107290
 // #BugDescription - Added additional checks to prevent rule from adding before all errors are fixed.
+// #BugID - 111195
+// #BugDescription - Removed global state function for adding rule locally.
+// #BugID - 112318
+// #BugDescription - Added condition for disabling if radio option in parallel distribute activity.
+// #BugID - 112369
+// #BugDescription - Added provision to add constants in list with constants already made.
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "./index.module.css";
+import moment from "moment";
 import arabicStyles from "./ArabicStyles.module.css";
 import * as actionCreators from "../../../../redux-store/actions/Properties/showDrawerAction.js";
 import { connect, useDispatch } from "react-redux";
@@ -50,6 +57,7 @@ import {
   AUDIT_OPERATION_TYPE,
   ESCALATE_WITH_TRIGGER_OPERATION_TYPE,
   DISTRIBUTE_TO_OPERATION_TYPE,
+  REMINDER_OPERATION_TYPE,
   Y_FLAG,
   SPACE,
   EQUAL_TO,
@@ -58,6 +66,7 @@ import {
   USER_DEFINED_SCOPE,
   RTL_DIRECTION,
   propertiesLabel,
+  CONSTANT,
 } from "../../../../Constants/appConstants";
 import {
   getOperator,
@@ -69,6 +78,9 @@ import {
   databaseExclusiveOperations,
   workdesksOperations,
   distributeOperations,
+  replyOperations,
+  entryDetailsOperations,
+  reminderOperations,
 } from "./CommonFunctionCall";
 import NoRulesScreen from "./NoRuleScreen";
 import RuleStatement from "./RuleStatement";
@@ -77,9 +89,13 @@ import {
   getRuleConditionObject,
   getRuleOperationObject,
   getRuleOperationDataObj,
+  getAlwaysRuleConditionObject,
+  isValueDateType,
+  otherwiseRuleData,
 } from "./CommonFunctions";
 import { noIncomingTypes } from "../../../../utility/bpmnView/noIncomingTypes.js";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 function ActivityRules(props) {
   let { t } = useTranslation();
@@ -95,6 +111,7 @@ function ActivityRules(props) {
     taskIndex,
     calledFromAction,
     actionData,
+    activityTab,
   } = props;
   const dispatch = useDispatch();
   const globalActivityData = store.getState("activityPropertyData");
@@ -129,6 +146,8 @@ function ActivityRules(props) {
   const [actionIndex, setActionIndex] = useState(0); //action index
   //---------
   const [addClicked, setAddClicked] = useState(false);
+  const [isActParallelDistribute, setIsActParallelDistribute] = useState(false);
+  const [currentTabName, setCurrentTabName] = useState(null); //added by mahtab to check the current tab name in an activity
 
   // Function that runs when the component loads.
   useEffect(() => {
@@ -149,6 +168,12 @@ function ActivityRules(props) {
         }
       });
   }, []);
+  //added by mahtab to setting current tab
+  useEffect(() => {
+    if (activityTab !== "") {
+      setCurrentTabName(activityTab);
+    }
+  }, []);
 
   // Function that validates the rule being currently added/modified.
   const validateRule = () => {
@@ -159,19 +184,53 @@ function ActivityRules(props) {
     };
     localRuleData?.ruleCondList?.forEach((element) => {
       conditionFieldKeys["ruleCondition"]?.forEach((value) => {
-        if (element[value] === "" || element[value] === null) {
+        if (
+          element[value] === "" ||
+          element[value] === null ||
+          element[value] === CONSTANT
+        ) {
           conditionFieldsFilled = false;
         }
       });
     });
 
-    localRuleData?.ruleOpList?.forEach((element) => {
-      operationFieldKeys[element.opType]?.forEach((value) => {
-        if (element[value] === "" || element[value] === null) {
-          operationFieldsFilled = false;
-        }
-      });
+    localRuleData?.ruleOpList?.forEach((element, i) => {
+      //added by mahtab
+      let oprtnType = 1;
+      if (activityTab === "Reminder") {
+        oprtnType = 39;
+        operationFieldKeys[oprtnType]?.forEach((value) => {
+          var nameSplit = value.split(".");
+          nameSplit.pop();
+          var name = nameSplit.join(".");
+          if (name == "durationInfo") {
+            const index = value.lastIndexOf(".");
+
+            const after = value.slice(index + 1);
+
+            if (element[name][after] === "" || element[name][after] === null) {
+              operationFieldsFilled = false;
+            }
+          } else {
+            if (element[value] === "" || element[value] === null) {
+              operationFieldsFilled = false;
+            }
+          }
+
+          /* if (element[value] === "" || element[value] === null) {
+            operationFieldsFilled = false;
+          } */
+        });
+      } else {
+        oprtnType = element.opType;
+        operationFieldKeys[element.opType]?.forEach((value) => {
+          if (element[value] === "" || element[value] === null) {
+            operationFieldsFilled = false;
+          }
+        });
+      }
     });
+
     setDoesSelectedRuleHaveErrors(!operationFieldsFilled);
     setRuleConditionErrors(!conditionFieldsFilled);
     if (operationFieldsFilled && conditionFieldKeys) {
@@ -258,6 +317,22 @@ function ActivityRules(props) {
     let temp = JSON.parse(JSON.stringify(localActivityPropertyData));
     if (cellActivityType === 7 && cellActivitySubType === 1) {
       temp.ActivityProperty.routingCriteria.routCriteriaList = rules;
+    }
+    //added by mahtab
+    else if (
+      cellActivityType === 4 &&
+      cellActivitySubType === 1 &&
+      activityTab !== "Reminder"
+    ) {
+      temp.ActivityProperty.esInfo.esRuleList = rules;
+    }
+    //added by mahtab
+    else if (
+      cellActivityType === 4 &&
+      cellActivitySubType === 1 &&
+      activityTab === "Reminder"
+    ) {
+      temp.ActivityProperty.reminderInfo.reminderList = rules;
     } else if (
       cellActivityType === 10 &&
       (cellActivitySubType === 3 || cellActivitySubType === 6)
@@ -290,6 +365,24 @@ function ActivityRules(props) {
       operationsList = distributeOperations;
     } else if (cellActivityType === 33 && cellActivitySubType === 1) {
       operationsList = workdesksOperations;
+    } else if (cellActivityType === 26 && cellActivitySubType === 1) {
+      operationsList = replyOperations;
+    }
+    //addded by mahtab
+    else if (
+      cellActivityType === 4 &&
+      cellActivitySubType === 1 &&
+      activityTab !== "Reminder"
+    ) {
+      operationsList = entryDetailsOperations;
+    }
+    //addded by mahtab
+    else if (
+      cellActivityType === 4 &&
+      cellActivitySubType === 1 &&
+      activityTab === "Reminder"
+    ) {
+      operationsList = reminderOperations;
     }
     setOperationsAllowed(operationsList);
   }, []);
@@ -316,6 +409,22 @@ function ActivityRules(props) {
         activityData =
           entrySettingsData.ActivityProperty.routingCriteria &&
           entrySettingsData.ActivityProperty.routingCriteria.routCriteriaList;
+        if (
+          entrySettingsData?.ActivityProperty?.routingCriteria?.routCriteriaList
+            ?.length === 0
+        ) {
+          activityData = otherwiseRuleData;
+        }
+      }
+      //added by mahtab for reminder
+      else if (
+        cellActivityType === 4 &&
+        cellActivitySubType === 1 &&
+        activityTab === "Reminder"
+      ) {
+        activityData =
+          entrySettingsData?.ActivityProperty?.reminderInfo &&
+          entrySettingsData?.ActivityProperty?.reminderInfo?.reminderList;
       } else if (
         cellActivityType === 5 &&
         (cellActivitySubType === 1 || cellActivitySubType === 2)
@@ -348,11 +457,13 @@ function ActivityRules(props) {
           entrySettingsData.ActivityProperty &&
           activityData &&
           activityData.length > 0 &&
-          activityData[selectedRule].ruleOpList) || [getRuleOperationObject()],
+          activityData[selectedRule].ruleOpList) || [
+          getRuleOperationObject(1, activityTab === "Reminder" && "39"),
+        ],
       };
       setLocalRuleData({ ...dataObj });
     }
-  }, [localActivityPropertyData.ActivityProperty, taskIndex]);
+  }, [localActivityPropertyData?.ActivityProperty, taskIndex]);
 
   // Function that runs when the selected rule is changed.
   useEffect(() => {
@@ -364,6 +475,14 @@ function ActivityRules(props) {
       setLocalRuleData({ ...dataObj });
     }
   }, [selectedRule]);
+
+  // Function that runs when the activity type and activity subtype changes.
+  useEffect(() => {
+    if (cellActivityType === 5 && cellActivitySubType === 2) {
+      setIsActParallelDistribute(true);
+      setSelectedCondition(RULES_ALWAYS_CONDITION);
+    }
+  }, [cellActivityType, cellActivitySubType, showAddRuleButton]);
 
   // Function to set the rule count.
   useEffect(() => {
@@ -432,7 +551,8 @@ function ActivityRules(props) {
     }
 
     if (isRuleBeingCreated) {
-      let temp = [...rules];
+      //updated by mahtab
+      let temp = rules && rules?.lenght > 0 ? [...rules] : [];
       temp.splice(selectedRule, 1);
       setRules(temp);
       setGlobalData(temp);
@@ -543,6 +663,7 @@ function ActivityRules(props) {
     const temp = [...rules];
     temp[selectedRule].ruleCondList = ruleCondList;
     temp[selectedRule].ruleOpList = ruleOpList;
+
     setRules(temp);
     setGlobalData(temp);
     setIsRuleBeingCreated(false);
@@ -567,6 +688,26 @@ function ActivityRules(props) {
       return {
         [propertiesLabel.EntrySetting]: { isModified: true, hasError: false },
       };
+    }
+    //added by mahtab
+    else if (
+      cellActivityType === 4 &&
+      cellActivitySubType === 1 &&
+      activityTab !== "Reminder"
+    ) {
+      return {
+        [propertiesLabel.EntrySetting]: { isModified: true, hasError: false },
+      };
+    }
+    //added by mahtab
+    else if (
+      cellActivityType === 4 &&
+      cellActivitySubType === 1 &&
+      activityTab === "Reminder"
+    ) {
+      return {
+        [propertiesLabel.reminder]: { isModified: true, hasError: false },
+      };
     } else if (
       cellActivityType === 5 &&
       (cellActivitySubType === 1 || cellActivitySubType === 2)
@@ -580,13 +721,17 @@ function ActivityRules(props) {
   // Function that gets called when the user clicks on add rule button in the left panel to add a new rule locally.
   const addRuleLocally = () => {
     expandDrawer(true);
+    let isParallelDistribute = false;
+    if (cellActivityType === 5 && cellActivitySubType === 2) {
+      isParallelDistribute = true;
+    }
     setDoesSelectedRuleHaveErrors(false);
     setCheckValidation(false);
     setIsRuleBeingCreated(true);
     let maxRuleId = 0;
     rules &&
-      rules.length > 0 &&
-      rules.forEach((element) => {
+      rules?.length > 0 &&
+      rules?.forEach((element) => {
         if (element.ruleOrderId > maxRuleId) {
           maxRuleId = element.ruleOrderId;
         }
@@ -597,14 +742,19 @@ function ActivityRules(props) {
       ruleOrderId: +maxRuleId + 1,
       ruleLabel: "",
       ruleType: getRuleType(cellActivityType, cellActivitySubType),
-      ruleCondList: [getRuleConditionObject()],
-      ruleOpList: [getRuleOperationObject()],
+      ruleCondList: [
+        isParallelDistribute
+          ? getAlwaysRuleConditionObject()
+          : getRuleConditionObject(),
+      ],
+      ruleOpList: [
+        getRuleOperationObject(1, activityTab === "Reminder" && "39"),
+      ],
     };
 
-    let temp = [...rules];
+    let temp = rules?.length > 0 ? [...rules] : []; //updated by mahtab
     temp.push(newRule);
     setRules(temp);
-    setGlobalData(temp);
     setSelectedRule(temp.length - 1);
     setShowAddRuleButton(false);
   };
@@ -650,8 +800,13 @@ function ActivityRules(props) {
             maxOrderId = element.opOrderId;
           }
         });
-
-      const newOperation = getRuleOperationObject(maxOrderId + 1);
+      let newOperation;
+      /*  if (activityTab === "Reminder") {
+        newOperation = getRuleOperationObject(maxOrderId + 1, "39");
+      } else {
+        newOperation = getRuleOperationObject(maxOrderId + 1);
+      } */
+      newOperation = getRuleOperationObject(maxOrderId + 1);
       const temp = { ...localRuleData };
       temp.ruleOpList.push(newOperation);
       setLocalRuleData(temp);
@@ -663,7 +818,7 @@ function ActivityRules(props) {
   const lastOperationValidation = () => {
     let temp = false;
     const arr = localRuleData && localRuleData.ruleOpList;
-    const operationType = arr[arr.length - 1].opType;
+    const operationType = arr[arr.length - 1]?.opType;
     switch (operationType) {
       case ROUTE_TO_OPERATION_TYPE:
         dispatch(
@@ -759,7 +914,6 @@ function ActivityRules(props) {
       let temp = [...rules];
       temp.splice(selectedRule, 1);
       setRules(temp);
-      setGlobalData(temp);
       setSelectedRule((prevCount) => {
         if (prevCount > 0) {
           return prevCount - 1;
@@ -795,6 +949,14 @@ function ActivityRules(props) {
       activityDataArr =
         entrySettingsData.ActivityProperty.distributeInfo &&
         entrySettingsData.ActivityProperty.distributeInfo.disRuleInfo;
+    } else if (
+      cellActivityType === 4 &&
+      cellActivitySubType === 1 &&
+      activityTab === "Reminder"
+    ) {
+      activityDataArr =
+        entrySettingsData.ActivityProperty.reminderInfo &&
+        entrySettingsData.ActivityProperty.reminderInfo.reminderList;
     }
     let tempArr = [...rules];
     temp.ruleCondList = activityDataArr[selectedRule].ruleCondList;
@@ -921,7 +1083,10 @@ function ActivityRules(props) {
               SPACE +
               EQUAL_TO +
               SPACE +
-              element.param2 +
+              (isValueDateType(element.param2).isValDateType
+                ? moment(element.param2).format("DD/MM/YYYY")
+                : element.param2) +
+              // element.param2 +
               SPACE +
               getOperator(element.operator) +
               SPACE +
@@ -967,10 +1132,15 @@ function ActivityRules(props) {
             getCalendarTypeName(element.ruleCalFlag)
           );
         case ESCALATE_WITH_TRIGGER_OPERATION_TYPE:
+        case REMINDER_OPERATION_TYPE:
           return (
             getTypedropdown(element.opType) +
             SPACE +
             element.triggerName +
+            SPACE +
+            "Frequency" +
+            SPACE +
+            element.iReminderFrequency +
             SPACE +
             t("after") +
             SPACE +
@@ -1155,6 +1325,8 @@ function ActivityRules(props) {
   };
 
   return (
+    <>
+      <TabsHeading heading={props?.heading} />
     <div
       className={
         direction === RTL_DIRECTION
@@ -1162,536 +1334,619 @@ function ActivityRules(props) {
           : styles.ruleScreen
       }
     >
-      <div
-        className={styles.leftPanel}
-        style={{
-          width: isDrawerExpanded ? "26%" : "100%",
-        }}
-      >
-        {calledFromAction ? (
-          <div>
-            {actionCount === 0 ? (
-              <div
-                className={
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.flexRow
-                    : styles.flexRow
-                }
-              >
-                <p
-                  className={
-                    direction === RTL_DIRECTION
-                      ? arabicStyles.noRuleDefined
-                      : styles.noRuleDefined
-                  }
-                >
-                  {t("no")}
-                  {SPACE + t("actionAreDefined")}
-                </p>
-                {!isProcessReadOnly && showAddRuleButton ? (
-                  <button
-                    id="AR_Add_Action_Locally"
-                    className={
-                      direction === RTL_DIRECTION
-                        ? arabicStyles.addRuleLocallyButton
-                        : styles.addRuleLocallyButton
-                    }
-                    onClick={addActionLocally}
-                  >
-                    {t("addAction")}
-                  </button>
-                ) : null}
-              </div>
-            ) : (
-              <div className="row">
-                <p
-                  className={
-                    direction === RTL_DIRECTION
-                      ? arabicStyles.noRuleDefined
-                      : styles.noRuleDefined
-                  }
-                >
-                  {actionCount === 1
-                    ? actionCount + SPACE + t("actionIsDefined")
-                    : actionCount + SPACE + t("actionAreDefined")}
-                </p>
-                {!isProcessReadOnly && showAddRuleButton ? (
-                  <button
-                    id="AR_Add_Action_Locally"
-                    className={
-                      direction === RTL_DIRECTION
-                        ? arabicStyles.addRuleLocallyButton
-                        : styles.addRuleLocallyButton
-                    }
-                    onClick={addActionLocally}
-                  >
-                    {t("addAction")}
-                  </button>
-                ) : null}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div>
-            {rulesCount === 0 ? (
-              <div
-                className={
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.flexRow
-                    : styles.flexRow
-                }
-              >
-                <p
-                  className={
-                    direction === RTL_DIRECTION
-                      ? arabicStyles.noRuleDefined
-                      : styles.noRuleDefined
-                  }
-                >
-                  {t("no")}
-                  {SPACE + t("rulesAreDefined")}
-                </p>
-                {!isProcessReadOnly && showAddRuleButton ? (
-                  <button
-                    id="AR_Add_Rule_Locally"
-                    className={
-                      direction === RTL_DIRECTION
-                        ? arabicStyles.addRuleLocallyButton
-                        : styles.addRuleLocallyButton
-                    }
-                    onClick={addRuleLocally}
-                  >
-                    {t("addRule")}
-                  </button>
-                ) : null}
-              </div>
-            ) : (
-              <div
-                className={
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.flexRow
-                    : styles.flexRow
-                }
-              >
-                <p
-                  className={
-                    direction === RTL_DIRECTION
-                      ? arabicStyles.noRuleDefined
-                      : styles.noRuleDefined
-                  }
-                >
-                  {rulesCount === 1
-                    ? rulesCount + SPACE + t("ruleIsDefined")
-                    : rulesCount + SPACE + t("rulesAreDefined")}
-                </p>
-                {!isProcessReadOnly && showAddRuleButton ? (
-                  <button
-                    id="AR_Add_Rule_Locally"
-                    className={
-                      direction === RTL_DIRECTION
-                        ? arabicStyles.addRuleLocallyButton
-                        : styles.addRuleLocallyButton
-                    }
-                    onClick={addRuleLocally}
-                  >
-                    {t("addRule")}
-                  </button>
-                ) : null}
-              </div>
-            )}
-          </div>
-        )}
-        {calledFromAction ? (
-          <ul>
-            {actions && actions.length !== 0 ? (
-              actions.map((element, index) => {
-                return (
-                  <li onClick={() => setActionIndex(index)}>
-                    {element.actionName}
-                  </li>
-                );
-              })
-            ) : (
-              <li
-                className={
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.restList
-                    : styles.restList
-                }
-              >
-                {t("no")}
-                {SPACE + t("actionsareDefined")}
-              </li>
-            )}
-          </ul>
-        ) : (
-          <ul>
-            {rules && rules.length !== 0 ? (
-              rules.map((element, index) => {
-                return (
-                  <li
-                    id="AR_Open_Rule"
-                    className={
-                      selectedRule === index
-                        ? direction === RTL_DIRECTION
-                          ? arabicStyles.ruleStatement
-                          : styles.ruleStatement
-                        : direction === RTL_DIRECTION
-                        ? arabicStyles.restList
-                        : styles.restList
-                    }
-                    onClick={() => handleSelectedRuleChange(index)}
-                  >
-                    <RuleStatement
-                      index={index}
-                      rules={rules}
-                      isRuleBeingCreated={
-                        index === selectedRule ? isRuleBeingCreated : false
-                      }
-                      buildRuleStatement={buildRuleStatement}
-                      shortenRuleStatement={shortenRuleStatement}
-                      registeredFunctions={registeredFunctions}
-                      registeredOptionsLabelsData={registeredOptionsLabelsData}
-                    />
-                  </li>
-                );
-              })
-            ) : (
-              <li
-                className={
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.restList
-                    : styles.restList
-                }
-              >
-                {t("no")}
-                {SPACE + t("rulesAreDefined")}
-              </li>
-            )}
-          </ul>
-        )}
-      </div>
-      <div
-        className={
-          direction === RTL_DIRECTION
-            ? arabicStyles.verticalDivision
-            : styles.verticalDivision
-        }
-      ></div>
-      {rules && rules.length > 0 ? (
-        <div
-          style={{
-            width: isDrawerExpanded ? "74%" : "0%",
-          }}
-        >
-          {isDrawerExpanded ? (
-            <div
-              className={
-                direction === RTL_DIRECTION
-                  ? arabicStyles.rightPanel
-                  : styles.rightPanel
-              }
-            >
-              {calledFromAction ? (
-                <div className="row" style={{ margin: "-20px 0 12px 0" }}>
-                  <p
-                    style={{
-                      font: " normal normal normal 16px/22px Open Sans",
-                    }}
-                  >
-                    {t("actionName")}
-                  </p>
-                  <input
-                    onChange={(event) => actionHandler(event)}
-                    value={actionName}
-                    style={{ marginLeft: "2rem" }}
-                  />
-                </div>
-              ) : null}
-
-              <div
-                className={
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.flexRow
-                    : styles.flexRow
-                }
-              >
-                <p className={styles.mainHeading}>{t("rulesCondition")}</p>
-                <StarRateIcon
-                  style={{ height: "15px", width: "15px", color: "red" }}
-                />
-                {isRuleBeingCreated ? (
+      {(calledFromAction && actionCount > 0) ||
+      (!calledFromAction && rulesCount > 0) ||
+      isRuleBeingCreated ? (
+        <>
+       
+          <div
+            className={styles.leftPanel}
+            style={{
+              width: isDrawerExpanded ? "26%" : "100%",
+            }}
+          >
+            {calledFromAction ? (
+              <div>
+                {actionCount === 0 ? (
                   <div
                     className={
                       direction === RTL_DIRECTION
-                        ? arabicStyles.buttonsDiv
-                        : styles.buttonsDiv
+                        ? arabicStyles.flexRow
+                        : styles.flexRow
                     }
                   >
-                    <button
-                      id="AR_Cancel_Rule_Changes"
+                    <p
                       className={
                         direction === RTL_DIRECTION
-                          ? arabicStyles.cancelHeaderBtn
-                          : styles.cancelHeaderBtn
+                          ? arabicStyles.noRuleDefined
+                          : styles.noRuleDefined
                       }
-                      onClick={cancelRule}
-                      style={{
-                        display: isProcessReadOnly ? "none" : "",
-                      }}
+                      style={{ fontSize: "1.1rem", marginRight: "0.8rem" }}
                     >
-                      {t("cancel")}
-                    </button>
-                    {calledFromAction ? (
+                      {t("no")}
+                      {SPACE + t("actionAreDefined")}
+                    </p>
+                    {!isProcessReadOnly && showAddRuleButton ? (
                       <button
-                        id="AR_Add_Action_Button"
+                        id="AR_Add_Action_Locally"
                         className={
                           direction === RTL_DIRECTION
-                            ? arabicStyles.addHeaderBtn
-                            : styles.addHeaderBtn
+                            ? arabicStyles.addRuleLocallyButton
+                            : styles.addRuleLocallyButton
                         }
-                        onClick={addActionHandler}
-                        style={{
-                          display: isProcessReadOnly ? "none" : "",
-                        }}
+                        onClick={addActionLocally}
                       >
                         {t("addAction")}
                       </button>
-                    ) : (
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="row">
+                    <p
+                      className={
+                        direction === RTL_DIRECTION
+                          ? arabicStyles.noRuleDefined
+                          : styles.noRuleDefined
+                      }
+                    >
+                      {actionCount === 1
+                        ? actionCount + SPACE + t("actionIsDefined")
+                        : actionCount + SPACE + t("actionAreDefined")}
+                    </p>
+                    {!isProcessReadOnly && showAddRuleButton ? (
                       <button
-                        id="AR_Add_Rule_Button"
+                        id="AR_Add_Action_Locally"
                         className={
                           direction === RTL_DIRECTION
-                            ? arabicStyles.addHeaderBtn
-                            : styles.addHeaderBtn
+                            ? arabicStyles.addRuleLocallyButton
+                            : styles.addRuleLocallyButton
                         }
-                        onClick={addRuleHandler}
-                        style={{
-                          display: isProcessReadOnly ? "none" : "",
-                        }}
+                        onClick={addActionLocally}
+                      >
+                        {t("addAction")}
+                      </button>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div>
+                {rulesCount === 0 ? (
+                  <div
+                    className={
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.flexRow1
+                        : styles.flexRow1
+                    }
+                  >
+                    <p
+                      className={
+                        direction === RTL_DIRECTION
+                          ? arabicStyles.noRuleDefined
+                          : styles.noRuleDefined
+                      }
+                    >
+                      {t("no")}
+                      {SPACE + t("rulesAreDefined")}
+                    </p>
+                    {!isProcessReadOnly && showAddRuleButton ? (
+                      <button
+                        id="AR_Add_Rule_Locally"
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.addRuleLocallyButton
+                            : styles.addRuleLocallyButton
+                        }
+                        onClick={addRuleLocally}
                       >
                         {t("addRule")}
                       </button>
-                    )}
+                    ) : null}
                   </div>
                 ) : (
                   <div
                     className={
                       direction === RTL_DIRECTION
-                        ? arabicStyles.buttonsDiv
-                        : styles.buttonsDiv
+                        ? arabicStyles.flexRow1
+                        : styles.flexRow1
                     }
                   >
-                    <button
-                      id="AR_Delete_Rule_Button"
+                    <p
                       className={
                         direction === RTL_DIRECTION
-                          ? arabicStyles.cancelHeaderBtn
-                          : styles.cancelHeaderBtn
+                          ? arabicStyles.noRuleDefined
+                          : styles.noRuleDefined
                       }
-                      onClick={deleteRule}
+                      style={{ fontSize: "1.1rem", marginRight: "0.8rem" }}
+                    >
+                      {rulesCount === 1
+                        ? rulesCount + SPACE + t("ruleIsDefined")
+                        : rulesCount + SPACE + t("rulesAreDefined")}
+                    </p>
+                    {!isProcessReadOnly && showAddRuleButton ? (
+                      <button
+                        id="AR_Add_Rule_Locally"
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.addRuleLocallyButton
+                            : styles.addRuleLocallyButton
+                        }
+                        onClick={addRuleLocally}
+                      >
+                        {t("addRule")}
+                      </button>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+            )}
+            {calledFromAction ? (
+              <ul>
+                {actions && actions.length !== 0 ? (
+                  actions.map((element, index) => {
+                    return (
+                      <li onClick={() => setActionIndex(index)}>
+                        {element.actionName}
+                      </li>
+                    );
+                  })
+                ) : (
+                  <li
+                    className={
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.restList
+                        : styles.restList
+                    }
+                  >
+                    {t("no")}
+                    {SPACE + t("actionsareDefined")}
+                  </li>
+                )}
+              </ul>
+            ) : (
+              <ul>
+                {rules && rules.length !== 0 ? (
+                  rules.map((element, index) => {
+                    return (
+                      <li
+                        id="AR_Open_Rule"
+                        className={
+                          selectedRule === index
+                            ? direction === RTL_DIRECTION
+                              ? arabicStyles.ruleStatement
+                              : styles.ruleStatement
+                            : direction === RTL_DIRECTION
+                            ? arabicStyles.restList
+                            : styles.restList
+                        }
+                        onClick={() => handleSelectedRuleChange(index)}
+                      >
+                        <RuleStatement
+                          index={index}
+                          rules={rules}
+                          isRuleBeingCreated={
+                            index === selectedRule ? isRuleBeingCreated : false
+                          }
+                          buildRuleStatement={buildRuleStatement}
+                          shortenRuleStatement={shortenRuleStatement}
+                          registeredFunctions={registeredFunctions}
+                          registeredOptionsLabelsData={
+                            registeredOptionsLabelsData
+                          }
+                        />
+                      </li>
+                    );
+                  })
+                ) : (
+                  <li
+                    className={
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.restList
+                        : styles.restList
+                    }
+                  >
+                    {t("no")}
+                    {SPACE + t("rulesAreDefined")}
+                  </li>
+                )}
+              </ul>
+            )}
+          </div>
+          <div
+            className={
+              direction === RTL_DIRECTION
+                ? arabicStyles.verticalDivision
+                : styles.verticalDivision
+            }
+          ></div>
+          <div
+            style={{
+              width: isDrawerExpanded ? "74%" : "0%",
+            }}
+          >
+            {isDrawerExpanded ? (
+              <div
+                className={
+                  direction === RTL_DIRECTION
+                    ? arabicStyles.rightPanel
+                    : styles.rightPanel
+                }
+              >
+                {calledFromAction ? (
+                  <div className="row" style={{ margin: "-20px 0 12px 0" }}>
+                    <p
                       style={{
-                        display: isProcessReadOnly ? "none" : "",
+                        font: " normal normal normal 16px/22px Open Sans",
+                        fontSize: "var(--title_text_font_size)",
                       }}
                     >
-                      {t("delete")}
-                    </button>
+                      {t("actionName")}
+                    </p>
+                    <input
+                      onChange={(event) => actionHandler(event)}
+                      value={actionName}
+                      style={{ marginLeft: "2rem", height: "24px" }}
+                    />
+                  </div>
+                ) : null}
 
-                    {isRuleBeingModified ? (
-                      <div className={styles.buttonsDiv}>
+                <div
+                  className={
+                    direction === RTL_DIRECTION
+                      ? arabicStyles.flexRow1
+                      : styles.flexRow1
+                  }
+                >
+                  <p
+                    className={styles.mainHeading}
+                    style={{
+                      fontSize: "var(--subtitle_text_font_size)",
+                      display: "flex",
+                    }}
+                  >
+                    {t("rulesCondition")}
+                    <span className={styles.starIcon}>*</span>
+                  </p>
+                  {isRuleBeingCreated ? (
+                    <div
+                      className={
+                        direction === RTL_DIRECTION
+                          ? arabicStyles.buttonsDiv
+                          : styles.buttonsDiv
+                      }
+                    >
+                      <button
+                        id="AR_Cancel_Rule_Changes"
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.cancelHeaderBtn
+                            : styles.cancelHeaderBtn
+                        }
+                        onClick={cancelRule}
+                        style={{
+                          display: isProcessReadOnly ? "none" : "",
+                        }}
+                      >
+                        {t("cancel")}
+                      </button>
+                      {calledFromAction ? (
                         <button
-                          id="AR_Cancel_Rule_Changes"
-                          className={
-                            direction === RTL_DIRECTION
-                              ? arabicStyles.cancelHeaderBtn
-                              : styles.cancelHeaderBtn
-                          }
-                          onClick={restoreRuleChanges}
-                          style={{
-                            display: isProcessReadOnly ? "none" : "",
-                          }}
-                        >
-                          {t("cancel")}
-                        </button>
-                        <button
-                          id="AR_Modify_Rule"
+                          id="AR_Add_Action_Button"
                           className={
                             direction === RTL_DIRECTION
                               ? arabicStyles.addHeaderBtn
                               : styles.addHeaderBtn
                           }
-                          onClick={modifyRule}
+                          onClick={addActionHandler}
                           style={{
                             display: isProcessReadOnly ? "none" : "",
                           }}
                         >
-                          {t("modifyRule")}
+                          {t("addAction")}
                         </button>
-                      </div>
-                    ) : null}
-                  </div>
-                )}
-              </div>
-              <div>
-                {ruleConditionErrors ? (
-                  <p className={styles.errorStatement}>
-                    {t("mandatoryErrorStatement")}
-                  </p>
-                ) : null}
-              </div>
-
-              <RadioGroup
-                onChange={optionSelector}
-                value={selectedCondition}
-                className={
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.radioButton
-                    : styles.radioButton
-                }
-              >
-                <FormControlLabel
-                  disabled={isProcessReadOnly || isOtherwiseSelected}
-                  id="AR_Always_Option"
-                  className={styles.radioOption}
-                  value={RULES_ALWAYS_CONDITION}
-                  control={<Radio />}
-                  label={t("always")}
-                />
-                <FormControlLabel
-                  disabled={isProcessReadOnly || isOtherwiseSelected}
-                  id="AR_If_Option"
-                  value={RULES_IF_CONDITION}
-                  control={<Radio />}
-                  label={t("if")}
-                />
-                <FormControlLabel
-                  disabled={isProcessReadOnly || !isOtherwiseSelected}
-                  id="AR_Otherwise_Option"
-                  value={RULES_OTHERWISE_CONDITION}
-                  control={<Radio />}
-                  label={t("otherwise")}
-                />
-              </RadioGroup>
-              <div className={styles.ruleData}>
-                {localRuleData &&
-                  localRuleData.ruleCondList &&
-                  localRuleData.ruleCondList.length > 0 &&
-                  localRuleData.ruleCondList.map((element, index) => {
-                    return (
-                      <AddCondition
-                        localRuleData={localRuleData}
-                        setLocalRuleData={setLocalRuleData}
-                        index={index}
-                        addNewCondition={addNewCondition}
-                        selectedRule={selectedRule}
-                        showDelIcon={
-                          rules &&
-                          rules.length > 0 &&
-                          rules[selectedRule] &&
-                          rules[selectedRule].ruleCondList &&
-                          rules[selectedRule].ruleCondList.length > 1
-                        }
-                        disabled={disabled}
-                        isRuleBeingCreated={isRuleBeingCreated}
-                        setIsRuleBeingModified={setIsRuleBeingModified}
-                        isProcessReadOnly={isProcessReadOnly}
-                        checkValidation={checkValidation}
-                        setCheckValidation={setCheckValidation}
-                        ruleConditionErrors={ruleConditionErrors}
-                        setRuleConditionErrors={setRuleConditionErrors}
-                        isAlwaysRule={
-                          selectedCondition === RULES_ALWAYS_CONDITION
-                        }
-                      />
-                    );
-                  })}
-
-                <React.Fragment>
-                  <p className={styles.showHeading}>
-                    {t("operations")}
-                    <StarRateIcon className={styles.asteriskStyles} />
-                    <Divider
+                      ) : (
+                        <button
+                          id="AR_Add_Rule_Button"
+                          className={
+                            direction === RTL_DIRECTION
+                              ? arabicStyles.addHeaderBtn
+                              : styles.addHeaderBtn
+                          }
+                          onClick={addRuleHandler}
+                          style={{
+                            display: isProcessReadOnly ? "none" : "",
+                          }}
+                        >
+                          {t("addRule")}
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div
                       className={
                         direction === RTL_DIRECTION
-                          ? arabicStyles.showLine
-                          : styles.showLine
+                          ? arabicStyles.buttonsDiv
+                          : styles.buttonsDiv
                       }
-                    />
-                  </p>
-                  {doesSelectedRuleHaveErrors ? (
+                    >
+                      {!isOtherwiseSelected && (
+                        <button
+                          id="AR_Delete_Rule_Button"
+                          className={
+                            direction === RTL_DIRECTION
+                              ? arabicStyles.cancelHeaderBtn
+                              : styles.cancelHeaderBtn
+                          }
+                          onClick={deleteRule}
+                          style={{
+                            display: isProcessReadOnly ? "none" : "",
+                          }}
+                        >
+                          {t("delete")}
+                        </button>
+                      )}
+
+                      {isRuleBeingModified ? (
+                        <div className={styles.buttonsDiv}>
+                          <button
+                            id="AR_Cancel_Rule_Changes"
+                            className={
+                              direction === RTL_DIRECTION
+                                ? arabicStyles.cancelHeaderBtn
+                                : styles.cancelHeaderBtn
+                            }
+                            onClick={restoreRuleChanges}
+                            style={{
+                              display: isProcessReadOnly ? "none" : "",
+                            }}
+                          >
+                            {t("cancel")}
+                          </button>
+                          <button
+                            id="AR_Modify_Rule"
+                            className={
+                              direction === RTL_DIRECTION
+                                ? arabicStyles.addHeaderBtn
+                                : styles.addHeaderBtn
+                            }
+                            onClick={modifyRule}
+                            style={{
+                              display: isProcessReadOnly ? "none" : "",
+                            }}
+                          >
+                            {t("modifyRule")}
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  {ruleConditionErrors ? (
                     <p className={styles.errorStatement}>
                       {t("mandatoryErrorStatement")}
                     </p>
                   ) : null}
-                  {!isProcessReadOnly ? (
-                    <button
-                      id="AR_Add_New_Operation"
-                      onClick={addNewOperation}
-                      className={
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.addOperationButton
-                          : styles.addOperationButton
-                      }
-                    >
-                      {t("addOperation")}
-                    </button>
-                  ) : null}
-                  {localRuleData &&
-                    localRuleData.ruleOpList &&
-                    localRuleData.ruleOpList.length > 0 &&
-                    localRuleData.ruleOpList.map((element, index) => {
+                </div>
+
+                <RadioGroup
+                  onChange={optionSelector}
+                  value={selectedCondition}
+                  className={
+                    direction === RTL_DIRECTION
+                      ? arabicStyles.radioButton
+                      : styles.radioButton
+                  }
+                >
+                  <FormControlLabel
+                    disabled={isProcessReadOnly || isOtherwiseSelected}
+                    id="AR_Always_Option"
+                    className={styles.radioOption}
+                    value={RULES_ALWAYS_CONDITION}
+                    control={
+                      <Radio
+                        style={{
+                          color: "var(--radio_color)",
+                          padding: "0.5rem 0.5vw 0.5rem 0.75vw",
+                        }}
+                      />
+                    }
+                    label={
+                      <p style={{ fontSize: "var(--base_text_font_size)" }}>
+                        {t("always")}
+                      </p>
+                    }
+                  />
+                  <FormControlLabel
+                    disabled={
+                      isProcessReadOnly ||
+                      isOtherwiseSelected ||
+                      isActParallelDistribute
+                    }
+                    id="AR_If_Option"
+                    value={RULES_IF_CONDITION}
+                    control={
+                      <Radio
+                        style={{
+                          color: "var(--radio_color)",
+                          padding: "0.5rem 0.5vw 0.5rem 0.75vw",
+                        }}
+                      />
+                    }
+                    label={
+                      <p style={{ fontSize: "var(--base_text_font_size)" }}>
+                        {t("if")}
+                      </p>
+                    }
+                  />
+                  <FormControlLabel
+                    disabled={isProcessReadOnly || !isOtherwiseSelected}
+                    id="AR_Otherwise_Option"
+                    value={RULES_OTHERWISE_CONDITION}
+                    control={
+                      <Radio
+                        style={{
+                          color: "var(--radio_color)",
+                          padding: "0.5rem 0.5vw 0.5rem 0.75vw",
+                        }}
+                      />
+                    }
+                    label={
+                      <p style={{ fontSize: "var(--base_text_font_size)" }}>
+                        {t("otherwise")}
+                      </p>
+                    }
+                  />
+                </RadioGroup>
+                <div className={styles.ruleData}>
+                  <div
+                    className={clsx(
+                      styles.flexRow,
+                      styles.ruleConditionLabelsDiv
+                    )}
+                  >
+                    <p className={clsx(styles.operationsLabel)}>
+                      {t("variable")}
+                    </p>
+                    <p className={clsx(styles.operationsLabel)}>
+                      {t("operator")}
+                    </p>
+                    <p className={clsx(styles.operationsLabel)}>{t("value")}</p>
+                  </div>
+                  {localRuleData?.ruleCondList?.length > 0 &&
+                    localRuleData?.ruleCondList?.map((element, index) => {
                       return (
-                        <AddOperations
-                          index={index}
+                        <AddCondition
                           localRuleData={localRuleData}
                           setLocalRuleData={setLocalRuleData}
+                          index={index}
+                          addNewCondition={addNewCondition}
                           selectedRule={selectedRule}
-                          deleteOperation={deleteOperation}
+                          showDelIcon={
+                            rules?.length > 0 &&
+                            rules[selectedRule]?.ruleCondList?.length > 1
+                          }
+                          disabled={disabled}
                           isRuleBeingCreated={isRuleBeingCreated}
                           setIsRuleBeingModified={setIsRuleBeingModified}
                           isProcessReadOnly={isProcessReadOnly}
-                          registeredFunctions={registeredFunctions}
-                          operationsAllowed={operationsAllowed}
-                          workstepList={workstepList}
                           checkValidation={checkValidation}
                           setCheckValidation={setCheckValidation}
-                          setDoesSelectedRuleHaveErrors={
-                            setDoesSelectedRuleHaveErrors
+                          ruleConditionErrors={ruleConditionErrors}
+                          setRuleConditionErrors={setRuleConditionErrors}
+                          isAlwaysRule={
+                            selectedCondition === RULES_ALWAYS_CONDITION
                           }
-                          showDelIcon={
-                            rules &&
-                            rules.length > 0 &&
-                            rules[selectedRule] &&
-                            rules[selectedRule].ruleOpList &&
-                            rules[selectedRule].ruleOpList.length > 1
-                              ? true
-                              : false
-                          }
-                          variablesWithRights={variablesWithRights}
                         />
                       );
                     })}
-                </React.Fragment>
+
+                  <React.Fragment>
+                    <p className={styles.showHeading}>
+                      <span className="flex">
+                        {t("operations")}
+                        <span className={styles.starIcon}>*</span>
+                      </span>
+                      <Divider
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.showLine
+                            : styles.showLine
+                        }
+                      />
+                    </p>
+                    {doesSelectedRuleHaveErrors ? (
+                      <p className={styles.errorStatement}>
+                        {t("mandatoryErrorStatement")}
+                      </p>
+                    ) : null}
+                    {!isProcessReadOnly && activityTab !== "Reminder" ? (
+                      <button
+                        id="AR_Add_New_Operation"
+                        onClick={addNewOperation}
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.addOperationButton
+                            : styles.addOperationButton
+                        }
+                      >
+                        {t("addOperation")}
+                      </button>
+                    ) : null}
+                    {localRuleData?.ruleOpList?.length > 0 &&
+                      localRuleData.ruleOpList.map((element, index) => {
+                        return (
+                          <AddOperations
+                            index={index}
+                            localRuleData={localRuleData}
+                            setLocalRuleData={setLocalRuleData}
+                            selectedRule={selectedRule}
+                            deleteOperation={deleteOperation}
+                            isRuleBeingCreated={isRuleBeingCreated}
+                            setIsRuleBeingModified={setIsRuleBeingModified}
+                            isProcessReadOnly={isProcessReadOnly}
+                            registeredFunctions={registeredFunctions}
+                            operationsAllowed={operationsAllowed}
+                            workstepList={workstepList}
+                            checkValidation={checkValidation}
+                            setCheckValidation={setCheckValidation}
+                            setDoesSelectedRuleHaveErrors={
+                              setDoesSelectedRuleHaveErrors
+                            }
+                            showDelIcon={
+                              rules?.length > 0 &&
+                              rules[selectedRule]?.ruleOpList?.length > 1
+                                ? true
+                                : false
+                            }
+                            variablesWithRights={variablesWithRights}
+                            currentTab={currentTabName}
+                          />
+                        );
+                      })}
+                  </React.Fragment>
+                </div>
               </div>
-            </div>
-          ) : null}
-        </div>
+            ) : null}
+          </div>
+        </>
       ) : (
-        <div
-          className={clsx(
-            styles.noRulesDiv,
-            !isDrawerExpanded && styles.noWidth
-          )}
-        >
-          {isDrawerExpanded ? (
-            <NoRulesScreen
-              isProcessReadOnly={isProcessReadOnly}
-              calledFromAction={calledFromAction}
-            />
-          ) : null}
+        <div className={styles.noRulesDiv}>
+          <NoRulesScreen
+            isProcessReadOnly={isProcessReadOnly}
+            calledFromAction={calledFromAction}
+          />
+          <div style={{ textAlign: "center", marginTop: "1rem" }}>
+            {calledFromAction && !isProcessReadOnly ? (
+              <button
+                id="AR_Add_Rule_Locally"
+                className={
+                  direction === RTL_DIRECTION
+                    ? arabicStyles.addRuleLocallyButton
+                    : styles.addRuleLocallyButton
+                }
+                onClick={addRuleLocally}
+              >
+                {t("addRule")}
+              </button>
+            ) : (
+              <button
+                id="AR_Add_Rule_Locally"
+                className={
+                  direction === RTL_DIRECTION
+                    ? arabicStyles.addRuleLocallyButton
+                    : styles.addRuleLocallyButton
+                }
+                onClick={addRuleLocally}
+              >
+                {t("addRule")}
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
+    </>
   );
 }
 

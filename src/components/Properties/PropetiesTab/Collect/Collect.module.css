@@ -4,12 +4,15 @@
     flex-direction: column;
     font-size: 0.875rem;
     font-family: "Open Sans";
+    height: 66vh;
+    overflow-y: scroll;
   }
   
   .mainContent{
       display: flex;
       flex-direction: column;
-      overflow-y: auto;
+      height: 100%;
+     
   }
   
   .firstContentBox{
@@ -20,7 +23,7 @@
   .radioButton{
       font-family: "Open Sans";
       color: #727272;
-      font-size: 0.875rem;
+      font-size: 0.9rem;
       white-space: nowrap;
       opacity: 1;
       font-weight: 500;

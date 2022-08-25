@@ -1,176 +1,181 @@
 import React, { useState, useEffect } from "react";
-import {
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  FormControl,
-} from "@material-ui/core";
+import clsx from "clsx";
+import { Radio, MenuItem } from "@material-ui/core";
+import styles from "./index.module.css";
 import "../../Properties.css";
-import { Select, MenuItem } from "@material-ui/core";
 import { store, useGlobalState } from "state-pool";
-import { getActivityProps } from "../../../../utility/abstarctView/getActivityProps";
-import { connect } from "react-redux";
 import { useTranslation } from "react-i18next";
-import "./index.css";
-import {
-  ENDPOINT_RESETINVOCATION,
-  ENDPOINT_SETREPLYWORKSTEP,
-  SERVER_URL,
-} from "../../../../Constants/appConstants";
-import axios from "axios";
+import { propertiesLabel } from "../../../../Constants/appConstants";
+import { connect, useDispatch } from "react-redux";
+import CustomizedDropdown from "../../../../UI/Components_With_ErrrorHandling/Dropdown";
+import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 function ReceiveInvocation(props) {
   let { t } = useTranslation();
+  const dispatch = useDispatch();
+  const globalActivityData = store.getState("activityPropertyData");
+  const [localActivityPropertyData, setLocalActivityPropertyData] =
+    useGlobalState(globalActivityData);
   const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
-  const loadedActivityPropertyData = store.getState("activityPropertyData");
-  const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
-    useGlobalState(loadedActivityPropertyData);
-  const [replyActivities, setReplyActivities] = useState([]);
-  const [chosenReply, setChosenReply] = useState();
-  const [chosenReplyId, setchosenReplyId] = useState("");
-  const [chosenReplyID, setChosenReplyID] = useState(null);
-  const [invocationType, setInvocationType] = useState(
-    t("ReplyAfterCompletion")
-  );
-  const handleChange = (event) => {
-    let jsonBody = {
-      processDefId: props.openProcessID,
-      activityId: localLoadedActivityPropertyData.ActivityProperty.ActivityId,
-      invocationtype: event.target.value,
-    };
+  const [replyActivities, setReplyActivities] = useState([]); // State that stores the list of all reply type activities.
+  const [invocationType, setInvocationType] = useState(t("ReplyImmediate")); // State that stores the invocation type.
+  const [selectedReplyActivityId, setSelectedReplyActivityId] = useState(0); // State that stores the selected reply activity id.
 
-    axios.post(SERVER_URL + ENDPOINT_RESETINVOCATION, jsonBody).then((res) => {
-      if (res.data.Status === 0) {
-      }
-      console.log(res);
-    });
-    setInvocationType(event.target.value);
-  };
-  const OnReplySelect = (e) => {
-    let jsonBody = {
-      processDefId: props.openProcessID,
-      activityId: localLoadedActivityPropertyData.ActivityProperty.ActivityId,
-      invocationtype: "RA",
-      associatedactivity: chosenReplyId,
-    };
-
-    axios.post(SERVER_URL + ENDPOINT_SETREPLYWORKSTEP, jsonBody).then((res) => {
-      if (res.data.Status === 0) {
-      }
-      console.log(res);
-    });
-
-    setChosenReply(e.target.value);
-  };
+  // Function that runs when the loadedProcessData value changes.
   useEffect(() => {
-    if (
-      loadedActivityPropertyData.value.ActivityProperty.AssociatedActivityId ===
-      0
-    ) {
-      setChosenReply("");
+    setReplyActivities(getReplyTypeActivities());
+  }, []);
+
+  // Function that runs when the component loads.
+  useEffect(() => {
+    if (globalActivityData?.value?.ActivityProperty?.actAssocId === 0) {
+      setSelectedReplyActivityId("");
       setInvocationType(t("ReplyImmediate"));
     } else {
-      replyActivities.map((replyActivity) => {
+      setInvocationType(t("ReplyAfterCompletion"));
+      getReplyTypeActivities()?.map((replyActivity) => {
         if (
-          replyActivity.ActivityId ==
-          loadedActivityPropertyData.value.ActivityProperty.AssociatedActivityId
+          replyActivity.activityId ===
+          globalActivityData?.value?.ActivityProperty?.actAssocId
         ) {
-          setChosenReply(replyActivity.activityName);
-          setInvocationType(t("ReplyAfterCompletion"));
-          setChosenReplyID(replyActivity.activityId);
+          setSelectedReplyActivityId(replyActivity?.activityId);
         }
       });
     }
-  }, []);
+  }, [globalActivityData]);
 
-  useEffect(() => {
-    let tempData = [];
-    loadedProcessData.value.MileStones.map((mile) => {
-      mile.Activities.map((activity) => {
-        if (activity.ActivityType == 26 && activity.ActivitySubType == 1) {
-          tempData.push({
+  // Function that returns the list of all reply type activities with its activity name and activity id.
+  const getReplyTypeActivities = () => {
+    let tempArr = [];
+    loadedProcessData?.value?.MileStones?.map((mile) => {
+      mile?.Activities?.map((activity) => {
+        if (activity.ActivityType === 26 && activity.ActivitySubType === 1) {
+          tempArr.push({
             activityName: activity.ActivityName,
             activityId: activity.ActivityId,
           });
         }
       });
     });
-    setReplyActivities(tempData);
-  }, [loadedProcessData]);
+    return tempArr;
+  };
+
+  // Function that runs when the user changes the invocation type radio value.
+  const handleRadioChange = (value) => {
+    setInvocationType(value);
+    if (value === t("ReplyAfterCompletion")) {
+      setGlobalData(value, getFirstElementId());
+      setSelectedReplyActivityId(getFirstElementId());
+    } else {
+      setGlobalData(value);
+    }
+  };
+
+  // Function that returns the id for the first element in the list of reply activities.
+  const getFirstElementId = () => {
+    let firstElementId = "";
+    firstElementId = replyActivities && replyActivities[0]?.activityId;
+    return firstElementId;
+  };
+
+  // Function to set global data when the user does any action.
+  const setGlobalData = (type, value) => {
+    let temp = JSON.parse(JSON.stringify(localActivityPropertyData));
+    if (type === t("ReplyImmediate")) {
+      temp.ActivityProperty.actAssocId = 0;
+    } else {
+      if (value !== "") {
+        temp.ActivityProperty.actAssocId = value;
+      }
+    }
+    setLocalActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.receive]: { isModified: true, hasError: false },
+      })
+    );
+  };
 
   return (
-    <div className="receiveInvocation">
-      <FormControl component="fieldset">
-        <RadioGroup
-          id="receive_RadioGroup"
-          onChange={handleChange}
-          aria-label="gender"
-          defaultValue={
-            localLoadedActivityPropertyData.ActivityProperty
-              .AssociatedActivityId == 0
-              ? t("ReplyImmediate")
-              : t("ReplyAfterCompletion")
-          }
-          name="radio-buttons-group"
-        >
-          <FormControlLabel
-            id="receive_Radio_replyImmediate"
+    <>
+      <TabsHeading heading={props?.heading} />
+      <div className="receiveInvocation">
+      <p className={styles.heading}>{t("InvocationType")}</p>
+      <div className={styles.invocationTypeDiv}>
+        <div className={styles.flexRow}>
+          <Radio
+            id="recieve_reply_immediate_radio"
+            checked={invocationType === t("ReplyImmediate")}
+            onChange={() => handleRadioChange(t("ReplyImmediate"))}
             value={t("ReplyImmediate")}
-            control={<Radio size="small" />}
-            label={t("ReplyImmediate")}
+            size="small"
           />
-          <FormControlLabel
-            id="receive_Radio_replyAfterCompletion"
+          <p
+            className={styles.labelStyles}
+            id="reply_immediate_label"
+            onClick={() => handleRadioChange(t("ReplyImmediate"))}
+          >
+            {t("ReplyImmediate")}
+          </p>
+        </div>
+        <div className={styles.flexRow}>
+          <Radio
+            id="recieve_reply_after_completion_radio"
+            checked={invocationType === t("ReplyAfterCompletion")}
+            onChange={() => handleRadioChange(t("ReplyAfterCompletion"))}
             value={t("ReplyAfterCompletion")}
-            control={<Radio size="small" />}
-            label={t("ReplyAfterCompletion")}
+            size="small"
           />
-          {invocationType == t("ReplyAfterCompletion") ? (
-            <Select
-              onChange={(e) => OnReplySelect(e)}
-              className="receive_select"
-              value={chosenReply}
-              MenuProps={{
-                anchorOrigin: {
-                  vertical: "bottom",
-                  horizontal: "left",
-                },
-                transformOrigin: {
-                  vertical: "top",
-                  horizontal: "left",
-                },
-                getContentAnchorEl: null,
-              }}
-            >
-              {replyActivities.map((reply) => {
-                return (
-                  <MenuItem
-                    id="replyType_activitiesList"
-                    value={reply.activityName}
-                  >
-                    <p id="reply_activityName">{reply.activityName}</p>
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          ) : null}
-        </RadioGroup>
-      </FormControl>
+          <p
+            className={styles.labelStyles}
+            id="reply_after_completion_label"
+            onClick={() => handleRadioChange(t("ReplyAfterCompletion"))}
+          >
+            {t("ReplyAfterCompletion")}
+          </p>
+        </div>
+      </div>
+      <div>
+        <div className={clsx(styles.flexRow, styles.replyActivityDiv)}>
+          {invocationType === t("ReplyAfterCompletion") && (
+            <div className={styles.flexRow}>
+              <p className={styles.subHeading}>{t("replyActivities")}</p>
+              <p className={styles.asterisk}>*</p>
+              <CustomizedDropdown
+                id="receive_reply_activities_dropdown"
+                className={styles.dropdownInput}
+                value={selectedReplyActivityId}
+                onChange={(event) => {
+                  setSelectedReplyActivityId(event.target.value);
+                  setGlobalData(invocationType, event.target.value);
+                }}
+                isNotMandatory={false}
+              >
+                {replyActivities?.map((reply) => {
+                  return (
+                    <MenuItem
+                      value={reply.activityId}
+                      className={styles.menuItemStyles}
+                    >
+                      {reply.activityName}
+                    </MenuItem>
+                  );
+                })}
+              </CustomizedDropdown>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
+    </>
+   
   );
 }
 
 const mapStateToProps = (state) => {
   return {
-    showDrawer: state.showDrawerReducer.showDrawer,
-    cellID: state.selectedCellReducer.selectedId,
-    cellName: state.selectedCellReducer.selectedName,
-    cellType: state.selectedCellReducer.selectedType,
-    cellActivityType: state.selectedCellReducer.selectedActivityType,
-    cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
-    openProcessID: state.openProcessClick.selectedId,
   };
 };
 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "../modal.module.css";
-import StarRateIcon from "@material-ui/icons/StarRate";
 import Button from "@material-ui/core/Button";
 import SelectWithInput from "../../../../UI/SelectWithInput";
 import axios from "axios";
@@ -24,16 +23,14 @@ function SaveTemplate(props) {
 
   useEffect(() => {
     axios.get(SERVER_URL + ENDPOINT_FETCH_CATEGORIES).then((res) => {
-      if (res.data.Status === 0) {
-        setCategories(res.data.Category);
+      if (res?.data?.Status === 0) {
+        setCategories(res?.data?.Category);
         let templateArr = [];
-        res.data.Category &&
-          res.data.Category.forEach((category) => {
-            category.Templates &&
-              category.Templates.forEach((template) => {
-                templateArr.push(template.Name.toLowerCase());
-              });
+        res?.data?.Category?.forEach((category) => {
+          category?.Templates?.forEach((template) => {
+            templateArr.push(template?.Name?.toLowerCase());
           });
+        });
         setTemplateList(templateArr);
       }
     });
@@ -49,8 +46,8 @@ function SaveTemplate(props) {
         processDefId: props.openProcessID,
         processType: props.openProcessType,
         templateName: templateName,
-        categoryName: isCategoryConstant ? "constantName" : "",
-        categoryId: isCategoryConstant ? "" : category.id,
+        categoryName: isCategoryConstant ? category.name : "",
+        categoryId: category.id,
         description: templateDesc,
       };
       axios.post(SERVER_URL + ENDPOINT_ADD_TEMPLATE, json).then((response) => {
@@ -59,6 +56,17 @@ function SaveTemplate(props) {
         }
       });
     }
+  };
+
+  // Function that returns the max category id.
+  const getMaxCategoryId = () => {
+    let maxCategoryId = 0;
+    categories?.forEach((element) => {
+      if (+element.CategoryId > maxCategoryId) {
+        maxCategoryId = +element.CategoryId;
+      }
+    });
+    return maxCategoryId;
   };
 
   return (
@@ -74,9 +82,11 @@ function SaveTemplate(props) {
             dropdownOptions={categories}
             setValue={(val) => {
               if (val) {
-                setCategory({ id: val.CategoryId, name: val.CategoryName });
-              } else {
-                setCategory(val);
+                if (isCategoryConstant) {
+                  setCategory({ id: `${getMaxCategoryId() + 1}`, name: val });
+                } else {
+                  setCategory({ id: val.CategoryId, name: val.CategoryName });
+                }
               }
             }}
             showEmptyString={false}

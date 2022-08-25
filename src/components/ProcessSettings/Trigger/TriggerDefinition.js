@@ -480,7 +480,7 @@ function TriggerDefinition(props) {
               <div className={styles.triggerMainView}>
                 <div className={`flex ${styles.triggerSearchDiv}`}>
                   <SearchComponent
-                    width="75%"
+                    width="72%"
                     onSearchChange={onSearchSubmit}
                     clearSearchResult={clearResult}
                     name="search"

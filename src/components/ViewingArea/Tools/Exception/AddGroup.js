@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
-import StarRateIcon from "@material-ui/icons/StarRate";
-import Button from "@material-ui/core/Button";
 import "../Interfaces.css";
 import { useTranslation } from "react-i18next";
+import "./Exception.css";
+import styles from "../DocTypes/index.module.css";
+import CloseIcon from "@material-ui/icons/Close";
+import arabicStyles from "../DocTypes/arabicStyles.module.css";
+import { RTL_DIRECTION } from "../../../../Constants/appConstants";
 
 function AddGroup(props) {
   let { t } = useTranslation();
@@ -27,69 +30,116 @@ function AddGroup(props) {
           groupExists = true;
         }
       });
-    console.log("BGROUP", nameInput, groupExists);
     if (props.bGroupExists) {
       props.setbGroupExists(groupExists);
     }
   }, [props.groupName, props.groupsList, nameInput]);
 
-  console.log("BGROUP_outer", props.bGroupExists);
   return (
-    <div
-      className="addDocs"
-      style={{ height: "auto", width: "310px", direction: direction }}
-    >
-      <p className="addDocsHeading">{t("addGroup")}</p>
-      <div>
-        <label className="nameInputlabel">
-          {t("groupName")}
-          <StarRateIcon
-            style={{ height: "15px", width: "15px", color: "red" }}
-          />
-        </label>
-        <input
-          id="groupNameInput_exception"
-          value={nameInput}
-          onChange={(e) => setNameFunc(e)}
-          className="nameInput"
+    <div className="addDocs">
+      {/*code edited on 1 Aug 2022 for BugId 112553 */}
+      <div className={styles.modalHeader}>
+        <h3
+          className={
+            direction === RTL_DIRECTION
+              ? arabicStyles.modalHeading
+              : styles.modalHeading
+          }
+        >
+          {t("addGroup")}
+        </h3>
+        <CloseIcon
+          onClick={() => props.handleClose()}
+          className={styles.closeIcon}
         />
+      </div>
+      <div className={styles.modalSubHeader} style={{ paddingBottom: "2rem" }}>
+        <label
+          //className={styles.modalLabel}
+
+          className="fieldlabel"
+        >
+          {t("groupName")}
+          <span className={styles.starIcon}>*</span>
+        </label>
+        <form>
+          <input
+            id="groupNameInput_exception"
+            value={nameInput}
+            onChange={(e) => setNameFunc(e)}
+            className={styles.modalInput}
+          />
+        </form>
         {props.bGroupExists ? (
-          <p style={{ color: "red", fontSize: "10px" }}>
-            This Group Name already exits!
-          </p>
+          <span
+            style={{
+              color: "red",
+              fontSize: "var(--sub_text_font_size)",
+              marginTop: "-0.25rem",
+              marginBottom: "0.5rem",
+              display: "block",
+            }}
+          >
+            {t("GroupAlreadyExists")}
+          </span>
+        ) : null}
+        {props.showGroupNameError ? (
+          <span
+            style={{
+              color: "red",
+              fontSize: "var(--sub_text_font_size)",
+              marginTop: "-0.25rem",
+              marginBottom: "0.5rem",
+              display: "block",
+            }}
+          >
+            {t("filltheName")}
+          </span>
         ) : null}
       </div>
       <div
-        className="buttons_add"
-        style={{ marginTop: "20px", marginLeft: "15px" }}
+        className={
+          direction === RTL_DIRECTION
+            ? arabicStyles.modalFooter
+            : styles.modalFooter
+        }
       >
-        <Button
-          id="close_AddExpGroup_Modal"
-          variant="outlined"
+        <button
+          /*  className={
+            direction === RTL_DIRECTION
+              ? arabicStyles.cancelButton
+              : styles.cancelButton
+          }*/
           onClick={() => props.handleClose()}
+          className="tertiary"
+          type="button"
         >
           {t("cancel")}
-        </Button>
-        <Button
-          id="addAnother_AddExpGroup_Modal"
+        </button>
+
+        <button
+          id="addAnotherDocTypes_Button"
           onClick={(e) =>
             props.addGroupToList(nameInput, "addAnother", props.newGroupToMove)
           }
-          variant="contained"
-          color="primary"
+          className={styles.okButton}
+          // className="primary"
+          type="button"
         >
           {t("addAnother")}
-        </Button>
-        <Button
-          id="addNclose_AddExpGroup_Modal"
-          variant="contained"
+        </button>
+
+        <button
+          id="addNclose_AddDocModal_Button"
           onClick={() =>
             props.addGroupToList(nameInput, "add", props.newGroupToMove)
           }
-          color="primary"
+          className={styles.okButton}
+          // className="primary"
+          type="button"
         >
           {t("add&Close")}
-        </Button>
+        </button>
       </div>
     </div>
   );

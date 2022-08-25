@@ -98,7 +98,7 @@
   height: 28px;
   margin-left: 10px;
   background: var(--blue-1-0072c6) 0% 0% no-repeat padding-box;
-  background: #0072c6 0% 0% no-repeat padding-box;
+  background: var(--button_color);
   border-radius: 2px;
   opacity: 1;
 }

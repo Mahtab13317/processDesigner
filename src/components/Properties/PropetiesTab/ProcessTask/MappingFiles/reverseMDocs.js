@@ -25,6 +25,7 @@ import Modal from "../../../../../UI/Modal/Modal";
 import DeleteIcon from "@material-ui/icons/Delete";
 import DocumentListReverse from "../MappingLists/docListReverse";
 import "./index.css";
+import TabsHeading from "../../../../../UI/TabsHeading";
 
 function ReverseForVariables(props) {
   // Process Data
@@ -49,7 +50,7 @@ function ReverseForVariables(props) {
 
   useEffect(() => {
     let jsonBody = {
-      processDefId: "2145",
+      processDefId: localStorage.getItem("selectedTargetProcessID"),
       extTableDataFlag: "Y",
       docReq: "Y",
       omniService: "Y",
@@ -113,7 +114,10 @@ function ReverseForVariables(props) {
   const oneLineForMap = () => {
     return reverseDocsList?.map((el) => {
       return (
-        <div
+       <>
+       <TabsHeading heading={props?.heading} />
+         <div
+          id="processTaskId1"
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -186,6 +190,7 @@ function ReverseForVariables(props) {
             />
           </div>
         </div>
+       </>
       );
     });
   };

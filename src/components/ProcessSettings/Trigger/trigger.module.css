@@ -34,17 +34,20 @@
 
 .notriggerAddedString {
   font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
   color: #000000;
   margin: 1rem 0;
 }
 
 .addTriggerButton {
-  background: #0072c6 0% 0% no-repeat padding-box !important;
+  background: var(--button_color) 0% 0% no-repeat padding-box !important;
   border-radius: 2px !important;
-  border: 1px solid #0072c6 !important;
+  border: 1px solid var(--button_color) !important;
   text-align: center;
   font: normal normal 600 12px/17px Open Sans !important;
+  font-size: var(--base_text_font_size);
+  font-weight: 600;
   letter-spacing: 0px !important;
   color: #ffffff !important;
   text-transform: none !important;
@@ -58,6 +61,8 @@
   border-radius: 2px !important;
   text-align: center;
   font: normal normal 600 12px/17px Open Sans !important;
+  font-size: var(--base_text_font_size);
+  font-weight: 600;
   letter-spacing: 0px !important;
   color: #606060 !important;
   text-transform: none !important;
@@ -89,8 +94,9 @@
 .addTrigger {
   text-align: left;
   font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
-  color: #0072c6;
+  color: var(--link_color);
   background: white;
   border: none;
   cursor: pointer;
@@ -115,11 +121,12 @@
 
 .triggerNameTypeDiv {
   margin-right: 5vw;
+  width: 40%;
 }
 
 .triggerFormLabel {
   display: inline-block;
-  width: 10vw;
+  width: 7vw;
   margin-right: 1vw;
   margin-top: 0.25rem;
   text-align: left;
@@ -136,32 +143,41 @@
 
 .triggerFormInput {
   width: 21vw;
-  height: 1.5rem;
+
   margin-bottom: 1rem;
   text-align: left;
   font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
   color: #000000;
-  border: 1px solid #DADADA;
+  border: 1px solid #dadada;
 }
 
 .descriptionInput {
-  width: 24.75vw;
-  height: 4rem;
+  width: 23.75vw;
+  height: 4rem !important;
   margin-bottom: 1rem;
   text-align: left;
   font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px;
   color: #000000;
-  border: 1px solid #DADADA;
+  border: 1px solid #dadada;
 }
 
 .nameFormInput {
   padding: 0.25rem 0.5rem;
+  font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+  letter-spacing: 0px;
+  height: 2.5rem;
+  color: #000000;
+  border: 1px solid #dadada;
 }
 
 .triggerSelectInput {
-  border: 1px solid #DADADA;
+  border: 1px solid #dadada;
   width: 21vw;
   text-align: left;
   font: normal normal normal 12px/17px Open Sans !important;
@@ -198,6 +214,7 @@
   text-align: left;
   width: 22vw;
   font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
   color: #000000;
   cursor: pointer;
@@ -210,7 +227,7 @@
 
 .selectedTriggerListRow {
   background: #e8f3fa 0% 0% no-repeat padding-box !important;
-  border-left: 0.25rem solid #007cc6 !important;
+  border-left: 0.25rem solid var(--selected_tab_color) !important;
 }
 
 .triggerDropdownData {
@@ -234,6 +251,7 @@
 .triggerTypeHeading {
   display: flex;
   font: normal normal 600 11px/15px Open Sans;
+  font-size: var(--sub_text_font_size);
   letter-spacing: 0px;
   color: #606060;
   text-transform: uppercase;
@@ -263,6 +281,7 @@
 
 .triggerNameHeading {
   font: normal normal 600 16px Open Sans;
+  font-size: var(--title_text_font_size);
   letter-spacing: 0px;
   color: #000000;
 }
@@ -278,7 +297,7 @@
 }
 
 .triggerAddButton {
-  background: #0072c6 0% 0% no-repeat padding-box !important;
+  background: var(--button_color) 0% 0% no-repeat padding-box !important;
   border-radius: 2px !important;
   margin-right: 0vw !important;
   margin-bottom: 0.5rem !important;
@@ -291,8 +310,8 @@
 
 .FlashOnIcon {
   color: #c2c2c2 !important;
-  width: 1rem !important;
-  height: 1rem !important;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
   margin-top: 1.5px;
   margin-right: 0.5vw;
 }
@@ -305,4 +324,7 @@
 .defaultSelectValue {
   opacity: 0;
   height: 0 !important;
+}
+.triggerNameTypeDiv #selectWithInput_TF {
+  width: 60% !important;
 }

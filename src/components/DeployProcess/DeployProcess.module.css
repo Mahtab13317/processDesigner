@@ -4,6 +4,7 @@
   font-family: "Open Sans";
   display: flex;
   flex-direction: column;
+  height: 71vh;
 }
 
 .header {
@@ -88,7 +89,7 @@
 
 .fieldsName {
   color: #606060;
-  font-size: 0.85rem;
+  font-size: 1rem;
   opacity: 1;
   font-weight: 600;
   margin-top: 0.4375rem;
@@ -96,7 +97,7 @@
 
 .footerDiv {
   width: 100%;
-  height: 3.125rem;
+  height: 4.125rem;
   display: flex;
   flex-direction: row-reverse;
   padding: 0.875rem;
@@ -105,8 +106,8 @@
 
 .footerDivSettings {
   position: absolute;
-  bottom: 10%;
-  width: 79.3%;
+  bottom: 1%;
+  width: 84.3%;
   height: 50px;
   display: flex;
   flex-direction: row-reverse;
@@ -130,7 +131,7 @@
 }
 
 .buttons {
-  width: 3.5rem;
+  width: 4.5rem;
   height: 1.75rem;
   margin-inline: 0.3rem;
   border: none;
@@ -138,8 +139,8 @@
   border-radius: 3px;
 }
 
-.DeploynSaveButton{
-  width: 6.5rem;
+.DeploynSaveButton {
+  width: 8.5rem;
   height: 1.75rem;
   margin-inline: 0.3rem;
   border: none;
@@ -158,15 +159,14 @@
 .starIcon {
   color: #d12c2c !important;
   padding: 5px;
-  margin-top: 0.1rem;
   margin-left: -0.3125rem;
   font-size: 8px;
 }
 
 .deployProcessHeading {
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   font-weight: 600;
-  /* margin-left: 1.5rem; */
+  margin-left: 1.1rem;
   margin-top: 1rem;
   color: #383737;
 }
@@ -184,4 +184,3 @@
   margin-bottom: 0.5rem;
   padding: 5px;
 }
-

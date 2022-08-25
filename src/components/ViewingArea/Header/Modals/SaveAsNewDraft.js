@@ -1,3 +1,5 @@
+// #BugID - 110938
+// #BugDescription - payload changed for save the process
 import React, { useState, useEffect } from "react";
 import StarRateIcon from "@material-ui/icons/StarRate";
 import Button from "@material-ui/core/Button";
@@ -10,14 +12,24 @@ import {
   ENDPOINT_SAVE_LOCAL,
   SERVER_URL,
 } from "../../../../Constants/appConstants";
+import { store, useGlobalState } from "state-pool";
+import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
+import { useDispatch } from "react-redux";
 
 function SaveAsNewDraft(props) {
   let { t } = useTranslation();
+  const poolProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData, setlocalLoadedProcessData] =
+    useGlobalState(poolProcessData);
   const [comment, setComment] = useState("");
   const [projectList, setProjectList] = useState([]);
-  const [projectName, setProjectName] = useState();
+  const [projectName, setProjectName] = useState(
+    localLoadedProcessData.ProjectName
+  );
   const [isProjectNameConstant, setProjectNameConstant] = useState(false);
   const [process, setProcess] = useState("");
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     axios
@@ -34,18 +46,42 @@ function SaveAsNewDraft(props) {
 
   const saveAsNewDraft = () => {
     let json = {
-      processDefId: +props.processDefId,
+      processDefId: localLoadedProcessData.ProcessDefId,
       comment: comment,
+      /*  projectName: projectName.ProjectName, */
       projectName: projectName,
       saveAsLocal: "Y",
       validateFlag: "N",
+      bNewVersion: false,
+
+      newProcessName: process,
+      type: "1",
     };
-    axios.post(SERVER_URL + ENDPOINT_SAVE_LOCAL, json).then((response) => {
-      if (response.data.Status === 0) {
-        props.setModalClosed();
-      }
-    });
+    if (comment.trim() !== "" && process.trim() !== "" && !!projectName) {
+      axios.post(SERVER_URL + ENDPOINT_SAVE_LOCAL, json).then((response) => {
+        if (response.data.Status === 0) {
+          dispatch(
+            setToastDataFunc({
+              message: t("operationSuccessful"),
+              severity: "success",
+              open: true,
+            })
+          );
+          props.setModalClosed();
+        }
+      });
+    } else {
+      dispatch(
+        setToastDataFunc({
+          message: t("mandatoryErr"),
+          severity: "error",
+          open: true,
+        })
+      );
+    }
   };
+
+  console.log("mahtab", localLoadedProcessData);
 
   return (
     <React.Fragment>

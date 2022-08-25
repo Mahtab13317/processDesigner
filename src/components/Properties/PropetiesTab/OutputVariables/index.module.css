@@ -10,15 +10,15 @@
 
 .expandedView {
   max-width: 50vw;
-  padding: 1rem 1.5vw;
+  padding: 1rem 1vw;
 }
 
 .outputVariablesHeading {
   text-align: left;
-  font: normal normal 600 14px/19px Open Sans;
+  font: normal normal 600 var(--subtitle_text_font_size)/19px var(--font_family);
   letter-spacing: 0px;
   color: #000000;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .outputTableHeader {
@@ -53,14 +53,14 @@
 
 .outputHeadDiv {
   text-align: left;
-  font: normal normal 600 13px/18px Open Sans;
+  font: normal normal 600 var(--base_text_font_size)/17px var(--font_family);
   letter-spacing: 0px;
   color: #070707;
 }
 
 .outputBodyDiv {
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size)/17px var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   white-space: nowrap;

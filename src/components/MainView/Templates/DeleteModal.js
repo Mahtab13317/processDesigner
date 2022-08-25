@@ -9,12 +9,15 @@ import {
   ENDPOINT_DELETE_CATEGORY,
   RTL_DIRECTION,
   ENDPOINT_DELETE_TEMPLATE,
+  ENDPOINT_DELETE_PROJECT,
 } from "../../../Constants/appConstants";
+import { useDispatch } from "react-redux";
+import { setToastDataFunc } from "../../../redux-store/slices/ToastDataHandlerSlice";
 
 function DeleteModal(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
-
+  const dispatch = useDispatch();
   const deleteFunc = () => {
     if (props.category) {
       let json = {
@@ -37,6 +40,75 @@ function DeleteModal(props) {
             props.setModalClosed();
           }
         });
+    } else if (props?.deleteProject) {
+      let projectId, projectType;
+
+      props.projectList.forEach((project) => {
+        if (project.ProjectName === props.projectToDelete) {
+          projectId = project.ProjectId;
+          projectType = project.ProjectType;
+        }
+      });
+      let checkedOutProcessPresent = false;
+
+      props.allProcessesPerProject.some((proc) => {
+        if (proc.CheckedOut === "Y") {
+          checkedOutProcessPresent = true;
+          return true;
+        }
+      });
+
+      if (!checkedOutProcessPresent) {
+        if (projectType === "R" && props.allProcessesPerProject.length > 0) {
+          dispatch(
+            setToastDataFunc({
+              message: t("deleteAllProcessError"),
+              severity: "error",
+              open: true,
+            })
+          );
+        } else {
+          axios
+            .delete(
+              SERVER_URL +
+                ENDPOINT_DELETE_PROJECT +
+                "/" +
+                projectId +
+                "/" +
+                projectType
+            )
+            .then((res) => {
+              if (res?.data?.Status === 0) {
+                props.setProjectList((prev) => {
+                  let temp = structuredClone(prev);
+                  temp.Projects.forEach((proj, index) => {
+                    if (proj.ProjectId === projectId) {
+                      temp.Projects.splice(index, 1);
+                    }
+                  });
+
+                  return temp;
+                });
+                dispatch(
+                  setToastDataFunc({
+                    message: res?.data?.Message,
+                    severity: "success",
+                    open: true,
+                  })
+                );
+                props.setModalClosed();
+              }
+            });
+        }
+      } else {
+        dispatch(
+          setToastDataFunc({
+            message: t("oneProcessCheckedOutError"),
+            severity: "error",
+            open: true,
+          })
+        );
+      }
     } else {
       let json = {
         templateName: props.elemToBeDeleted.Name,
@@ -87,8 +159,8 @@ function DeleteModal(props) {
   const elementToBeDeleted = () => {
     if (props.category) {
       return props.elemToBeDeleted.CategoryName;
-    } else if (props.projectList) {
-      return props.processToDelete;
+    } else if (props.deleteProject) {
+      return props.projectToDelete;
     } else return props.elemToBeDeleted.Name;
   };
 
@@ -118,9 +190,15 @@ function DeleteModal(props) {
         }
       >
         {t("NOTE")} :{" "}
-        {props.category
-          ? t("categories") + " " + t("categoryDeletedMessage")
-          : t("templates") + " " + t("onceDeletedCannotBeRecovered")}
+        {props.category ? (
+          t("categories") + " " + t("categoryDeletedMessage")
+        ) : (
+          <>
+            {props.deleteProject
+              ? t("projects.projects") + " " + t("onceDeletedCannotBeRecovered")
+              : t("templates") + " " + t("onceDeletedCannotBeRecovered")}
+          </>
+        )}
       </div>
       <div className={styles.deleteModalButtonDiv}>
         <Button

@@ -73,23 +73,26 @@
 .moreOptionsInput {
   margin: 16px 0px 18px 0px;
   cursor: pointer;
+  height: 1.75rem !important;
+  width: 1.75rem !important;
 }
 
 .addButton {
   cursor: pointer;
-  background: #0072c6 0% 0% no-repeat padding-box;
-  border-radius: 2px;
-  border: 2px solid #0072c6 !important;
-  width: 50px;
-  height: 28px;
-  margin: 13px 0px 5px 30px;
+  background: var(--button_color) 0% 0% no-repeat padding-box;
+  border-radius: 0.125rem !important;
+  border: 0.125rem solid var(--button_color) !important;
+  width: 3.125rem !important;
+  /* height: 1.75rem !important; */
+  margin: 0.8125rem 0rem 0.3125rem 1.875rem !important;
   opacity: 1;
 }
 
 .addButtonText {
   text-align: left;
-  font: normal normal 600 12px/17px Open Sans;
-  letter-spacing: 0px;
+  font: normal normal 600 var(--base_text_font_size) / 1.0625rem
+    var(--font_family);
+  letter-spacing: 0rem;
   color: #ffffff;
   opacity: 1;
 }
@@ -99,6 +102,8 @@
   margin: 14px 10px 8px 8px;
   color: #707070;
   opacity: 1;
+  height: 1.75rem !important;
+  width: 1.75rem !important;
 }
 
 .menuItemStyles {

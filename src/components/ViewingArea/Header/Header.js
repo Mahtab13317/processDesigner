@@ -1,10 +1,12 @@
+// #BugID - 113913
+// #BugDescription - handled the checks for redirecting to blank page on click version
 import { useState, useEffect } from "react";
 import React from "react";
 import styles from "./index.module.css";
 import MenuIcon from "@material-ui/icons/Menu";
 import CloseIcon from "@material-ui/icons/Close";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
-import deploy from "../../../assets/Header/deploy.svg";
+import deploy from "../../../assets/Header/deploy.png";
 import { connect, useSelector } from "react-redux";
 import "./Header.css";
 import ProcessDeployment from "./ProcessValidation/ProcessDeployment/DeploySucessModal.js";
@@ -60,7 +62,6 @@ import { setImportExportVal } from "../../../redux-store/slices/ImportExportSlic
 import { useDispatch } from "react-redux";
 import Box from "@material-ui/core/Box";
 import Drawer from "@material-ui/core/Drawer";
-import Button from "@material-ui/core/Button";
 import ProcessValidation from "./ProcessValidation/ProcessProgress/index";
 import { UserRightsValue } from "../../../redux-store/slices/UserRightsSlice";
 import { getMenuNameFlag } from "../../../utility/UserRightsFunctions";
@@ -115,7 +116,8 @@ function Header(props) {
     useGlobalState(openProcessesArr);
   const [action, setAction] = useState(null);
   const [showVersionCard, setshowVersionCard] = useState(false);
-  const { processData } = props;
+  //code edited on 26 July 2022 for BugId 110024
+  const { processData, setProcessData } = props;
   const [isDisable, setIsDisable] = useState(false);
   const buttonFrom = "DeployHeader";
   const [showProcessReport, setshowProcessReport] = useState(false);
@@ -126,6 +128,12 @@ function Header(props) {
   const [errorVariables, setErrorVariables] = useState([]);
   const [warningVariables, setWarningVariables] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const checkIfCheckedOutProcess = () => {
+    let temp = false;
+    localLoadedProcessData?.CheckedOut === "Y" ? (temp = true) : (temp = false);
+    return temp;
+  };
 
   useEffect(() => {
     if (props.openProcessType === PROCESSTYPE_LOCAL) {
@@ -175,8 +183,6 @@ function Header(props) {
     }
     getPinned();
   }, [processData.ProcessDefId]);
-
-  console.log("ccccccccccc", pinnedProcessDefIdArr);
 
   useEffect(() => {
     if (pinnedProcessDefIdArr.includes(processData.ProcessDefId))
@@ -255,31 +261,25 @@ function Header(props) {
         setversionListSelected(temp);
       }
     });
-  }, [props.processData]);
+  }, []);
 
-  const toggleDrawer = (anchor, open) => (event) => {
-    if (
-      event &&
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
-    }
-
+  const toggleDrawer = (anchor, open) => {
+    // Bug fixed for Bug Id  - 111391 (When Deployment fails the pop up shows "View Details" but nothing happens after clicking on it)
     setState({ ...state, [anchor]: open });
   };
-  console.log("STATE", state);
 
   const list = (anchor) => (
     <Box
       sx={{ width: anchor === "top" || anchor === "bottom" ? "auto" : 250 }}
       role="presentation"
-      // onClick={toggleDrawer(anchor, false)}
-      // onKeyDown={toggleDrawer(anchor, false)}
     >
       <ProcessValidation
         errorVariables={errorVariables}
         setErrorVariables={setErrorVariables}
+        showDeployModal={showDeployModal}
+        setShowDeployModal={setShowDeployModal}
+        setShowDeployFailModal={setShowDeployFailModal}
+        showDeployFailModal={showDeployFailModal}
         warningVariables={warningVariables}
         setWarningVariables={setWarningVariables}
         // style={{ height: isDrawerMinimised?"50px":"183px" }}
@@ -292,7 +292,9 @@ function Header(props) {
   return (
     <div className="header_processes" style={{ direction: `${t("HTML_DIR")}` }}>
       <div className="leftHeader">
-        <MenuIcon style={{ marginTop: "2px", color: "#606060" }} />
+        <MenuIcon
+          style={{ color: "#606060", width: "1.5rem", height: "1.5rem" }}
+        />
         <p class="processName">
           {props.openTemplateFlag ? props.templateName : props.openProcessName}
         </p>
@@ -306,13 +308,16 @@ function Header(props) {
           {props.openTemplateFlag ? null : (
             <img
               src={tileProcess(props.openProcessType)[0]}
-              style={{ height: "13px", width: "13px", marginTop: "3px" }}
+              style={{ height: "1rem", width: "1rem", marginTop: "1px" }}
+              alt=""
             />
           )}
           <span class="processTypeName">
             {props.openTemplateFlag
               ? t("Template")
-              : tileProcess(props.openProcessType)[1]}
+              : `${tileProcess(props.openProcessType)[1]} ${
+                  checkIfCheckedOutProcess() ? "(Checked-Out)" : ""
+                }`}
           </span>
         </span>
       </div>
@@ -324,7 +329,7 @@ function Header(props) {
               <div className="row">
                 <div>
                   <p className="versionCardLabel">{t("Version")}</p>
-                  <p className="versionCardVal"> {props.openProcessVersion}</p>
+                  <p className="versionCardVal"> {props?.openProcessVersion}</p>
                 </div>
                 <div>
                   {props.processData?.Versions?.length > 1 ? (
@@ -339,16 +344,16 @@ function Header(props) {
               </div>
               <p className="versionCardLabel">{t("createdBy")}</p>
               <p className="versionCardVal">
-                {versionListSelected[0].CreatedBy} {t("on")}
-                {versionListSelected[0].CreatedOn}
+                {versionListSelected[0]?.CreatedBy} {t("on")}
+                {versionListSelected[0]?.CreatedOn}
               </p>
               <p className="versionCardLabel">{t("lastModifiedBy")}</p>
               <p className="versionCardVal">
-                {versionListSelected[0].LastModifiedBy} {t("on")}{" "}
-                {versionListSelected[0].LastModifiedOn}
+                {versionListSelected[0]?.LastModifiedBy} {t("on")}{" "}
+                {versionListSelected[0]?.LastModifiedOn}
               </p>
               <p className="versionCardLabel">{t("project")}</p>
-              <p className="versionCardVal">{props.processData.ProjectName}</p>
+              <p className="versionCardVal">{props?.processData?.ProjectName}</p>
             </CardContent>
           </Card>
         </ClickAwayListener>
@@ -361,9 +366,7 @@ function Header(props) {
               onClick={() => setShowMore(true)}
               id="header_more_btn"
             >
-              <span>
-                <MoreHorizIcon style={{ color: "#727272" }} />
-              </span>
+              <MoreHorizIcon style={{ color: "#727272" }} />
               <span className="moreText">{t("More")}</span>
             </button>
           </ClickAwayListener>
@@ -465,11 +468,11 @@ function Header(props) {
                     {t("checkoutProcess")}
                   </li>
                   <li
-                    onClick={toggleDrawer("bottom", true)}
+                    onClick={() => toggleDrawer("bottom", true)}
                     className="moreOptions"
                     style={{
                       display:
-                        processData.CheckedOut !== PROCESS_CHECKOUT
+                        props.openProcessType === PROCESSTYPE_LOCAL
                           ? ""
                           : "none",
                     }}
@@ -511,9 +514,9 @@ function Header(props) {
                       onClick={() => handleProcessAction(MENUOPTION_IMPORT)}
                       style={{
                         display:
-                          processData.CheckedOut === PROCESS_CHECKOUT
-                            ? "none"
-                            : "",
+                          props.openProcessType === PROCESSTYPE_LOCAL
+                            ? ""
+                            : "none",
                       }}
                       id="header_delete_btn"
                     >
@@ -620,9 +623,11 @@ function Header(props) {
             onClick={() => setAction(MENUOPTION_DEPLOY)}
             id="header_deploy_btn"
           >
-            <span className="deployIcon">
-              <img src={deploy} width="14px" height="13px" alt="" />
-            </span>
+            <img
+              src={deploy}
+              style={{ width: "1.75rem", height: "1.75rem" }}
+              alt=""
+            />
             <span className="deployText">{t("Deploy")}</span>
           </button>
         ) : null}
@@ -641,8 +646,8 @@ function Header(props) {
         <Modal
           show={showProcessReport}
           style={{
-            width: "40vw",
-            height: "50vh",
+            width: "518px",
+            height: "396px",
             left: "30%",
             top: "20%",
             padding: "0",
@@ -853,9 +858,12 @@ function Header(props) {
           }}
           modalClosed={() => setAction(null)}
           children={
+            //code edited on 26 July 2022 for BugId 110024
             <DisableProcess
               setModalClosed={() => setAction(null)}
               modalType={MENUOPTION_DISABLE}
+              processDefId={processData.ProcessDefId}
+              setProcessData={setProcessData}
             />
           }
         />
@@ -871,9 +879,12 @@ function Header(props) {
           }}
           modalClosed={() => setAction(null)}
           children={
+            //code edited on 26 July 2022 for BugId 110024
             <EnableProcess
               setModalClosed={() => setAction(null)}
               modalType={MENUOPTION_ENABLE}
+              processDefId={processData.ProcessDefId}
+              setProcessData={setProcessData}
             />
           }
         />
@@ -933,12 +944,14 @@ function Header(props) {
             <DeployProcess
               setModalClosed={() => setAction(null)}
               buttonFrom={buttonFrom}
+              showDeployModal={showDeployModal}
               setShowDeployModal={setShowDeployModal}
               setShowDeployFailModal={setShowDeployFailModal}
               errorVariables={errorVariables}
               setErrorVariables={setErrorVariables}
               warningVariables={warningVariables}
               setWarningVariables={setWarningVariables}
+              toggleDrawer={() => toggleDrawer("top", false)}
             />
           }
         />
@@ -957,7 +970,11 @@ function Header(props) {
           }}
           modalClosed={() => setShowDeployModal(false)}
           children={
-            <ProcessDeployment setShowDeployModal={setShowDeployModal} />
+            <ProcessDeployment
+              toggleDrawer={() => toggleDrawer("bottom", false)}
+              setShowDeployModal={setShowDeployModal}
+              showDeployModal={showDeployModal}
+            />
           }
         ></Modal>
       ) : null}
@@ -977,7 +994,13 @@ function Header(props) {
           children={
             <ProcessDeploymentFailed
               showDeployFailModal={showDeployFailModal}
-              setShowDeployFailModal={setShowDeployFailModal}
+              setShowDeployFailModal={() => {
+                setShowDeployFailModal(false);
+                toggleDrawer("bottom", true);
+              }}
+              // toggleDrawer={() => {
+              //   toggleDrawer("bottom", true);
+              // }}
             />
           }
         ></Modal>
@@ -1011,7 +1034,7 @@ function Header(props) {
         <Drawer
           anchor={"bottom"}
           open={state["bottom"]}
-          onClose={toggleDrawer("bottom", false)}
+          onClose={() => toggleDrawer("bottom", false)}
           // hideBackdrop={true}
           BackdropProps={{ invisible: true }}
         >

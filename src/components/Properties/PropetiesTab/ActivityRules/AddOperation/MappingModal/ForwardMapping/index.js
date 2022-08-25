@@ -28,7 +28,7 @@ function MappingData(props) {
             return element;
           }
         });
-      console.log("FM", "LONG", dropdownOptions, filteredOptions);
+
       setFilteredDropdownOptions(filteredOptions);
     }
   }, [dropdownOptions, paramType]);

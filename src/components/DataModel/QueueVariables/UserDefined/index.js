@@ -326,9 +326,6 @@ function UserDefined() {
               >
                 {t("tableAndMapping")}
                 <br /> {t("autoCreated")}.
-                <span className={styles.viewAndEdit} onClick={openModal}>
-                  {t("viewOrEdit")}
-                </span>
               </p>
               {isModalOpen ? (
                 <Modal

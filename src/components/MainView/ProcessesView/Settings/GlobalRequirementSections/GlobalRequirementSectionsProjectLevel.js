@@ -1,3 +1,7 @@
+// Changes made to solve 110715 (Global Requirement section: Buttons not visible while Adding section) and
+// 113580 (if the requirements are on project level not on Global level then the message should be different)
+// 110720, Global Requirement section: section with lengthy data was not added
+
 import { Button } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import styles from "./GlobalRequirementSections.module.css";
@@ -12,17 +16,9 @@ import { store, useGlobalState } from "state-pool";
 import { connect } from "react-redux";
 import {
   SERVER_URL,
-  ENDPOINT_FETCHSYSTEMREQUIREMENTS,
-  ENDPOINT_FETCHPROCESSREQUIREMENTS,
   ENDPOINT_FETCHPROJECTREQUIREMENTS,
-  ENDPOINT_ADDSYSTEMREQUIREMENTS,
-  ENDPOINT_ADDPROCESSREQUIREMENTS,
   ENDPOINT_ADDPROJECTREQUIREMENTS,
-  ENDPOINT_DELETESYSTEMREQUIREMENTS,
   ENDPOINT_DELETEPROJECTREQUIREMENTS,
-  ENDPOINT_DELETEPROCESSREQUIREMENTS,
-  ENDPOINT_EDITSYSTEMREQUIREMENTS,
-  ENDPOINT_EDITPROCESSREQUIREMENTS,
   ENDPOINT_EDITPROJECTREQUIREMENTS,
   ADD,
   EDIT,
@@ -33,342 +29,14 @@ import {
 } from "../../../../../Constants/appConstants";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import EditOutlinedIcon from "@material-ui/icons/Edit";
-
-import Modal from "@material-ui/core/Modal";
 import { makeStyles } from "@material-ui/core/styles";
 import ExportImport from "./ExportImport";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { useTranslation } from "react-i18next";
-import StarRateSharpIcon from "@material-ui/icons/StarRateSharp";
-
-function AddNewSectionBox(props) {
-  let { t } = useTranslation();
-  const cancelButtonClick = () => {
-    props.cancelCallBack();
-  };
-  const [previousOrderId, setpreviousOrderId] = useState(props.previousOrderId);
-  const [newSection, setnewSection] = useState({});
-  const [sectionName, setsectionName] = useState("");
-  const [desc, setdesc] = useState("");
-
-  const addHandler = () => {
-    if (sectionName !== "") {
-      props.mapNewSection(newSection);
-      setpreviousOrderId((prevState) => prevState + 1);
-      setdesc("");
-      setsectionName("");
-    } else {
-      alert("cant be empty");
-    }
-  };
-  const addcloseHandler = () => {
-    if (sectionName !== "") {
-      props.mapNewSection(newSection);
-    } else {
-      alert("cant be empty");
-    }
-
-    cancelButtonClick();
-  };
-
-  useEffect(() => {
-    let parent = previousOrderId + 1;
-    setnewSection({
-      OrderId: parent.toString(),
-      SectionName: sectionName,
-      Description: desc,
-    });
-  }, [desc, previousOrderId, props, sectionName]);
-
-  return (
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <div
-        style={{
-          border: "1px solid black",
-          backgroundColor: "white",
-          width: "350px",
-          height: "auto",
-
-          top: "40%",
-          left: "40%",
-          padding: "10px",
-        }}
-      >
-        <p
-          style={{
-            fontSize: "16px",
-            marginBottom: "10px",
-            font: "normal normal 600 16px/22px Open Sans",
-          }}
-        >
-          {props.sectionNo === "" || props.sectionNo === undefined
-            ? t("addNewSection")
-            : `${t("addSectionWithin")} ${props.sectionNo}`}
-        </p>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-            flexDirection: "column",
-            width: "100%",
-          }}
-        >
-          <label style={{ fontSize: "14px", marginBottom: "10px" }}>
-            {t("section")} {t("name")}
-            <StarRateSharpIcon
-              style={{
-                height: "15px",
-                width: "15px",
-                color: "red",
-                opacity: "0.9",
-                fontSize: "small",
-              }}
-            />
-          </label>
-
-          <input
-            id="add_sectionName"
-            value={sectionName}
-            onChange={(e) => setsectionName(e.target.value)}
-            style={{
-              width: "100%",
-              height: "24px",
-              marginBottom: "10px",
-              background: "#F8F8F8 0% 0% no-repeat padding-box",
-              border: "1px solid #c9c7c7",
-              borderRadius: "2px",
-              paddingLeft: "5px",
-              opacity: "1",
-            }}
-          />
-
-          <label style={{ fontSize: "14px", marginBottom: "10px" }}>
-            {t("Discription")}
-            {/* <StarRateIcon
-          style={{ height: "15px", width: "15px", color: "red" }}
-          /> */}
-          </label>
-
-          <textarea
-            id="add_sectionDesc"
-            value={desc}
-            onChange={(e) => setdesc(e.target.value.trim())}
-            style={{
-              width: "100%",
-              height: "5rem",
-              marginBottom: "10px",
-              background: "#F8F8F8 0% 0% no-repeat padding-box",
-              border: "1px solid #c9c7c7",
-              borderRadius: "2px",
-              paddingLeft: "5px",
-              opacity: "1",
-              resize: "none",
-              fontFamily: "Open Sans",
-            }}
-          />
-        </div>
-
-        <div
-          className="buttons_add"
-          style={{
-            display: "flex",
-            flexDirection: "row-reverse",
-            alignItems: "flex-end",
-            width: "100%",
-          }}
-        >
-          <Button
-            id="add_cancel"
-            variant="outlined"
-            className={styles.buttons}
-            onClick={cancelButtonClick}
-          >
-            {t("cancel")}
-          </Button>
-
-          <Button
-            id="add_sectionAnother"
-            variant="contained"
-            className={styles.buttons}
-            size="small"
-            color="primary"
-            onClick={addHandler}
-          >
-            {t("addAnother")}
-          </Button>
-          <Button
-            id="add_sectionClose"
-            variant="contained"
-            className={styles.buttons}
-            color="primary"
-            onClick={addcloseHandler}
-          >
-            {t("add&Close")}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function EditSectionBox(props) {
-  let { t } = useTranslation();
-  const [newSection, setnewSection] = useState({});
-  const [sectionName, setsectionName] = useState("");
-  const [desc, setdesc] = useState(null);
-  const cancelButtonClick = () => {
-    props.cancelCallBack();
-  };
-
-  const editSave = () => {
-    props.editMapToData(newSection);
-    cancelButtonClick();
-  };
-
-  const handleDesc = (e) => {
-    if (e.target.value === "") {
-      setdesc("");
-    } else setdesc(e.target.value.trim());
-  };
-  useEffect(() => {
-    setnewSection({
-      OrderId: props.sectionToEdit.OrderId,
-      SectionName: sectionName || props.sectionToEdit.SectionName,
-      Description: desc !== null ? desc : props.sectionToEdit.Description,
-    });
-  }, [
-    desc,
-    props.OrderId,
-    props.sectionToEdit.Description,
-    props.sectionToEdit.OrderId,
-    props.sectionToEdit.SectionName,
-    sectionName,
-  ]);
-
-  return (
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <div
-        style={{
-          border: "1px solid black",
-          backgroundColor: "white",
-          width: "322px",
-          height: "auto",
-          padding: "10px",
-        }}
-      >
-        <p
-          style={{
-            fontSize: "16px",
-            marginBottom: "10px",
-            font: "normal normal 600 16px/22px Open Sans",
-          }}
-        >
-          {t("edit")} {t("section")}
-        </p>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-            flexDirection: "column",
-          }}
-        >
-          <label style={{ fontSize: "14px", marginBottom: "10px" }}>
-            {t("section")} {t("name")}
-            <StarRateSharpIcon
-              style={{
-                height: "15px",
-                width: "15px",
-                color: "red",
-                opacity: "0.9",
-                fontSize: "small",
-              }}
-            />
-          </label>
-
-          <input
-            id="edit_sectionName"
-            onChange={(e) => setsectionName(e.target.value)}
-            defaultValue={props.sectionToEdit.SectionName}
-            style={{
-              width: "100%",
-              height: "24px",
-              marginBottom: "10px",
-              background: "#F8F8F8 0% 0% no-repeat padding-box",
-              border: "1px solid #c9c7c7",
-              borderRadius: "2px",
-              paddingLeft: "5px",
-              opacity: "1",
-            }}
-          />
-
-          <label style={{ fontSize: "14px", marginBottom: "10px" }}>
-            {t("Discription")}
-            {/* <StarRateIcon
-          style={{ height: "15px", width: "15px", color: "red" }}
-          /> */}
-          </label>
-
-          <textarea
-            id="edit_sectionDesc"
-            onChange={(e) => handleDesc(e)}
-            defaultValue={props.sectionToEdit.Description}
-            style={{
-              width: "100%",
-              height: "5rem",
-              marginBottom: "10px",
-              background: "#F8F8F8 0% 0% no-repeat padding-box",
-              border: "1px solid #c9c7c7",
-              borderRadius: "2px",
-              paddingLeft: "5px",
-              opacity: "1",
-              resize: "none",
-              fontFamily: "Open Sans",
-            }}
-          />
-        </div>
-
-        <div
-          className="buttons_add"
-          style={{ display: "flex", flexDirection: "row-reverse" }}
-        >
-          <Button
-            id="edit_cancel"
-            variant="outlined"
-            onClick={cancelButtonClick}
-            className={styles.buttons}
-          >
-            {t("cancel")}
-          </Button>
-          <Button
-            id="edit_save"
-            variant="contained"
-            color="primary"
-            className={styles.buttons}
-            onClick={editSave}
-          >
-            {t("save")}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
+import AddNewSectionBox from "./AddNewSectionBoxProject";
+import Modal from "../../../../../UI/Modal/Modal";
+import EditSectionBox from "./EditNewSectionBox";
+import "./index.css";
 
 function GlobalRequirementSections(props) {
   let { t } = useTranslation();
@@ -380,11 +48,17 @@ function GlobalRequirementSections(props) {
     },
   });
   const classes = useStyles();
-  const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [reqData, setreqData] = useState([]);
   const [showEditBox, setshowEditBox] = useState(false);
   const [spinner, setspinner] = useState(true);
+  const [firstLevelTextFieldShow, setfirstLevelTextFieldShow] = useState(false);
+  const [sectionToEdit, setsectionToEdit] = useState({});
+  const [levelToMap, setlevelToMap] = useState();
+  const [levelToEdit, setlevelToEdit] = useState();
+  const [previousOrderId, setpreviousOrderId] = useState();
+  const [level1DataOrderId, setlevel1DataOrderId] = useState(null);
+  const [level2DataOrderId, setlevel2DataOrderId] = useState(null);
+
   const cancelAddNewSection = () => {
     setshowEditBox(false);
     setfirstLevelTextFieldShow(false);
@@ -401,7 +75,9 @@ function GlobalRequirementSections(props) {
   useEffect(() => {
     async function getSections() {
       const res = await axios.get(
-        SERVER_URL + ENDPOINT_FETCHPROJECTREQUIREMENTS + `/${props.selectedProjectId}/${props.selectedProcessCode}`
+        SERVER_URL +
+          ENDPOINT_FETCHPROJECTREQUIREMENTS +
+          `/${props.selectedProjectId}/${props.selectedProcessCode}`
       );
       if (res.status === 200) {
         const data = await res.data.Section;
@@ -423,19 +99,6 @@ function GlobalRequirementSections(props) {
     getSections();
   }, []);
 
-  const [firstLevelTextFieldShow, setfirstLevelTextFieldShow] = useState(false);
-  const [sectionToEdit, setsectionToEdit] = useState({});
-  const [showExportImportModal, setshowExportImportModal] = useState(false);
-  const [exportOrImportToShow, setexportOrImportToShow] = useState("");
-  const [levelToMap, setlevelToMap] = useState();
-  const [levelToEdit, setlevelToEdit] = useState();
-  const [previousOrderId, setpreviousOrderId] = useState();
-  const [level1DataOrderId, setlevel1DataOrderId] = useState();
-  const [level2DataOrderId, setlevel2DataOrderId] = useState();
-  const closeExportImportModal = () => {
-    setshowExportImportModal(false);
-  };
-
   const addSection = (e, levelToAdd, level1Data, level2Data) => {
     e.stopPropagation();
     setfirstLevelTextFieldShow(true);
@@ -446,15 +109,17 @@ function GlobalRequirementSections(props) {
       if (level1Data.hasOwnProperty("SectionInner"))
         setpreviousOrderId(level1Data.SectionInner.length);
       else setpreviousOrderId(0);
-
       setlevel1DataOrderId(level1Data.OrderId);
     } else {
       if (level2Data.hasOwnProperty("SectionInner2"))
         setpreviousOrderId(level2Data.SectionInner2.length);
       else setpreviousOrderId(0);
-
       setlevel1DataOrderId(level1Data.OrderId);
-      setlevel2DataOrderId(level2Data.OrderId);
+      reqData[level1Data.OrderId - 1].SectionInner.forEach((item, idx) => {
+        if (item.OrderId === level2Data.OrderId) {
+          setlevel2DataOrderId(idx);
+        }
+      });
     }
   };
 
@@ -512,29 +177,26 @@ function GlobalRequirementSections(props) {
     e.stopPropagation();
     setshowEditBox(true);
     setlevelToEdit(levelToEdit);
-
     if (levelToEdit === LEVEL2) {
       setpreviousOrderId(level1Data.OrderId);
       setsectionToEdit(level1Data);
     } else if (levelToEdit === LEVEL3) {
       setsectionToEdit(level2Data);
       setpreviousOrderId(level2Data.OrderId);
-
       setlevel1DataOrderId(level1Data.OrderId);
     } else {
       setsectionToEdit(level3Data);
       setpreviousOrderId(level3Data.OrderId);
-
       setlevel1DataOrderId(level1Data.OrderId);
-      setlevel2DataOrderId(level2Data.OrderId);
+      reqData[level1Data.OrderId - 1].SectionInner.forEach((item, idx) => {
+        if (item.OrderId === level2Data.OrderId) {
+          setlevel2DataOrderId(idx);
+        }
+      });
     }
   };
 
   const editMapToData = async (data) => {
-    //   let newArray = reqData.map(function(arr) {
-    //     return arr.slice();
-    // });
-
     let temp = JSON.parse(JSON.stringify(reqData));
     let toEditSection;
     if (levelToEdit === LEVEL2) {
@@ -557,7 +219,7 @@ function GlobalRequirementSections(props) {
       });
     } else {
       temp[level1DataOrderId - 1].SectionInner[
-        level2DataOrderId - 1
+        level2DataOrderId
       ].SectionInner2.forEach((item) => {
         if (item.OrderId === previousOrderId) {
           toEditSection = item;
@@ -600,22 +262,21 @@ function GlobalRequirementSections(props) {
       const flagForApi = await commonApiCalls(
         ADD,
         data,
-        temp[level1DataOrderId - 1].SectionInner[level2DataOrderId - 1]
-          .SectionId
+        temp[level1DataOrderId - 1].SectionInner[level2DataOrderId].SectionId
       );
       if (flagForApi) {
         let dataToPush = { ...data, SectionId: flagForApi.SectionId };
         if (
           temp[level1DataOrderId - 1].SectionInner[
-            level2DataOrderId - 1
+            level2DataOrderId
           ].hasOwnProperty("SectionInner2")
         )
           temp[level1DataOrderId - 1].SectionInner[
-            level2DataOrderId - 1
+            level2DataOrderId
           ].SectionInner2.push(dataToPush);
         else
           temp[level1DataOrderId - 1].SectionInner[
-            level2DataOrderId - 1
+            level2DataOrderId
           ].SectionInner2 = [dataToPush];
 
         setreqData(temp);
@@ -781,769 +442,816 @@ function GlobalRequirementSections(props) {
   };
 
   return (
-    <>
-      <div className={styles.page}>
-        <div className={styles.headingProjectLevel}>
-          <div className={styles.headingBox}>
-            <p className={styles.headingText}>
-              {t("globalRequirementSections")}
-            </p>
-            <p className={styles.headingInfo}>
-              {t("gloablRequirementSectionsHeadingInfo")}
-            </p>
-          </div>
-          <div style={{marginRight:'25px'}}>
-            <Button
-              variant="contained"
-              size="medium"
-              color="primary"
-              className={styles.addSectionButton}
-              styles={{ width: "7rem" }}
-              onClick={(e) => addSection(e, LEVEL1)}
-              id="add_section"
-            >
-              <p className={styles.buttonText}>
-                {t("add")} {t("section")}
-              </p>
-            </Button>
-          </div>
+    <div
+      className={styles.page}
+      style={{ width: "98%", height: "75vh", margin: "1rem 1vw" }}
+    >
+      <div className={styles.headingProjectLevel}>
+        <div className={styles.headingBox}>
+          <p className={styles.headingText}>Project Requirements Section</p>
+          <p className={styles.headingInfo}>
+            Requirement sections which are defined here, will automatically
+            appear in in all the processes of this project.
+          </p>
         </div>
-        {spinner ? (
-          <CircularProgress style={{ marginTop: "30vh", marginLeft: "40%" }} />
-        ) : (
-          <>
-            {reqData.length !== 0 ? (
-              <div className={styles.body}>
-                <DragDropContext onDragEnd={dragEndHandler}>
-                  <Droppable droppableId="droppable" type={LEVEL1}>
-                    {(provided, snapshot) => (
-                      <div
-                        {...provided.droppableProps}
-                        ref={provided.innerRef}
-                        style={{
-                          zIndex: 0,
-                        }}
-                        // style={getListStyle(snapshot.isDraggingOver)}
-                      >
-                        {reqData &&
-                          reqData.map((data, index) => {
-                            return (
-                              <div
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  justifyContent: "flex-start",
-                                }}
+        <div>
+          <Button
+            className={styles.addSectionButton}
+            onClick={(e) => addSection(e, LEVEL1)}
+            id="add_section"
+          >
+            <p className={styles.buttonText}>
+              {t("add")} {t("section")}
+            </p>
+          </Button>
+        </div>
+      </div>
+      {spinner ? (
+        <CircularProgress style={{ marginTop: "30vh", marginLeft: "40%" }} />
+      ) : (
+        <>
+          {reqData?.length !== 0 ? (
+            <div
+              className={styles.body}
+              style={{ width: "100%", minHeight: "64vh" }}
+            >
+              <DragDropContext onDragEnd={dragEndHandler}>
+                <Droppable droppableId="droppable" type={LEVEL1}>
+                  {(provided, snapshot) => (
+                    <div
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                      style={{
+                        zIndex: 0,
+                      }}
+                    >
+                      {reqData &&
+                        reqData.map((data, index) => {
+                          return (
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "flex-start",
+                              }}
+                            >
+                              <Draggable
+                                key={data.OrderId}
+                                draggableId={data.OrderId}
+                                index={index}
+                                demo={++index}
                               >
-                                <Draggable
-                                  key={data.OrderId}
-                                  draggableId={data.OrderId}
-                                  index={index}
-                                  demo={++index}
-                                >
-                                  {(provided, snapshot) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                  >
+                                    <Accordion
+                                      className={`${classes.hideBorder} globalSection`}
                                     >
-                                      <Accordion className={classes.hideBorder}>
-                                        <AccordionSummary
-                                          className={styles.accordianOuter}
+                                      <AccordionSummary
+                                        className={styles.accordianOuter}
+                                        style={{
+                                          flexDirection: "row-reverse",
+                                          alignItems: "start",
+                                        }}
+                                        expandIcon={
+                                          <ExpandMoreIcon
+                                            id="expand_1"
+                                            style={{
+                                              color: "var(--button_color)",
+                                              width: "1.5rem",
+                                              height: "1.75rem",
+                                            }}
+                                          />
+                                        }
+                                        aria-controls="panel1a-content"
+                                        id="panel1a-header"
+                                      >
+                                        <div
                                           style={{
-                                            flexDirection: "row-reverse",
-                                            alignItems: "start",
+                                            display: "flex",
+                                            flexDirection: "column",
                                           }}
-                                          expandIcon={
-                                            <ExpandMoreIcon
-                                              id="expand_1"
-                                              style={{ color: "#0072C6" }}
-                                            />
-                                          }
-                                          aria-controls="panel1a-content"
-                                          id="panel1a-header"
                                         >
                                           <div
+                                            className={styles.iconsandtextBox}
                                             style={{
-                                              display: "flex",
-                                              flexDirection: "column",
-                                              backgroundColor: "#ebeced",
+                                              width: "100%",
+                                              padding: "0 0.5vw",
                                             }}
                                           >
                                             <div
-                                              className={styles.iconsandtextBox}
-                                              style={{ width: "70vw" }}
-                                            >
-                                              <div
-                                                style={{
-                                                  display: "flex",
-                                                  flexDirection: "row",
-                                                }}
-                                              >
-                                                <p
-                                                  id="orderId_1"
-                                                  style={{
-                                                    padding: "0px 0 0 2px",
-                                                    color: "#0072C6",
-                                                    fontSize: "0.875rem",
-                                                    fontWeight: "600",
-                                                    fontFamily: "Open Sans",
-                                                    width: "1.7rem",
-                                                    height: "1.3rem",
-
-                                                    borderRight: "none",
-                                                  }}
-                                                >
-                                                  {data.OrderId + "."}
-                                                </p>
-                                                <p
-                                                  id="sectionName_1"
-                                                  spellCheck="false"
-                                                  onClick={(e) =>
-                                                    e.stopPropagation()
-                                                  }
-                                                  style={{
-                                                    fontWeight: "600",
-                                                    fontSize: "0.875rem",
-                                                    fontFamily: "Open Sans",
-                                                    color: "#0072C6",
-                                                    marginLeft: "-7px",
-                                                    marginTop: "0px",
-                                                    borderLeft: "none",
-                                                  }}
-                                                >
-                                                  {data.SectionName}
-                                                </p>
-                                              </div>
-
-                                              <div>
-                                                <AddIcon
-                                                  id="addIcon_1"
-                                                  onClick={(e) =>
-                                                    addSection(
-                                                      e,
-
-                                                      LEVEL2,
-                                                      data
-                                                    )
-                                                  }
-                                                  style={{
-                                                    color: "grey",
-                                                    height: "1.5rem",
-                                                    cursor: "pointer",
-                                                  }}
-                                                />
-                                                <EditOutlinedIcon
-                                                  id="editIcon_1"
-                                                  style={{
-                                                    color: "grey",
-                                                    height: "1.3rem",
-                                                    cursor: "pointer",
-                                                  }}
-                                                  onClick={(e) =>
-                                                    editClicked(e, LEVEL2, data)
-                                                  }
-                                                />
-                                                <DeleteOutlineIcon
-                                                  id="deleteIcon_1"
-                                                  onClick={(e) =>
-                                                    deleteClicked(
-                                                      e,
-                                                      LEVEL2,
-                                                      data
-                                                    )
-                                                  }
-                                                  style={{
-                                                    color: "grey",
-                                                    height: "1.3rem",
-                                                    cursor: "pointer",
-                                                  }}
-                                                />
-                                              </div>
-                                            </div>
-                                            <div>
-                                              <p
-                                                id="description_1"
-                                                style={{
-                                                  marginLeft: "2px",
-                                                  marginTop: "-5px",
-
-                                                  width: "68vw",
-                                                  font: "0.8rem Open Sans",
-                                                }}
-                                              >
-                                                {" "}
-                                                {data.Description}
-                                              </p>
-                                            </div>
-                                          </div>
-                                        </AccordionSummary>
-                                        <Droppable
-                                          droppableId={
-                                            "droppable1 " +
-                                            data.SectionId +
-                                            " " +
-                                            data.OrderId
-                                          }
-                                          type={LEVEL2}
-                                        >
-                                          {(provided, snapshot) => (
-                                            <div
-                                              {...provided.droppableProps}
-                                              ref={provided.innerRef}
                                               style={{
-                                                zIndex: 1000,
+                                                display: "flex",
+                                                flexDirection: "row",
+                                                gap: "0.5vw",
                                               }}
                                             >
-                                              {data.hasOwnProperty(
-                                                "SectionInner"
-                                              ) &&
-                                                data.SectionInner.map(
-                                                  (subsection, index) => (
-                                                    <Draggable
-                                                      key={subsection.OrderId}
-                                                      draggableId={
-                                                        data.OrderId +
-                                                        " " +
-                                                        subsection.OrderId +
-                                                        " " +
-                                                        data.SectionId
-                                                      }
-                                                      index={index}
-                                                    >
-                                                      {(provided, snapshot) => (
-                                                        <div
-                                                          ref={
-                                                            provided.innerRef
+                                              <p
+                                                id="orderId_1"
+                                                style={{
+                                                  padding: "0px 0 0 2px",
+                                                  color: "var(--button_color)",
+                                                  fontSize:
+                                                    "var(--subtitle_text_font_size)",
+                                                  fontWeight: "600",
+                                                  fontFamily:
+                                                    "var(--font_family)",
+                                                  borderRight: "none",
+                                                }}
+                                              >
+                                                {data.OrderId + "."}
+                                              </p>
+                                              <p
+                                                id="sectionName_1"
+                                                spellCheck="false"
+                                                onClick={(e) =>
+                                                  e.stopPropagation()
+                                                }
+                                                style={{
+                                                  fontWeight: "600",
+                                                  fontSize:
+                                                    "var(--subtitle_text_font_size)",
+                                                  fontFamily:
+                                                    "var(--font_family)",
+                                                  color: "var(--button_color)",
+                                                  marginTop: "0px",
+                                                  borderLeft: "none",
+                                                }}
+                                              >
+                                                {data.SectionName}
+                                              </p>
+                                            </div>
+
+                                            <div
+                                              style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "0.5vw",
+                                              }}
+                                            >
+                                              <AddIcon
+                                                id="addIcon_1"
+                                                onClick={(e) =>
+                                                  addSection(e, LEVEL2, data)
+                                                }
+                                                style={{
+                                                  color: "grey",
+                                                  height: "1.5rem",
+                                                  width: "1.5rem",
+                                                  cursor: "pointer",
+                                                }}
+                                              />
+                                              <EditOutlinedIcon
+                                                id="editIcon_1"
+                                                style={{
+                                                  color: "grey",
+                                                  height: "1.5rem",
+                                                  width: "1.5rem",
+                                                  cursor: "pointer",
+                                                }}
+                                                onClick={(e) =>
+                                                  editClicked(e, LEVEL2, data)
+                                                }
+                                              />
+                                              <DeleteOutlineIcon
+                                                id="deleteIcon_1"
+                                                onClick={(e) =>
+                                                  deleteClicked(e, LEVEL2, data)
+                                                }
+                                                style={{
+                                                  color: "grey",
+                                                  height: "1.5rem",
+                                                  width: "1.5rem",
+                                                  cursor: "pointer",
+                                                }}
+                                              />
+                                            </div>
+                                          </div>
+                                          <div
+                                            style={{ padding: "0.25rem 2vw" }}
+                                          >
+                                            <p
+                                              id="description_1"
+                                              style={{
+                                                width: "66vw",
+                                                fontFamily:
+                                                  "var(--font_family)",
+                                                fontSize:
+                                                  "var(--base_text_font_size)",
+                                              }}
+                                            >
+                                              {" "}
+                                              {data.Description}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </AccordionSummary>
+                                      <Droppable
+                                        droppableId={
+                                          "droppable1 " +
+                                          data.SectionId +
+                                          " " +
+                                          data.OrderId
+                                        }
+                                        type={LEVEL2}
+                                      >
+                                        {(provided, snapshot) => (
+                                          <div
+                                            {...provided.droppableProps}
+                                            ref={provided.innerRef}
+                                            style={{
+                                              zIndex: 1000,
+                                            }}
+                                          >
+                                            {data.hasOwnProperty(
+                                              "SectionInner"
+                                            ) &&
+                                              data.SectionInner.map(
+                                                (subsection, index) => (
+                                                  <Draggable
+                                                    key={subsection.OrderId}
+                                                    draggableId={
+                                                      data.OrderId +
+                                                      " " +
+                                                      subsection.OrderId +
+                                                      " " +
+                                                      data.SectionId
+                                                    }
+                                                    index={index}
+                                                  >
+                                                    {(provided, snapshot) => (
+                                                      <div
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                      >
+                                                        <Accordion
+                                                          className={`${classes.hideBorder} globalSection`}
+                                                          defaultExpanded={
+                                                            false
                                                           }
-                                                          {...provided.draggableProps}
-                                                          {...provided.dragHandleProps}
+                                                          style={{
+                                                            marginLeft: "2vw",
+                                                          }}
                                                         >
-                                                          <Accordion
+                                                          <AccordionSummary
                                                             className={
-                                                              classes.hideBorder
-                                                            }
-                                                            defaultExpanded={
-                                                              false
+                                                              styles.accordianInner
                                                             }
                                                             style={{
-                                                              marginLeft:
-                                                                "2.5rem",
+                                                              flexDirection:
+                                                                "row-reverse",
+                                                              alignItems:
+                                                                "start",
                                                             }}
+                                                            expandIcon={
+                                                              <ExpandMoreIcon
+                                                                id="expandIcon_2"
+                                                                style={{
+                                                                  color:
+                                                                    "black",
+                                                                  width:
+                                                                    "1.5rem",
+                                                                  height:
+                                                                    "1.75rem",
+                                                                }}
+                                                              />
+                                                            }
+                                                            aria-controls="panel1a-content"
+                                                            id="panel1a-header"
                                                           >
-                                                            <AccordionSummary
-                                                              className={
-                                                                styles.accordianInner
-                                                              }
+                                                            <div
                                                               style={{
+                                                                display: "flex",
                                                                 flexDirection:
-                                                                  "row-reverse",
-                                                                alignItems:
-                                                                  "start",
+                                                                  "column",
+                                                                height: "auto",
+                                                                backgroundColor:
+                                                                  "#F6F6F6",
                                                               }}
-                                                              expandIcon={
-                                                                <ExpandMoreIcon
-                                                                  id="expandIcon_2"
-                                                                  style={{
-                                                                    color:
-                                                                      "black",
-                                                                  }}
-                                                                />
-                                                              }
-                                                              aria-controls="panel1a-content"
-                                                              id="panel1a-header"
                                                             >
                                                               <div
+                                                                className={
+                                                                  styles.iconsandtextBox
+                                                                }
                                                                 style={{
-                                                                  display:
-                                                                    "flex",
-                                                                  flexDirection:
-                                                                    "column",
-                                                                  height:
-                                                                    "auto",
-                                                                  backgroundColor:
-                                                                    "#ebeced",
+                                                                  width: "67vw",
+                                                                  padding:
+                                                                    "0 0.5vw 0 0",
                                                                 }}
                                                               >
                                                                 <div
-                                                                  className={
-                                                                    styles.iconsandtextBox
-                                                                  }
                                                                   style={{
-                                                                    width:
-                                                                      "67vw",
+                                                                    display:
+                                                                      "flex",
+                                                                    flexDirection:
+                                                                      "row",
+                                                                    gap: "0.5vw",
                                                                   }}
                                                                 >
-                                                                  <div
+                                                                  <p
+                                                                    id="orderId_2"
                                                                     style={{
-                                                                      display:
-                                                                        "flex",
-                                                                      flexDirection:
-                                                                        "row",
+                                                                      padding:
+                                                                        "0px 0 0 2px",
+                                                                      color:
+                                                                        "#000",
+                                                                      fontSize:
+                                                                        "var(--subtitle_text_font_size)",
+                                                                      fontWeight:
+                                                                        "600",
+                                                                      fontFamily:
+                                                                        "var(--font_family)",
+                                                                      borderRight:
+                                                                        "none",
                                                                     }}
                                                                   >
-                                                                    <p
-                                                                      id="orderId_2"
-                                                                      style={{
-                                                                        padding:
-                                                                          "0px 0 0 2px",
-                                                                        color:
-                                                                          "black",
-                                                                        fontSize:
-                                                                          "0.875rem",
-                                                                        fontWeight:
-                                                                          "600",
-                                                                        fontFamily:
-                                                                          "Open Sans",
-                                                                        width:
-                                                                          "1.7rem",
-                                                                        height:
-                                                                          "1.5rem",
-                                                                        marginTop:
-                                                                          "0px",
-                                                                        borderRight:
-                                                                          "none",
-                                                                      }}
-                                                                    >
-                                                                      {data.OrderId +
-                                                                        "." +
-                                                                        subsection.OrderId +
-                                                                        "."}
-                                                                    </p>
+                                                                    {subsection.OrderId +
+                                                                      "."}
+                                                                  </p>
 
-                                                                    <p
-                                                                      id="sectionName_2"
-                                                                      style={{
-                                                                        fontSize:
-                                                                          "0.875rem",
-                                                                        fontWeight:
-                                                                          "600",
-                                                                        fontFamily:
-                                                                          "Open Sans",
-                                                                        margin:
-                                                                          "0px 0 0 0px",
-                                                                        width:
-                                                                          "58vw",
-                                                                        borderLeft:
-                                                                          "none",
-                                                                      }}
-                                                                    >
-                                                                      {
-                                                                        subsection.SectionName
-                                                                      }
-                                                                    </p>
-                                                                  </div>
-
-                                                                  <div>
-                                                                    <AddIcon
-                                                                      id="addIcon_2"
-                                                                      onClick={(
-                                                                        e
-                                                                      ) =>
-                                                                        addSection(
-                                                                          e,
-
-                                                                          LEVEL3,
-                                                                          data,
-                                                                          subsection
-                                                                        )
-                                                                      }
-                                                                      style={{
-                                                                        color:
-                                                                          "grey",
-                                                                        height:
-                                                                          "1.5rem",
-                                                                        cursor:
-                                                                          "pointer",
-                                                                      }}
-                                                                    />
-                                                                    <EditOutlinedIcon
-                                                                      id="editIcon_2"
-                                                                      onClick={(
-                                                                        e
-                                                                      ) =>
-                                                                        editClicked(
-                                                                          e,
-                                                                          LEVEL3,
-                                                                          data,
-                                                                          subsection
-                                                                        )
-                                                                      }
-                                                                      style={{
-                                                                        color:
-                                                                          "grey",
-                                                                        height:
-                                                                          "1.3rem",
-                                                                        cursor:
-                                                                          "pointer",
-                                                                      }}
-                                                                    />
-                                                                    <DeleteOutlineIcon
-                                                                      id="deleteIcon_2"
-                                                                      onClick={(
-                                                                        e
-                                                                      ) =>
-                                                                        deleteClicked(
-                                                                          e,
-                                                                          LEVEL3,
-                                                                          data,
-                                                                          subsection
-                                                                        )
-                                                                      }
-                                                                      style={{
-                                                                        color:
-                                                                          "grey",
-                                                                        height:
-                                                                          "1.3rem",
-                                                                        cursor:
-                                                                          "pointer",
-                                                                      }}
-                                                                    />
-                                                                  </div>
-                                                                </div>
-                                                                <div>
                                                                   <p
-                                                                    id="description_2"
+                                                                    id="sectionName_2"
                                                                     style={{
-                                                                      font: "0.8rem Open Sans",
-                                                                      margin:
-                                                                        "-5px 0 0 2px",
-
-                                                                      width:
-                                                                        "63vw",
+                                                                      fontWeight:
+                                                                        "600",
+                                                                      fontSize:
+                                                                        "var(--subtitle_text_font_size)",
+                                                                      fontFamily:
+                                                                        "var(--font_family)",
+                                                                      color:
+                                                                        "#000",
+                                                                      marginTop:
+                                                                        "0px",
+                                                                      borderLeft:
+                                                                        "none",
                                                                     }}
                                                                   >
                                                                     {
-                                                                      subsection.Description
+                                                                      subsection.SectionName
                                                                     }
                                                                   </p>
                                                                 </div>
-                                                              </div>
-                                                            </AccordionSummary>
 
-                                                            <Droppable
-                                                              droppableId={
-                                                                "droppable2 " +
-                                                                subsection.SectionId +
-                                                                " " +
-                                                                subsection.OrderId
-                                                              }
-                                                              type={LEVEL3}
-                                                            >
-                                                              {(
-                                                                provided,
-                                                                snapshot
-                                                              ) => (
                                                                 <div
-                                                                  {...provided.droppableProps}
-                                                                  ref={
-                                                                    provided.innerRef
-                                                                  }
                                                                   style={{
-                                                                    zIndex: 2000,
+                                                                    display:
+                                                                      "flex",
+                                                                    alignItems:
+                                                                      "center",
+                                                                    gap: "0.5vw",
                                                                   }}
                                                                 >
-                                                                  {/* subsections2 */}
-                                                                  {subsection.hasOwnProperty(
-                                                                    "SectionInner2"
-                                                                  ) &&
-                                                                    subsection
-                                                                      .SectionInner2
-                                                                      .length !==
-                                                                      0 &&
-                                                                    subsection.SectionInner2.map(
-                                                                      (
-                                                                        subsections2,
-                                                                        index
-                                                                      ) => (
-                                                                        <Draggable
-                                                                          key={
-                                                                            subsections2.OrderId
-                                                                          }
-                                                                          draggableId={
-                                                                            data.OrderId +
-                                                                            " " +
-                                                                            subsection.OrderId +
-                                                                            " " +
-                                                                            subsections2.OrderId +
-                                                                            " " +
-                                                                            subsection.SectionId
-                                                                          }
-                                                                          index={
-                                                                            index
-                                                                          }
-                                                                        >
-                                                                          {(
-                                                                            provided,
-                                                                            snapshot
-                                                                          ) => (
-                                                                            <div
-                                                                              ref={
-                                                                                provided.innerRef
+                                                                  <AddIcon
+                                                                    id="addIcon_2"
+                                                                    onClick={(
+                                                                      e
+                                                                    ) =>
+                                                                      addSection(
+                                                                        e,
+                                                                        LEVEL3,
+                                                                        data,
+                                                                        subsection
+                                                                      )
+                                                                    }
+                                                                    style={{
+                                                                      color:
+                                                                        "grey",
+                                                                      height:
+                                                                        "1.5rem",
+                                                                      width:
+                                                                        "1.5rem",
+                                                                      cursor:
+                                                                        "pointer",
+                                                                    }}
+                                                                  />
+                                                                  <EditOutlinedIcon
+                                                                    id="editIcon_2"
+                                                                    onClick={(
+                                                                      e
+                                                                    ) =>
+                                                                      editClicked(
+                                                                        e,
+                                                                        LEVEL3,
+                                                                        data,
+                                                                        subsection
+                                                                      )
+                                                                    }
+                                                                    style={{
+                                                                      color:
+                                                                        "grey",
+                                                                      height:
+                                                                        "1.5rem",
+                                                                      width:
+                                                                        "1.5rem",
+                                                                      cursor:
+                                                                        "pointer",
+                                                                    }}
+                                                                  />
+                                                                  <DeleteOutlineIcon
+                                                                    id="deleteIcon_2"
+                                                                    onClick={(
+                                                                      e
+                                                                    ) =>
+                                                                      deleteClicked(
+                                                                        e,
+                                                                        LEVEL3,
+                                                                        data,
+                                                                        subsection
+                                                                      )
+                                                                    }
+                                                                    style={{
+                                                                      color:
+                                                                        "grey",
+                                                                      height:
+                                                                        "1.5rem",
+                                                                      width:
+                                                                        "1.5rem",
+                                                                      cursor:
+                                                                        "pointer",
+                                                                    }}
+                                                                  />
+                                                                </div>
+                                                              </div>
+                                                              <div
+                                                                style={{
+                                                                  padding:
+                                                                    "0.25rem 2vw",
+                                                                }}
+                                                              >
+                                                                <p
+                                                                  id="description_2"
+                                                                  style={{
+                                                                    width:
+                                                                      "60vw",
+                                                                    fontFamily:
+                                                                      "var(--font_family)",
+                                                                    fontSize:
+                                                                      "var(--base_text_font_size)",
+                                                                  }}
+                                                                >
+                                                                  {
+                                                                    subsection.Description
+                                                                  }
+                                                                </p>
+                                                              </div>
+                                                            </div>
+                                                          </AccordionSummary>
+
+                                                          <Droppable
+                                                            droppableId={
+                                                              "droppable2 " +
+                                                              subsection.SectionId +
+                                                              " " +
+                                                              subsection.OrderId
+                                                            }
+                                                            type={LEVEL3}
+                                                          >
+                                                            {(
+                                                              provided,
+                                                              snapshot
+                                                            ) => (
+                                                              <div
+                                                                {...provided.droppableProps}
+                                                                ref={
+                                                                  provided.innerRef
+                                                                }
+                                                                style={{
+                                                                  zIndex: 2000,
+                                                                }}
+                                                              >
+                                                                {/* subsections2 */}
+                                                                {subsection.hasOwnProperty(
+                                                                  "SectionInner2"
+                                                                ) &&
+                                                                  subsection
+                                                                    .SectionInner2
+                                                                    .length !==
+                                                                    0 &&
+                                                                  subsection.SectionInner2.map(
+                                                                    (
+                                                                      subsections2,
+                                                                      index
+                                                                    ) => (
+                                                                      <Draggable
+                                                                        key={
+                                                                          subsections2.OrderId
+                                                                        }
+                                                                        draggableId={
+                                                                          data.OrderId +
+                                                                          " " +
+                                                                          subsection.OrderId +
+                                                                          " " +
+                                                                          subsections2.OrderId +
+                                                                          " " +
+                                                                          subsection.SectionId
+                                                                        }
+                                                                        index={
+                                                                          index
+                                                                        }
+                                                                      >
+                                                                        {(
+                                                                          provided,
+                                                                          snapshot
+                                                                        ) => (
+                                                                          <div
+                                                                            ref={
+                                                                              provided.innerRef
+                                                                            }
+                                                                            {...provided.draggableProps}
+                                                                            {...provided.dragHandleProps}
+                                                                          >
+                                                                            <Accordion
+                                                                              className={`${classes.hideBorder} globalSection`}
+                                                                              defaultExpanded={
+                                                                                false
                                                                               }
-                                                                              {...provided.draggableProps}
-                                                                              {...provided.dragHandleProps}
+                                                                              style={{
+                                                                                marginLeft:
+                                                                                  "3.5vw",
+                                                                                marginTop:
+                                                                                  "0.5rem",
+                                                                              }}
                                                                             >
-                                                                              <Accordion
+                                                                              <AccordionSummary
                                                                                 className={
-                                                                                  classes.hideBorder
-                                                                                }
-                                                                                defaultExpanded={
-                                                                                  false
+                                                                                  styles.accordianInner2
                                                                                 }
                                                                                 style={{
-                                                                                  marginLeft:
-                                                                                    "55px",
+                                                                                  flexDirection:
+                                                                                    "row-reverse",
+                                                                                  alignItems:
+                                                                                    "start",
                                                                                 }}
+                                                                                aria-controls="panel1a-content"
+                                                                                id="panel1a-header"
                                                                               >
-                                                                                <AccordionSummary
-                                                                                  className={
-                                                                                    styles.accordianInner2
-                                                                                  }
+                                                                                <div
                                                                                   style={{
+                                                                                    display:
+                                                                                      "flex",
                                                                                     flexDirection:
-                                                                                      "row-reverse",
-                                                                                    alignItems:
-                                                                                      "start",
+                                                                                      "column",
+                                                                                    backgroundColor:
+                                                                                      "#F6F6F6",
                                                                                   }}
-                                                                                  aria-controls="panel1a-content"
-                                                                                  id="panel1a-header"
                                                                                 >
                                                                                   <div
+                                                                                    className={
+                                                                                      styles.iconsandtextBox
+                                                                                    }
                                                                                     style={{
-                                                                                      display:
-                                                                                        "flex",
-                                                                                      flexDirection:
-                                                                                        "column",
-                                                                                      backgroundColor:
-                                                                                        "#ebeced",
+                                                                                      width:
+                                                                                        "64.8vw",
+                                                                                      padding:
+                                                                                        "0 0.5vw 0 0",
                                                                                     }}
                                                                                   >
                                                                                     <div
-                                                                                      className={
-                                                                                        styles.iconsandtextBox
-                                                                                      }
                                                                                       style={{
-                                                                                        width:
-                                                                                          "65vw",
+                                                                                        display:
+                                                                                          "flex",
+                                                                                        flexDirection:
+                                                                                          "row",
+                                                                                        gap: "0.5vw",
                                                                                       }}
                                                                                     >
-                                                                                      <div
-                                                                                        style={{
-                                                                                          display:
-                                                                                            "flex",
-                                                                                          flexDirection:
-                                                                                            "row",
-                                                                                        }}
-                                                                                      >
-                                                                                        <p
-                                                                                          id="orderId_3"
-                                                                                          style={{
-                                                                                            padding:
-                                                                                              "0px 0 0 2px",
-                                                                                            color:
-                                                                                              "black",
-                                                                                            fontSize:
-                                                                                              "0.875rem",
-                                                                                            fontWeight:
-                                                                                              "600",
-                                                                                            fontFamily:
-                                                                                              "Open Sans",
-                                                                                            width:
-                                                                                              "2.5rem",
-                                                                                            height:
-                                                                                              "1.5rem",
-                                                                                            marginTop:
-                                                                                              "0px",
-                                                                                            borderRight:
-                                                                                              "none",
-                                                                                          }}
-                                                                                        >
-                                                                                          {data.OrderId +
-                                                                                            "." +
-                                                                                            subsection.OrderId +
-                                                                                            "." +
-                                                                                            subsections2.OrderId +
-                                                                                            "."}
-                                                                                        </p>
-                                                                                        <p
-                                                                                          id="sectionName_3"
-                                                                                          onClick={(
-                                                                                            e
-                                                                                          ) =>
-                                                                                            e.stopPropagation()
-                                                                                          }
-                                                                                          style={{
-                                                                                            fontSize:
-                                                                                              "0.875rem",
-                                                                                            fontWeight:
-                                                                                              "600",
-                                                                                            fontFamily:
-                                                                                              "Open Sans",
-                                                                                            width:
-                                                                                              "55vw",
-                                                                                            marginLeft:
-                                                                                              "0px",
-                                                                                            borderLeft:
-                                                                                              "none",
-                                                                                          }}
-                                                                                        >
-                                                                                          {
-                                                                                            subsections2.SectionName
-                                                                                          }
-                                                                                        </p>
-                                                                                      </div>
-
-                                                                                      <div
-                                                                                        style={{
-                                                                                          marginLeft:
-                                                                                            "-10px",
-                                                                                        }}
-                                                                                      >
-                                                                                        <EditOutlinedIcon
-                                                                                          id="editIcon_3"
-                                                                                          onClick={(
-                                                                                            e
-                                                                                          ) =>
-                                                                                            editClicked(
-                                                                                              e,
-                                                                                              "3rd",
-                                                                                              data,
-                                                                                              subsection,
-                                                                                              subsections2
-                                                                                            )
-                                                                                          }
-                                                                                          style={{
-                                                                                            color:
-                                                                                              "grey",
-                                                                                            height:
-                                                                                              "1.3rem",
-                                                                                            cursor:
-                                                                                              "pointer",
-                                                                                          }}
-                                                                                        />
-                                                                                        <DeleteOutlineIcon
-                                                                                          id="deleteIcon_3"
-                                                                                          onClick={(
-                                                                                            e
-                                                                                          ) =>
-                                                                                            deleteClicked(
-                                                                                              e,
-                                                                                              "3rd",
-                                                                                              data,
-                                                                                              subsection,
-                                                                                              subsections2
-                                                                                            )
-                                                                                          }
-                                                                                          style={{
-                                                                                            color:
-                                                                                              "grey",
-                                                                                            height:
-                                                                                              "1.3rem",
-                                                                                            cursor:
-                                                                                              "pointer",
-                                                                                          }}
-                                                                                        />
-                                                                                      </div>
-                                                                                    </div>
-                                                                                    <div>
                                                                                       <p
+                                                                                        id="orderId_3"
                                                                                         style={{
-                                                                                          font: "0.8rem Open Sans",
-                                                                                          margin:
-                                                                                            "-5px 0 0 2px",
+                                                                                          padding:
+                                                                                            "0px 0 0 2px",
+                                                                                          color:
+                                                                                            "#000",
+                                                                                          fontSize:
+                                                                                            "var(--subtitle_text_font_size)",
+                                                                                          fontWeight:
+                                                                                            "600",
+                                                                                          fontFamily:
+                                                                                            "var(--font_family)",
+                                                                                          marginTop:
+                                                                                            "0px",
+                                                                                          borderRight:
+                                                                                            "none",
+                                                                                        }}
+                                                                                      >
+                                                                                        {subsections2.OrderId +
+                                                                                          "."}
+                                                                                      </p>
+                                                                                      <p
+                                                                                        id="sectionName_3"
+                                                                                        onClick={(
+                                                                                          e
+                                                                                        ) =>
+                                                                                          e.stopPropagation()
+                                                                                        }
+                                                                                        style={{
+                                                                                          fontSize:
+                                                                                            "var(--subtitle_text_font_size)",
+                                                                                          fontWeight:
+                                                                                            "600",
+                                                                                          fontFamily:
+                                                                                            "var(--font_family)",
                                                                                           width:
-                                                                                            "58vw",
+                                                                                            "55vw",
+                                                                                          marginLeft:
+                                                                                            "0px",
+                                                                                          borderLeft:
+                                                                                            "none",
                                                                                         }}
                                                                                       >
                                                                                         {
-                                                                                          subsections2.Description
+                                                                                          subsections2.SectionName
                                                                                         }
                                                                                       </p>
                                                                                     </div>
-                                                                                  </div>
-                                                                                </AccordionSummary>
-                                                                              </Accordion>
-                                                                            </div>
-                                                                          )}
-                                                                        </Draggable>
-                                                                      )
-                                                                    )}
-                                                                  {
-                                                                    provided.placeholder
-                                                                  }
-                                                                </div>
-                                                              )}
-                                                            </Droppable>
-                                                          </Accordion>
-                                                        </div>
-                                                      )}
-                                                    </Draggable>
-                                                  )
-                                                )}
-                                              {provided.placeholder}
-                                            </div>
-                                          )}
-                                        </Droppable>
-                                      </Accordion>
-                                    </div>
-                                  )}
-                                </Draggable>
-                              </div>
-                            );
-                          })}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </DragDropContext>
 
-                {firstLevelTextFieldShow === true ? (
-                  <Modal open={firstLevelTextFieldShow}>
+                                                                                    <div
+                                                                                      style={{
+                                                                                        display:
+                                                                                          "flex",
+                                                                                        alignItems:
+                                                                                          "center",
+                                                                                        gap: "0.5vw",
+                                                                                      }}
+                                                                                    >
+                                                                                      <EditOutlinedIcon
+                                                                                        id="editIcon_3"
+                                                                                        onClick={(
+                                                                                          e
+                                                                                        ) =>
+                                                                                          editClicked(
+                                                                                            e,
+                                                                                            "3rd",
+                                                                                            data,
+                                                                                            subsection,
+                                                                                            subsections2
+                                                                                          )
+                                                                                        }
+                                                                                        style={{
+                                                                                          color:
+                                                                                            "grey",
+                                                                                          height:
+                                                                                            "1.5rem",
+                                                                                          width:
+                                                                                            "1.5rem",
+                                                                                          cursor:
+                                                                                            "pointer",
+                                                                                        }}
+                                                                                      />
+                                                                                      <DeleteOutlineIcon
+                                                                                        id="deleteIcon_3"
+                                                                                        onClick={(
+                                                                                          e
+                                                                                        ) =>
+                                                                                          deleteClicked(
+                                                                                            e,
+                                                                                            "3rd",
+                                                                                            data,
+                                                                                            subsection,
+                                                                                            subsections2
+                                                                                          )
+                                                                                        }
+                                                                                        style={{
+                                                                                          color:
+                                                                                            "grey",
+                                                                                          height:
+                                                                                            "1.5rem",
+                                                                                          width:
+                                                                                            "1.5rem",
+                                                                                          cursor:
+                                                                                            "pointer",
+                                                                                        }}
+                                                                                      />
+                                                                                    </div>
+                                                                                  </div>
+                                                                                  <div
+                                                                                    style={{
+                                                                                      padding:
+                                                                                        "0.25rem 3.25vw",
+                                                                                    }}
+                                                                                  >
+                                                                                    <p
+                                                                                      style={{
+                                                                                        width:
+                                                                                          "57vw",
+                                                                                        fontFamily:
+                                                                                          "var(--font_family)",
+                                                                                        fontSize:
+                                                                                          "var(--base_text_font_size)",
+                                                                                      }}
+                                                                                    >
+                                                                                      {
+                                                                                        subsections2.Description
+                                                                                      }
+                                                                                    </p>
+                                                                                  </div>
+                                                                                </div>
+                                                                              </AccordionSummary>
+                                                                            </Accordion>
+                                                                          </div>
+                                                                        )}
+                                                                      </Draggable>
+                                                                    )
+                                                                  )}
+                                                                {
+                                                                  provided.placeholder
+                                                                }
+                                                              </div>
+                                                            )}
+                                                          </Droppable>
+                                                        </Accordion>
+                                                      </div>
+                                                    )}
+                                                  </Draggable>
+                                                )
+                                              )}
+                                            {provided.placeholder}
+                                          </div>
+                                        )}
+                                      </Droppable>
+                                    </Accordion>
+                                  </div>
+                                )}
+                              </Draggable>
+                            </div>
+                          );
+                        })}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+
+              {firstLevelTextFieldShow === true ? (
+                <Modal
+                  show={firstLevelTextFieldShow}
+                  style={{
+                    width: "30vw",
+                    left: "35%",
+                    top: "25%",
+                    padding: "0",
+                  }}
+                  modalClosed={() => setfirstLevelTextFieldShow(false)}
+                  children={
                     <AddNewSectionBox
                       mapNewSection={(data) => mapNewSection(data)}
                       levelToMap={levelToMap}
                       cancelCallBack={cancelAddNewSection}
                       previousOrderId={previousOrderId}
                     />
-                  </Modal>
-                ) : null}
-                {showEditBox === true ? (
-                  <Modal open={showEditBox}>
+                  }
+                />
+              ) : null}
+              {showEditBox === true ? (
+                <Modal
+                  show={showEditBox}
+                  style={{
+                    width: "30vw",
+                    left: "35%",
+                    top: "25%",
+                    padding: "0",
+                  }}
+                  modalClosed={() => setshowEditBox(false)}
+                  children={
                     <EditSectionBox
                       editMapToData={(data) => editMapToData(data)}
                       sectionToEdit={sectionToEdit}
                       cancelCallBack={cancelAddNewSection}
                     />
-                  </Modal>
-                ) : null}
-                {showExportImportModal === true ? (
-                  <Modal open={showExportImportModal}>
-                    <ExportImport
-                      exportOrImportToShow={exportOrImportToShow}
-                      closeExportImportModal={closeExportImportModal}
-                      sections={reqData}
-                    />
-                  </Modal>
-                ) : null}
-              </div>
-            ) : (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "80%",
-                  height: "80%",
-                }}
-              >
-                <NotInterestedOutlinedIcon />
-                <p className={styles.headingInfo}>
-                  {t("noRequirementDefined")}, {t("pleaseUseAddSection")}
-                </p>
-                {firstLevelTextFieldShow === true ? (
-                  <Modal open={firstLevelTextFieldShow}>
+                  }
+                />
+              ) : null}
+            </div>
+          ) : (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "80%",
+                height: "80%",
+              }}
+            >
+              <NotInterestedOutlinedIcon />
+              <p className={styles.headingInfo}>
+                {t("noRequirementDefined")}, {t("pleaseUseAddSection")}
+              </p>
+              {firstLevelTextFieldShow === true ? (
+                <Modal
+                  show={firstLevelTextFieldShow}
+                  style={{
+                    width: "30vw",
+                    left: "35%",
+                    top: "25%",
+                    padding: "0",
+                  }}
+                  modalClosed={() => setfirstLevelTextFieldShow(false)}
+                  children={
                     <AddNewSectionBox
                       mapNewSection={(data, levelToMap) =>
                         mapNewSection(data, levelToMap)
@@ -1552,23 +1260,14 @@ function GlobalRequirementSections(props) {
                       levelToMap={levelToMap}
                       previousOrderId={0}
                     />
-                  </Modal>
-                ) : null}
-                {showExportImportModal === true ? (
-                  <Modal open={showExportImportModal}>
-                    <ExportImport
-                      exportOrImportToShow={exportOrImportToShow}
-                      closeExportImportModal={closeExportImportModal}
-                      sections={reqData}
-                    />
-                  </Modal>
-                ) : null}
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    </>
+                  }
+                />
+              ) : null}
+            </div>
+          )}
+        </>
+      )}
+    </div>
   );
 }
 

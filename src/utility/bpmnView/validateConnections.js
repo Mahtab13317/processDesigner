@@ -29,7 +29,7 @@ export const validateConnections = (source, target, displayMessage) => {
     //to check the limit on outgoing edges of source
     else if (
       limitOutgoingEdges.includes(source.style) &&
-      outgoingEdges.length > 1
+      outgoingEdges.length === 1
     ) {
       console.log("errorMessage.limitOutgoingConnection");
       return false;
@@ -37,7 +37,7 @@ export const validateConnections = (source, target, displayMessage) => {
     //to check the limit on incoming edges of target
     else if (
       limitIncomingEdges.includes(target.style) &&
-      incomingEdges.length > 1
+      incomingEdges.length === 1
     ) {
       console.log("errorMessage.limitIncomingConnection");
       return false;

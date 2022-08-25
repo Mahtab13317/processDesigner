@@ -29,8 +29,8 @@ function RenameModal(props) {
     } else {
       let editCategoryJSON = {
         categoryName: nameInput,
-        categoryId: props.elemToBeDeleted.CategoryId,
-        description: props.elemToBeDeleted.Description,
+        categoryId: props.elemToBeDeleted?.CategoryId,
+        description: props.elemToBeDeleted?.Description,
       };
       axios
         .post(SERVER_URL + ENDPOINT_EDIT_CATEGORY, editCategoryJSON)

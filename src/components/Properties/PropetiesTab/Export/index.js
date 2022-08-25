@@ -12,6 +12,7 @@ import {
   propertiesLabel,
 } from "../../../../Constants/appConstants";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 function Export(props) {
   const { openProcessType, openProcessID } = props;
@@ -83,6 +84,7 @@ function Export(props) {
   return (
     <div>
       <div>
+        <TabsHeading heading={props?.heading} />
         <div className={styles.tabStyles}>
           <Tabs
             value={value}

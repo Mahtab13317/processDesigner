@@ -40,6 +40,7 @@ function Document(props) {
     isDownlaod: false,
     isModify: false,
   });
+  const [addAnotherDoc, setAddAnotherDoc] = useState(false);
   const dispatch = useDispatch();
   const openProcessData = useSelector(OpenProcessSliceValue);
 
@@ -251,11 +252,12 @@ function Document(props) {
                 Activities: [],
               });
               setDocData(tempData);
+              // code added on 2 August 2022 for BugId 112251
               if (button_type !== "addAnother") {
                 setAddDoc(false);
-              }
-              if (button_type === "addAnother") {
-                document.getElementById("DocNameInput").value = "";
+                setAddAnotherDoc(false);
+              } else if (button_type === "addAnother") {
+                setAddAnotherDoc(true);
               }
             }
           });
@@ -426,7 +428,6 @@ function Document(props) {
         <div className="row">
           <div className={styles.searchbox}>
             <SearchBox
-              height="1.5rem"
               width="20vw"
               name="search"
               placeholder={t("Search Here")}
@@ -592,6 +593,8 @@ function Document(props) {
         <AddDoc
           handleClose={() => setAddDoc(false)}
           addDocToList={addDocToList}
+          addAnotherDoc={addAnotherDoc}
+          setAddAnotherDoc={setAddAnotherDoc}
         />
       </Modal>
     </React.Fragment>

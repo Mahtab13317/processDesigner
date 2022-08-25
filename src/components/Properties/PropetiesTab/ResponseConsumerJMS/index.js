@@ -33,8 +33,9 @@ import "./index.css";
 import SwapHorizIcon from "@material-ui/icons/SwapHoriz";
 import DeleteIcon from "@material-ui/icons/Delete";
 import { Checkbox } from "@material-ui/core";
-import JMS_XML from './jmsXML.js';
-import TableResponseConsumer from './TableResponseConsumer.js';
+import JMS_XML from "./jmsXML.js";
+import TableResponseConsumer from "./TableResponseConsumer.js";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -96,6 +97,7 @@ function ResponseConsumerJMS(props) {
 
   return (
     <div>
+      <TabsHeading heading={props?.heading} />
       <div style={{ padding: "0px 10px 10px 10px" }}>
         <p className="requestConsumerHead">Response Consumer JMS</p>
         <div
@@ -132,7 +134,7 @@ function ResponseConsumerJMS(props) {
           </div>
         </div>
       </div>
-      <TableResponseConsumer/>
+      <TableResponseConsumer />
 
       {showXMLModal ? (
         <Modal
@@ -147,7 +149,7 @@ function ResponseConsumerJMS(props) {
             height: "295px",
           }}
           modalClosed={() => setShowXMLModal(false)}
-          children= {<JMS_XML setShowXMLModal={setShowXMLModal}/>}
+          children={<JMS_XML setShowXMLModal={setShowXMLModal} />}
         ></Modal>
       ) : null}
     </div>

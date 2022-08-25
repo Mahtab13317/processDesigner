@@ -56,7 +56,7 @@
 .cabinetDiv {
   background-color: white;
   flex: 0.4;
-  padding: 0.5vw 1vw;
+  padding: 0.5rem 0.75vw;
   margin: 0.25rem 0.25vw;
 }
 
@@ -78,7 +78,7 @@
 .templateList {
   background-color: white;
   flex: 0.5;
-  padding: 0.5vw 1vw;
+  padding: 0.5rem 0.75vw;
   margin: 0.5rem 0 0.5rem 0.25vw;
 }
 
@@ -86,12 +86,13 @@
   background-color: white;
   border-left: 0.125rem solid #eaeaea;
   flex: 0.9;
-  padding: 0.5vw 1vw;
+  padding: 0.5rem 0.75vw;
   margin: 0.5rem 0.25vw 0.5rem 0;
 }
 
 .nextDivHeading {
-  font: normal normal 600 14px/19px Open Sans;
+  font: normal normal 600 var(--subtitle_text_font_size) / 19px
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   margin: 1rem 0;
@@ -99,17 +100,19 @@
 }
 
 .subDivHeading {
-  font: normal normal 600 14px/19px Open Sans;
+  font: normal normal 600 var(--subtitle_text_font_size) / 19px
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   flex: 1;
 }
 
 .divHeading {
-  font: normal normal 600 14px/19px Open Sans;
+  font: normal normal 600 var(--subtitle_text_font_size) / 19px
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   flex: 1;
 }
 
@@ -128,7 +131,7 @@
 }
 
 .templatePropLabel {
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
   color: #606060;
   margin: 0.25rem 0;
@@ -139,12 +142,12 @@
   font: normal normal 500 12px/17px Open Sans;
   letter-spacing: 0px;
   color: #606060;
-  margin: 0.25rem 0;
+  margin: 0.5rem 0;
   display: block;
 }
 
 .propsValue {
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   margin-bottom: 0.5rem;
@@ -154,14 +157,15 @@
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   background-color: #fff;
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   letter-spacing: 0px;
   color: #606060;
   margin: 0.125rem 0 0.5rem;
   display: block;
   padding: 0.125rem 0.5rem;
   width: 100%;
-  height: 1.5rem;
+  height: var(--line_height);
 }
 
 input[type="number"].templatePropInput::-webkit-inner-spin-button,
@@ -178,20 +182,21 @@ input[type="number"]::-webkit-outer-spin-button {
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   background-color: #fff;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #606060;
   margin: 0.125rem 0 0.5rem;
   display: block;
-  padding: 0.125rem !important;
   width: 100%;
-  height: 1.5rem;
+  height: var(--line_height);
 }
 
 .templateDropdownData {
   padding: 0.125rem 0.5rem !important;
   width: 100%;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   letter-spacing: 0px;
   color: #606060;
 }
@@ -199,18 +204,18 @@ input[type="number"]::-webkit-outer-spin-button {
 .starIcon {
   color: red;
   margin-left: 0.25vw;
-  font-size: 0.75rem;
+  font-size: 1rem;
 }
 
 .getCabinetBtn {
   background: #ffffff 0% 0% no-repeat padding-box;
   border: 1px solid #0072c5;
   border-radius: 2px;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
   color: #0072c6;
   padding: 0.25rem 1vw;
-  margin: 0.5rem 0 0 auto;
+  margin: 0.5rem 0 0 auto !important;
   display: flex;
   cursor: pointer;
 }
@@ -219,11 +224,11 @@ input[type="number"]::-webkit-outer-spin-button {
   background: #ffffff 0% 0% no-repeat padding-box;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
   color: #606060;
   padding: 0.25rem 1vw;
-  margin: 0.5rem 0 0 auto;
+  margin: 0.5rem 0 0 auto !important;
   display: flex;
   cursor: pointer;
 }
@@ -231,12 +236,13 @@ input[type="number"]::-webkit-outer-spin-button {
 .associatedTempDiv {
   background: #0072c600 0% 0% no-repeat padding-box;
   border: 1px solid #e4e4e480;
-  padding: 0.25rem 1vw;
+  padding: 0.5rem 1vw;
   margin-bottom: 0.25rem;
   display: flex;
+  grid-gap: 1.5vw;
   gap: 1.5vw;
   cursor: pointer;
-  height: 2rem;
+  height: 3rem;
   align-items: center;
   width: 100%;
 }
@@ -247,11 +253,11 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .selectedTempDiv {
   background: #0072c60f 0% 0% no-repeat padding-box;
-  padding: 0.25rem 1vw;
+  padding: 0.5rem 1vw;
   margin-bottom: 0.25rem;
   display: flex;
   cursor: pointer;
-  height: 2rem;
+  height: 3rem;
   align-items: center;
 }
 
@@ -263,7 +269,8 @@ input[type="number"]::-webkit-outer-spin-button {
 .tempName {
   flex: 4;
   max-width: 14vw;
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   white-space: nowrap;
@@ -288,16 +295,16 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .downloadIcon {
-  width: 1rem !important;
-  height: 1rem !important;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
   color: #606060 !important;
   margin-left: 0.5vw;
   cursor: pointer;
 }
 
 .expandViewIcon {
-  width: 1.25rem !important;
-  height: 1.25rem !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
   color: #606060 !important;
   margin-left: 0.5vw;
   cursor: pointer;
@@ -310,7 +317,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .noTemplateSelectedString {
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   margin: 0.5rem 0;

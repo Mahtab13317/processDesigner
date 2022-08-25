@@ -14,7 +14,13 @@ function ForwardTemplateMapping(props) {
   let { schemaList, template, setUpdatedTemplate, checked, setChecked } = props;
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
-  const variableDefinition = localLoadedProcessData?.Variable;
+  const loadedActivityPropertyData = store.getState("activityPropertyData");
+  const [localLoadedActivityPropertyData] = useGlobalState(
+    loadedActivityPropertyData
+  );
+  const variableDefinition = localLoadedProcessData?.Variable?.filter(
+    (el) => el.VariableType !== "11"
+  );
 
   useEffect(() => {
     let checkedTempObj = {};
@@ -47,6 +53,42 @@ function ForwardTemplateMapping(props) {
     });
     setChecked(checkedTempObj);
   }, [schemaList]);
+
+  const checkForVarRights = (data) => {
+    let temp = false;
+    localLoadedActivityPropertyData?.ActivityProperty?.m_objDataVarMappingInfo?.dataVarList?.forEach(
+      (item, i) => {
+        if (item?.processVarInfo?.variableId === data.VariableId) {
+          if (
+            item?.m_strFetchedRights === "O" ||
+            item?.m_strFetchedRights === "R"
+          ) {
+            temp = true;
+          }
+        }
+      }
+    );
+    return temp;
+  };
+
+  const getVarListByType = (varList, item) => {
+    let varType = item?.type;
+    let list = [];
+    varList?.forEach((el) => {
+      if (
+        el.VariableScope === "M" ||
+        el.VariableScope === "S" ||
+        (el.VariableScope === "U" && checkForVarRights(el)) ||
+        (el.VariableScope === "I" && checkForVarRights(el))
+      ) {
+        let type = el.VariableType;
+        if (+varType === +type) {
+          list.push(el);
+        }
+      }
+    });
+    return list;
+  };
 
   const updateForwardMapping = (tempName, value) => {
     setChecked((prev) => {
@@ -201,22 +243,20 @@ function ForwardTemplateMapping(props) {
                     updateForwardMapping(d.name, e.target.value);
                   }}
                 >
-                  {variableDefinition
-                    ?.filter((el) => +el.VariableType === +d.type)
-                    .map((ele) => {
-                      return (
-                        <MenuItem
-                          value={ele.VariableName}
-                          className={
-                            direction === RTL_DIRECTION
-                              ? arabicStyles.templateDropdownData
-                              : styles.templateDropdownData
-                          }
-                        >
-                          {ele.VariableName}
-                        </MenuItem>
-                      );
-                    })}
+                  {getVarListByType(variableDefinition, d)?.map((ele) => {
+                    return (
+                      <MenuItem
+                        value={ele.VariableName}
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.templateDropdownData
+                            : styles.templateDropdownData
+                        }
+                      >
+                        {ele.VariableName}
+                      </MenuItem>
+                    );
+                  })}
                 </Select>
               </p>
             </div>

@@ -25,7 +25,7 @@ import {
   artefacts,
   caseWorkdesk,
   sapAdapter,
-  sharePoint
+  sharePoint,
 } from "../../../../utility/bpmnView/toolboxIcon";
 import searchIcon from "../../../../assets/bpmnView/toolbox/SearchToolbox.svg";
 import { getCaseEnabledActivities } from "../../../../utility/ViewingArea/CaseEnabledActivities";
@@ -75,8 +75,8 @@ const useStyles = makeStyles({
     width: "100%",
     height: "28px",
     "& img": {
-      width: "15px",
-      height: "15px",
+      width: "1.25rem",
+      height: "1.25rem",
     },
   },
   rootListItemIcon: {
@@ -174,7 +174,12 @@ function Toolbox(props) {
   let toolTypeList = [];
   let updatedActivities;
   let updatedIntegrationPointActivities;
-  let sharePointFlag = localLoadedProcessData?.SystemProperty[0]?.SHAREPOINTFLAG === "N" ? false : true
+  // code edited on 29 July 2022 for BugId 113313 and BugId 113849
+  let sharePointFlag = localLoadedProcessData?.SystemProperty
+    ? localLoadedProcessData?.SystemProperty[0]?.SHAREPOINTFLAG === "N"
+      ? false
+      : true
+    : false;
   if (
     // This condition runs when process is not case enabled and the user is in abstract view.
     caseEnabled === false &&
@@ -183,10 +188,10 @@ function Toolbox(props) {
     updatedActivities = getCaseEnabledActivities(caseEnabled, [caseWorkdesk]);
     updatedIntegrationPointActivities = getSapEnabledActivities(
       localLoadedProcessData?.SAPRequired,
-      [sapAdapter], sharePointFlag, [sharePoint]
+      [sapAdapter],
+      sharePointFlag,
+      [sharePoint]
     );
-
-
 
     toolTypeList = [
       startEvents,
@@ -204,7 +209,9 @@ function Toolbox(props) {
     updatedActivities = getCaseEnabledActivities(caseEnabled, [caseWorkdesk]);
     updatedIntegrationPointActivities = getSapEnabledActivities(
       localLoadedProcessData?.SAPRequired,
-      [sapAdapter], sharePointFlag, [sharePoint]
+      [sapAdapter],
+      sharePointFlag,
+      [sharePoint]
     );
     toolTypeList = [
       startEvents,
@@ -222,7 +229,9 @@ function Toolbox(props) {
   ) {
     updatedIntegrationPointActivities = getSapEnabledActivities(
       localLoadedProcessData?.SAPRequired,
-      [sapAdapter], sharePointFlag, [sharePoint]
+      [sapAdapter],
+      sharePointFlag,
+      [sharePoint]
     );
     toolTypeList = [
       taskTemplates,
@@ -241,7 +250,9 @@ function Toolbox(props) {
   ) {
     updatedIntegrationPointActivities = getSapEnabledActivities(
       localLoadedProcessData?.SAPRequired,
-      [sapAdapter], sharePointFlag, [sharePoint]
+      [sapAdapter],
+      sharePointFlag,
+      [sharePoint]
     );
     toolTypeList = [
       startEvents,
@@ -278,7 +289,7 @@ function Toolbox(props) {
     expandedView
       ? (document.querySelectorAll(".toolTabs")[0].style.backgroundColor = "")
       : (document.querySelectorAll(".toolTabs")[0].style.backgroundColor =
-        "#0072C60D");
+          "#0072C60D");
     setExpandedView(!expandedView);
   };
 
@@ -299,10 +310,10 @@ function Toolbox(props) {
       if (
         ellToArray[i].getBoundingClientRect().top - searchBarFromTop < 46 &&
         ellToArray[i].getBoundingClientRect().top -
-        searchBarFromTop +
-        oneToolListToArray[i].clientHeight -
-        34 >
-        0
+          searchBarFromTop +
+          oneToolListToArray[i].clientHeight -
+          34 >
+          0
       ) {
         setTabIndex(i);
         tooltabs[tabIndex].style.backgroundColor = "#0072C60D";
@@ -524,8 +535,9 @@ function Toolbox(props) {
               <ListItemIcon>
                 <div
                   id="searchActivity_abstractView"
-                  className={`toolTabs ${expandedView ? "" : "onHoverTabStyle"
-                    }`}
+                  className={`toolTabs ${
+                    expandedView ? "" : "onHoverTabStyle"
+                  }`}
                   style={{
                     width: "8vw",
                     cursor: "pointer",
@@ -536,9 +548,9 @@ function Toolbox(props) {
                     className={classes.rootListItemIcon}
                     src={searchIcon}
                     style={{
-                      height: "2rem",
-                      width: "2rem",
-                      maxHeight: "2rem",
+                      height: "2.5rem",
+                      width: "2.5rem",
+                      maxHeight: "2.5rem",
                     }}
                     alt={t("toolbox.search")}
                     id="searchActivityIcon_abstractView"
@@ -560,12 +572,13 @@ function Toolbox(props) {
               onMouseEnter={(event) =>
                 displayToolContainer(event, element, index)
               }
-            // onMouseLeave={(e) => hideToolContainer(e)}
+              // onMouseLeave={(e) => hideToolContainer(e)}
             >
               <ListItemIcon style={{ justifyContent: "center" }}>
                 <div
-                  className={`toolTabs ${expandedView ? "" : "onHoverTabStyle"
-                    }`}
+                  className={`toolTabs ${
+                    expandedView ? "" : "onHoverTabStyle"
+                  }`}
                   onClick={() => onClickHandler(index)}
                   style={{
                     display: "flex",
@@ -599,10 +612,10 @@ function Toolbox(props) {
             <img
               style={{
                 position: "absolute",
-                top: expandedView ? "28.5rem" : "31rem",
+                top: expandedView ? "36.5rem" : "40rem",
                 left: expandedView ? "18.5vw" : "5.2vw",
-                height: "1.5rem",
-                width: "1.5rem",
+                height: "2rem",
+                width: "2rem",
                 cursor: "pointer",
                 zIndex: "6",
               }}
@@ -639,7 +652,7 @@ function Toolbox(props) {
           overflowY: "auto",
           maxHeight: "75vh",
           height: expandedView ? "75vh" : "auto",
-          marginTop: expandedView ? "113px" : "115px",
+          marginTop: expandedView ? "118px" : "114px",
           display: expandedView ? "block" : "none",
         }}
         view={props.view}
@@ -674,14 +687,14 @@ function Toolbox(props) {
                 height: "40px",
                 backgroundColor: "#FFFFFF",
                 border: "1px solid #C4C4C4",
-                width: "19.5vw",
+                width: "19.3vw",
                 padding: "0.25rem",
               }}
             >
               <div
                 style={{
                   border: "1px solid #C4C4C4",
-                  height: "28px",
+                  height: "2.7rem",
                   display: "flex",
                   alignItems: "center",
                 }}
@@ -713,8 +726,8 @@ function Toolbox(props) {
           )}
           {toolTypeContainer}
           {toolboxDisplay !== null &&
-            toolMap.has(toolboxDisplay) &&
-            expandedView === false
+          toolMap.has(toolboxDisplay) &&
+          expandedView === false
             ? toolMap.get(toolboxDisplay).toolsDiv
             : null}
         </React.Fragment>

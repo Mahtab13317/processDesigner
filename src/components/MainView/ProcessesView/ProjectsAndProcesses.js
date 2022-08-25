@@ -12,24 +12,30 @@ import {
   SERVER_URL,
 } from "../../../Constants/appConstants";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { connect, useDispatch } from "react-redux";
+import { connect, useDispatch, useSelector } from "react-redux";
 import { setImportExportVal } from "../../../redux-store/slices/ImportExportSlice";
 import Tabs from "../../../UI/Tab/Tab";
+import {
+  projectCreationVal,
+  setProjectCreation,
+} from "../../../redux-store/slices/projectCreationSlice";
 
 function ProjectsAndProcesses(props) {
   const [selectedProcessCode, setSelectedProcessCode] = useState();
   const [selectedProcessCount, setSelectedProcessCount] = useState();
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [selectedProjectDesc, setSelectedProjectDesc] = useState();
-  const [processesPerProject, setProcessesPerProject] = useState();
+  const [processesPerProject, setProcessesPerProject] = useState([]);
   const [selectedProcessTile, setSelectedProcessTile] = useState(-1);
   const [projectList, setProjectList] = useState({
     Status: 0,
     Message: "",
     Projects: [],
   });
+  const [spinnerProcessList, setspinnerProcessList] = useState(true);
   const [spinner, setSpinner] = useState(true);
   const [value, setValue] = useState(0);
+  const projectCreatedVal = useSelector(projectCreationVal);
   const dispatch = useDispatch();
 
   let selectedProjectName = null;
@@ -61,8 +67,7 @@ function ProjectsAndProcesses(props) {
           setProjectList(data);
           if (data?.Projects?.length > 0) {
             setSelectedProjectId(data.Projects[0]?.ProjectId);
-          } 
-          else {
+          } else {
             // code added on 22 June 2022 for BugId 111210
             getSelectedProcessTile(value === 0 ? "L" : "R", 0);
             setSelectedProcessTile(0);
@@ -80,7 +85,55 @@ function ProjectsAndProcesses(props) {
       });
   }, [value]);
 
+  //code edited on 28 July 2022 for BugId 110133
   useEffect(() => {
+    if (projectCreatedVal.projectCreated) {
+      axios
+        .get(
+          SERVER_URL +
+            `${
+              value === 0
+                ? ENDPOINT_GETPROJECTLIST_DRAFTS
+                : ENDPOINT_GETPROJECTLIST_DEPLOYED
+            }`
+        )
+        .then((res) => {
+          if (res.data.Status === 0) {
+            let data = res.data;
+            setProjectList(data);
+            if (data?.Projects?.length > 0) {
+              if (projectCreatedVal.projectCreated) {
+                let selectedId = null;
+                data?.Projects?.forEach((el) => {
+                  if (el.ProjectName === projectCreatedVal.projectName) {
+                    selectedId = el.ProjectId;
+                  }
+                });
+                setSelectedProjectId(selectedId);
+                dispatch(
+                  setProjectCreation({
+                    projectCreated: false,
+                    projectName: null,
+                    projectDesc: null,
+                  })
+                );
+              }
+            }
+            setSpinner(false);
+            dispatch(setImportExportVal({ ProjectList: res.data.Projects }));
+          } else {
+            setSpinner(false);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          setSpinner(false);
+        });
+    }
+  }, [projectCreatedVal.projectCreated]);
+
+  useEffect(() => {
+    setspinnerProcessList(true);
     if (selectedProjectId) {
       axios
         .get(
@@ -90,6 +143,7 @@ function ProjectsAndProcesses(props) {
         )
         .then((res) => {
           if (res.status === 200) {
+            setspinnerProcessList(false);
             setProcessesPerProject(res.data.Processes);
             if (value == 0) {
               localStorage.setItem("draftProcesses", { ...res.data.Processes });
@@ -122,98 +176,7 @@ function ProjectsAndProcesses(props) {
     );
   }, [props.selectedTabAtNavPanel]);
 
-  let pinnedProcessesPerProject = [
-    // {
-    //   LastModifiedBy: "Mark",
-    //   ProcessName: "RLOS",
-    //   Added: "N",
-    //   PendingActions: "N",
-    //   UserName: "padmin",
-    //   CreatedBy: "Mark",
-    //   RIGHTS: {
-    //     CS: "N",
-    //     IMPBO: "N",
-    //     C: "N",
-    //     AT: "N",
-    //     PRPT: "N",
-    //     U: "N",
-    //     V: "N",
-    //     M: "N",
-    //   },
-    //   ProcessVariantType: "S",
-    //   ProcessDefId: "32",
-    //   ModifiedDate: "06 Oct",
-    //   ProcessShared: "Y",
-    //   ProcessState: "E",
-    //   CreatedDate: "2021-02-08",
-    //   Version: "1.0",
-    //   Deleted: "N",
-    //   VariantPID: "32",
-    //   CheckedOut: "Y",
-    //   ProcessType: "L",
-    //   ModifiedTime: "2:55 PM",
-    // },
-    // {
-    //   LastModifiedBy: "Mark",
-    //   ProcessName: "Account Opening",
-    //   Added: "N",
-    //   PendingActions: "N",
-    //   UserName: "padmin",
-    //   CreatedBy: "Mark",
-    //   RIGHTS: {
-    //     CS: "N",
-    //     IMPBO: "N",
-    //     C: "N",
-    //     AT: "N",
-    //     PRPT: "N",
-    //     U: "N",
-    //     V: "N",
-    //     M: "N",
-    //   },
-    //   ProcessVariantType: "S",
-    //   ProcessDefId: "32",
-    //   ModifiedDate: "16 Nov",
-    //   ProcessShared: "Y",
-    //   ProcessState: "E",
-    //   CreatedDate: "2021-09-08",
-    //   Version: "2.1",
-    //   Deleted: "N",
-    //   VariantPID: "32",
-    //   CheckedOut: "Y",
-    //   ProcessType: "R",
-    //   ModifiedTime: "6:55 PM",
-    // },
-    // {
-    //   LastModifiedBy: "Mark",
-    //   ProcessName: "Recruitment",
-    //   Added: "N",
-    //   PendingActions: "N",
-    //   UserName: "padmin",
-    //   CreatedBy: "Mark",
-    //   RIGHTS: {
-    //     CS: "N",
-    //     IMPBO: "N",
-    //     C: "N",
-    //     AT: "N",
-    //     PRPT: "N",
-    //     U: "N",
-    //     V: "N",
-    //     M: "N",
-    //   },
-    //   ProcessVariantType: "S",
-    //   ProcessDefId: "32",
-    //   ModifiedDate: "24 Nov",
-    //   ProcessShared: "Y",
-    //   ProcessState: "E",
-    //   CreatedDate: "2021-11-18",
-    //   Version: "3.2",
-    //   Deleted: "N",
-    //   VariantPID: "32",
-    //   CheckedOut: "Y",
-    //   ProcessType: "R",
-    //   ModifiedTime: "11:25 AM",
-    // },
-  ];
+  let pinnedProcessesPerProject = [];
 
   const getSelectedProcessTile = (
     selectedProcessTileCode,
@@ -232,12 +195,13 @@ function ProjectsAndProcesses(props) {
         tabContentStyle="processSubTabContentStyle"
         tabBarStyle="processSubTabBarStyle"
         oneTabStyle="processSubOneTabStyleProcessType"
-        tabStyling="processViewTabs"
+        tabStyling="processTypeViewTabs"
         TabNames={["DRAFTS", "DEPLOYED"]}
         TabElement={[]}
         setValue={(val) => {
           setValue(val);
         }}
+        style={{ width: "20vw" }}
       />
       <Projects
         setSelectedProjectDesc={setSelectedProjectDesc}
@@ -258,6 +222,7 @@ function ProjectsAndProcesses(props) {
         defaultProjectId={selectedProjectId}
       />
       <Processes
+        spinnerProcess={spinnerProcessList}
         projectList={projectList.Projects}
         setProjectList={setProjectList}
         selectedProjectDesc={selectedProjectDesc}

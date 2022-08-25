@@ -6,29 +6,24 @@
 }
 
 .pinnedDiv {
-  margin-left: 1rem;
+  width: 98.5%;
+  margin-left: var(--spacing_h);
 }
 
 .pinnedTitle {
-  /* width: 86px; */
-  height: 22px;
   text-align: left;
-  font: normal normal 600 16px/22px Open Sans;
+  font: normal normal 600 var(--title_text_font_size) / var(--line_height)
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
-  opacity: 1;
 }
 
 .viewAll {
-  /* width: 50px; */
-  height: 17px;
   text-align: left;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
-  color: #0072c6;
-  opacity: 1;
-  margin-top: 5px;
-  margin-left: 10px;
+  color: var(--link_color);
+  margin-left: 1vw;
   cursor: pointer;
 }
 
@@ -45,6 +40,7 @@
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  font-size: var(--base_text_font_size);
 }
 
 .recentTableProcessType {
@@ -95,7 +91,7 @@
   /* IE and Edge */
   scrollbar-width: none;
   /* Firefox */
-  padding-top: 10px;
+  padding-top: 1rem;
   height: 100%;
   width: 71.8vw;
   overflow: auto;
@@ -114,7 +110,7 @@
 
 .RecentTableDiv {
   width: 96%;
-  margin-left: 1rem;
+  margin-left: var(--spacing_h);
 }
 
 .middleDivContainer {
@@ -125,4 +121,8 @@
 
 .PinnedTableDiv {
   width: 97.5%;
+}
+
+.Mui-selected .pinnedDropIcon {
+  color: white !important;
 }

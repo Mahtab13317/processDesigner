@@ -169,7 +169,7 @@ function VariableList(props) {
           style={{
             fontSize: "12px",
             paddingBottom: "5px",
-            borderBottom: selectedVariableType == 0 ? "3px solid blue" : null,
+            borderBottom: selectedVariableType == 0 ? "3px solid var(--selected_tab_color)" : null,
           }}
         >
           Queue Variables
@@ -180,7 +180,7 @@ function VariableList(props) {
             fontSize: "12px",
             marginLeft: "25px",
             paddingBottom: "5px",
-            borderBottom: selectedVariableType == 1 ? "3px solid blue" : null,
+            borderBottom: selectedVariableType == 1 ? "3px solid var(--selected_tab_color)" : null,
           }}
         >
           External Variables

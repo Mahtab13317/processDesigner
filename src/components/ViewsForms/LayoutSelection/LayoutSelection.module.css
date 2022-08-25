@@ -1,9 +1,9 @@
-.steps {
+.pmwebsteps {
   width: 50%;
   height: 44px;
 }
 
-.stepName {
+.pmwebstepName {
   text-align: left;
   font: normal normal normal 12px/18px Open Sans;
   letter-spacing: 0px;
@@ -12,33 +12,42 @@
   width: 75px;
 }
 
-.stepButton {
-  height: 12px !important;
+.pmwebstepButton {
+  height: 12px  ;
   margin-left: 10px;
   margin-right: 10px;
   padding: 0px;
 }
-.buttons {
-  width: auto !important;
-  height: 1.75rem !important;
-  /* background: #0072c6 0% 0% no-repeat padding-box !important; */
+.pmwebbuttons {
+  /* width: auto  ;
+  height: 1.75rem  ; */
+  /* background: #0072c6 0% 0% no-repeat padding-box  ; */
   /* font-family: "Open Sans"; */
-  opacity: 1 !important;
-  font-size: 0.75rem !important;
-  text-transform: none !important;
-  margin-inline: 0.3375rem !important;
-  white-space: nowrap !important;
-  color: white !important;
+  /* opacity: 1  ;
+  font-size: 0.75rem  ;
+  text-transform: none  ;
+  margin-inline: 0.3375rem  ;
+  white-space: nowrap  ;
+  color: white  ; */
+  background-color: var(--button_color) !important;
+	color: white !important;
+	font-weight: 600 !important;
 }
-.cancelButton {
-  width: auto !important;
-  height: 1.75rem !important;
-  background: white 0% 0% no-repeat padding-box !important;
-  /* font-family: "Open Sans"; */
-  opacity: 1 !important;
-  font-size: 0.75rem !important;
-  text-transform: none !important;
-  margin-inline: 0.3375rem !important;
-  white-space: nowrap !important;
-  color: #020202b9 !important;
+.pmwebcancelButton {
+  /* width: auto ;
+  height: 1.75rem  ;
+  background: white 0% 0% no-repeat padding-box  ;
+ 
+  opacity: 1  ;
+  font-size: 0.75rem  ;
+  text-transform: none  ;
+  margin-inline: 0.3375rem  ;
+  white-space: nowrap  ;
+  color: #020202b9  ; */
+  font-size:1rem !important;
+	background-color: white !important;	
+	color: var(--button_color) !important;
+	border: 1px solid var(--button_color) !important;
+	font-weight: 600 !important;
+
 }

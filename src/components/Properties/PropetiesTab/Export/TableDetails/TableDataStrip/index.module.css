@@ -59,6 +59,8 @@
   color: grey;
   margin: 12px 19px 14px 0px;
   cursor: pointer;
+  height: 1.75rem !important;
+  width: 1.75rem !important;
 }
 
 .precisionText {

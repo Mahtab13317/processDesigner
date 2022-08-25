@@ -118,25 +118,30 @@ function ProcessesHeader(props) {
             <CreateProcessButton
               onClick={importProcessHandler}
               buttonContent={
-                <span>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.25vw",
+                  }}
+                >
                   <img
                     src={ImportIcon}
-                    style={{ height: "16px", width: "16px", marginTop: "5px" }}
+                    style={{
+                      height: "1rem",
+                      width: "1rem",
+                    }}
                     alt=""
-                  />{" "}
-                  {t("ImportProcess")}
-                </span>
+                  />
+                  <span>{t("ImportProcess")}</span>
+                </div>
               }
               buttonStyle={{
-                marginRight: "10px",
                 backgroundColor: "white",
-                width: "120px",
-                height: "28px",
-                fontSize: "12px",
-                padding: "5px",
                 textTransform: "none",
                 color: "grey",
                 border: "1px solid #C4C4C4",
+                minWidth: "9vw",
               }}
             ></CreateProcessButton>
           )}
@@ -146,26 +151,23 @@ function ProcessesHeader(props) {
               onClick={() => createProcessHandler()}
               buttonContent={`+ ${t("CreateProcess")}`}
               buttonStyle={{
-                marginRight: "10px",
-                backgroundColor: "#0072C6",
-                width: "110px",
-                height: "28px",
-                fontSize: "12px",
-                padding: "5px",
+                backgroundColor: "var(--button_color)",
                 textTransform: "none",
                 color: "white",
+                minWidth: "9vw",
               }}
               disableElevation
             ></CreateProcessButton>
           )}
           <div
             style={{
-              width: "28px",
-              height: "28px",
-              marginRight: "10px",
+              width: "var(--line_height)",
+              height: "var(--line_height)",
+              marginRight: "var(--spacing_h)",
               border: "1px solid #C4C4C4",
               display: "inline-block",
               textAlign: "center",
+              padding: "0.25rem",
             }}
           >
             <MortVertModal
@@ -190,8 +192,7 @@ function ProcessesHeader(props) {
                 show={action === t("delete")}
                 style={{
                   width: "30vw",
-                  height: "11.5rem",
-                  left: "30%",
+                  left: "37%",
                   top: "25%",
                   padding: "0",
                 }}
@@ -201,7 +202,9 @@ function ProcessesHeader(props) {
                     projectList={props.projectList}
                     setProjectList={props.setProjectList}
                     setModalClosed={() => setAction(null)}
-                    processToDelete={props.selectedProject}
+                    projectToDelete={props.selectedProject}
+                    deleteProject={true}
+                    allProcessesPerProject={props.allProcessesPerProject}
                   />
                 }
               />
@@ -236,7 +239,7 @@ function ProcessesHeader(props) {
                 style={{
                   width: "30vw",
                   height: "11.5rem",
-                  left: "30%",
+                  left: "37%",
                   top: "25%",
                   padding: "0",
                 }}

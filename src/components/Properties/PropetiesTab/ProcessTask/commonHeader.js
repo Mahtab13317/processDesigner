@@ -20,14 +20,17 @@ function CommonHeader(props) {
           padding: "0.25rem 0.5vw 0",
         }}
       >
-        <p style={{ color: "#606060", fontSize: "12px" }}>
+        <p style={{ color: "#606060", fontSize: "var(--base_text_font_size)" }}>
           {props.tabType == "ForwardForVariables" ||
           props.tabType == "ForwardForDocuments"
             ? "FORWARD MAPPING"
             : "REVERSE MAPPING"}
         </p>
         <p
-          style={{ color: "#0072C6", fontSize: "11px" }}
+          style={{
+            color: "var(--link_color)",
+            fontSize: "var(--sub_text_font_size)",
+          }}
           onClick={() => props.setShowVariablesModal(true)}
         >
           {props.tabType == "ForwardForVariables" ||
@@ -63,7 +66,9 @@ function CommonHeader(props) {
               ? "Target Process"
               : "Current Proces"}
           </p>
-          <p style={{ fontSize: "11px", color: "#000000" }}>
+          <p
+            style={{ fontSize: "var(--sub_text_font_size)", color: "#000000" }}
+          >
             {props.tabType == "ForwardForDocuments" ||
             props.tabType == "ForwardForVariables"
               ? localLoadedActivityPropertyData?.m_objPMSubProcess
@@ -84,14 +89,18 @@ function CommonHeader(props) {
             paddingLeft: "5px",
           }}
         >
-          <p style={{ fontSize: "11px", color: "#000000" }}>
+          <p
+            style={{ fontSize: "var(--sub_text_font_size)", color: "#000000" }}
+          >
             {" "}
             {props.tabType == "ForwardForDocuments" ||
             props.tabType == "ForwardForVariables"
               ? "Current Process"
               : "Target Proces"}
           </p>
-          <p style={{ fontSize: "11px", color: "#000000" }}>
+          <p
+            style={{ fontSize: "var(--sub_text_font_size)", color: "#000000" }}
+          >
             {props.tabType == "ForwardForDocuments" ||
             props.tabType == "ForwardForVariables"
               ? localLoadedProcessData?.ProcessName

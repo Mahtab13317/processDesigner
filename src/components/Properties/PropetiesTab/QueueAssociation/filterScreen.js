@@ -13,7 +13,7 @@ import { ADD_SYMBOL } from "../../../../Constants/appConstants";
 
 function FilterScreen(props) {
   const [filterType, setFilterType] = useState("SF");
-
+  const [showSecond, setShowSecond] = useState(null);
   const handleChange = (event) => {
     setFilterType(event.target.value);
   };
@@ -136,7 +136,7 @@ function FilterScreen(props) {
           VariableId_2: "0",
           VarFieldId_2: "0",
           Operator: "4",
-          LogicalOp: "2",
+          LogicalOp: "3",
         },
       ],
 
@@ -179,7 +179,47 @@ function FilterScreen(props) {
       setStreamData([...streamsData]);
     }
   };
-  // ------------------------------
+
+  const testing = () => {
+    return streamsData.map((el, parentIndex) => {
+      return (
+        <div>
+          {el.RuleConditions.map((val, index) => {
+            return (
+              <SetFilterConditionStrip
+                localData={val}
+                index={index}
+                streamsData={streamsData}
+                setStreamData={setStreamData}
+                parentIndex={parentIndex}
+                newRow={newRow}
+                showDelIcon={
+                  streamsData[selectedStream].RuleConditions.length > 1
+                }
+                // disabled={disable}
+              />
+            );
+          })}
+          <hr />
+        </div>
+      );
+    });
+  };
+
+  const handleAddCondition = () => {
+    let temp = [...streamsData];
+    let maxId = 0;
+    temp.forEach((el) => {
+      if (maxId > +el.RuleId) {
+        maxId = +el.RuleId;
+      }
+    });
+    temp.push({
+      RuleConditions: [blankObjectCondition],
+      RuleId: maxId + 1,
+    });
+    setStreamData(temp);
+  };
 
   return (
     <div>
@@ -198,7 +238,7 @@ function FilterScreen(props) {
           onClick={() => props.setShowFilterScreen(false)}
         />
       </div>
-      <FormControl component="fieldset" style={{ padding: "10px" }}>
+      {/* <FormControl component="fieldset" style={{ padding: "10px" }}>
         <RadioGroup
           defaultValue="SF"
           onChange={handleChange}
@@ -214,36 +254,21 @@ function FilterScreen(props) {
             />
           </div>
         </RadioGroup>
-      </FormControl>
-      {filterType == "SF" ? (
+      </FormControl> */}
+      {/* {filterType == "SF" ? (
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             padding: "0px 10px",
+            height: "30vh",
+            overflow: "scroll",
           }}
         >
-          {/* ------------------------------------------------------------------- */}
-          {streamsData[selectedStream].RuleConditions.map((val, index) => {
-            return (
-              <SetFilterConditionStrip
-                localData={val}
-                index={index}
-                streamsData={streamsData}
-                setStreamData={setStreamData}
-                parentIndex={selectedStream}
-                newRow={newRow}
-                showDelIcon={
-                  streamsData[selectedStream].RuleConditions.length > 1
-                }
-                // disabled={disable}
-              />
-            );
-          })}
-          {/* -------------------------------------------------------------------- */}
-          <hr />
+          {testing()}
           <Button
             variant="outlined"
+            onClick={() => handleAddCondition()}
             style={{
               marginTop: "15px",
               border: "2px solid #0472C6",
@@ -257,31 +282,31 @@ function FilterScreen(props) {
           >
             + Add Condition
           </Button>
-        </div>
-      ) : (
-        <div style={{ paddingLeft: "10px" }}>
-          <div
+        </div> */}
+      {/* // ) : ( */}
+      <div style={{ paddingLeft: "10px" }}>
+        <div
+          style={{
+            width: "475px",
+            height: "36px",
+            backgroundColor: "#F0F0F0",
+            padding: "10px",
+            marginTop: "10px",
+          }}
+        >
+          <p style={{ color: "#000000", fontSize: "12px" }}>Type your Query</p>
+          <textarea
             style={{
-              width: "475px",
-              height: "36px",
-              backgroundColor: "#F0F0F0",
+              width: "474px",
+              height: "180px",
+              border: "1px solid #C4C4C4",
+              margin: "22px 0px 0px -10px",
               padding: "10px",
             }}
-          >
-            <p style={{ color: "#000000", fontSize: "12px" }}>
-              Type your Query
-            </p>
-            <textarea
-              style={{
-                width: "474px",
-                height: "105px",
-                border: "1px solid #C4C4C4",
-                margin: "11px 0px 0px -10px",
-              }}
-            />
-          </div>
+          />
         </div>
-      )}
+      </div>
+      {/* // )} */}
       <div className="buttons_add buttonsAddToDo_FilterScreen">
         <Button
           variant="outlined"
@@ -290,7 +315,12 @@ function FilterScreen(props) {
         >
           Cancel
         </Button>
-        <Button id="addAnotherTodo_Button" variant="contained" color="primary">
+        <Button
+          id="addAnotherTodo_Button"
+          variant="contained"
+          color="primary"
+          onClick={() => props.setShowFilterScreen(false)}
+        >
           Save
         </Button>
       </div>

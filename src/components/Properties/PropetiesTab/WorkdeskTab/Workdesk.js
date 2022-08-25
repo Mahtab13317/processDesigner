@@ -17,6 +17,7 @@ import {
 import Mobile from "./Mobile";
 import Others from "./Others";
 import Sap from "./Sap";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 function Workdesk(props) {
   let { t } = useTranslation();
@@ -29,6 +30,7 @@ function Workdesk(props) {
   const [bmobile, setbmobile] = useState(false);
   const [bSap, setbSap] = useState(false);
   const [bOther, setOther] = useState(false);
+  const [globalCustomInterfaces, setGlobalCustomInterfaces] = useState([]);
 
   useEffect(() => {
     axios
@@ -62,6 +64,11 @@ function Workdesk(props) {
             setbSap(true);
           }
           setOther(othersIncluded);
+          setGlobalCustomInterfaces(
+            res.data.GlobalInterfaceData?.filter(
+              (intf) => +intf.InterfaceId > 12 && intf.Included
+            )
+          );
         }
       });
   }, []);
@@ -92,7 +99,11 @@ function Workdesk(props) {
       arr.splice(arr?.length - 1, 0, <Mobile />);
     }
     if (bOther) {
-      arr.splice(arr?.length - 1, 0, <Others />);
+      arr.splice(
+        arr?.length - 1,
+        0,
+        <Others allCustomInterfaces={globalCustomInterfaces} />
+      );
     }
     if (bSap) {
       arr.splice(arr?.length - 1, 0, <Sap />);
@@ -102,6 +113,7 @@ function Workdesk(props) {
 
   return (
     <React.Fragment>
+    <TabsHeading heading={props?.heading} />
       <Tabs
         tabType="processSubTab"
         tabContentStyle="processSubTabContentStyle"

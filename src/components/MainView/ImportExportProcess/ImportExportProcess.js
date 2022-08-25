@@ -28,6 +28,7 @@ import * as actionCreators from "../../../redux-store/actions/processView/action
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import { setToastDataFunc } from "../../../redux-store/slices/ToastDataHandlerSlice";
+import { base64toBlob } from "../../../utility/Base64Operations/base64Operations";
 
 function ImportExportProcess(props) {
   const ProjectValue = useSelector(ImportExportSliceValue);
@@ -302,7 +303,7 @@ function ImportExportProcess(props) {
             // type: "application/json",
           },
         });
-        if (response?.status === 200) {
+        if (response?.status === 200 && response?.data?.Status === 0) {
           setAction(null);
           dispatch(
             setToastDataFunc({
@@ -351,20 +352,20 @@ function ImportExportProcess(props) {
     axios({
       url: "/pmweb/exportProcess", //your url
       method: "POST",
-      responseType: "blob", // important
+      // responseType: "blob", // important
       data: payload,
     })
       .then((res) => {
         const url = window.URL.createObjectURL(
-          new Blob([res.data], {
-            type: res.headers["content-type"],
-          })
+          base64toBlob(res?.data?.fileData, "application/octet-stream")
         );
-        var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-        var matches = filenameRegex.exec(res.headers["content-disposition"]);
+
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", matches[1].replace(/['"]/g, "")); //or any other extension
+        link.setAttribute(
+          "download",
+          res.data?.fileName || `${localLoadedProcessData.ProcessName}`
+        ); //or any other extension
         document.body.appendChild(link);
         link.click();
         setAction(null);
@@ -431,13 +432,13 @@ function ImportExportProcess(props) {
       <div
         style={{
           width: "100%",
-          height: typeImportorExport === "import" ? "15%" : "40px",
+          height: typeImportorExport === "import" ? "11%" : "40px",
           borderBottom: "1px solid rgb(0,0,0,0.5)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          paddingInline: "15px",
-          fontSize: "1rem",
+          paddingInline: "10px",
+          fontSize: "var(--subtitle_text_font_size)",
           fontWeight: "500",
         }}
       >
@@ -466,7 +467,7 @@ function ImportExportProcess(props) {
             alignItems: "flex-start",
             flexDirection: "column",
             width: "100%",
-            height: "73%",
+            height: "77%",
             padding: "10px",
             overflowY: "scroll",
             direction: direction,
@@ -552,7 +553,7 @@ function ImportExportProcess(props) {
             <div
               style={{
                 width: "72%",
-                height: "1.5625rem",
+                height: "2.1rem",
                 marginBottom: "10px",
                 background: "#F8F8F8 0% 0% no-repeat padding-box",
                 border: "1px solid #CECECE",
@@ -580,8 +581,8 @@ function ImportExportProcess(props) {
                 style={{
                   fontSize: "0.8rem",
                   border: "1px solid #0072C6",
-                  height: "1.5625rem",
-                  width: "5.2rem",
+                  height: "2rem",
+                  width: "6.2rem",
                   whiteSpace: "nowrap",
                   display: "flex",
                   flexDirection: "row",
@@ -616,7 +617,7 @@ function ImportExportProcess(props) {
             id="add_sectionName"
             style={{
               width: "100%",
-              height: "1.5625rem",
+              height: "2.1rem",
               marginBottom: "10px",
               background: "#F8F8F8 0% 0% no-repeat padding-box",
               border: "1px solid #CECECE",
@@ -642,7 +643,7 @@ function ImportExportProcess(props) {
               //   onChange={(e) => setsectionName(e.target.value)}
               style={{
                 width: "100%",
-                height: "1.5625rem",
+                height: "2.1rem",
                 marginBottom: "10px",
                 background: "#F8F8F8 0% 0% no-repeat padding-box",
                 border: "1px solid #CECECE",
@@ -710,7 +711,7 @@ function ImportExportProcess(props) {
             color: "#606060",
           }}
         >
-          <p style={{ fontWeight: "400", fontSize: "0.75rem" }}>
+          <p className="field_label">
             {t("export")} {t("type")}{" "}
           </p>
           <RadioGroup
@@ -724,7 +725,7 @@ function ImportExportProcess(props) {
               control={<Radio size="small" color="primary" />}
               label={CONST_XML}
               labelPlacement="end"
-              style={{ fontSize: "0.8rem" }}
+              style={{ fontSize: "var(--base_text_font_size)" }}
               classes={{
                 label: { color: "red" },
               }}
@@ -734,21 +735,21 @@ function ImportExportProcess(props) {
               control={<Radio size="small" color="primary" />}
               label={CONST_XPDI}
               labelPlacement="end"
-              style={{ fontSize: "0.8rem" }}
+              style={{ fontSize: "var(--base_text_font_size)" }}
             />
             <StyledLabel
               value="bpmn"
               control={<Radio size="small" color="primary" />}
               label={CONST_BPMN}
               labelPlacement="end"
-              style={{ fontSize: "0.8rem" }}
+              style={{ fontSize: "var(--base_text_font_size)" }}
             />
             <StyledLabel
               value="bpel"
               control={<Radio size="small" color="primary" />}
               label={CONST_BPEL}
               labelPlacement="end"
-              style={{ fontSize: "0.8rem" }}
+              style={{ fontSize: "var(--base_text_font_size)" }}
             />
           </RadioGroup>
         </div>
@@ -762,7 +763,7 @@ function ImportExportProcess(props) {
           alignItems: "flex-end",
           width: "100%",
           height: typeImportorExport === "import" ? "12%" : "40px",
-          padding: "10px",
+          padding: "10px 2px 10px 0px",
         }}
       >
         {typeImportorExport === "import" ? (
@@ -776,7 +777,7 @@ function ImportExportProcess(props) {
                   onClick={(e) => handleSubmit(e, true, false, false)}
                   style={{
                     background: disableImport() ? "grey" : "#0072c6",
-                    width: "10rem",
+                    width: "14rem",
                   }}
                 >
                   {t("overwriteExistingProcess")}
@@ -787,10 +788,10 @@ function ImportExportProcess(props) {
                   className={styles.newVersionButton}
                   onClick={(e) => handleSubmit(e, false, true, false)}
                   style={{
-                    background: disableImport() ? "grey" : "white",
+                    background: disableImport() ? "var(--button_color)" : "white",
                     color: disableImport() ? "white" : "#0072c6",
-                    width: "8rem",
-                    border: "1px solid rgb(0,0,0,0.4)",
+                    width: "10rem",
+                    border: "1px solid var(--button_color)",
                     borderRadius: "3px",
                   }}
                 >

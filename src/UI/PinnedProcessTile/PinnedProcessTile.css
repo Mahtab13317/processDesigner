@@ -1,9 +1,6 @@
 .cardPinned {
-  width: 16.1vw;
-  height: 6.375rem !important;
-  margin-bottom: 1rem !important;
+  width: 16.45vw;
   background: #ffffff 0% 0% no-repeat padding-box;
-  margin-right: 1.4vw;
   border: 0 !important;
   cursor: pointer;
   position: relative;
@@ -22,58 +19,61 @@
 }
 
 .titlePinned {
-  height: 19px;
   text-align: left;
-  font: normal normal 600 13px/18px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 1.25rem
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   margin-bottom: 0;
   margin-top: 0.5rem;
+  width: 12.5vw;
+  display: flex;
+}
+
+.titlePinnedName {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 80%;
 }
 
 .version {
-  font: normal normal normal 13px/18px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 1.25rem
+    var(--font_family);
   letter-spacing: 0px;
   color: #828282;
-  margin-left: 0.5rem;
+  margin-left: 0.5vw;
 }
 
 .processStatus {
-  font: normal normal 600 11px/15px Open Sans;
+  font: normal normal 600 11px / 15px var(--font_family);
   letter-spacing: 0px;
   color: #606060;
   text-transform: uppercase;
-  height: 17px;
   text-align: left;
-  opacity: 1;
-  margin-top: 0.44vw;
   margin-left: 0.125vw;
-  margin-bottom: 0.1rem;
 }
 
 .processCat {
-  font: normal normal normal 11px/15px Open Sans;
   letter-spacing: 0px;
   color: #606060;
-  height: 17px;
-  margin: 0.15rem 0 0.3rem 0;
+  font: normal normal normal 11px / 15px var(--font_family);
+  margin: 0.125rem 0 0.75rem 0;
+  width: 12.5vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .processModification {
-  top: 0px;
-  left: 0px;
   text-align: left;
-  font: normal normal normal 10px/14px Open Sans;
+  font: normal normal normal 10px / 14px var(--font_family);
   letter-spacing: 0px;
   color: #606060;
-  margin: 0;
 }
 
 .fileLogo {
   margin-top: 0.5rem;
-  width: 18px !important;
-  height: 17.2px !important;
-  transform: translateX('17px');
+  width: 1.34rem;
+  aspect-ratio: 1;
 }
 .typeColor {
   border-radius: 50%;
@@ -83,13 +83,14 @@
 }
 
 .pinnedCardContent {
-  padding: 0.25rem !important;
+  padding: var(--spacing_v) !important;
 }
 
 .processNameDiv {
   background: rgba(0, 114, 198, 0.07) 0% 0% no-repeat padding-box;
   border-radius: 4px;
-  padding-left: 9px;
+  gap: 0.5vw;
+  padding: 0 0 0 0.5vw;
 }
 
 .logoDiv {
@@ -97,11 +98,10 @@
 }
 
 .titleDiv {
-  flex: 5;
+  flex: 10 1;
   text-align: left;
-  margin-left:-8px !important;
 }
 
 .pinnedProcessAlignment {
-  margin-left: 2.5vw !important;
+  margin: 0.25rem 0 0 2.25vw;
 }

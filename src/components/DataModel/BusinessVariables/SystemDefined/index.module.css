@@ -5,10 +5,11 @@
 .headerDiv {
   background: #f0f0f0 0% 0% no-repeat padding-box;
   opacity: 1;
-  height: 2rem;
+  height: 2.5rem;
   width: 100%;
   display: flex;
   flex-direction: row;
+  align-items: center;
 }
 
 .dataMainDiv {
@@ -28,7 +29,9 @@
 
 .variableName {
   text-align: left;
-  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  /* font: normal normal 600 0.75rem/1.5rem Open Sans; */
+  font-size: var(--base_text_font_size);
+  font-weight: 600;
   letter-spacing: 0rem;
   color: #000000;
   opacity: 1;
@@ -37,7 +40,8 @@
 
 .variableType {
   text-align: left;
-  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  font-size: var(--base_text_font_size);
+  font-weight: 600;
   letter-spacing: 0rem;
   color: #000000;
   opacity: 1;
@@ -46,7 +50,8 @@
 
 .dataType {
   text-align: left;
-  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  font-size: var(--base_text_font_size);
+  font-weight: 600;
   letter-spacing: 0rem;
   color: #000000;
   opacity: 1;
@@ -55,7 +60,7 @@
 
 .defaultValue {
   text-align: left;
-  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0rem;
   color: #000000;
   opacity: 1;
@@ -64,7 +69,8 @@
 
 .variableLength {
   text-align: left;
-  font: normal normal 600 0.75rem/1.5rem Open Sans;
+  font-size: var(--base_text_font_size);
+  font-weight: 600;
   letter-spacing: 0rem;
   color: #000000;
   opacity: 1;
@@ -74,7 +80,7 @@
 .dataDiv {
   background: #ffffff 0% 0% no-repeat padding-box;
   opacity: 1;
-  height: 2.813rem;
+  height: 3.4rem;
   margin-bottom: 0.125rem;
   display: flex;
   flex-direction: row;
@@ -83,11 +89,11 @@
 .variableNameData {
   margin: 0.875rem 0rem 0.875rem 1.813rem;
   text-align: left;
-  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0rem;
   color: #000000;
   opacity: 1;
-  width: 7.8125rem;
+  width: 12.5rem;
 }
 
 .modifiableVariableType {
@@ -103,7 +109,7 @@
 
 .modifiableText {
   padding: 6px;
-  font: normal normal normal 0.75rem/1.063rem Open Sans !important;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0rem;
   color: #000000;
   opacity: 1;
@@ -121,7 +127,7 @@
 
 .nonModifiableText {
   padding: 6px;
-  font: normal normal normal 0.75rem/1.063rem Open Sans !important;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0rem;
   color: #5e5e5e;
   opacity: 1;
@@ -129,7 +135,7 @@
 
 .dataTypeValue {
   text-align: left;
-  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0rem;
   color: #000000;
   opacity: 1;
@@ -139,7 +145,7 @@
 
 .defaultValueData {
   text-align: left;
-  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0rem;
   color: #000000;
   opacity: 1;
@@ -149,10 +155,10 @@
 
 .variableLengthData {
   text-align: left;
-  font: normal normal normal 0.75rem/1.063rem Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0rem;
   color: #000000;
   opacity: 1;
-  width: 3.125rem;
+  width: 6.125rem;
   margin: 0.875rem 0rem 0.875rem 1.875rem;
 }

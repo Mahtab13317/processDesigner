@@ -19,17 +19,19 @@
 }
 .addAttachHeading {
   font: normal normal 700 14px/19px Open Sans;
+  font-size: var(--subtitle_text_font_size);
   letter-spacing: 0px;
   color: #000000;
 }
 .addAttachBtn {
-  background: #ffffff 0% 0% no-repeat padding-box;
-  border: 1px solid #0072c5;
+  background-color: white !important;
+  color: var(--button_color) !important;
+  border: 1px solid var(--button_color) !important;
+  font-weight: 600 !important;
   border-radius: 2px;
   text-align: center;
   font: normal normal 600 12px/17px Open Sans;
   letter-spacing: 0px;
-  color: #0072c6;
   padding: 0.25rem 0.5vw;
   width: 4rem;
   cursor: pointer;
@@ -53,15 +55,14 @@
   border-radius: 2px;
 }
 .collapsedView .tableHeaderRow {
-    padding: 0.25rem 1vw;
-    display: flex;
-    align-items: center;
-    background: #f8f8f8 0% 0% no-repeat padding-box;
-    border: 1px solid #f8f8f8;
-    border-radius: 2px;
-    height: 2rem;
-  }
-  
+  padding: 0.25rem 1vw;
+  display: flex;
+  align-items: center;
+  background: #f8f8f8 0% 0% no-repeat padding-box;
+  border: 1px solid #f8f8f8;
+  border-radius: 2px;
+  height: 2rem;
+}
 
 .tableRow {
   padding: 0.25rem 1vw;
@@ -101,20 +102,13 @@
   text-align: left !important;
 }
 
-.expandedView .divHead {
+.divHead {
   text-align: left;
   font: normal normal 600 13px/18px Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0.42px;
   color: #070707;
 }
-.collapsedView .divHead {
-    text-align: left;
-    font: normal normal 600 12px/17px Open Sans;
-    letter-spacing: 0.42px;
-    color: #070707;
-    padding: 0.1rem;
-     margin: 0.1rem;
-  }
 
 .expandedView .divBody {
   text-align: left;
@@ -123,10 +117,10 @@
   color: #070707;
 }
 .collapsedView .divBody {
-    text-align: left;
-    font: normal normal normal 12px/17px Open Sans;
-    letter-spacing: 0.42px;
-    color: #070707;
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0.42px;
+  color: #070707;
 }
 
 .cancelIconExpanded {
@@ -134,12 +128,19 @@
   height: 1.25rem !important;
   margin: 0.3vw;
 }
+
 .cancelIconCollapsed {
   width: 1.99rem !important;
   height: 1.25rem !important;
   margin: 0.3vw;
   font-size: 9px;
 }
+
+.cancelIcon {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
 .addIconExpanded {
   width: 3.25rem !important;
   height: 1.25rem !important;
@@ -149,142 +150,105 @@
   width: 1.23rem;
   height: 1.25rem !important;
   margin: 0.2vw;
-  
 }
-.expandedView .conditionDiv {
+.conditionDiv {
   width: 40%;
 }
-.collapsedView .conditionDiv{
-    width: 30%;
-}
-.expandedView .operationDiv {
+.operationDiv {
   width: 40%;
 }
-.collapsedView .operationDiv {
-    width: 30%;
-  }
-.expandedView .addDiv {
+.addDiv {
   width: 15%;
   text-align: right !important;
 }
-.collapsedView .addDiv {
-    width: 27%;
-    text-align: right !important;
-  }
+
 .expandedView .serialDiv {
   width: 5%;
 }
-.collapsedView .serialDiv {
-    width: 7%;
-    padding-left: 0.4rem
-  }
 
 .ruleInput {
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   background: #fff;
-  width: 80%;
-  height: 1.75rem;
-  padding: 0 0.5vw;
+  width: 75%;
+  /*height: 1.75rem;*/
+  padding: 0.75rem 0.7vw !important;
 }
-.expandedView .showInput {
+
+.showInput {
   padding: 0.25rem 1vw;
   display: flex;
   align-items: center;
   border: 1px solid #f8f8f8;
   background: #0072c61a;
 }
-.collapsedView .showInput {
-    padding: 0.25rem 0vw;
-    display: flex;
-    align-items: center;
-    border: 1px solid #f8f8f8;
-    background: #0072c61a;
-  }
-.expandedView .cancelBtn {
-  background: #ffffff 0% 0% no-repeat padding-box;
-  border: 1px solid #0072c5;
+
+.cancelBtn {
+  background-color: white !important;
+  color: var(--button_color) !important;
+  border: 1px solid var(--button_color) !important;
+  font-weight: 600 !important;
   border-radius: 2px;
   text-align: center;
   font: normal normal 600 12px/17px Open Sans;
   letter-spacing: 0px;
-  color: #0072c6;
+
   padding: 0.25rem 0.5vw;
-  width: 4rem;
+  cursor: pointer;
 }
-.collapsedView .cancelBtn {
-    background: #ffffff 0% 0% no-repeat padding-box;
-    border: 1px solid #0072c5;
-    border-radius: 2px;
-    text-align: center;
-    font: normal normal 600 8px/13px Open Sans;
-    letter-spacing: 0px;
-    color: #0072c6;
-    height: 1rem;
-    margin: 0 0.2vw;
-    width: 2rem;
-  }
-  
-.expandedView .addBtn {
-  background: #ffffff 0% 0% no-repeat padding-box;
-  border: 1px solid #0072c5;
+
+.disabledAddBtn {
+  background: rgba(0, 0, 0, 0.12) 0% 0% no-repeat padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.5);
   border-radius: 2px;
   text-align: center;
   font: normal normal 600 12px/17px Open Sans;
   letter-spacing: 0px;
-  color: #0072c6;
+  color: rgba(0, 0, 0, 0.5);
   padding: 0.25rem 0.5vw;
-  width: 4rem;
   margin: 0.25rem;
+  cursor: default;
 }
-.collapsedView .addBtn {
-    background: #ffffff 0% 0% no-repeat padding-box;
-    border: 1px solid #0072c5;
-    border-radius: 2px;
-    text-align: center;
-    font: normal normal 600 8px/13px Open Sans;
-    letter-spacing: 0px;
-    color: #0072c6;
-    height: 1rem;
-    width: 2rem;
-    margin: 0 0.2vw;
-  }
-  .expandedView .divBodyrule {
-    text-align: left;
-    font: normal normal normal 13px/18px Open Sans;
-    letter-spacing: 0.42px;
-    color: #070707;
-  }
-  .collapsedView .divBodyrule {
-      text-align: left;
-      font: normal normal normal 12px/17px Open Sans;
-      letter-spacing: 0.42px;
-      color: #070707;
-  }
-  .expandedView .showInput1 {
-    padding: 0.25rem 1vw;
-    display: flex;
-    align-items: center;
-    border: 1px solid #f8f8f8;
-    
-  }
-  .collapsedView .showInput1 {
-      padding: 0.25rem 0vw;
-      display: flex;
-      align-items: center;
-      border: 1px solid #f8f8f8;
-     
-    }
-    .expandedView .conditionDiv1 {
-        width: 40%;
-      }
-      .collapsedView .conditionDiv1{
-          width: 43%;
-          margin:-0.9rem;
-      }
-      .expandedView .operationDiv1{
-        width: 40%;
-      }
-      .collapsedView .operationDiv1 {
-          width: 30%;
-        }
+
+.addBtn {
+  background-color: white !important;
+  color: var(--button_color) !important;
+  border: 1px solid var(--button_color) !important;
+  font-weight: 600 !important;
+  border-radius: 2px;
+  text-align: center;
+  font: normal normal 600 12px/17px Open Sans;
+  letter-spacing: 0px;
+
+  padding: 0.25rem 0.5vw;
+  margin: 0.25rem;
+  cursor: pointer;
+}
+
+.expandedView .divBodyrule {
+  text-align: left;
+  font: normal normal normal 13px/18px Open Sans;
+  letter-spacing: 0.42px;
+  color: #070707;
+}
+.collapsedView .divBodyrule {
+  text-align: left;
+  font: normal normal normal 12px/17px Open Sans;
+  letter-spacing: 0.42px;
+  color: #070707;
+}
+
+.showInput1 {
+  padding: 0.25rem 1vw;
+  display: flex;
+  align-items: center;
+  border: 1px solid #f8f8f8;
+}
+
+.conditionDiv1 {
+  width: 40%;
+}
+
+.operationDiv1 {
+  width: 40%;
+}

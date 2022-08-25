@@ -51,7 +51,10 @@ function DataTable(props) {
                         : styles.dataEntryAddRemoveBtnHeader
                     }
                     style={{
-                      color: props.tableType == "remove" ? "red" : "#0072C6",
+                      color:
+                        props.tableType == "remove"
+                          ? "red"
+                          : "var(--link_color)",
                     }}
                     onClick={props.headerEntityClickFunc}
                     id={`${props.id}_all`}
@@ -115,7 +118,9 @@ function DataTable(props) {
                         }
                         style={{
                           color:
-                            props.tableType == "remove" ? "red" : "#0072C6",
+                            props.tableType == "remove"
+                              ? "red"
+                              : "var(--link_color)",
                         }}
                         onClick={() => props.singleEntityClickFunc(option)}
                         id={`${props.id}_item${index}`}

@@ -12,10 +12,42 @@ import {
   PMWEB_CONTEXT,
 } from "../../../Constants/appConstants";
 import ProcessIconTable from "../../../assets/HomePage/HS_Process.svg";
+import { makeStyles } from "@material-ui/core";
+
+const useStyles = makeStyles({
+  listItemIconRoot: {
+    minWidth: "25px",
+  },
+  listItemTextRoot: {
+    marginTop: "2px",
+    marginBottom: "2px",
+    "& span": {
+      fontSize: "var(--base_text_font_size)",
+    },
+  },
+  svgIconSmall: {
+    fontSize: "1.12rem",
+  },
+  statusSubDiv: {
+    display: "flex",
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  processType: {
+    textTransform: "uppercase",
+    fontFamily: "var(--font_family)",
+    fontWeight: "600",
+    fontSize: "11px",
+  },
+  checkedType: {
+    fontFamily: "var(--font_family)",
+    fontSize: "11px",
+  },
+});
 
 function PinnedProcesses(props) {
   let { t } = useTranslation();
-
+  const classes = useStyles();
   const [pinnedData, setpinnedData] = React.useState([]);
   useEffect(() => {
     async function getPinnedProcesses() {
@@ -41,21 +73,19 @@ function PinnedProcesses(props) {
             ?.sort(function sortPinnedData(a, b) {
               return a.OrderId - b.OrderId;
             })
-            .slice(0, 4)
+            ?.slice(0, 4)
     ).map((data, index) => {
       return (
-        <React.Fragment>
-          <PinnedProcessTile
-            index={index}
-            name={data.Name}
-            versionNo={data.Version}
-            modifiedTime={data.ModificationTime}
-            projectName={data.Parent}
-            processType={data.Status}
-            modifiedDate={data.ModificationDate}
-            id={data.Id}
-          />
-        </React.Fragment>
+        <PinnedProcessTile
+          index={index}
+          name={data.Name}
+          versionNo={data.Version}
+          modifiedTime={data.ModificationTime}
+          projectName={data.Parent}
+          processType={data.Status}
+          modifiedDate={data.ModificationDate}
+          id={data.Id}
+        />
       );
     });
   } else if (props.pinnedListView === 1) {
@@ -64,9 +94,9 @@ function PinnedProcesses(props) {
         id: "IC",
         label: "",
         styleTdCell: {
-          minWidth: "4.5%",
-          width: "4.5%",
-          paddingLeft: "10px",
+          minWidth: "3.7vw",
+          width: "3.7vw",
+          paddingLeft: "0.7rem",
           lineHeight: "0",
         },
       },
@@ -74,20 +104,19 @@ function PinnedProcesses(props) {
         id: "NM",
         label: t("name"),
         styleTdCell: {
-          minWidth: "15%",
-          width: "39%",
-          paddingLeft: "10px",
+          minWidth: "24.2vw",
+          width: "24.2vw",
         },
       },
       {
         id: "ST",
         label: t("status"),
-        styleTdCell: { minWidth: "10%", width: "22%" },
+        styleTdCell: { minWidth: "17.1vw", width: "17.1vw" },
       },
       {
         id: "LU",
         label: t("lastUpdatedOn"),
-        styleTdCell: { minWidth: "10%", width: "34.5%" },
+        styleTdCell: { minWidth: "23.5vw", width: "23.5vw" },
       },
     ];
 
@@ -99,71 +128,90 @@ function PinnedProcesses(props) {
             <img
               src={ProcessIconTable}
               alt={t("img")}
-              style={{ width: "18px", height: "17.2px" }}
+              style={{ width: "1.5rem", height: "1.5rem" }}
             />
           </React.Fragment>
         ),
         NM: (
           <React.Fragment>
-            <p className="recentTableName">{processData.Name}</p>
-            <p className="row recentTableRowCss">
-              <p className="recentTableVersion">
+            <p
+              className="recentTableName"
+              style={{ fontFamily: "var(--font_family)", fontWeight: "600" }}
+            >
+              {processData.Name}
+            </p>
+            <p
+              className="recentTableName"
+              style={{ color: "#828282", fontSize: "11px" }}
+            >
+              <span style={{ color: "#828282" }}>
                 {t("v")}
                 {processData.Version}
-              </p>
-              <p className="recentTableProjectName">{processData.Parent}</p>
+              </span>
+              {"  .  "}
+              {processData.Parent}
             </p>
           </React.Fragment>
         ),
         ST: (
           <React.Fragment>
-            <p className="row">
+            <div className={classes.statusSubDiv}>
               <img
                 style={{
-                  height: "10px",
-                  width: "10px",
+                  height: "0.75rem",
+                  width: "0.75rem",
                   marginTop: "1px",
                   marginRight: "0.125vw",
                 }}
                 src={t(tileProcess(processData.Status)[0])}
                 alt=""
               />
-              {/*4th index is used for background color*/}
-              <p className="recentTableProcessType">
+              <p className={classes.processType}>
                 {t(tileProcess(processData.Status)[1])}{" "}
-                {processData.Status == ("RP" || "EP") ? (
-                  <img
-                    src={t(tileProcess(processData.Status)[5])}
-                    alt={t("img")}
-                  />
-                ) : (
-                  ""
-                )}
-              </p>{" "}
+                <img src={tileProcess(processData.Status)[5]} alt="" />
+              </p>
+              <span className={classes.checkedType}>
+                {tileProcess(processData.Status)[8]
+                  ? `(${t("Checked")})`
+                  : null}
+              </span>
               {/* 1 is used for name and 5th is used for the clock icon */}
-            </p>
-            <p className="recentTableRowCss">
+            </div>
+            <p style={{ fontSize: "11px" }}>
               {processData.StatusMessage} {t("on")} {processData.CreationDate}
             </p>
           </React.Fragment>
         ),
         LU: (
-          <React.Fragment>
-            <p className="recentTableProcessDate">
+          <div>
+            <p
+              className="recentTableProcessDate"
+              style={{
+                fontFamily: "var(--font_family)",
+                fontWeight: "600",
+                fontSize: "11px",
+              }}
+            >
               {processData.ModificationDate}
             </p>
-            {processData.SameDate == "true" ? (
-              <p className="recentTableRowCss">
-                {t("EditedBy")}
-                {processData.Editor} {t("at")} {processData.ModificationTime}
-              </p>
-            ) : (
-              <p className="recentTableRowCss">
-                {t("EditedBy")}
-                {processData.Editor} {t("on")} {processData.ModificationDate}
-              </p>
-            )}
-          </React.Fragment>
+            <p
+              style={{
+                fontFamily: "var(--font_family)",
+                fontSize: "11px",
+              }}
+            >
+              {t("editedBy")} <span>{processData.Editor} </span>
+              {processData.SameDate == "true" ? (
+                <span>
+                  {t("at")} {processData.ModificationTime}
+                </span>
+              ) : (
+                <span>
+                  {t("on")} {processData.ModificationDate}
+                </span>
+              )}
+            </p>
+          </div>
         ),
         data: (
           <div>
@@ -198,7 +246,11 @@ function PinnedProcesses(props) {
     );
   }
 
-  return <div className="row">{pinnedDataUI}</div>;
+  return (
+    <div className="row" style={{ gap: "1vw" }}>
+      {pinnedDataUI}
+    </div>
+  );
 }
 
 export default PinnedProcesses;

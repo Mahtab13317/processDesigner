@@ -76,6 +76,23 @@ export const AddActivity = (
               AssociatedTasks: [],
               "Target WorkStep": [],
             });
+            // code added on 22 July 2022 for BugId 113305
+            if (!activity.queueInfo.queueExist) {
+              processObject.Queue?.splice(0, 0, {
+                QueueFilter: "",
+                OrderBy: activity.queueInfo?.orderBy,
+                AllowReassignment: activity.queueInfo?.allowReassignment,
+                UG: [],
+                FilterOption: "0",
+                RefreshInterval: activity.queueInfo?.refreshInterval,
+                QueueId: activity.queueInfo?.queueId,
+                SortOrder: activity.queueInfo?.sortOrder,
+                QueueName: activity.queueInfo?.queueName,
+                QueueDescription: activity.queueInfo?.queueDesc,
+                QueueType: activity.queueInfo?.queueType,
+                FilterValue: "",
+              });
+            }
             return processObject;
           });
         }
@@ -99,6 +116,13 @@ export const AddActivity = (
             processObject.MileStones[milestone.mileIndex].Activities = [
               ...newArr,
             ];
+            // code added on 22 July 2022 for BugId 113305
+            if (!activity.queueInfo.queueExist) {
+              processObject.Queue?.splice(0, 1);
+            }
+            if (+activity.actType === 41 && +activity.actSubType === 1) {
+              processObject.Queue?.splice(0, 1);
+            }
             return processObject;
           });
           hideIcons();

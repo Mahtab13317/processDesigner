@@ -10,9 +10,13 @@ import axios from "axios";
 import SunTextEditor from "../../../../UI/SunEditor/SunTextEditor";
 import c_Names from "classnames";
 import "./ProjectCreationArabic.css";
+import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
+import { useDispatch } from "react-redux";
+import { setProjectCreation } from "../../../../redux-store/slices/projectCreationSlice";
 
 function ProjectCreation(props) {
   let { t } = useTranslation();
+  const dispatch = useDispatch();
   const { setShowModal } = props;
   const direction = `${t("HTML_DIR")}`;
   const [projectInput, setprojectInput] = useState("");
@@ -32,11 +36,33 @@ function ProjectCreation(props) {
         description: descriptionInput,
       })
       .then((response) => {
+        //code edited on 28 July 2022 for BugId 111769
         if (response?.data?.Status === 0) {
+          dispatch(
+            setToastDataFunc({
+              message: response?.data?.Message,
+              severity: "success",
+              open: true,
+            })
+          );
+          dispatch(
+            setProjectCreation({
+              projectCreated: true,
+              projectName: projectInput,
+              projectDesc: descriptionInput,
+            })
+          );
           cancelHandler();
+        } else if (response?.data?.Status === -2) {
+          // code edited on 28 July 2022 for BugId 112445
+          dispatch(
+            setToastDataFunc({
+              message: response?.data?.Message,
+              severity: "error",
+              open: true,
+            })
+          );
         }
-      }).catch(err=>{
-        console.log(err)
       });
   };
 

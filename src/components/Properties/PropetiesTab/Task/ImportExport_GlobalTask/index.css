@@ -15,7 +15,7 @@
     border: 1px solid #c4c4c4 !important;
     border-radius: 2px !important;
     opacity: 1 !important;
-    font-size: 0.625rem;
+    font-size: var(--sub_text_font_size);
     text-transform: none !important;
     margin-right: 0.4375rem;
   }
@@ -25,11 +25,11 @@
     width: 5.9375rem;
     height: 1.75rem;
     text-align: left;
-    font: normal normal 600 12px/17px Open Sans;
+    font: normal normal 600 var(--base_text_font_size)/17px Open Sans;
     letter-spacing: 0px;
     color: white;
     opacity: 1;
-    font-size: 0.625rem;
+    font-size: var(--sub_text_font_size);
     margin-right: 0.4375rem;
     text-transform: none !important;
     border-radius: 0px !important;

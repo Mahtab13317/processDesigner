@@ -32,8 +32,7 @@ export function getActivityQueueObj(
     (+activityType === 21 && +activitySubType === 1) ||
     (+activityType === 4 && +activitySubType === 1)
   ) {
-    /*start event, conditional start, message start, case workdesk, query, oms adapter, event, jms producer
-      jms consumer, timer event*/
+    /*start event, conditional start, message start, case workdesk, query, oms adapter, event, jms producer, jms consumer, timer event*/
     setNewId((oldIds) => {
       let newIds = { ...oldIds };
       queueId = newIds.minQueueId - 1;
@@ -42,7 +41,7 @@ export function getActivityQueueObj(
     queueObj = {
       queueId: queueId,
       queueName: `${processData.ProcessName}_${activityName}`,
-      QueueDesc: `${t("DefaultQueueComment")} ${activityName}`,
+      queueDesc: `${t("DefaultQueueComment")} ${activityName}`,
       sortOrder: "A",
       orderBy: 2,
       refreshInterval: 0,
@@ -102,6 +101,19 @@ export function getActivityQueueObj(
         ) {
           existingSystemQueue = activity.QueueId;
         }
+        if (+activityType === 22 && +activitySubType === 1) {
+          if (
+            (+activity.ActivityType === 40 &&
+              +activity.ActivitySubType === 1) ||
+            (+activity.ActivityType === 23 &&
+              +activity.ActivitySubType === 1) ||
+            (+activity.ActivityType === 24 &&
+              +activity.ActivitySubType === 1) ||
+            (+activity.ActivityType === 25 && +activity.ActivitySubType === 1)
+          ) {
+            existingSystemQueue = activity.QueueId;
+          }
+        }
       });
     });
     if (existingSystemQueue) {
@@ -125,43 +137,43 @@ export function getActivityQueueObj(
         queueObj = {
           ...queueObj,
           queueName: SystemWSQueue,
-          QueueDesc: `${t("SystemWSComment")}`,
+          queueDesc: `${t("SystemWSComment")}`,
         };
       } else if (+activityType === 31 && +activitySubType === 1) {
         queueObj = {
           ...queueObj,
           queueName: SystemBRMSQueue,
-          QueueDesc: `${t("SystemBRMSComment")}`,
+          queueDesc: `${t("SystemBRMSComment")}`,
         };
       } else if (+activityType === 34 && +activitySubType === 1) {
         queueObj = {
           ...queueObj,
           queueName: SystemDXQueue,
-          QueueDesc: `${t("SystemDXComment")}`,
+          queueDesc: `${t("SystemDXComment")}`,
         };
       } else if (+activityType === 10 && +activitySubType === 4) {
         queueObj = {
           ...queueObj,
           queueName: SystemArchiveQueue,
-          QueueDesc: `${t("SystemArchiveComment")}`,
+          queueDesc: `${t("SystemArchiveComment")}`,
         };
       } else if (+activityType === 10 && +activitySubType === 1) {
         queueObj = {
           ...queueObj,
           queueName: SystemPFEQueue,
-          QueueDesc: `${t("SystemPFEComment")}`,
+          queueDesc: `${t("SystemPFEComment")}`,
         };
       } else if (+activityType === 30 && +activitySubType === 1) {
         queueObj = {
           ...queueObj,
           queueName: SystemSharepointQueue,
-          QueueDesc: `${t("SystemSharepointComment")}`,
+          queueDesc: `${t("SystemSharepointComment")}`,
         };
       } else if (+activityType === 29 && +activitySubType === 1) {
         queueObj = {
           ...queueObj,
           queueName: SystemSAPQueue,
-          QueueDesc: `${t("SystemSAPComment")}`,
+          queueDesc: `${t("SystemSAPComment")}`,
         };
       }
     }

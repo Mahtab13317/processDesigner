@@ -299,7 +299,6 @@ const ProcessView = (props) => {
 
   // Function that gives elements based on type
   const getElementAccToType = (array, type) => {
-    console.log("555", "ARRAY", array, type);
     let tempArr = [];
     array.forEach((element) => {
       if (type === "tabs") {
@@ -308,8 +307,6 @@ const ProcessView = (props) => {
         tempArr.push(element.component);
       }
     });
-    console.log("555", "ARRAY", array, type, tempArr);
-
     return tempArr;
   };
 
@@ -462,7 +459,8 @@ const ProcessView = (props) => {
 
   return (
     <div className="tabViewingArea">
-      <Header processData={processData} />
+      {/*code edited on 26 July 2022 for BugId 110024*/}
+      <Header processData={processData} setProcessData={setProcessData}/>
       <td style={{ direction: `${t("HTML_DIR")}` }}>
         <Tabs
           tabType="processSubTab"
@@ -476,7 +474,10 @@ const ProcessView = (props) => {
             ...getElementAccToType(tabsArray, "tabs"),
           ]}
           TabElement={[
-            <div className={cx("pmviewingArea")} style={{ marginTop: "0" }}>
+            <div
+              className={cx("pmviewingArea")}
+              style={{ marginTop: "0", height: "81vh" }}
+            >
               <ViewingArea
                 processType={openProcessType}
                 displayMessage={props.setDisplayMessage}

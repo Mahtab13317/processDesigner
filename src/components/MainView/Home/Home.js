@@ -22,34 +22,38 @@ import {
   SERVER_URL_LAUNCHPAD,
   ENDPOINT_MOVE_PINNED_TILES,
 } from "../../../Constants/appConstants";
+import { store, useGlobalState } from "state-pool";
 
 const useStyles = makeStyles({
   listItemIconRoot: {
     minWidth: "25px",
+    marginBottom: "0 !important",
+    justifyContent: "center",
   },
   listItemTextRoot: {
     marginTop: "2px",
     marginBottom: "2px",
     "& span": {
-      fontSize: "12px",
+      fontSize: "var(--base_text_font_size)",
     },
   },
   svgIconSmall: {
-    fontSize: "1.12rem",
-    marginTop: "5px",
-    marginLeft: "5px",
+    fontSize: "1.5rem",
   },
   pinnedDiv: {
     display: "flex",
     width: "96%",
     justifyContent: "space-between",
-    marginLeft: "1rem",
+    marginLeft: "var(--spacing_h)",
+    marginBottom: "var(--spacing_v)",
   },
 });
 
 function Home(props) {
   const classes = useStyles();
   let { t } = useTranslation();
+  const inMemoryDB = store.getState("inMemoryDB");
+  const [localinMemoryDB, setlocalinMemoryDB] = useGlobalState(inMemoryDB);
   const [dataLength, setLength] = useState(0);
   const [bViewAll, setviewAll] = useState(false);
   const [anchorEl, setAnchorEl] = useState();
@@ -101,10 +105,21 @@ function Home(props) {
       .catch((err) => console.log(err));
   };
 
+  const getActStreamData = async () => {
+    const res = await axios.get(SERVER_URL + "/fetchSavedData/PMWEB");
+    try {
+      if (res.data !== "" && res.data) {
+        setlocalinMemoryDB(res?.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     if (window.loadMicroFrontend) {
       const timeout = setTimeout(() => {
-        window.loadActivityStream();
+        window.loadActivityStream(getActStreamData);
       }, 1000);
       return () => clearTimeout(timeout);
     }
@@ -119,7 +134,10 @@ function Home(props) {
           <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
             <AppsIcon
               fontSize="small"
-              classes={{ fontSizeSmall: classes.svgIconSmall }}
+              classes={{
+                fontSizeSmall: classes.svgIconSmall,
+              }}
+              className="pinnedDropIcon"
             />
           </ListItemIcon>
           <ListItemText
@@ -138,6 +156,7 @@ function Home(props) {
             <MenuIcon
               fontSize="small"
               classes={{ fontSizeSmall: classes.svgIconSmall }}
+              className="pinnedDropIcon"
             />
           </ListItemIcon>
           <ListItemText
@@ -160,7 +179,7 @@ function Home(props) {
           <div
             style={{
               display: dataLength > 0 ? "block" : "none",
-              marginTop: "7px",
+              margin: "0 0 1rem",
             }}
           >
             <div className={classes.pinnedDiv}>
@@ -180,13 +199,18 @@ function Home(props) {
                     : ""}
                 </p>
               </div>
-              <IconButton aria-label="more" style={{ padding: "0 0 10px 0" }}>
+              <IconButton aria-label="more" className="icon-button">
                 <MoreVertIcon htmlColor="#AEAEAE" onClick={toggleDropdown} />
                 <Dropdown
                   anchorEl={anchorEl}
                   handleClose={toggleDropdown}
                   options={dropdownOptions}
-                  style={{ height: "61px", width: "89px" }}
+                  style={{
+                    width: "8rem",
+                    padding: "0.25rem 0.25vw",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
                 />
               </IconButton>
             </div>
@@ -197,7 +221,9 @@ function Home(props) {
                     {...provided.droppableProps}
                     ref={provided.innerRef}
                     className="pinnedDiv"
-                    style={{ marginRight: direction == "rtl" ? "20px" : "0" }}
+                    style={{
+                      marginRight: direction == "rtl" ? "20px" : "0",
+                    }}
                   >
                     <Pinned
                       pinnedList={pinnedList}

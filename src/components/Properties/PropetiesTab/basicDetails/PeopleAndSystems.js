@@ -7,18 +7,24 @@ import DeleteOutlinedIcon from "@material-ui/icons/DeleteOutlined";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import SearchComponent from "../../../../UI/Search Component";
 import { store, useGlobalState } from "state-pool";
+import { Popover } from "@material-ui/core";
+import Modal from "../../../../UI/Modal/Modal";
+import { useDispatch } from "react-redux";
+import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
+import { propertiesLabel } from "../../../../Constants/appConstants";
 
 const PeopleAndSystems = (props) => {
   const [open, setopen] = useState(false);
+  const dispatch = useDispatch();
   const loadedActivityPropertyData = store.getState("activityPropertyData"); //current processdata clicked
   const localProcessData = store.getState("loadedProcessData");
-
+  const [userGroupListData, setuserGroupListData] = useState({});
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
   const [localLoadedProcessData, setlocalLoadedProcessData] =
     useGlobalState(localProcessData);
   const [peopleName, setpeopleName] = useState("");
-
+  const [anchorElMF, setAnchorElMF] = React.useState(null);
   const [peopleAndSystemsArray, setpeopleAndSystemsArray] = useState([
     {
       type: "Owner",
@@ -43,13 +49,17 @@ const PeopleAndSystems = (props) => {
   ]);
 
   useEffect(() => {
+    updatePeopleAndSystems(localLoadedActivityPropertyData);
+  }, []);
+
+  const updatePeopleAndSystems = (actData) => {
     let temp = [
       {
         type: "Owner",
         names:
-          localLoadedActivityPropertyData.ActivityProperty.actGenPropInfo
-            .genPropInfo.ownerList.length !== 0
-            ? localLoadedActivityPropertyData.ActivityProperty.actGenPropInfo.genPropInfo.ownerList.map(
+          actData.ActivityProperty.actGenPropInfo.genPropInfo.ownerList
+            .length !== 0
+            ? actData.ActivityProperty.actGenPropInfo.genPropInfo.ownerList.map(
                 (item) => {
                   return {
                     id: item.orderID,
@@ -62,9 +72,9 @@ const PeopleAndSystems = (props) => {
       {
         type: "Consultant",
         names:
-          localLoadedActivityPropertyData.ActivityProperty.actGenPropInfo
-            .genPropInfo.consumerList.length !== 0
-            ? localLoadedActivityPropertyData.ActivityProperty.actGenPropInfo.genPropInfo.consultantList.map(
+          actData.ActivityProperty.actGenPropInfo.genPropInfo.consumerList
+            .length !== 0
+            ? actData.ActivityProperty.actGenPropInfo.genPropInfo.consultantList.map(
                 (item) => {
                   return {
                     id: item.orderID,
@@ -77,9 +87,9 @@ const PeopleAndSystems = (props) => {
       {
         type: "System",
         names:
-          localLoadedActivityPropertyData.ActivityProperty.actGenPropInfo
-            .genPropInfo.systemList.length !== 0
-            ? localLoadedActivityPropertyData.ActivityProperty.actGenPropInfo.genPropInfo.systemList.map(
+          actData.ActivityProperty.actGenPropInfo.genPropInfo.systemList
+            .length !== 0
+            ? actData.ActivityProperty.actGenPropInfo.genPropInfo.systemList.map(
                 (item) => {
                   return {
                     id: item.orderID,
@@ -92,9 +102,9 @@ const PeopleAndSystems = (props) => {
       {
         type: "Provider",
         names:
-          localLoadedActivityPropertyData.ActivityProperty.actGenPropInfo
-            .genPropInfo.providerList.length !== 0
-            ? localLoadedActivityPropertyData.ActivityProperty.actGenPropInfo.genPropInfo.providerList.map(
+          actData.ActivityProperty.actGenPropInfo.genPropInfo.providerList
+            .length !== 0
+            ? actData.ActivityProperty.actGenPropInfo.genPropInfo.providerList.map(
                 (item) => {
                   return {
                     id: item.orderID,
@@ -107,9 +117,9 @@ const PeopleAndSystems = (props) => {
       {
         type: "Consumer",
         names:
-          localLoadedActivityPropertyData.ActivityProperty.actGenPropInfo
-            .genPropInfo.consumerList.length !== 0
-            ? localLoadedActivityPropertyData.ActivityProperty.actGenPropInfo.genPropInfo.consumerList.map(
+          actData.ActivityProperty.actGenPropInfo.genPropInfo.consumerList
+            .length !== 0
+            ? actData.ActivityProperty.actGenPropInfo.genPropInfo.consumerList.map(
                 (item) => {
                   return {
                     id: item.orderID,
@@ -122,7 +132,7 @@ const PeopleAndSystems = (props) => {
     ];
 
     setpeopleAndSystemsArray(temp);
-  }, [localLoadedActivityPropertyData.ActivityProperty]);
+  };
 
   const [usersArray, setusersArray] = useState([
     { id: "1", userName: "Sunny", peopleName: "Sun" },
@@ -173,6 +183,7 @@ const PeopleAndSystems = (props) => {
   const [fieldToOpen, setfieldToOpen] = useState(); //which field to open a picklist in a type of people and systems
 
   const ref = React.useRef(null);
+  const [openUserGroupMF, setopenUserGroupMF] = useState(false);
   useEffect(() => {
     function handleClickOutside(event) {
       if (ref.current && !ref.current.contains(event.target)) {
@@ -188,10 +199,93 @@ const PeopleAndSystems = (props) => {
     };
   }, [ref]);
 
+  const getUserGroupList = (data, type) => {
+    console.log("bbbbbbbbbbbbdata", data);
+    setuserGroupListData(data);
+    let temp = structuredClone(localLoadedActivityPropertyData);
+    if (type === "Owner" || type === "Consultant") {
+      data.selectedUsers.forEach((user) => {
+        temp.ActivityProperty.actGenPropInfo.genPropInfo[
+          `${type.charAt(0).toLowerCase() + type.slice(1) + "List"}`
+        ].push({
+          [`${type.charAt(0).toLowerCase() + type.slice(1) + "Name"}`]:
+            user.name,
+          [`${type.charAt(0).toLowerCase() + type.slice(1) + "Id"}`]: user.id,
+          bRenderPlus: false,
+        });
+      });
+    } else if (type === "System") {
+      data.selectedUsers.forEach((user) => {
+        temp.ActivityProperty.actGenPropInfo.genPropInfo.systemList.push({
+          sysName: user.name,
+          orderId: user.id,
+          bRenderPlus: false,
+        });
+      });
+    } else {
+      data.selectedUsers.forEach((user) => {
+        temp.ActivityProperty.actGenPropInfo.genPropInfo[
+          `${type.charAt(0).toLowerCase() + type.slice(1) + "List"}`
+        ].push({
+          [`${type.charAt(0).toLowerCase() + type.slice(1) + "Name"}`]:
+            user.name,
+          orderId: user.id,
+          bRenderPlus: false,
+        });
+      });
+    }
+
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.basicDetails]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
+  };
+
+  console.log("bbbbbbbbbbblocal", localLoadedActivityPropertyData);
+
   const pickListHandler = (event, data, itemName) => {
-    setfieldToOpen(itemName.id);
+    // setfieldToOpen(itemName.id);
     settypeToOpen(data.type);
-    setopen(true);
+    // setopen(true);
+
+    setopenUserGroupMF(true);
+
+    let microProps = {
+      data: {
+        onSelection: (list) => getUserGroupList(list, data.type),
+        token: JSON.parse(localStorage.getItem("launchpadKey"))?.token,
+        ext: true,
+        customStyle: {
+          selectedTableMinWidth: "35vw", // selected user and group listing width
+
+          listTableMinWidth: "35vw", // user/ group listing width
+
+          listHeight: "60vh", // custom height common for selected listing and user/group listing
+
+          showUserFilter: true, // true for showing user filter, false for hiding
+
+          showExpertiseDropDown: true, // true for showing expertise dropdown, false for hiding
+
+          showGroupFilter: true, // true for showing group filter, false for hiding
+        },
+      },
+      locale: "en_US",
+      ContainerId: "usergroupDiv",
+      Module: "ORM",
+
+      Component: "UserGroupPicklistMF",
+
+      InFrame: false,
+
+      Renderer: "renderUserGroupPicklistMF",
+    };
+    window.loadUserGroupMF(microProps);
+    console.log("picklisttttttttttt,", data, itemName);
   };
 
   const setOwnerConsultantField = (obj, index, data) => {
@@ -225,42 +319,52 @@ const PeopleAndSystems = (props) => {
 
   const setOtherFields = (e, data, index) => {
     let temp = [...peopleAndSystemsArray];
+    let tempActData = structuredClone(localLoadedActivityPropertyData);
 
-    let isAdd = true,
-      payload;
-    let c = 0;
+    // let isAdd = true,
+    //   payload;
+    // let c = 0;
 
     temp.forEach((item) => {
       if (item.type === data.type) {
-        if (item.names[index].name !== "") {
-          isAdd = false;
-        }
+        // if (item.names[index].name !== "") {
+        //   // isAdd = false;
+        // }
         item.names[index].name = e.target.value;
       }
     });
-    setpeopleAndSystemsArray(temp);
 
-    let id = setTimeout(function () {
-      FetchData();
-    }, 5000);
-    const FetchData = () => {
-      if (c === 0) {
-        payload = {
-          processDefId: localLoadedProcessData.ProcessDefId,
-          regMode: localLoadedProcessData.ProcessType,
-          orderId: getOrderId(data.type),
-          name: e.target.value,
-          elementType: "A",
-          elementId:
-            localLoadedActivityPropertyData.ActivityProperty.ActivityId + "",
-        };
+    temp.forEach((iData) => {
+      if (iData.type === data.type) {
+        iData.names.forEach((eachName, index) => {
+          tempActData.ActivityProperty.actGenPropInfo.genPropInfo[
+            `${data.type.charAt(0).toLowerCase() + data.type.slice(1) + "List"}`
+          ].push({
+            orderId: index,
+            bRenderPlus: false,
+            [`${
+              data.type.charAt(0).toLowerCase() + data.type.slice(1) ===
+              "system"
+                ? "sysName"
+                : data.type.charAt(0).toLowerCase() +
+                  data.type.slice(1) +
+                  "Name"
+            }`]: eachName.name,
+          });
+        });
       }
-      c++;
-    };
+    });
 
-    let endpointName = isAdd
-      ? `/peopleAssociation/add${data.type}`
-      : `/peopleAssociation/modify${data.type}`;
+    setlocalLoadedActivityPropertyData(tempActData);
+    updatePeopleAndSystems(tempActData);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.basicDetails]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
   };
 
   const getOrderId = (type) => {
@@ -274,37 +378,35 @@ const PeopleAndSystems = (props) => {
     else return ++id + "";
   };
 
-  const detectLastKeyPress = (e) => {
-    var typingTimer; //timer identifier
-    var doneTypingInterval = 5000; //time in ms (5 seconds)
-    let counter = 0;
-    let callApi = false;
-    // if (e._reactName === "onKeyUp") {
-    //   clearTimeout(typingTimer);
-
-    //   typingTimer = setTimeout(doneTyping, doneTypingInterval);
-
-    //   //user is "finished typing," do something
-    //   function doneTyping() {
-    //     if (counter === 0) callApi = true;
-    //   }
-    //   counter++;
-    // }
-    return callApi;
-  };
-
   return (
     <div style={{ marginBlock: "1rem", paddingBottom: "1rem" }}>
       <p
         style={{
           color: "#727272",
-          fontSize: "0.875rem",
+          fontSize: "var(--subtitle_text_font_size)",
           fontWeight: "bolder",
           marginBottom: "0.5rem",
         }}
       >
         {props.disabled ? t("disabledPeopleAndSystems") : t("peopleAndSystems")}
       </p>
+      {openUserGroupMF ? (
+        <Modal
+          show={openUserGroupMF}
+          backDropStyle={{ backgroundColor: "transparent" }}
+          style={{
+            width: "70vw",
+            height: "60vh",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%,-50%)",
+            background: "white",
+          }}
+          modalClosed={() => setopenUserGroupMF(false)}
+          children={<div id="usergroupDiv"></div>}
+        ></Modal>
+      ) : null}
 
       {peopleAndSystemsArray.map((item) => {
         return (
@@ -312,8 +414,8 @@ const PeopleAndSystems = (props) => {
             <p
               style={{
                 color: "#727272",
-                fontSize: "0.875rem",
-                fontWeight: "500",
+
+                fontSize: "var(--subtitle_text_font_size)",
               }}
             >
               {item.type}
@@ -330,7 +432,7 @@ const PeopleAndSystems = (props) => {
                   {item.type === "Owner" || item.type === "Consultant" ? (
                     <div
                       style={{
-                        height: "2.0625rem",
+                        height: "2.5rem",
                         display: "flex",
                         flexDirection: "row",
                         width: item.names.length > 1 ? "76%" : "87%",
@@ -349,7 +451,7 @@ const PeopleAndSystems = (props) => {
                           height: "100%",
                         }}
                       >
-                        <p style={{ color: "#000000", fontSize: "0.9rem" }}>
+                        <p style={{ color: "#000000", fontSize: "1rem" }}>
                           {name.name}
                         </p>
                       </div>
@@ -383,7 +485,7 @@ const PeopleAndSystems = (props) => {
                               : pickListHandler(e, item, name)
                           }
                         />
-                        <div style={{ position: "relative" }}>
+                        {/* <div style={{ position: "relative" }}>
                           {open &&
                           typeToOpen === item.type &&
                           fieldToOpen === name.id ? (
@@ -451,60 +553,7 @@ const PeopleAndSystems = (props) => {
                                     width="30%"
                                     style={{ marginBottom: "0.7rem" }}
                                   />
-                                  {/* <Select
-                                    disableUnderline
-                                    classes={{
-                                      root: outlineSelectClasses.select,
-                                    }}
-                                    IconComponent={iconComponent}
-                                    value={0}
-                                  >
-                                    <MenuItem value={0}>
-                                      <ListItemIcon
-                                        classes={{
-                                          root: outlineSelectClasses.listIcon,
-                                        }}
-                                      >
-                                        <FilterListIcon />
-                                      </ListItemIcon>
-                                      <span
-                                        style={{
-                                          marginTop: 3,
-                                          marginLeft: "-0.4375rem",
-                                          fontSize: "0.75rem",
-                                        }}
-                                      >
-                                        Group By
-                                      </span>
-                                    </MenuItem>
-                                  </Select>
-                                  <Select
-                                    disableUnderline
-                                    classes={{
-                                      root: outlineSelectClasses.select,
-                                    }}
-                                    IconComponent={iconComponent}
-                                    value={0}
-                                  >
-                                    <MenuItem value={0}>
-                                      <ListItemIcon
-                                        classes={{
-                                          root: outlineSelectClasses.listIcon,
-                                        }}
-                                      >
-                                        <FilterListIcon />
-                                      </ListItemIcon>
-                                      <span
-                                        style={{
-                                          marginTop: 3,
-                                          marginLeft: "-0.4375rem",
-                                          fontSize: "0.75rem",
-                                        }}
-                                      >
-                                        Expertise: All
-                                      </span>
-                                    </MenuItem>
-                                  </Select> */}
+                                  
                                 </div>
                                 <div
                                   style={{
@@ -531,7 +580,7 @@ const PeopleAndSystems = (props) => {
                                           style={{
                                             textAlign: "left",
                                             color: "black",
-                                            fontSize: "0.875rem",
+                                            fontSize: "1rem",
                                             fontWeight: "500",
                                           }}
                                         >
@@ -544,7 +593,7 @@ const PeopleAndSystems = (props) => {
                               </div>
                             </div>
                           ) : null}
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   ) : null}
@@ -553,7 +602,7 @@ const PeopleAndSystems = (props) => {
                   item.type === "Provider" ? (
                     <div
                       style={{
-                        height: "2.0625rem",
+                        height: "2.5rem",
                         display: "flex",
                         flexDirection: "row",
                         width: item.names.length > 1 ? "76%" : "87%",
@@ -561,18 +610,19 @@ const PeopleAndSystems = (props) => {
                         border: "1px solid #CECECE",
                         justifyContent: "space-between",
                       }}
+                      // onClick={(e) => pickListHandler(e, item)}
                     >
                       <TextField
-                        InputProps={{
-                          readOnly: props.disabled,
-                        }}
+                        // InputProps={{
+                        //   readOnly: props.disabled,
+                        // }}
                         key={name.id}
                         value={name.name}
                         onChange={(e) => {
-                          setpeopleName(e.target.value);
                           setOtherFields(e, item, index);
                         }}
-                        onKeyUp={(e) => detectLastKeyPress(e)}
+                        // disabled={true}
+                        // onKeyUp={(e) => detectLastKeyPress(e)}
                       />
                       <div style={{ height: "100%" }}></div>
                     </div>
@@ -595,10 +645,12 @@ const PeopleAndSystems = (props) => {
                     <AddIcon
                       style={{
                         color: "white",
-                        backgroundColor: "#0072C6",
-                        height: "1.8rem",
-                        width: "1.8rem",
-                        marginTop: "0.125rem",
+
+                        backgroundColor: "var(--brand_color1)",
+                        height: "2.5rem",
+                        width: "2.5rem",
+                        // marginTop: "0.125rem",
+
                         display: props.disabled ? "none" : "",
                       }}
                       onClick={() => (props.disabled ? null : addField(item))}

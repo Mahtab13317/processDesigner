@@ -7,6 +7,10 @@ import { connect } from "react-redux";
 function DeployProcess(props) {
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
+  const closeThisAndShowValidationPopUp = () => {
+    // Bug fixed for Bug Id  - 111391 (When Deployment fails the pop up shows "View Details" but nothing happens after clicking on it)
+    props.setShowDeployFailModal(false);
+  };
 
   return (
     <div>
@@ -60,7 +64,7 @@ function DeployProcess(props) {
               cursor: "pointer",
               marginLeft: "25px",
             }}
-            // onClick={() => closeThisAndShowValidationPopUp()}
+            onClick={() => closeThisAndShowValidationPopUp()}
           >
             View details
           </span>

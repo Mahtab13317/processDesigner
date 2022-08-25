@@ -1,5 +1,5 @@
 .mainDiv {
-  /* width: 100%; */
+  width: 100%;
   /* margin-left: 10px; */
   padding-top: 10px;
   /* margin-right: 10px;  */
@@ -14,9 +14,10 @@
 }
 
 .businessVariableHeading {
-  width: 9.375rem;
+  /* width: 9.375rem; */
   text-align: left;
-  font: normal normal 600 16px/22px Open Sans;
+  font-size: var(--title_text_font_size);
+  font-weight: 600;
   letter-spacing: 0px;
   color: #000000;
   opacity: 1;
@@ -146,5 +147,5 @@
 .accordianHeadingDiv {
   display: flex;
   flex-direction: row;
-  width: 65rem;
+  width: 100%;
 }

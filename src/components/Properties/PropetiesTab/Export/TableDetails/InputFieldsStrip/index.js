@@ -20,6 +20,7 @@ function InputFieldsStrip(props) {
   let { t } = useTranslation();
   const {
     setValue,
+    mappingDetails,
     inputBaseValue,
     inputBaseHandler,
     dropdownValue,
@@ -257,6 +258,7 @@ function InputFieldsStrip(props) {
             handleClose={() => setIsModalOpen(false)}
             documentList={documentList}
             variablesList={filteredVariables}
+            mappingDetails={mappingDetails}
             // variableTypeValue={dropdownValue}
           />
         </Modal>

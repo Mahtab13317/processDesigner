@@ -1,3 +1,5 @@
+// Changes made to fix 113436 => Project Property: Project level property should be available even if the no process is created in the project like Properties, settings, requirements, audit trail
+
 import React, { useState } from "react";
 import Tab from "../../../../../UI/Tab/Tab";
 import { useTranslation } from "react-i18next";
@@ -12,10 +14,14 @@ import EnabledIcon from "../../../../../assets/HomePage/HS_Enabled.svg";
 import FilterImage from "../../../../../assets/ProcessView/PT_Sorting.svg";
 import DeployedPending from "../../../../../assets/HomePage/PT_Deployed waiting.svg";
 import EnabledPending from "../../../../../assets/HomePage/PT_Enabled Waiting.svg";
+import NoprocessesPerproject from "../NoProjectsOrProcesses/NoProcessPerProjectScreen.js";
+import SortButton from "../../../../../UI/SortingModal/Modal.js";
 
 function ProcessListByProjectSubTab(props) {
   let { t } = useTranslation();
   const [pinToTopPerProjectcheck, setPinnedCheck] = useState(true);
+  const [selectionOne, setSelectionOne] = useState(0);
+  const [selectionTwo, setSelectionTwo] = useState(0);
   const subTabLabels =
     props.tabValue === 0
       ? []
@@ -24,13 +30,13 @@ function ProcessListByProjectSubTab(props) {
           <p className="flex" style={{ alignItems: "center" }}>
             <img src={DraftIcon} className="processDotsOnTab" />
             <span>
-              {t("processList.Drafts")} {props.processListLength[1]}
+              {`${t("processList.Drafts")} (${props.processListLength[1]})`}
             </span>
           </p>,
           <p className="flex" style={{ alignItems: "center" }}>
             <img src={DeployedIcon} className="processDotsOnTab" />
             <span>
-              {t("processList.Deployed")} {props.processListLength[2]}
+              {`${t("processList.Deployed")} (${props.processListLength[2]})`}
             </span>
           </p>,
           <p className="flex" style={{ alignItems: "center" }}>
@@ -38,9 +44,9 @@ function ProcessListByProjectSubTab(props) {
             <span>{t("processList.Deployed")}</span>
           </p>,
           <p className="flex" style={{ alignItems: "center" }}>
-            <img className="processDotsOnTab" src={DeployedIcon} />
+            <img className="processDotsOnTab" src={EnabledIcon} />
             <span>
-              {t("processList.Enabled")} {props.processListLength[4]}
+              {`${t("processList.Enabled")} (${props.processListLength[4]})`}
             </span>
           </p>,
           <p className="flex" style={{ alignItems: "center" }}>
@@ -54,6 +60,8 @@ function ProcessListByProjectSubTab(props) {
       <div className="subTabContentToScroll">
         <p className="tableHeading">{t("processList.pinnedProcesses")}</p>
         <ProcessListByProjectTable
+          selectionOne={selectionOne}
+          selectionTwo={selectionTwo}
           margin="0 0 15px 0"
           showTableHead={true}
           processesPerProject={props.pinnedProcessesPerProject}
@@ -61,12 +69,16 @@ function ProcessListByProjectSubTab(props) {
 
         <p className="tableHeading">{t("processList.otherProcesses")}</p>
         <ProcessListByProjectTable
+          selectionOne={selectionOne}
+          selectionTwo={selectionTwo}
           showTableHead={false}
           processesPerProject={props.allProcessesPerProject}
         />
       </div>
     ) : (
       <ProcessListByProjectTable
+        selectionOne={selectionOne}
+        selectionTwo={selectionTwo}
         maxHeightofTable="380px"
         showTableHead={true}
         processesPerProject={props.allProcessesPerProject}
@@ -76,6 +88,8 @@ function ProcessListByProjectSubTab(props) {
       <div className="subTabContentToScroll">
         <p className="tableHeading">{t("processList.pinnedProcesses")}</p>
         <ProcessListByProjectTable
+          selectionOne={selectionOne}
+          selectionTwo={selectionTwo}
           margin="0 0 15px 0"
           showTableHead={true}
           processesPerProject={props.pinnedProcessesPerProject?.filter(
@@ -86,6 +100,8 @@ function ProcessListByProjectSubTab(props) {
         />
         <p className="tableHeading">{t("processList.otherProcesses")}</p>
         <ProcessListByProjectTable
+          selectionOne={selectionOne}
+          selectionTwo={selectionTwo}
           showTableHead={false}
           processesPerProject={props.allProcessesPerProject?.filter(
             (process) => {
@@ -96,6 +112,8 @@ function ProcessListByProjectSubTab(props) {
       </div>
     ) : (
       <ProcessListByProjectTable
+        selectionOne={selectionOne}
+        selectionTwo={selectionTwo}
         maxHeightofTable="380px"
         showTableHead={true}
         processesPerProject={props.allProcessesPerProject?.filter((process) => {
@@ -107,6 +125,8 @@ function ProcessListByProjectSubTab(props) {
       <div className="subTabContentToScroll">
         <p className="tableHeading">{t("processList.pinnedProcesses")}</p>
         <ProcessListByProjectTable
+          selectionOne={selectionOne}
+          selectionTwo={selectionTwo}
           margin="0 0 15px 0"
           showTableHead={true}
           processesPerProject={props.pinnedProcessesPerProject?.filter(
@@ -117,6 +137,8 @@ function ProcessListByProjectSubTab(props) {
         />
         <p className="tableHeading">{t("processList.otherProcesses")}</p>
         <ProcessListByProjectTable
+          selectionOne={selectionOne}
+          selectionTwo={selectionTwo}
           showTableHead={false}
           processesPerProject={props.allProcessesPerProject?.filter(
             (process) => {
@@ -127,6 +149,8 @@ function ProcessListByProjectSubTab(props) {
       </div>
     ) : (
       <ProcessListByProjectTable
+        selectionOne={selectionOne}
+        selectionTwo={selectionTwo}
         maxHeightofTable="380px"
         showTableHead={true}
         processesPerProject={props.allProcessesPerProject?.filter((process) => {
@@ -138,6 +162,8 @@ function ProcessListByProjectSubTab(props) {
       <div className="subTabContentToScroll">
         <p className="tableHeading">{t("processList.pinnedProcesses")}</p>
         <ProcessListByProjectTable
+          selectionOne={selectionOne}
+          selectionTwo={selectionTwo}
           margin="0 0 15px 0"
           showTableHead={true}
           processesPerProject={props.pinnedProcessesPerProject?.filter(
@@ -148,6 +174,8 @@ function ProcessListByProjectSubTab(props) {
         />
         <p className="tableHeading">{t("processList.otherProcesses")}</p>
         <ProcessListByProjectTable
+          selectionOne={selectionOne}
+          selectionTwo={selectionTwo}
           showTableHead={false}
           processesPerProject={props.allProcessesPerProject?.filter(
             (process) => {
@@ -158,6 +186,8 @@ function ProcessListByProjectSubTab(props) {
       </div>
     ) : (
       <ProcessListByProjectTable
+        selectionOne={selectionOne}
+        selectionTwo={selectionTwo}
         maxHeightofTable="380px"
         showTableHead={true}
         processesPerProject={props.allProcessesPerProject?.filter((process) => {
@@ -169,6 +199,8 @@ function ProcessListByProjectSubTab(props) {
       <div className="subTabContentToScroll">
         <p className="tableHeading">{t("processList.pinnedProcesses")}</p>
         <ProcessListByProjectTable
+          selectionOne={selectionOne}
+          selectionTwo={selectionTwo}
           margin="0 0 15px 0"
           showTableHead={true}
           processesPerProject={props.pinnedProcessesPerProject?.filter(
@@ -179,6 +211,8 @@ function ProcessListByProjectSubTab(props) {
         />
         <p className="tableHeading">{t("processList.otherProcesses")}</p>
         <ProcessListByProjectTable
+          selectionOne={selectionOne}
+          selectionTwo={selectionTwo}
           showTableHead={false}
           processesPerProject={props.allProcessesPerProject?.filter(
             (process) => {
@@ -189,6 +223,8 @@ function ProcessListByProjectSubTab(props) {
       </div>
     ) : (
       <ProcessListByProjectTable
+        selectionOne={selectionOne}
+        selectionTwo={selectionTwo}
         maxHeightofTable="380px"
         showTableHead={true}
         processesPerProject={props.allProcessesPerProject?.filter((process) => {
@@ -200,6 +236,8 @@ function ProcessListByProjectSubTab(props) {
       <div className="subTabContentToScroll">
         <p className="tableHeading">{t("processList.pinnedProcesses")}</p>
         <ProcessListByProjectTable
+          selectionOne={selectionOne}
+          selectionTwo={selectionTwo}
           margin="0 0 15px 0"
           showTableHead={true}
           processesPerProject={props.pinnedProcessesPerProject?.filter(
@@ -210,6 +248,8 @@ function ProcessListByProjectSubTab(props) {
         />
         <p className="tableHeading">{t("processList.otherProcesses")}</p>
         <ProcessListByProjectTable
+          selectionOne={selectionOne}
+          selectionTwo={selectionTwo}
           showTableHead={false}
           processesPerProject={props.allProcessesPerProject?.filter(
             (process) => {
@@ -220,6 +260,8 @@ function ProcessListByProjectSubTab(props) {
       </div>
     ) : (
       <ProcessListByProjectTable
+        selectionOne={selectionOne}
+        selectionTwo={selectionTwo}
         maxHeightofTable="380px"
         showTableHead={true}
         processesPerProject={props.allProcessesPerProject?.filter((process) => {
@@ -229,27 +271,59 @@ function ProcessListByProjectSubTab(props) {
     ),
   ];
 
-  return (
-    <div className="projectTable">
-      <Tab
-        adjacentToTabElements={
-          <div
-            className="filterBox"
-            style={{ position: "absolute", right: "25px", top: "5px" }}
-          >
-            {/* <Checkbox onChange={()=>setPinnedCheck(!pinToTopPerProjectcheck)} checked={pinToTopPerProjectcheck} size= 'small' inputProps={{ 'aria-label': 'uncontrolled-checkbox' }} />{t('processList.ShowPinnedAtTop')} */}
-            <SearchBox height="23px" />
-            <img src={FilterImage} className="filterButton" />
-          </div>
-        }
-        tabType="subTab"
-        tabContentStyle="subTabContentStyle"
-        tabBarStyle="subTabBarStyle"
-        oneTabStyle="subOneTabStyle"
-        TabNames={subTabLabels}
-        TabElement={subTabElements}
-      />
-    </div>
+  const sortSelectionFunc = (sortSelectionOne, sortSelectionTwo) => {
+    setSelectionOne(sortSelectionOne);
+    setSelectionTwo(sortSelectionTwo);
+  };
+
+  return props.allProcessesPerProject.length > 0 ? (
+    <React.Fragment>
+      <div
+        className="filterBox"
+        style={{
+          justifyContent: "end",
+          background: "#f6f6f6",
+          padding: "0 1vw",
+        }}
+      >
+        {/* <Checkbox onChange={()=>setPinnedCheck(!pinToTopPerProjectcheck)} checked={pinToTopPerProjectcheck} size= 'small' inputProps={{ 'aria-label': 'uncontrolled-checkbox' }} />{t('processList.ShowPinnedAtTop')} */}
+        <SearchBox height="2.7rem" />
+        <SortButton
+          id="ProcessesTabByProject_sortProcess"
+          backDrop={true}
+          buttonToOpenModal={
+            <div className="filterButton" type="button">
+              <img src={FilterImage} style={{ width: "100%" }} />
+            </div>
+          }
+          sortSelection={sortSelectionFunc}
+          showTickIcon={true}
+          modalFromTop="62"
+          modalFromLeft="33"
+          modalWidth="180"
+          sortSectionTwo={[t("NewToOld"), t("OldToNew")]}
+          sortOrderOptionsForName={[t("Ascending"), t("Descending")]}
+          indexToSwitchSortOptions="2"
+          sortBy={t("sortBy")}
+          sortOrder={t("sortOrder")}
+          sortSectionOne={[t("LastModifiedByMe"), t("LastModified"), t("Name")]}
+          modalPaper="modalPaperProjects1"
+          isArabic={false}
+        />
+      </div>
+      <div className="projectTable">
+        <Tab
+          tabType="subTab"
+          tabContentStyle="subTabContentStyle"
+          tabBarStyle="subTabBarStyle"
+          oneTabStyle="subOneTabStyle"
+          TabNames={subTabLabels}
+          TabElement={subTabElements}
+        />
+      </div>
+    </React.Fragment>
+  ) : (
+    <NoprocessesPerproject />
   );
 }
 

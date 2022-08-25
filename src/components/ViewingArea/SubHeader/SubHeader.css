@@ -1,22 +1,22 @@
 .leftDiv {
   display: flex;
+  align-items: center;
 }
 
 .rightDiv {
   flex: 1 1;
-  text-align: right;
   justify-content: flex-end;
   display: flex;
+  align-items: center;
 }
 
 .sub-header {
   display: flex;
   background: #f8f8f8 0% 0% no-repeat padding-box;
   box-shadow: 0px 3px 6px #00000029;
-  padding: 0 15px;
-  margin-top: 5px;
-  margin-bottom: 10px;
-  height: 35px;
+  padding: 0.25rem 1vw;
+  margin-top: 1px;
+  margin-bottom: 1rem;
 }
 
 .buttonImgDropdown {
@@ -28,11 +28,12 @@
 .buttonImg {
   background: none;
   border: none;
-  margin-right: 12px;
+  align-items: center;
+  display: flex;
   cursor: pointer;
 }
 
-.buttonImgDisabled{
+.buttonImgDisabled {
   background: none;
   border: none;
   margin-right: 12px;
@@ -73,15 +74,19 @@
   padding: 0 7px 0 0px;
   margin-right: 6px;
 }
+
 .subProcessBtn {
-  width: 8rem;
-  height: 1.7rem;
   border: 1px solid #c3c3c3;
   border-radius: 4px;
-  opacity: 1;
+  padding: 0 0.5rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing_v) var(--spacing_h) !important;
   background: white;
 }
+
 .subProcessCount {
   height: 3rem;
   width: 3rem;

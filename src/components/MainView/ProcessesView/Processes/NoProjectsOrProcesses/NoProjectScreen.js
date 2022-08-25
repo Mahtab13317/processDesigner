@@ -14,14 +14,10 @@ function NoProjectScreen(props) {
       <CreateProcessButton
         buttonContent={t("CreateNewProject")}
         buttonStyle={{
-          marginRight: "10px",
-          backgroundColor: "#0072C6",
-          width: "142px",
-          height: "28px",
-          fontSize: "12px",
-          padding: "5px",
-          textTransform: "none",
+          backgroundColor: "var(--button_color)",
           color: "white",
+          minWidth: "10vw",
+          margin: "var(--spacing_v) 0 !important",
         }}
       ></CreateProcessButton>
     </div>

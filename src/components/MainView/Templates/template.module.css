@@ -23,13 +23,13 @@
 
 .noSelectedCategoryString {
   margin-top: 0.5rem;
-  font-size: 12px;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
   color: #3a3a3a;
 }
 
 .templateSearchHeader {
-  padding: 0.25rem 0.5rem;
+  padding: var(--spacing_v) 0.5vw 1rem;
 }
 
 .templateHeadingArea {
@@ -40,19 +40,21 @@
 
 .templateHeading {
   text-align: left;
-  font: normal normal 600 14px/19px Open Sans;
+  font: normal normal 600 var(--subtitle_text_font_size) / 19px
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
 }
 
 .addCategoryHeading {
   text-align: left;
-  font: normal normal 600 16px/21px Open Sans;
+  font-size: var(--title_text_font_size);
   letter-spacing: 0px;
+  font-weight: 600;
   color: #000000;
   margin-bottom: 1rem;
   border-bottom: 1px solid #c4c4c4;
-  padding: 1rem 1rem 0.5rem;
+  padding: 0.75rem 1rem 0.75rem;
 }
 
 .categoryName {
@@ -62,7 +64,7 @@
 
 .labelHeading {
   text-align: left;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 500 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   margin-bottom: 0.25rem;
@@ -71,7 +73,7 @@
 
 .newNameHeading {
   text-align: left;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   margin: 0.25rem 0;
@@ -81,14 +83,15 @@
 .starIcon {
   color: red;
   margin-left: 0.25vw;
-  font-size: 0.75rem;
+  font-size: var(--base_text_font_size);
 }
 
 .nameInput {
   width: 25vw;
-  height: 1.5rem;
+  height: 2.25rem;
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   border: 1px solid #dadada;
@@ -98,9 +101,10 @@
 
 .newNameInput {
   width: 18vw;
-  height: 1.5rem;
+  height: 2.25rem;
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   border: 1px solid #dadada;
@@ -112,7 +116,8 @@
   width: 25vw;
   height: 5rem;
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   border: 1px solid #dadada;
@@ -132,7 +137,8 @@
 
 /*code edited on 21 June 2022 for BugId 111115*/
 .errorMessage {
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   text-align: left;
   color: #d12c2c;
@@ -142,21 +148,22 @@
 
 .templateHeadingPlusBtn {
   text-align: left;
-  font: normal normal 800 24px/29px Open Sans;
+  font: normal normal 800 24px/29px var(--font_family);
   letter-spacing: 0px;
-  color: #0072c6;
+  color: var(--button_color);
   cursor: pointer;
 }
 
 .searchBoxArea {
   display: flex;
   justify-content: space-between;
-  margin-top: 0.25rem;
+  margin-top: var(--spacing_v);
+  align-items: center;
 }
 
 .searchBox {
   flex: 1;
-  margin-right: 0.25vw;
+  margin-right: 0.5vw;
 }
 
 .categoryHeader {
@@ -165,16 +172,17 @@
   display: flex;
   justify-content: space-between;
   margin: 0.25rem 0.75rem 0 0.5rem;
-  padding: 0.75rem 1.25rem;
-  align-items: center;
+  padding: 0.75rem 1vw;
+  align-items: start;
 }
 
 .categoryHeadingDesc {
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
-  margin-left: 0.5rem;
+  margin-left: 0.5vw;
   width: 65vw;
   white-space: break-spaces;
   overflow: hidden;
@@ -182,14 +190,15 @@
 }
 
 .showMore {
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: blue;
   margin-left: 0.25rem;
 }
 
 .categoryHeaderDisplay {
-  display: inline-flex;
+  display: flex;
   align-items: start;
 }
 
@@ -205,58 +214,65 @@
 }
 
 .moreVertIcon {
-  width: 1.25rem !important;
-  height: 1.25rem !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
   color: #70707095 !important;
+  margin-top: 1px;
   cursor: pointer;
 }
 
 .moreVertGridIcon {
-  width: 1.25rem !important;
-  height: 1.25rem !important;
+  width: 1.75rem !important;
+  height: 1.75rem !important;
   color: #70707095 !important;
-  padding-top: 0.25rem;
+  padding-top: 0.5rem;
   cursor: pointer;
 }
 
 .categoryHeading {
   text-align: left;
-  font: normal normal 600 16px/22px Open Sans;
+  font: normal normal 600 var(--title_text_font_size) / 22px var(--font_family);
   letter-spacing: 0px;
   color: #000000;
-  margin-left: 0.5rem;
+  margin-left: 0.5vw;
 }
 
 .categoryTemplatesList {
-  margin: 0.25rem 0.5rem 1rem 0.25rem;
+  margin: 0.75rem 0.5rem 1rem 0.25rem;
   height: 80vh;
 }
 
 .templateFilterArea {
   display: flex;
   justify-content: space-between;
-  margin-top: 0.25rem;
+  align-items: center;
   margin-left: 0.25rem;
   margin-right: 0.25rem;
 }
 
 .listViewBtn {
-  width: 28px;
+  width: var(--line_height);
   height: 28px;
+  margin: 0 !important;
   cursor: pointer;
   background: #efefef 0% 0% no-repeat padding-box;
   border: 1px solid #c4c4c4;
   border-radius: 0px 2px 2px 0px;
   align-items: center;
+  display: flex;
+  justify-content: center;
 }
 
 .selectedListViewBtn {
-  width: 28px;
+  width: var(--line_height);
   height: 28px;
+  margin: 0 !important;
   background: #ffffff 0% 0% no-repeat padding-box;
-  border: 1px solid #c4c4c4;
+  border: 1px solid var(--button_color);
   border-radius: 2px;
   align-items: center;
+  display: flex;
+  justify-content: center;
   cursor: pointer;
 }
 
@@ -266,8 +282,8 @@
 
 .templateListTable {
   overflow-y: auto;
-  margin-top: 0.25rem;
-  height: 80vh;
+  margin-top: 0.75rem;
+  height: 75vh;
 }
 
 .templateListTable::-webkit-scrollbar {
@@ -281,9 +297,9 @@
 }
 
 .templateGridView {
-  margin: 0 0.25rem;
+  margin: 0 0 0 0.25rem;
   display: inline-block;
-  width: 100%;
+  width: 99.5%;
 }
 
 .templateListTableHeader {
@@ -302,35 +318,35 @@
 
 .templateListTableHeaderName {
   width: 25%;
-  font-size: 12px;
+  font-size: var(--base_text_font_size);
   font-weight: 600;
   text-align: left;
 }
 
 .templateListTableHeaderDate {
   width: 10%;
-  font-size: 12px;
+  font-size: var(--base_text_font_size);
   font-weight: 600;
   text-align: center;
 }
 
 .templateListTableHeaderCreatedBy {
   width: 20%;
-  font-size: 12px;
+  font-size: var(--base_text_font_size);
   font-weight: 600;
   text-align: left;
 }
 
 .templateListTableHeaderExtras {
   width: 16.5%;
-  font-size: 12px;
+  font-size: var(--base_text_font_size);
   font-weight: 600;
   text-align: left;
 }
 
 .templateListTableHeaderUsage {
   width: 24%;
-  font-size: 12px;
+  font-size: var(--base_text_font_size);
   font-weight: 600;
   text-align: left;
 }
@@ -338,7 +354,7 @@
 .templateListTableRow {
   background: #ffffff 0% 0% no-repeat padding-box;
   height: 45px;
-  margin: 0rem 0.25rem 0.25rem;
+  margin: 0rem 0.25rem 0.5rem;
   display: flex;
   align-items: center;
   padding: 0.25rem 0;
@@ -356,7 +372,8 @@
 
 .templateName {
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   display: inline-flex;
@@ -369,7 +386,7 @@
   letter-spacing: 0px;
   color: #ffffff;
   width: fit-content;
-  font: normal normal normal 10px/15px Open Sans;
+  font: normal normal normal 10px/15px var(--font_family);
   padding: 0 0.25rem;
   align-items: center;
 }
@@ -386,14 +403,14 @@
   display: flex;
   flex-direction: column;
   text-align: center;
-  font-size: 12px;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
   color: #000000;
 }
 
 .templateListTableCreatedBy {
   width: 20%;
-  font-size: 12px;
+  font-size: var(--base_text_font_size);
   text-align: left;
   display: flex;
   flex-direction: column;
@@ -405,7 +422,7 @@
 
 .templateListTableExtras {
   width: 16.5%;
-  font-size: 12px;
+  font-size: var(--base_text_font_size);
   font-weight: 600;
   justify-content: end;
   padding-right: 2vw;
@@ -415,7 +432,7 @@
 
 .templateListTableUsage {
   width: 24%;
-  font-size: 12px;
+  font-size: var(--base_text_font_size);
   font-weight: 600;
   justify-content: end;
   display: inline-flex;
@@ -425,9 +442,9 @@
 
 .createProcessBtn {
   text-align: left;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
-  color: #0072c6;
+  color: var(--link_color);
   background: transparent;
   border: none;
   margin-right: 1vw;
@@ -436,7 +453,7 @@
 
 .templateUsageCount {
   text-align: left;
-  font: italic normal normal 11px/15px Open Sans;
+  font: italic normal normal 11px/15px var(--font_family);
   letter-spacing: 0px;
   color: #727272;
   margin-right: 1vw;
@@ -449,7 +466,7 @@
   width: 100%;
   align-items: center;
   margin-top: 0.5rem;
-  background: #f5f5f5 0% 0% no-repeat padding-box; 
+  background: #f5f5f5 0% 0% no-repeat padding-box;
   padding: 0.75rem 1rem;
 }
 
@@ -459,35 +476,31 @@
   justify-content: flex-end;
   width: 100%;
   align-items: center;
-  margin-top: 0.5rem;
+  margin-top: 1rem;
   background: #f5f5f5 0% 0% no-repeat padding-box;
-  position: absolute;
-  bottom: 0;
   padding: 0.75rem 0.5rem;
 }
 
 .disabledCategoryButton {
-  background: rgba(0, 0, 0, 0.12) !important;
+  background: rgba(0, 0, 0, 0.15) !important;
   border-radius: 2px !important;
   border: none !important;
-  font: normal normal 600 12px/17px Open Sans !important;
   letter-spacing: 0px !important;
-  color: rgba(0, 0, 0, 0.5) !important;
   text-transform: none !important;
-  margin-right: 0.5rem !important;
   padding: 0.25rem 0.75rem !important;
   cursor: default !important;
+  margin: 0 0.5vw 0 0 !important;
+  color: #606060 !important;
 }
 
 .addCategoryButton {
-  background: #0072c6 0% 0% no-repeat padding-box !important;
+  background: var(--button_color) 0% 0% no-repeat padding-box !important;
   border-radius: 2px !important;
-  border: 1px solid #0072c6 !important;
-  font: normal normal 600 12px/17px Open Sans !important;
+  border: 1px solid var(--button_color) !important;
   letter-spacing: 0px !important;
   color: #ffffff !important;
   text-transform: none !important;
-  margin-right: 0.5rem !important;
+  margin: 0 0.5vw 0 0 !important;
   padding: 0.25rem 0.75rem !important;
 }
 
@@ -495,54 +508,51 @@
   background: #ffffff 0% 0% no-repeat padding-box !important;
   border: 1px solid #c4c4c4 !important;
   border-radius: 2px !important;
-  font: normal normal 600 12px/17px Open Sans !important;
   letter-spacing: 0px !important;
   color: #606060 !important;
   text-transform: none !important;
-  margin-right: 0.5rem !important;
   padding: 0.25rem 1rem !important;
+  margin: 0 0.5vw 0 0 !important;
 }
 
 .templateCount {
-  display: inline-flex;
+  display: flex;
   align-items: center;
 }
 
 .templateLogo {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .infoIcon {
-  width: 1rem !important;
-  height: 1rem !important;
-  margin-top: 0.125rem;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  margin-top: 4px;
   color: #70707095 !important;
 }
 
 .templateInfoIcon {
-  width: 1rem !important;
-  height: 1rem !important;
-  margin-left: 0.25rem;
-  margin-top: 0.125rem;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  margin-left: 0.25vw;
+  margin-top: 1px;
   color: #70707095 !important;
 }
 
 .templatePredefinedIcon {
-  width: 1rem !important;
-  height: 1rem !important;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
   margin-left: 0.25rem;
   margin-top: 1px;
-  color: #0072c6 !important;
-  /* color: #70707095 !important; */
+  color: var(--brand_color2) !important;
 }
 
 .categoryPredefinedIcon {
-  width: 0.75rem !important;
-  height: 1rem !important;
-  margin-left: 0.25rem;
-  color: #0072c6 !important;
-  /* color: #70707095 !important; */
+  width: 1.125rem !important;
+  height: 1.125rem !important;
+  margin-left: 0.25vw;
+  color: var(--brand_color2) !important;
 }
 
 .templateIcon {
@@ -571,14 +581,14 @@
 
 .moreVertProcessHeaderModal {
   position: absolute;
-  width: 9vw !important;
+  width: 10vw;
   right: 2vw;
   z-index: 100;
   background: #ffffff 0% 0% no-repeat padding-box;
   box-shadow: 0px 3px 6px #00000029;
   border: 1px solid #c4c4c4;
   margin-left: 0.5vw;
-  margin-top: 0.1rem;
+  margin-top: 0.5rem;
 }
 
 .moreVertHeaderModal {
@@ -622,7 +632,7 @@
 
 .moreVertModalOption {
   margin-top: 0px;
-  font-size: 12px;
+  font-size: var(--base_text_font_size);
   color: #000000;
   cursor: pointer;
   padding: 0 0.5rem;
@@ -637,20 +647,21 @@
 
 .moreVertModalDiv {
   display: flex;
-  height: 1.5rem;
+  height: 2rem;
 }
 
 .noRecordDiv {
   text-align: center;
   margin: 2rem 0;
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
 }
 
 .deleteModalHeading {
   text-align: left;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
   color: #383737;
   padding: 1rem 1rem 0.5rem;
@@ -659,7 +670,7 @@
 
 .deleteModalSubHeading {
   text-align: left;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
   color: #383737;
   padding: 1rem 1rem 0.75rem;
@@ -674,7 +685,7 @@
   border: 1px solid #d53d3d;
   border-radius: 2px;
   text-align: left;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
   color: #383737;
   margin: 0 1rem 0.5rem;

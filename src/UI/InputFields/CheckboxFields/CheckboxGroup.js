@@ -5,14 +5,23 @@ import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import { Grid, Checkbox, FormGroup, FormControlLabel } from "@material-ui/core";
 const useStyles = makeStyles((theme) => ({
   CheckBoxIcon: {
-    color: `${theme.palette.primary.main}`,
+    color: "var(--checkbox_color)",
+    "& .MuiSvgIcon-root": {
+      width: "1.5rem !important",
+      height: "1.5rem !important",
+    },
   },
   icon: {
     // height: "16px",
     //width: "16px",
     // fontSize: "12px",
   },
-  label: { fontSize: "12px", color: "#686868", opacity: 1, fontWeight: 450 },
+  label: {
+    fontSize: "var(--base_text_font_size)",
+    color: "#686868",
+    opacity: 1,
+    fontWeight: 450,
+  },
 }));
 const CheckboxGroup = (props) => {
   const classes = useStyles();
@@ -31,7 +40,7 @@ const CheckboxGroup = (props) => {
                   control={
                     <Checkbox
                       style={{
-                        fontSize: "12px",
+                        fontSize: "var(--base_text_font_size)",
                         paddingRight: "5px",
                         paddingBottom: "3px",
                         paddingTop: "3px",
@@ -57,7 +66,12 @@ const CheckboxGroup = (props) => {
                     />
                   }
                   label={
-                    <span style={{ fontSize: "12px" }}>
+                    <span
+                      style={{
+                        fontSize: "var(--base_text_font_size)",
+                        fontWeight: 600,
+                      }}
+                    >
                       {label || name || ""}
                     </span>
                   }

@@ -93,61 +93,60 @@ export function drawOnGraph(
   ];
 
   //draw lanes
-  jsonData.Lanes &&
-    jsonData.Lanes.forEach((eachLane, index) => {
-      let width = eachLane.Width
-        ? parseInt(eachLane.Width)
-        : defaultWidthSwimlane;
-      let height = eachLane.Height
-        ? parseInt(eachLane.Height)
-        : defaultHeightSwimlane;
-      width = dimensionInMultipleOfGridSize(width);
-      height = dimensionInMultipleOfGridSize(height);
-      if (eachLane.LaneId !== -99) {
-        let colorIndex = showTasklane ? (index - 1) % 3 : index % 3;
-        mileButton = mileButton + height;
-        let vertex = new mxCell(
-          null,
-          new mxGeometry(0, 0, width, height),
-          `${style.swimlane};fillColor=${laneColorCodes[colorIndex]?.fillColor};swimlaneFillColor=${laneColorCodes[colorIndex]?.laneFillColor};`
-        );
-        //point added to vertex/lane to make it collapsable
-        let point = new mxCell(null, new mxGeometry(0, 0, 0.1, 0.1));
-        vertex.insert(point);
-        vertex.setVertex(true);
-        vertex.setConnectable(false);
-        vertex.value = eachLane.LaneName;
-        vertex.setId(eachLane.LaneId);
-        indexByLaneId.set(eachLane.LaneId, index);
-        laneIdxByHeight.set(index, height);
-        //lanes saved to local array so that activities in json.milestone can be added to lanes vertex
-        lanes.set(eachLane.LaneId, vertex);
-        swimlaneLayer.insert(vertex);
-      } else if (showTasklane) {
-        let vertex = new mxCell(
-          translation(tasklaneName),
-          new mxGeometry(0, 0, width, height),
-          style.tasklane
-        );
-        tasklaneHeight = height;
-        let point = new mxCell(null, new mxGeometry(0, 0, 0.1, 0.1));
-        vertex.insert(point);
-        vertex.setVertex(true);
-        vertex.setConnectable(false);
-        vertex.setId(-99);
-        tasklane = vertex;
-        graph.addCell(vertex);
-        //collapse tasklane if no tasks present
-        // code added on 17 June 2022 for BugId 110174
-        if (
-          jsonData.Tasks &&
-          jsonData.Tasks.length <= 0 &&
-          !graph.isTasklaneExpanded
-        ) {
-          foldCell = true;
-        }
+  jsonData.Lanes?.forEach((eachLane, index) => {
+    let width = eachLane.Width
+      ? parseInt(eachLane.Width)
+      : defaultWidthSwimlane;
+    let height = eachLane.Height
+      ? parseInt(eachLane.Height)
+      : defaultHeightSwimlane;
+    width = dimensionInMultipleOfGridSize(width);
+    height = dimensionInMultipleOfGridSize(height);
+    if (eachLane.LaneId !== -99) {
+      let colorIndex = showTasklane ? (index - 1) % 3 : index % 3;
+      mileButton = mileButton + height;
+      let vertex = new mxCell(
+        null,
+        new mxGeometry(0, 0, width, height),
+        `${style.swimlane};fillColor=${laneColorCodes[colorIndex]?.fillColor};swimlaneFillColor=${laneColorCodes[colorIndex]?.laneFillColor};`
+      );
+      //point added to vertex/lane to make it collapsable
+      let point = new mxCell(null, new mxGeometry(0, 0, 0.1, 0.1));
+      vertex.insert(point);
+      vertex.setVertex(true);
+      vertex.setConnectable(false);
+      vertex.value = eachLane.LaneName;
+      vertex.setId(eachLane.LaneId);
+      indexByLaneId.set(eachLane.LaneId, index);
+      laneIdxByHeight.set(index, height);
+      //lanes saved to local array so that activities in json.milestone can be added to lanes vertex
+      lanes.set(eachLane.LaneId, vertex);
+      swimlaneLayer.insert(vertex);
+    } else if (showTasklane) {
+      let vertex = new mxCell(
+        translation(tasklaneName),
+        new mxGeometry(0, 0, width, height),
+        style.tasklane
+      );
+      tasklaneHeight = height;
+      let point = new mxCell(null, new mxGeometry(0, 0, 0.1, 0.1));
+      vertex.insert(point);
+      vertex.setVertex(true);
+      vertex.setConnectable(false);
+      vertex.setId(-99);
+      tasklane = vertex;
+      graph.addCell(vertex);
+      //collapse tasklane if no tasks present
+      // code added on 17 June 2022 for BugId 110174
+      if (
+        jsonData.Tasks &&
+        jsonData.Tasks.length <= 0 &&
+        !graph.isTasklaneExpanded
+      ) {
+        foldCell = true;
       }
-    });
+    }
+  });
 
   //draw milestones
   jsonData.MileStones?.forEach((milestone) => {
@@ -172,7 +171,7 @@ export function drawOnGraph(
     milestoneLayer.insert(parentVertex);
 
     //draw activities
-    milestone.Activities.forEach((activity) => {
+    milestone.Activities?.forEach((activity) => {
       let x = dimensionInMultipleOfGridSize(parseInt(activity.xLeftLoc));
       let y = dimensionInMultipleOfGridSize(
         parseInt(activity.yTopLoc) - milestoneTitleWidth
@@ -317,12 +316,14 @@ export function drawOnGraph(
       cellById.get(connection.TargetId),
       "edgeStyle=orthogonalEdgeStyle;shape=connector;orthogonalLoop=1;jettySize=auto;labelBackgroundColor=default;fontSize=11;fontColor=#000;startFill=1;endArrow=classic;strokeColor=black;strokeWidth=1;movableLabel=0;verticalAlign=bottom;snapToPoint=1;"
     );
-    edge.initialRender = true;
-    let edgePoints = [];
-    connection.xLeft?.forEach((x, idx) => {
-      edgePoints.push(new mxPoint(x, connection.yTop[idx]));
-    });
-    edge.geometry.points = edgePoints;
+    if (edge) {
+      edge.initialRender = true;
+      let edgePoints = [];
+      connection.xLeft?.forEach((x, idx) => {
+        edgePoints.push(new mxPoint(x, connection.yTop[idx]));
+      });
+      edge.geometry.points = edgePoints;
+    }
   });
 
   //draw text Annotations

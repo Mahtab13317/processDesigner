@@ -37,6 +37,7 @@ import "./index.css";
 import { style } from "../../../../Constants/bpmnView";
 import * as actionCreators from "../../../../redux-store/actions/Properties/showDrawerAction.js";
 import Toast from "../../../../UI/ErrorToast";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 const styleModal = {
   position: "absolute",
@@ -925,9 +926,10 @@ function SharePointArchive(props) {
             </div>
           </Box>
         </Modal>
-        <div className="labels">
+       {/*  <div className="labels">
           <h4> {t("toolbox.sharePointArchive.archive")}</h4>
-        </div>
+        </div> */}
+        <TabsHeading heading={props?.heading} />
         <Box
           className={
             props.isDrawerExpanded ? "flexRow section" : "sectionCollapse"

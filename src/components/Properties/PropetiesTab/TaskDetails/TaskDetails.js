@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Divider, Grid, Typography } from "@material-ui/core";
+import { Divider, Grid, Typography, Select, MenuItem } from "@material-ui/core";
 import DataFields from "../commonTabHeader.js";
 import "../../Properties.css";
 import { useTranslation } from "react-i18next";
-import { Select, MenuItem } from "@material-ui/core";
-
 import { connect, useDispatch, useSelector } from "react-redux";
 import { getActivityProps } from "../../../../utility/abstarctView/getActivityProps";
 
@@ -37,6 +35,7 @@ import {
   DeleteIcon,
 } from "../../../../utility/AllImages/AllImages.js";
 import { setProcessTaskType } from "../../../../redux-store/slices/ProcessTaskTypeSlice.js";
+import TabsHeading from "../../../../UI/TabsHeading/index.js";
 
 const makeFieldInputs = (value) => {
   return {
@@ -89,6 +88,7 @@ const useStyles = makeStyles((props) => ({
   GroupTitle: {
     fontWeight: "bold",
     color: "#606060",
+    fontSize: "var(--subtitle_text_font_size)",
   },
   btnIcon: {
     cursor: "pointer",
@@ -101,19 +101,21 @@ const useStyles = makeStyles((props) => ({
     height: "28px",
     width: "28px",
     border: "1px solid #CECECE",
-    backgroundColor: "#0072C6",
-    color: "#FFFFFF",
-    marginTop: "1.6rem",
+    backgroundColor: "var(--button_color) !important",
+    color: "#FFFFFF !important",
+    borderRadius: "2px",
+    marginTop: "6px",
     // filter:
     // "brightness(0) saturate(100%) invert(95%) sepia(99%) saturate(17%) hue-rotate(78deg) brightness(107%) contrast(100%)",
   },
   plusIcon: {
     color: "#FFFFFF",
-    fontSize: "1rem",
+    fontSize: "var(--subtitle_text_font_size)",
+
     marginTop: "-.5rem",
   },
   fontSize: {
-    fontSize: "0.725rem",
+    fontSize: "var(--base_text_font_size)",
     fontWeight: 600,
   },
   deleteIcon: {
@@ -531,6 +533,7 @@ function TaskDetails(props) {
     temp.m_objPMSubProcess.importedProcessName = e.target.value;
     registeredProcessList?.map((list) => {
       if (list.ProcessName == e.target.value) {
+        localStorage.setItem("selectedTargetProcessID", list.ProcessDefId);
         // setSelectedRegisteredProcess(list.ProcessName);
         // setSelectedRegisteredProcessID(list.ProcessDefId);
         temp.m_objPMSubProcess.importedProcessDefId = list.ProcessDefId;
@@ -542,8 +545,8 @@ function TaskDetails(props) {
   };
 
   const handleChangeInRegisteredProcessType = (e) => {
-    console.log('PROCESSTYPE', e.target.value);
-dispatch(setProcessTaskType(e.target.value))
+    console.log("PROCESSTYPE", e.target.value);
+    dispatch(setProcessTaskType(e.target.value));
     dispatch(
       setActivityPropertyChange({
         [propertiesLabel.taskDetails]: {
@@ -587,7 +590,9 @@ dispatch(setProcessTaskType(e.target.value))
   };
 
   return (
-    <Grid container direction="column">
+    <>
+    <TabsHeading heading={props?.heading} />
+      <Grid container direction="column">
       <Grid item>
         <div style={{ width: "100%", height: "100%" }}>
           {spinner ? (
@@ -614,7 +619,7 @@ dispatch(setProcessTaskType(e.target.value))
               >
                 <Grid container direction="column" spacing={2}>
                   <Grid item>
-                    <Typography component="h5">
+                    <Typography className={classes.GroupTitle} component="h5">
                       {`${t("task")} ${t("details")}`.toUpperCase()}
                     </Typography>
                   </Grid>
@@ -655,13 +660,25 @@ dispatch(setProcessTaskType(e.target.value))
                         getContentAnchorEl: null,
                       }}
                     >
-                      <MenuItem className="InputPairDiv_CommonList" value="S" style={{fontSize:'12px'}}>
+                      <MenuItem
+                        className="InputPairDiv_CommonList"
+                        value="S"
+                        style={{ fontSize: "12px" }}
+                      >
                         Synchronous
                       </MenuItem>
-                      <MenuItem className="InputPairDiv_CommonList" value="A" style={{fontSize:'12px'}}>
+                      <MenuItem
+                        className="InputPairDiv_CommonList"
+                        value="A"
+                        style={{ fontSize: "12px" }}
+                      >
                         Asynchronous
                       </MenuItem>
-                      <MenuItem className="InputPairDiv_CommonList" value="U" style={{fontSize:'12px'}}>
+                      <MenuItem
+                        className="InputPairDiv_CommonList"
+                        value="U"
+                        style={{ fontSize: "12px" }}
+                      >
                         User Monitored Synchronous
                       </MenuItem>
                     </Select>
@@ -712,7 +729,7 @@ dispatch(setProcessTaskType(e.target.value))
                           <MenuItem
                             className="InputPairDiv_CommonList"
                             value={list.ProcessName}
-                            style={{fontSize:'12px'}}
+                            style={{ fontSize: "12px" }}
                           >
                             {list.ProcessName}
                           </MenuItem>
@@ -792,8 +809,6 @@ dispatch(setProcessTaskType(e.target.value))
                       calendarType={turnAroundTime.value?.calendarType || ""}
                       handleChange={handleChange}
                       label={t("turnaroundTime")}
-                      //error={turnAroundTime.error}
-                      //helperText={turnAroundTime.helperText}
                     />
                   </Grid>
                 </Grid>
@@ -804,9 +819,8 @@ dispatch(setProcessTaskType(e.target.value))
                   marginLeft: "0.8rem",
                   marginRight: "0.8rem",
 
-                  //  marginTop: "0.9rem",
                   width: props.isDrawerExpanded ? "50%" : null,
-                  //  height: "100%",
+
                   paddingTop: props.isDrawerExpanded ? "0.6rem" : "0.2rem",
                 }}
               >
@@ -832,6 +846,7 @@ dispatch(setProcessTaskType(e.target.value))
                       item
                       container
                       spacing={2}
+                      alignItems="center"
                       xs={props.isDrawerExpanded ? 9 : 12}
                     >
                       <Grid item xs>
@@ -882,6 +897,7 @@ dispatch(setProcessTaskType(e.target.value))
         </div>
       </Grid>
     </Grid>
+    </>
   );
 }
 

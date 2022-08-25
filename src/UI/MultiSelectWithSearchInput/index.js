@@ -11,10 +11,11 @@ import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import styled from "styled-components";
 import styles from "./index.module.css";
 import { useTranslation } from "react-i18next";
+import "./index.css";
 
 const InputWrapper = styled("div")`
   width: 100%;
-  height: 1.5rem;
+  height: var(--line_height);
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   background-color: #fff;
@@ -25,7 +26,7 @@ const InputWrapper = styled("div")`
 
   & input {
     font: normal normal normal 12px/17px Open Sans;
-    height: 1.25rem;
+    height: 2.125rem;
     box-sizing: border-box;
     padding: 0.125rem 0.5vw;
     color: #606060;
@@ -194,6 +195,7 @@ export default function MultiSelectWithSearch(props) {
     <div className="relative">
       <InputWrapper
         style={{ backgroundColor: props.isDisabled ? "#f8f8f8" : "#fff" }}
+        id="multiSelectSearch"
       >
         {props.showTags &&
           tagList &&

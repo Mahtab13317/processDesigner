@@ -44,10 +44,11 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "20px",
     color: "black",
     minWidth: "0px",
+    minHeight: "2.5rem",
     height: "19px",
   },
   tabs: {
-    minHeight: "1.5rem",
+    minHeight: "0",
   },
 }));
 
@@ -80,6 +81,7 @@ export default function ScrollableTabsButtonAuto(props) {
       className={`${classes.root} ${props.tabType} ${props.tabStyling} tabStyling`}
       style={{ direction: props.direction }}
     >
+   
       <AppBar
         className={props.tabBarStyle}
         style={{
@@ -108,7 +110,6 @@ export default function ScrollableTabsButtonAuto(props) {
                 );
               })
             : null}
-          {props.adjacentToTabElements}
         </Tabs>
       </AppBar>
       {props.TabElement

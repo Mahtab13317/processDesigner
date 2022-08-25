@@ -1,8 +1,9 @@
+/*code changes on 3 August 2022 for BugId 112560*/
 .DocTypes {
   display: flex;
   align-items: center;
-  height: 80vh;
-  max-height: 80vh;
+  height: 82vh;
+  max-height: 82vh;
   background-color: white;
 }
 
@@ -11,24 +12,24 @@
 }
 
 .DocTypes .MuiFormControlLabel-root span {
-  font-size: 0.75rem !important;
-  margin-bottom: -0.3125rem !important;
+  /*font-size: 0.75rem !important;*/
+  font-size: var(--base_text_font_size);
+
+  padding: 0.125rem 0.525rem;
 }
 
 .DocTypes #searchBoxId {
-  width: 12.8125rem !important;
+  /* width: 12.8125rem !important;*/
+  width: 12.8125rem;
 }
 
 .DocTypes .oneBox {
+  /* padding-top: 5px; */
   display: flex;
   flex-direction: column;
   width: 80vw;
   overflow-x: auto;
   overflow-y: hidden;
-}
-
-.oneBox .checkBoxes {
-  transform: translate(1.5rem, 1.5625rem);
 }
 
 .DocTypes
@@ -46,13 +47,24 @@
   top: 15%;
 }
 
+.addToDo {
+  background-color: white;
+  width: 45vw;
+  position: absolute;
+  top: 21.5%;
+  left: 27.5%;
+  padding: 0;
+  height: auto;
+}
+
 .addDocsHeading {
-  font-size: 1rem;
+  /*font-size: 1rem;*/
+  font-size: var(--title_text_font_size);
   margin-bottom: 0.625rem;
   font: normal normal 600 16px/22px Open Sans;
 }
 .addDocs .buttons_add .MuiButtonBase-root.MuiButton-root.MuiButton-outlined {
-  width: 3.8125rem !important;
+  /* width: 3.8125rem !important;
   height: 1.75rem !important;
   background: #ffffff 0% 0% no-repeat padding-box !important;
   border: 1px solid #c4c4c4 !important;
@@ -60,6 +72,15 @@
   opacity: 1 !important;
   font-size: 0.625rem;
   text-transform: none !important;
+  margin-right: 0.4375rem;*/
+  width: 3.8125rem;
+  height: 1.75rem;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  font-size: 0.625rem;
+  text-transform: none;
   margin-right: 0.4375rem;
 }
 
@@ -120,7 +141,7 @@
 }
 
 .activities {
-  width: 12.5rem;
+  /* width: 12.5rem;*/
   border-right: 1px solid rgb(218, 208, 194);
   font-size: 0.8125rem;
   text-align: center;
@@ -133,7 +154,7 @@
 }
 
 .oneActivityColumn {
-  width: 12.51875rem;
+  /* width: 12.51875rem;*/
   border-right: 1px solid #dad0c2;
   text-align: center;
 }
@@ -145,7 +166,7 @@
 }
 .screenHeading {
   /* margin-right: 1.875rem; */
-  font-size: 1rem;
+  font-size: var(--title_text_font_size) !important;
   font: normal normal 600 16px/22px Open Sans;
   cursor: pointer;
 }
@@ -160,8 +181,8 @@
 .activityNameDiv {
   display: flex;
   flex-direction: column;
-  align-items: left;
-  margin-top: 10px;
+  text-align: left;
+  margin-top: 0.25rem;
 }
 .checkBoxesStyling {
   margin-top: -0.625rem;
@@ -177,6 +198,7 @@
   top: 0;
   z-index: 1;
   background-color: white;
+  padding-left: 10px;
 }
 
 .docName {
@@ -185,25 +207,23 @@
 }
 
 .docDescription {
-  font-size: 10px;
-  width: 135px;
+  font-size: var(--sub_text_font_size);
+  width: 35%;
 }
 .oneDocDiv {
   height: 100%;
-  width: 17.4375rem;
-  /* background-color: white; */
+  width: 23.4375rem;
   margin-top: 0.625rem;
   display: flex;
   flex-direction: column;
 }
 
 #ToDoDescInput,
-#ExceptionNameInput,
-#ExceptionDescInput,
 #ToDoNameInput,
 #groupNameInput_exception,
 #todo_groupNameId,
 #DocDescInput,
+#ExceptionNameInput,
 #DocNameInput {
   padding: 5px !important;
 }
@@ -211,21 +231,24 @@
 .Rules {
   color: grey;
   /* font-size: 1rem; */
+  font-size: var(--title_text_font_size);
   font: normal normal normal 16px/22px Open Sans;
   cursor: pointer;
 }
 .selectedBottomBorder {
-  border-bottom: 5px solid #0072c6;
+  /* border-bottom: 3px solid #0072c6;*/
+  /* border-bottom: 3px solid #0072c6;*/
+  border-bottom: 3px solid var(--selected_tab_color);
 }
 
+/*code edited on 2 August 2022 for BugId 111822*/
 .docSearchDiv {
   display: flex;
   padding: 0.3125rem 0.3125rem 0rem 0.625rem;
   position: sticky;
-  top: 0rem;
+  top: 2.1rem;
   z-index: 1;
   background-color: white;
-  margin-bottom: 0.5rem;
 }
 
 .activityName {
@@ -246,18 +269,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.48125rem;
+  padding: 1rem;
+  /* padding-bottom: 10px;*/
   border-bottom: 1px solid #dad0c2;
   border-left: 1px solid rgb(218, 208, 194);
   position: sticky;
   top: 0rem;
-  height: 2.55rem;
+  /*height: 2.55rem;*/
   z-index: 1;
   background-color: white;
 }
 .activitySideHeading {
   margin-right: 1.875rem;
-  font-size: 1rem;
+  /* font-size: 1rem;*/
+  font-size: var(--title_text_font_size);
   font: normal normal 600 16px/22px Open Sans;
 }
 
@@ -267,8 +292,11 @@
 }
 
 .addException {
-  color: #0072c6;
-  font-size: 12px;
+  /* color: #0072c6;*/
+  color: var(--link_color);
+  /*font-size: 12px;*/
+  font-size: var(--base_text_font_size);
+
   cursor: pointer;
   border-bottom: 1px solid #f3f0d7;
   /* position: absolute;
@@ -324,14 +352,14 @@
   .MuiFormControlLabel-root
   .MuiIconButton-label
   .MuiSvgIcon-root {
-  font-size: 1rem !important;
+  font-size: 1rem;
 }
 
 .activityModal
   .actModalCheckboxes
   .MuiFormControlLabel-root
   .MuiFormControlLabel-label {
-  font-size: 0.8rem;
+  font-size: var(--base_text_font_size);
 }
 
 .noDocTypesScreen {
@@ -341,8 +369,9 @@
   left: 35%;
 }
 
-.activities .oneActivityColumn .MuiFormControlLabel-root {
-  margin-right: 5px !important;
+.checkBoxes .MuiFormControlLabel-root {
+  margin-right: 5px;
+  margin-left: 0px;
 }
 
 .addDocs .MuiFormControlLabel-root .MuiSvgIcon-root.MuiSvgIcon-fontSizeSmall {
@@ -350,33 +379,37 @@
 }
 
 .addDocs .MuiFormControlLabel-root .MuiTypography-body1 {
-  font-size: 0.8rem !important;
-}
-
-.addDocs #ExceptionDescInput {
-  width: 378px;
-  height: 110px;
-  padding: 5px !important;
+  font-size: 0.8rem;
 }
 
 .activityHeader {
   background-color: white;
-  height: 2rem;
+  height: 3.56rem;
   width: 12.4rem;
   border-bottom: 1px solid rgb(218, 208, 194);
+  display: flex;
+  font-size: 1rem;
+  padding: 0px 10px;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .activityNameDivDocs {
   display: flex;
   align-items: center;
+  height: 1.5rem;
 }
 
 .activityHeaderToDo {
   background-color: white;
-  height: 2rem;
+  height: 3.56rem;
   width: 12.4rem;
   border-bottom: 1px solid rgb(218, 208, 194);
-  /* margin-bottom: 10px; */
+  display: flex;
+  font-size: 1rem;
+  padding: 0px 10px;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .oneBox::-webkit-scrollbar {
@@ -387,13 +420,23 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-right: 10px;
+  padding: 10px;
 }
 
 .groupName {
   margin: 5px 0px 8px 0px;
   font-weight: 600;
   font-size: 14px;
+}
+
+/*code added on 2 August for BugId 110100*/
+.groupNameExp {
+  margin: 5px 0px 8px 0px;
+  font-weight: 600;
+  font-size: 14px;
+  width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .addExpButtonDiv {
@@ -427,15 +470,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 5px 5px 1rem;
-  /* margin-top: 10px; */
-  margin-left: -12px;
 }
 
 .selectedToDoTypeModal {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  margin-left: 50px;
 }
 
 .selectedToDoTypeDiv {
@@ -457,7 +497,7 @@
 }
 
 .activities:first-child .oneActivityColumn {
-  width: 12.45rem !important;
+  /*width: 12.45rem !important;*/
 }
 
 .pickListInputDiv {
@@ -481,11 +521,14 @@
     var(--unnamed-font-size-12) / var(--unnamed-line-spacing-17)
     var(--unnamed-font-family-open-sans);
   letter-spacing: var(--unnamed-character-spacing-0);
-  color: var(--blue-1-0072c6);
+
   text-align: left;
   font: normal normal 600 12px/17px Open Sans;
+  color: var(--link_color);
+
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
-  color: #0072c6;
+
   opacity: 1;
 }
 
@@ -499,14 +542,16 @@
   color: var(--blue-1-0072c6);
   text-align: left;
   font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
-  color: #0072c6;
+  /*color: #0072c6;*/
+  color: var(--link_color);
   opacity: 1;
   cursor: pointer;
 }
 
 #addGroup {
-  color: #0072c6;
+  color: var(--link_color);
 }
 
 #triggerInput_todo {
@@ -520,12 +565,47 @@
   padding-left: 3px;
 }
 
-.addToDo {
-  background-color: white;
-  width: 50vw;
-  position: absolute;
-  top: 21.5%;
-  left: 25%;
-  padding: 0;
-  height: auto;
+/*.actvitySearchDiv .MuiFormControlLabel-root .MuiSwitch-root {
+  width: 30px;
+  height: 18px;
+  display: inline-flex;
+  padding: 12px;
+  z-index: 0;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  vertical-align: middle;
+}*/
+.actvitySearchDiv .MuiFormControlLabel-root .MuiSwitch-root .MuiSwitch-track {
+  width: 100%;
+  height: 70%;
+  opacity: 0.38;
+  z-index: -1;
+  transition: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  border-radius: 28px;
+  background-color: #000;
+}
+.MuiSwitch-colorPrimary.Mui-checked {
+  color: var(--checkbox_color) !important;
+}
+.checkBoxesThree .MuiFormControlLabel-root {
+  cursor: pointer;
+  display: flex;
+  justify-content: right;
+  margin-left: -11px;
+  margin-right: 16px;
+  vertical-align: middle;
+  -webkit-tap-highlight-color: transparent;
+}
+.actvitySearchDiv .MuiFormControlLabel-label {
+  margin-top: -12px;
+}
+
+.expandIcon {
+  border: none !important;
+  cursor: pointer;
+  background-color: transparent;
+  transform: translateY(-4px);
 }

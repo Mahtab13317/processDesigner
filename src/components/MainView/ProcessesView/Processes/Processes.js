@@ -1,3 +1,4 @@
+// Changes made to fix 113436 => Project Property: Project level property should be available even if the no process is created in the project like Properties, settings, requirements, audit trail
 import React from "react";
 import "../Projects/projects.css";
 import ProcessesHeader from "../Processes/ProcessesHeader/ProcessesHeader";
@@ -8,6 +9,7 @@ import NoprocessPerprojectScreen from "../Processes//NoProjectsOrProcesses//NoPr
 import { connect } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { RTL_DIRECTION } from "../../../../Constants/appConstants";
+import { CircularProgress } from "@material-ui/core";
 
 function Processes(props) {
   let { t } = useTranslation();
@@ -56,23 +58,29 @@ function Processes(props) {
     );
   }
 
-  if (props.selectedProjectTotalProcessCount > 0) {
+  // if (props.allProcessesPerProject.length > 0) {
     processListPerProjectToRender = (
-      <MainTab
-        tabValue={props.tabValue}
-        pinnedProcessesPerProject={props.pinnedProcessesPerProject}
-        allProcessesPerProject={props.allProcessesPerProject}
-        processListLength={processListLength}
-        selectedProjectId={props.selectedProjectId}
-        selectedProject={props.selectedProject}
-        selectedProcessCode={props.selectedProcessCode}
-      />
+      <>
+        {props.spinnerProcess ? (
+          <CircularProgress style={{ marginTop: "40vh", marginLeft: "50%" }} />
+        ) : (
+          <MainTab
+            tabValue={props.tabValue}
+            pinnedProcessesPerProject={props.pinnedProcessesPerProject}
+            allProcessesPerProject={props.allProcessesPerProject}
+            processListLength={processListLength}
+            selectedProjectId={props.selectedProjectId}
+            selectedProject={props.selectedProject}
+            selectedProcessCode={props.selectedProcessCode}
+          />
+        )}
+      </>
     );
-  } else {
-    processListPerProjectToRender = (
-      <NoprocessPerprojectScreen selectedProjectName={props.selectedProject} />
-    );
-  }
+  // } else {
+    // processListPerProjectToRender = (
+    //   <NoprocessPerprojectScreen selectedProjectName={props.selectedProject} />
+    // );
+  // }
   return (
     <div
       className={direction === RTL_DIRECTION ? "processes_rtl" : "processes"}
@@ -84,6 +92,7 @@ function Processes(props) {
         selectedProjectDesc={props.selectedProjectDesc}
         selectedProcessCode={props.selectedProcessCode}
         selectedProject={props.selectedProject}
+        allProcessesPerProject={props.allProcessesPerProject}
       />
       {props.selectedProject
         ? processListPerProjectToRender

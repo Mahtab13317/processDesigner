@@ -16,6 +16,7 @@ import {
   ENDPOINT_UPDATEJMSCONSUMER,
   SERVER_URL,
 } from "../../../../Constants/appConstants";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 function JmsConsumer(props) {
   let { t } = useTranslation();
@@ -269,6 +270,7 @@ function JmsConsumer(props) {
 
   return (
     <React.Fragment>
+      <TabsHeading heading={props?.heading} />
       {props.isDrawerExpanded ? (
         <React.Fragment>
           {" "}

@@ -11,50 +11,54 @@
 .noFieldDeleteIcon {
   color: grey;
   cursor: pointer;
-  margin-top: 2px;
+  margin-bottom: 0.5rem;
+  height: 1.5rem;
+  width: 1.5rem;
 }
 
 .deleteIcon {
   color: grey;
-  margin-top: 1rem;
+  margin-top: 2.2rem;
   cursor: pointer;
 }
 
 .dropdownMargin {
-  margin-top: 15px;
+  margin-top: 0.5rem;
 }
 
 .operationsLabel {
   font: normal normal normal 12px/17px Open Sans;
   display: flex;
   align-items: center;
+  margin-bottom: 0.25rem;
 }
 
 .operationsLabelMid {
-  margin-top: 6px;
-  margin-right: 4px;
-  font: normal normal normal 12px/17px Open Sans;
+  margin-right: 0.25vw;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   display: flex;
   align-items: center;
 }
 
 .typeDropdown {
-  width: 110px;
+  width: 13vw;
   height: 28px;
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
   margin-right: 10px;
-  margin-top: 15px;
 }
 
 .fieldDropdown {
   width: 110px;
   height: 28px;
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
@@ -65,7 +69,8 @@
   width: 130px;
   height: 28px;
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
@@ -76,7 +81,8 @@
   width: 60px;
   height: 28px;
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
@@ -85,34 +91,35 @@
 
 .menuItemStyles {
   text-align: left;
-  font: normal normal normal 12px/24px Open Sans !important;
+  font: normal normal normal 12px/17px Open Sans !important;
   letter-spacing: 0px;
   color: #000000;
-  opacity: 1;
+  padding: 0.5rem 0.5vw;
+  width: 100%;
 }
 
 .equals {
-  margin-top: 3.5%;
-  margin-right: 1.5%;
+  margin-bottom: 0.5%;
+  margin-right: 1%;
 }
 
 .setAndExecuteEquals {
-  margin-top: 35px;
-  margin-right: 10px;
+  margin-bottom: 1%;
+  margin-right: 2%;
 }
 
 .button {
-  background: #0072c6 0% 0% no-repeat padding-box !important;
+  background: var(--button_color) 0% 0% no-repeat padding-box;
   border-radius: 2px !important;
-  border: 1px solid #0072c6 !important;
+  border: 1px solid var(--button_color);
   text-align: left;
-  font: normal normal 600 12px/17px Open Sans !important;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family) !important;
   letter-spacing: 0px !important;
   color: #ffffff !important;
   text-transform: none !important;
   position: relative;
   padding: 0.25rem 0.5rem !important;
-  margin-top: 15px;
+  margin: 0 !important;
 }
 
 .triggerHeadingDiv {
@@ -129,7 +136,8 @@
   width: 160px;
   height: 28px;
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
@@ -140,7 +148,8 @@
   width: 160px;
   height: 28px;
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
@@ -150,13 +159,16 @@
 .flexRow {
   display: flex;
   flex-direction: row;
+  align-items: end;
+  min-height: 3rem;
 }
 
 .assignedToVariableDropdown {
   width: 160px;
   height: 28px;
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
@@ -167,7 +179,8 @@
   width: 160px;
   height: 28px;
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
@@ -197,25 +210,24 @@
   text-align: left;
   font: normal normal normal 14px/19px Open Sans;
   letter-spacing: 0px;
-  color: #000000;
-  opacity: 1;
-  margin-top: 10px;
+  color: var(--radio_color);
 }
 
 .routeToType {
   text-align: left;
-  font: normal normal 600 12px/24px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
-  opacity: 1;
-  margin-top: 16px;
+  transform: translateY(-9px);
 }
 
 .inputVariableDropdown {
   width: 160px;
   height: 28px;
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
@@ -228,7 +240,8 @@
   width: 160px;
   height: 28px;
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
@@ -239,7 +252,8 @@
   width: 100px;
   height: 28px;
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
@@ -247,26 +261,34 @@
 }
 
 .repeatAfterCheckbox {
-  height: 0.875rem;
-  width: 0.875rem;
-  color: #c4c4c4 !important;
   border-radius: 2px;
-  opacity: 1;
-  margin: 20px 10px 15px 0px !important;
+  position: relative;
+}
+
+.repeatAfterCheckbox svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .textInputField {
   background: #ffffff 0% 0% no-repeat padding-box;
-  border: 0.0625rem solid #c4c4c4;
   border-radius: 0.125rem;
-  opacity: 1;
-  margin: -0.125rem 0.3125rem 0.3125rem 0rem;
-  width: 3.125rem;
-  height: 1.75rem !important;
+  margin: 0 0.25vw;
+  width: 6vw;
+  height: var(--line_height);
   text-align: left;
-  font: normal normal normal 0.75rem/1.0625rem Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   letter-spacing: 0rem;
-  color: #000000;
+}
+
+.textInputField input {
+  border: 1px solid #c4c4c4 !important;
+  height: var(--line_height) !important;
+}
+
+.textInputField input[disabled] {
+  height: var(--line_height);
 }
 
 .afterEscalationText {
@@ -278,9 +300,9 @@
 }
 
 .flexColumnMargin {
-  margin-top: -17px;
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
 }
 
 .percentageIcon {
@@ -297,4 +319,157 @@
 
 .marginLeftOperationLabel {
   margin-left: 5px;
+}
+
+
+/* mahtab code */
+.mainContainer {
+  max-height: 420px;
+  overflow-y: auto;
+  /* font-family: 'Open Sans, Regular'; */
+  margin-left: 10px;
+  /* font-size: 12px; */
+  min-width: 500px;
+}
+.emailModal{
+  margin-top:3rem;
+}
+.modalHeader {
+  height: 50px;
+  border-bottom: 1px solid #f5f5f5;
+  padding: 5px;
+}
+.modalLabel {
+  float: left;
+}
+.modalClose {
+  float: right;
+}
+.modalFooter {
+  height: 50px;
+  border-top: 1px solid #f5f5f5;
+  background: #f5f5f5;
+}
+.modalFooterInner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  padding: 0.25rem;
+}
+
+.modalHeaderRTL {
+  height: 50px;
+  border-bottom: 1px solid #f5f5f5;
+  padding: 5px;
+}
+.modalLabelRTL {
+  float: right;
+}
+.modalCloseRTL {
+  float: left;
+}
+.modalFooterRTL {
+  height: 50px;
+  border-top: 1px solid #f5f5f5;
+  background: #f5f5f5;
+}
+
+.modalFooterInnerRTL {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row-reverse;
+  justify-content: start;
+  padding: 10px;
+}
+
+.modalFooterInnerRTL {
+  margin-right: 10px;
+}
+.labels {
+  margin-top: 12px;
+}
+
+.modalBody {
+  padding: 15px;
+  clear: both;
+}
+
+.modalControl {
+  margin-top: 15px;
+}
+
+.modalText {
+  width: 100%;
+}
+.cancelMap {
+  margin-right: 10px;
+  border-radius: 1px;
+}
+.btnMapModal {
+  color: #fff;
+  background: #0072c6;
+  border-radius: 1px;
+}
+.btnMapModal:hover {
+  color: #fff;
+  background: #0072c6;
+  border-radius: 1px;
+}
+.emailContainer {
+}
+.fieldRow {
+  display: flex;
+  margin: 0.25rem;
+  padding: 0.25rem;
+  justify-content: space-between;
+}
+.fldLabel {
+ 
+    font: normal normal normal 14px/17px Open Sans;
+    align-items: center;
+}
+.fldElement {
+  width: 25rem;
+ 
+}
+.txtField {
+  width: 25rem;
+  height: 28px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  margin-right: 10px;
+}
+.escalateToEmailDropdown{
+  width: 25rem;
+  height: 28px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  margin-right: 10px;
+
+}
+.txtAreaField{
+  width: 25rem;
+  height: 1.5rem;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  margin-right: 10px;
+}
+
+.addBtn{
+  margin-top: 0px !important;
+}
+.error{
+  color: red;
 }

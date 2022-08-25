@@ -32,7 +32,9 @@ export function createPopupMenu(
   setProcessData,
   setNewId,
   translation,
-  caseEnabled
+  caseEnabled, 
+  setShowQueueModal, 
+  isSwimlanePresent
 ) {
   if (
     graph.copiedCell &&
@@ -57,6 +59,20 @@ export function createPopupMenu(
       )
     );
   }
+  menu.addItem(translation("queueManagement"), null, () =>{
+    let queueId;
+    setProcessData(prev=>{
+      let temp = {...prev}
+      temp.Lanes.forEach(el=>{
+        if(el.LaneId==isSwimlanePresent?.id){
+          queueId = el.QueueId;
+        }
+      })
+      return temp;
+    })
+  setShowQueueModal({show: true, queueId:queueId} );
+  }
+  );
 }
 
 export function pasteFunction(

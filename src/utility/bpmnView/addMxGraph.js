@@ -28,6 +28,7 @@ import {
   heightForDefaultVertex,
   milestoneTitleWidth,
   swimlaneTitleSize,
+  AddVertexType,
 } from "../../Constants/bpmnView";
 import { configureStyleForCell } from "./configureStyleForCell";
 import { collapseExpandCell } from "./collapseExpandCell";
@@ -39,6 +40,7 @@ import { getActivityProps } from "../abstarctView/getActivityProps";
 import { edgeOnMouseHover } from "./edgeOnMouseHover";
 import { getFullWidth } from "../abstarctView/addWorkstepAbstractView";
 import { createPopupMenu } from "./createPopupMenu";
+import { getSwimlaneAt } from "./getSwimlaneAt";
 
 const mxgraphobj = require("mxgraph")({
   mxImageBasePath: "mxgraph/javascript/src/images",
@@ -62,8 +64,6 @@ const mxVertexHandler = mxgraphobj.mxVertexHandler;
 const mxUtils = mxgraphobj.mxUtils;
 const mxGraphView = mxgraphobj.mxGraphView;
 const mxEventObject = mxgraphobj.mxEventObject;
-const mxParallelEdgeLayout = mxgraphobj.mxParallelEdgeLayout;
-const mxLayoutManager = mxgraphobj.mxLayoutManager;
 let graph = null;
 
 //array object which store layer of swimlane and milestone
@@ -120,7 +120,8 @@ export function addMxGraph(
   caseEnabled,
   setOpenDeployedProcess,
   setTaskAssociation,
-  setShowDependencyModal
+  setShowDependencyModal, 
+  setShowQueueModal
 ) {
   mxConnectionHandler.prototype.connectImage = new mxImage(
     connector,
@@ -250,16 +251,6 @@ export function addMxGraph(
 
   //function when swimlane is collapsed or expanded
   collapseExpandCell(graph, buttons, milestoneLayer, swimlaneLayer, rootLayer);
-
-  // Automatically handle parallel edges
-  var layout = new mxParallelEdgeLayout(graph);
-  var layoutMgr = new mxLayoutManager(graph);
-
-  layoutMgr.getLayout = function (cell) {
-    if (cell.getChildCount() > 0) {
-      return layout;
-    }
-  };
 
   // Redirects the perimeter to the label bounds if intersection between edge and label is found
   let mxGraphViewGetPerimeterPoint = mxGraphView.prototype.getPerimeterPoint;
@@ -499,13 +490,16 @@ export function addMxGraph(
   graph.popupMenuHandler.autoExpand = true;
   // Installs a popupmenu handler using local function (see below).
   graph.popupMenuHandler.factoryMethod = function (menu) {
+    let isSwimlanePresent = getSwimlaneAt(graph.popupMenuHandler.triggerX, graph.popupMenuHandler.triggerY, null, graph, AddVertexType);
     createPopupMenu(
       graph,
       menu,
       setProcessData,
       setNewId,
       translation,
-      caseEnabled
+      caseEnabled, 
+      setShowQueueModal, 
+      isSwimlanePresent
     );
   };
 

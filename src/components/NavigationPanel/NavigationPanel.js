@@ -28,30 +28,30 @@ const useStyles = makeStyles((theme) => ({
   drawerClose: {
     overflowX: "hidden",
     width: (props) => (props.direction === RTL_DIRECTION ? "5vw" : "5.2vw"),
-    backgroundColor: "#404040",
-    color: "white",
+    backgroundColor: `var(--nav_primary_color)`,
+    color: "var(--nav_secondary_color)",
     marginTop: `${APP_HEADER_HEIGHT}`,
     zIndex: 0,
   },
   rootListItem: {
     display: "flex",
     flexDirection: "column",
-    paddingTop: "0.75rem !important",
-    paddingBottom: "0.75rem !important",
+    paddingTop: "1rem !important",
+    paddingBottom: "1rem !important",
     marginTop: "0",
     marginBottom: "0",
     borderLeft: "0.25rem solid transparent",
   },
   selectedListItem: {
-    backgroundColor: "#606060 !important",
-    borderLeft: "0.25rem solid #ff764b !important",
+    backgroundColor: "var(--nav_primary_sel_color) !important",
+    borderLeft: "0.25rem solid var(--brand_color1) !important",
   },
   guttersListItem: {
     paddingLeft: "0",
     paddingRight: "0.25rem",
     position: "relative",
     "&:hover": {
-      backgroundColor: "#606060 !important",
+      backgroundColor: "#424242 !important",
     },
   },
   rootListItemIcon: {
@@ -59,23 +59,34 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: "0 !important",
   },
   rootListItemImg: {
-    width: "1.5rem",
-    height: "1.5rem",
+    width: "2rem",
+    height: "2rem",
+  },
+  createItemImg: {
+    width: "3rem",
+    height: "3rem",
+    backgroundColor: "var(--brand_color1)",
+    color: "#fff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "2.5rem",
+    borderRadius: "50%",
   },
   rootListItemIconNoCaption: {
     justifyContent: "center",
-    padding: "3px",
-    height: "40px",
+    padding: "0.25rem",
+    height: "4rem",
   },
   selectedItemText: {
-    color: "#FFFFFF",
-    fontSize: "10px",
+    color: "#fff",
     textAlign: "center",
-    fontFamily: "Open Sans",
+    fontFamily: "var(--font_family)",
+    fontSize: "var(--sub_text_font_size)",
   },
   primaryText: {
     color: "#D3D3D3",
-    fontSize: "10px",
+    fontSize: "var(--sub_text_font_size)",
     textAlign: "center",
     fontFamily: "Open Sans",
   },
@@ -89,9 +100,8 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: "1px 0px 12px #00000080",
     border: "1px solid #CFCFCF",
     borderRadius: "1px",
-    opacity: "1",
-    width: "105px",
-    height: "64px",
+    padding: "0 0.25vw",
+    width: "10rem",
     zIndex: 100,
   },
   subPopup: {
@@ -107,6 +117,10 @@ const useStyles = makeStyles((theme) => ({
     "&:hover": {
       background: "#FFFFFF 0% 0% no-repeat padding-box",
     },
+  },
+  drawerList: {
+    paddingTop: "0",
+    paddingBottom: "0",
   },
 }));
 
@@ -146,21 +160,10 @@ function NavigationPanel(props) {
       key={element.langKey}
       selected={props.selectedNavigation === element.langKey}
       onClick={() => {
-        if (element.default !== t("Create")) {
-          props.setTemplatePage(null);
-          props.setTemplateDetails(
-            null,
-            null,
-            false,
-            null,
-            null,
-            false,
-            "",
-            []
-          );
-          props.setClickedProcessTile(null);
-          props.setSelection(element.langKey);
-        }
+        props.setTemplatePage(null);
+        props.setTemplateDetails(null, null, false, null, null, false, "", []);
+        props.setClickedProcessTile(null);
+        props.setSelection(element.langKey);
       }}
       onMouseOver={() => {
         if (element.default === t("Create")) setShowPopup(true);
@@ -174,7 +177,9 @@ function NavigationPanel(props) {
             : classes.rootListItemIcon,
         }}
       >
-        {props.selectedNavigation === element.langKey ? (
+        {element.default === t("Create") ? (
+          <div className={classes.createItemImg}>+</div>
+        ) : props.selectedNavigation === element.langKey ? (
           <img
             src={element.selectedIcon}
             alt={t(element.langKey, element.default)}
@@ -212,12 +217,12 @@ function NavigationPanel(props) {
           paper: classes.drawerClose,
         }}
       >
-        <List>{iconDisplay}</List>
+        <List className={classes.drawerList}>{iconDisplay}</List>
       </Drawer>
       {showPopup ? (
         <div className={classes.popup}>
           <Button
-            className={classes.subPopup}
+            className={`${classes.subPopup} non-button`}
             onClick={() => {
               setShowModal("Project");
               setShowPopup(false);
@@ -226,7 +231,7 @@ function NavigationPanel(props) {
             {t("createProject")}
           </Button>
           <Button
-            className={classes.subPopup}
+            className={`${classes.subPopup} non-button`}
             onClick={() => {
               props.CreateProcessClickFlag(CREATE_PROCESS_FLAG_FROM_PROCESS);
               props.setSelectedProject(null, null);

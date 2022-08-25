@@ -66,7 +66,7 @@ function ProcessTypes(props) {
                 <p style={{ display: "inline", marginLeft: "4px" }}>Waiting</p>
               ) : null}{" "}
             </p>
-            <div className="processCount">
+            <div className="processTypeCount">
               <span>{type.Count}</span>
             </div>
           </div>

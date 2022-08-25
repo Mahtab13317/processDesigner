@@ -33,12 +33,12 @@ export let iconsForMainView = [
     default: "Home",
     langKey: "navigationPanel.home",
   },
-  {
-    icon: MyInbox,
-    selectedIcon: SelectedMyInbox,
-    default: "My Inbox",
-    langKey: "navigationPanel.myInbox",
-  },
+  // {
+  //   icon: MyInbox,
+  //   selectedIcon: SelectedMyInbox,
+  //   default: "My Inbox",
+  //   langKey: "navigationPanel.myInbox",
+  // },
   {
     icon: Processes,
     selectedIcon: SelectedProcesses,

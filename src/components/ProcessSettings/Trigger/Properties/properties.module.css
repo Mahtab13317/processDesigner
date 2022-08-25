@@ -4,10 +4,6 @@
   width: 73vw;
 }
 
-.triggerNameTypeDiv {
-  margin-right: 5vw;
-}
-
 .propertiesColumnView {
   display: flex;
   flex-direction: column;
@@ -17,7 +13,7 @@
 
 .propertiesFormInput {
   width: 21vw;
-  height: 1.5rem;
+  height: 2.5rem;
   margin-bottom: 1rem;
   text-align: left;
   font: normal normal normal 12px/17px Open Sans;
@@ -29,7 +25,7 @@
 
 .propertiesDescLabel {
   display: inline-block;
-  width: 12.5vw;
+  width: 7vw;
   margin-right: 1vw;
   margin-top: 0.25rem;
   text-align: left;
@@ -40,7 +36,7 @@
 
 .triggerFormLabel {
   display: inline-block;
-  width: 10vw;
+  width: 7vw;
   margin-right: 1vw;
   margin-top: 0.25rem;
   text-align: left;
@@ -48,7 +44,10 @@
   letter-spacing: 0px;
   color: #606060;
 }
-
+.triggerNameTypeDiv {
+  margin-right: 5vw;
+  width: 41%;
+}
 .starIcon {
   color: red;
   margin-left: 0.25vw;
@@ -71,8 +70,8 @@
 }
 
 .properties_radioButton svg {
-  width: 1rem;
-  height: 1rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .propertiesAddButton {
@@ -80,12 +79,13 @@
   text-transform: capitalize;
   margin-bottom: 0.25rem;
   background: #ffffff 0% 0% no-repeat padding-box;
-  border: 1px solid #338ed1;
+  border: 1px solid var(--button_color);
   border-radius: 2px;
   text-align: center;
   font: normal normal 600 12px/17px Open Sans !important;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
-  color: #0072c6;
+  color: var(--button_color);
   cursor: pointer;
 }
 
@@ -141,6 +141,7 @@
 .dataEntryHeading {
   text-align: left;
   font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
   color: #000000;
 }
@@ -169,13 +170,14 @@
 .addSetTrigger {
   text-align: left;
   font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
-  color: #0072c6;
+  color: var(--button_color);
   background: #ffffff 0% 0% no-repeat padding-box;
-  border: 1px solid #338ed1;
+  border: 1px solid var(--button_color);
   border-radius: 2px;
   padding: 0.25rem 1rem;
-  margin-left: 2vw;
+  margin-left: 2vw !important;
   cursor: pointer;
 }
 
@@ -230,10 +232,11 @@
   background: #ffffff 0% 0% no-repeat padding-box;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
-  padding: 0 0.25rem;
-  margin-left: 0.25vw;
-  height: 1.5rem;
+  padding: 0 0.25rem !important;
+  margin-left: 0.25vw !important;
+  height: 2.6rem !important;
   cursor: pointer;
+  margin-top: 1px !important;
 }
 
 .MuiMenu-list {
@@ -258,6 +261,7 @@
 .dropdownVariableType {
   text-align: left;
   font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
   color: #000000;
   opacity: 1;
@@ -270,6 +274,7 @@
 .dropdownVariable span {
   text-align: left;
   font: normal normal normal 10px/14px Open Sans;
+  font-size: var(--sub_text_font_size);
   letter-spacing: 0px;
   color: #000000;
   opacity: 0.48;
@@ -324,6 +329,7 @@
 .dataTableHeadCellContent {
   text-align: left;
   font: normal normal 600 12px/24px Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
   color: #000000;
 }
@@ -331,6 +337,7 @@
 .dataEntryAddRemoveBtnHeader {
   text-align: right;
   font: normal normal 600 12px/24px Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
   color: #000000;
   cursor: pointer;
@@ -343,6 +350,7 @@
   text-align: center;
   margin: 1rem 0;
   font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
   color: #000000;
 }
@@ -483,4 +491,7 @@
 .argStringBodyInput:hover::-webkit-scrollbar-thumb {
   background-color: #dadada;
   border-radius: 0.313rem;
+}
+.triggerNameTypeDiv #selectWithInput_TF {
+  width: 60% !important;
 }

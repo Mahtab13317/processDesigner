@@ -57,16 +57,14 @@ function CheckBoxes(props) {
   useEffect(() => {
     if (processType !== PROCESSTYPE_LOCAL) {
       setIsProcessReadOnly(true);
+    } else {
+      setIsProcessReadOnly(false);
     }
   }, [processType]);
 
   const changeChecks = (check_type) => {
     if (props.type === "set-all") {
-      props.updateSetAllChecks(
-        check_type,
-        props.docIdx,
-        checks[check_type]
-      );
+      props.updateSetAllChecks(check_type, props.docIdx, checks[check_type]);
     } else {
       props.toggleSingleChecks(
         check_type,
@@ -144,15 +142,11 @@ function CheckBoxes(props) {
           disabled={
             DisableCheckBox(TempAdd, props) || isProcessReadOnly ? true : false
           }
-          checked={
-            DisableCheckBox(TempAdd, props) || isProcessReadOnly
-              ? false
-              : checks.Add
-          }
+          checked={DisableCheckBox(TempAdd, props) ? false : checks.Add}
           onChange={() => changeChecks("Add")}
         />
         <FormControlLabel
-          checked={isProcessReadOnly ? false : checks.View}
+          checked={checks.View}
           disabled={isProcessReadOnly ? true : false}
           onChange={() => changeChecks("View")}
           control={
@@ -179,11 +173,7 @@ function CheckBoxes(props) {
               ? true
               : false
           }
-          checked={
-            DisableCheckBox(TempModify, props) || isProcessReadOnly
-              ? false
-              : checks.Modify
-          }
+          checked={DisableCheckBox(TempModify, props) ? false : checks.Modify}
         />
         <FormControlLabel
           control={
@@ -200,11 +190,7 @@ function CheckBoxes(props) {
               ? true
               : false
           }
-          checked={
-            DisableCheckBox(TempDelete, props) || isProcessReadOnly
-              ? false
-              : checks.Delete
-          }
+          checked={DisableCheckBox(TempDelete, props) ? false : checks.Delete}
         />
         <FormControlLabel
           control={
@@ -222,9 +208,7 @@ function CheckBoxes(props) {
               : false
           }
           checked={
-            DisableCheckBox(TempDownload, props) || isProcessReadOnly
-              ? false
-              : checks.Download
+            DisableCheckBox(TempDownload, props) ? false : checks.Download
           }
         />
         <FormControlLabel
@@ -242,33 +226,25 @@ function CheckBoxes(props) {
               ? true
               : false
           }
-          checked={
-            DisableCheckBox(TempPrint, props) || isProcessReadOnly
-              ? false
-              : checks.Print
-          }
+          checked={DisableCheckBox(TempPrint, props) ? false : checks.Print}
         />
       </div>
     );
   }
   return (
-    <div className="checkBoxes" style={{ display: "flex"}}>
-      <div className="checkBoxesThree" style={{ marginRight: "15px"}}>
+    <div className="checkBoxes" style={{ display: "flex", marginTop: "-1px" }}>
+      <div className="checkBoxesThree" style={{ marginRight: "15px" }}>
         <FormControlLabel
           control={<Checkbox name="checkedF" id="addRight_docTypes" />}
           label={t("add")}
           disabled={
             DisableCheckBox(TempAdd, props) || isProcessReadOnly ? true : false
           }
-          checked={
-            DisableCheckBox(TempAdd, props) || isProcessReadOnly
-              ? false
-              : checks.Add
-          }
+          checked={DisableCheckBox(TempAdd, props) ? false : checks.Add}
           onChange={() => changeChecks("Add")}
         />
         <FormControlLabel
-          checked={isProcessReadOnly ? false : checks.View}
+          checked={checks.View}
           disabled={isProcessReadOnly ? true : false}
           onChange={() => changeChecks("View")}
           control={<Checkbox name="checkedF" id="viewRight_docTypes" />}
@@ -283,11 +259,7 @@ function CheckBoxes(props) {
               ? true
               : false
           }
-          checked={
-            DisableCheckBox(TempModify, props) || isProcessReadOnly
-              ? false
-              : checks.Modify
-          }
+          checked={DisableCheckBox(TempModify, props) ? false : checks.Modify}
         />
       </div>
       <div className="checkBoxesThree">
@@ -300,11 +272,7 @@ function CheckBoxes(props) {
               ? true
               : false
           }
-          checked={
-            DisableCheckBox(TempDelete, props) || isProcessReadOnly
-              ? false
-              : checks.Delete
-          }
+          checked={DisableCheckBox(TempDelete, props) ? false : checks.Delete}
         />
         <FormControlLabel
           control={<Checkbox name="checkedF" id="downloadRight_docTypes" />}
@@ -316,9 +284,7 @@ function CheckBoxes(props) {
               : false
           }
           checked={
-            DisableCheckBox(TempDownload, props) || isProcessReadOnly
-              ? false
-              : checks.Download
+            DisableCheckBox(TempDownload, props) ? false : checks.Download
           }
         />
         <FormControlLabel
@@ -330,11 +296,7 @@ function CheckBoxes(props) {
               ? true
               : false
           }
-          checked={
-            DisableCheckBox(TempPrint, props) || isProcessReadOnly
-              ? false
-              : checks.Print
-          }
+          checked={DisableCheckBox(TempPrint, props) ? false : checks.Print}
         />
       </div>
     </div>

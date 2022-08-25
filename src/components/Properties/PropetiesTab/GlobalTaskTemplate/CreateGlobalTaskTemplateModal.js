@@ -118,7 +118,7 @@ const CreateGlobalTaskTemplateModal = (props) => {
         m_strTemplateName: templateName.value,
         m_strStatus: "I",
         processDefId: localLoadedProcessData.ProcessDefId,
-        m_iTemplateId: maxId + 1,
+        //  m_iTemplateId: maxId + 1,
       });
 
       if (res.data?.Status === 0) {
@@ -128,7 +128,7 @@ const CreateGlobalTaskTemplateModal = (props) => {
           m_bGlobalTemplateFormCreated: true,
           m_bCustomFormAssoc: true,
           m_strTemplateName: templateName.value,
-          m_iTemplateId: maxId + 1,
+          m_iTemplateId: res.data?.Data?.m_iTemplateId || maxId + 1,
 
           taskGenPropInfo: {
             isRepeatable: false,
@@ -168,6 +168,14 @@ const CreateGlobalTaskTemplateModal = (props) => {
               m_strExpires: "NE",
               m_SelectedUser: "::",
             },
+            taskTemplateInfo: {
+              m_arrTaskTemplateVarList: [],
+              m_bGlobalTemplate: true,
+              m_bGlobalTemplateFormCreated: true,
+              m_bCustomFormAssoc: true,
+              m_strTemplateName: templateName.value,
+              m_iTemplateId: maxId + 1,
+            },
           },
         };
 
@@ -179,7 +187,7 @@ const CreateGlobalTaskTemplateModal = (props) => {
         dispatch(showDrawer(true));
         dispatch(
           selectedTask(
-            maxId + 1,
+            res.data?.Data?.m_iTemplateId || maxId + 1,
             templateName.value,
             TaskType.globalTask,
             getSelectedCellType("TASKTEMPLATE")

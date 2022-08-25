@@ -15,7 +15,14 @@ function VarAndDocList(props) {
   const [varDefinition, setVarDefinition] = useState([]);
   const [selectedVariables, setSelectedVariables] = useState([]);
   const [selectedVariableType, setSelectedVariableType] = useState(0);
-  const [registeredProcessID, setRegisteredProcessID] = useState("2145");
+  const localActivityPropertyData = store.getState("activityPropertyData");
+  const [
+    localLoadedActivityPropertyData,
+    setlocalLoadedActivityPropertyData,
+    updatelocalLoadedActivityPropertyData,
+  ] = useGlobalState(localActivityPropertyData);
+
+  const [registeredProcessID, setRegisteredProcessID] = useState(null);
   useEffect(() => {
     setSelectedVariables(props.selectedVariableList);
   }, [props.selectedVariableList]);
@@ -36,11 +43,11 @@ function VarAndDocList(props) {
     }
   };
 
-  // useEffect(() => {
-  //   localStorage.getItem("selectedTargetProcessID") == null
-  //     ? "2148"
-  //     : setRegisteredProcessID(localStorage.getItem("selectedTargetProcessID"));
-  // }, [localStorage, registeredProcessID]);
+  useEffect(() => {
+    localStorage.getItem("selectedTargetProcessID") == null
+      ? localLoadedActivityPropertyData.m_objPMSubProcess.importedProcessDefId
+      : setRegisteredProcessID(localStorage.getItem("selectedTargetProcessID"));
+  }, [localStorage, registeredProcessID]);
 
   const addVariablesToList = () => {
     props.selectedVariables(selectedVariables);

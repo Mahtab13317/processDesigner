@@ -1,77 +1,35 @@
+// #BugID - 114308
+// #BugDescription - Delete button added in expand view
 import React, { useState, useEffect } from "react";
-import {
-  Grid,
-  Typography,
-  Button,
-  IconButton,
-  TextField
-} from "@material-ui/core";
-import SystemUpdateAltIcon from "@material-ui/icons/SystemUpdateAlt";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice.js";
-import { RTL_DIRECTION, propertiesLabel
+import {
+  RTL_DIRECTION,
+  propertiesLabel,
 } from "../../../../Constants/appConstants";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import arabicStyles from "./arabicStyles.module.css";
-import {
-  ActivityPropertySaveCancelValue,
-  setSave
-} from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked.js";
-import DeleteIcon from "@material-ui/icons/Delete";
-import { makeStyles } from "@material-ui/styles";
 import { useGlobalState, store } from "state-pool";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { useTranslation } from "react-i18next";
-import { connect, useDispatch, useSelector } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import styles from "./Rule.module.css";
 import * as actionCreators from "../../../../redux-store/actions/Properties/showDrawerAction";
-const useStyles = makeStyles({
-  root: {
-    width: "100%",
-    maxWidth: 500,
-    fontSize: "14px",
-    paddingTop: "2rem",
-    paddingLeft: "1rem",
-    fontWeight: "600"
-  },
-  roota: {
-    paddingTop: "1rem",
-    paddingLeft: "2rem",
-    fontSize: "12px",
-    fontWeight: "600",
-    height: "4rem"
-  },
-  rootb: {
-    paddingRight: "2rem",
-    paddingLeft: "5rem",
 
-    paddingTop: "2rem",
-    width: "7px",
-    height: "10px"
-  },
-  textField: {
-    height: 10,
-    fontSize: "12px"
-  }
-});
-const InitialRule = props => {
+const InitialRule = (props) => {
   let dispatch = useDispatch();
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const [showInput, setShowInput] = useState(false);
-  const [data, setData] = useState({});
+  const [data, setData] = useState({
+    condition: "",
+    operation: "",
+  });
   const localActivityPropertyData = store.getState("activityPropertyData");
   const [spinner, setspinner] = useState(true);
-  const [
-    localLoadedActivityPropertyData,
-    setlocalLoadedActivityPropertyData,
-    updatelocalLoadedActivityPropertyData
-  ] = useGlobalState(localActivityPropertyData);
-  console.log(
-    localLoadedActivityPropertyData.ActivityProperty.objPMRuleDetails
-  );
-  const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
+  const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
+    useGlobalState(localActivityPropertyData);
   const [attachField, setAttachField] = useState([]);
-  
+
   useEffect(() => {
     if (localLoadedActivityPropertyData?.Status === 0) {
       setspinner(false);
@@ -84,42 +42,162 @@ const InitialRule = props => {
     }
   }, [localLoadedActivityPropertyData]);
 
+  //code edited on 5 August 2022 for BugId 110897
   const handleChange = (e, i) => {
     const values = [...attachField];
-    values[i][e.target.name] = e.target.value;
+    values[i] = {
+      ...values[i],
+      [e.target.name]: e.target.value,
+      isEdited: true,
+    };
     setAttachField(values);
   };
-  const handleDataChange = e => {
+
+  const handleDataChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
-  const handleRemoveFields = i => {
-    
+
+  const handleRemoveFields = (i, ruleId) => {
     const values = [...attachField];
     values.splice(i, 1);
     setAttachField(values);
+    let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
+    let idx = null;
+    temp?.ActivityProperty?.objPMRuleDetails?.m_arrRuleInfo?.forEach(
+      (el, index) => {
+        if (+el.ruleId === +ruleId) {
+          idx = index;
+        }
+      }
+    );
+    if (idx !== null) {
+      temp.ActivityProperty.objPMRuleDetails.m_arrRuleInfo.splice(idx, 1);
+    }
+    setlocalLoadedActivityPropertyData(temp);
     dispatch(
       setActivityPropertyChange({
         [propertiesLabel.initialRules]: {
           isModified: true,
-          hasError: false
-        }
+          hasError: false,
+        },
       })
     );
   };
-  const handleAddFields = () => {
-    setAttachField([...attachField, { ruleCondition: "", ruleOperation: "" }]);
-    dispatch(
-      setActivityPropertyChange({
-        [propertiesLabel.initialRules]: {
-          isModified: true,
-          hasError: false
-        }
-      })
-    );
-  };
- 
 
-  const classes = useStyles();
+  // code edited on 5 August 2022 for BugId 111117
+  const handleAddFields = () => {
+    setAttachField([
+      ...attachField,
+      { ruleCondition: data.condition, ruleOperation: data.operation },
+    ]);
+    setData({
+      condition: "",
+      operation: "",
+    });
+    let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
+    let maxRuleId = 0;
+    if (temp?.ActivityProperty?.objPMRuleDetails) {
+      if (temp?.ActivityProperty?.objPMRuleDetails?.m_arrRuleInfo?.length > 0) {
+        temp?.ActivityProperty?.objPMRuleDetails?.m_arrRuleInfo?.forEach(
+          (el) => {
+            if (+el.ruleId > +maxRuleId) {
+              maxRuleId = +el.ruleId;
+            }
+          }
+        );
+        temp.ActivityProperty.objPMRuleDetails.m_arrRuleInfo.push({
+          m_bSelected: false,
+          ruleCondition: data.condition,
+          ruleId: `${maxRuleId + 1}`,
+          ruleOperation: data.operation,
+        });
+      } else {
+        temp.ActivityProperty.objPMRuleDetails = {
+          ...temp.ActivityProperty.objPMRuleDetails,
+          m_arrRuleInfo: [
+            {
+              m_bSelected: false,
+              ruleCondition: data.condition,
+              ruleId: `${maxRuleId + 1}`,
+              ruleOperation: data.operation,
+            },
+          ],
+        };
+      }
+    } else {
+      temp.ActivityProperty = {
+        ...temp.ActivityProperty,
+        objPMRuleDetails: {
+          m_arrRuleInfo: [
+            {
+              m_bSelected: false,
+              ruleCondition: data.condition,
+              ruleId: `${maxRuleId + 1}`,
+              ruleOperation: data.operation,
+            },
+          ],
+        },
+      };
+    }
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.initialRules]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
+  };
+  // code edited on 5 August 2022 for BugId 110897
+  const handleEditFields = (rule) => {
+    let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
+    let idx = null;
+    temp?.ActivityProperty?.objPMRuleDetails?.m_arrRuleInfo?.forEach(
+      (el, index) => {
+        if (+el.ruleId === +rule.ruleId) {
+          idx = index;
+        }
+      }
+    );
+    if (idx !== null) {
+      temp.ActivityProperty.objPMRuleDetails.m_arrRuleInfo[idx] = {
+        ...temp.ActivityProperty.objPMRuleDetails.m_arrRuleInfo[idx],
+        ruleCondition: rule.ruleCondition,
+        ruleOperation: rule.ruleOperation,
+      };
+    }
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.initialRules]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
+  };
+
+  // code edited on 5 August 2022 for BugId 110897
+  const cancelEdit = (i, rule) => {
+    let oldRule = null;
+    localLoadedActivityPropertyData?.ActivityProperty?.objPMRuleDetails?.m_arrRuleInfo?.forEach(
+      (el, index) => {
+        if (+el.ruleId === +rule.ruleId) {
+          oldRule = el;
+        }
+      }
+    );
+    const values = [...attachField];
+    values[i] = {
+      ...values[i],
+      ruleCondition: oldRule.ruleCondition,
+      ruleOperation: oldRule.ruleOperation,
+      isEdited: false,
+    };
+    setAttachField(values);
+  };
+
   return (
     <div>
       {spinner ? (
@@ -142,24 +220,37 @@ const InitialRule = props => {
           <table className={styles.tableDiv}>
             <thead className={styles.tableHeader}>
               <tr className={styles.tableHeaderRow}>
-                <td className={styles.serialDiv}></td>
-                <td className={`${styles.conditionDiv1} ${direction === RTL_DIRECTION
-              ? arabicStyles.divHead
-              : styles.divHead}`}>
+                {props.isDrawerExpanded && (
+                  <td className={styles.serialDiv}></td>
+                )}
+                <td
+                  className={`${styles.conditionDiv1} ${
+                    direction === RTL_DIRECTION
+                      ? arabicStyles.divHead
+                      : styles.divHead
+                  }`}
+                >
                   {t("condition")}
                 </td>
-                <td className={`${styles.operationDiv1} ${direction === RTL_DIRECTION
-              ? arabicStyles.divHead
-              : styles.divHead}`}>
+                <td
+                  className={`${styles.operationDiv1} ${
+                    direction === RTL_DIRECTION
+                      ? arabicStyles.divHead
+                      : styles.divHead
+                  }`}
+                >
                   {t("operation")}
                 </td>
                 <td className={styles.addDiv}>
                   {!showInput ? (
                     <button
-                      className={direction === RTL_DIRECTION
-                        ? arabicStyles.addAttachBtn
-                        : styles.addAttachBtn}
-                      onClick={() => {props.expandDrawer(true)
+                      className={
+                        direction === RTL_DIRECTION
+                          ? arabicStyles.addAttachBtn
+                          : styles.addAttachBtn
+                      }
+                      onClick={() => {
+                        props.expandDrawer(true);
                         setShowInput(true);
                       }}
                     >
@@ -170,100 +261,187 @@ const InitialRule = props => {
               </tr>
             </thead>
             <tbody>
-              {showInput  && props.isDrawerExpanded ? (
+              {showInput && props.isDrawerExpanded && (
                 <tr className={styles.showInput}>
-                  <td className={styles.serialDiv}>1.</td>
-                  <td className={`${styles.conditionDiv} ${direction === RTL_DIRECTION
-              ? arabicStyles.divBody
-              : styles.divBody}`}>
+                  <td
+                    className={`${styles.serialDiv} ${
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.divBody
+                        : styles.divBody
+                    }`}
+                  ></td>
+                  <td
+                    className={`${styles.conditionDiv} ${
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.divBody
+                        : styles.divBody
+                    }`}
+                  >
                     <input
-                      value={data.ruleCondition}
+                      value={data.condition}
                       className={styles.ruleInput}
-                      onChange={e => handleDataChange(e)}
+                      onChange={(e) => handleDataChange(e)}
                       name="condition"
                     />
                   </td>
 
-                  <td className={`${styles.operationDiv} ${direction === RTL_DIRECTION
-              ? arabicStyles.divBody
-              : styles.divBody}`}>
+                  <td
+                    className={`${styles.operationDiv} ${
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.divBody
+                        : styles.divBody
+                    }`}
+                  >
                     <input
-                      value={data.ruleOperation}
+                      value={data.operation}
                       className={styles.ruleInput}
-                      onChange={e => handleDataChange(e)}
+                      onChange={(e) => handleDataChange(e)}
                       name="operation"
                     />
                   </td>
 
-                  <td className={`${styles.addDiv} ${direction === RTL_DIRECTION
-              ? arabicStyles.divBody
-              : styles.divBody}`}>
+                  <td
+                    className={`${styles.addDiv} ${
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.divBody
+                        : styles.divBody
+                    }`}
+                  >
                     <button
                       className={styles.cancelBtn}
                       onClick={() => {
                         setShowInput(false);
+                        setData({ condition: "", operation: "" });
                       }}
                     >
                       {t("cancel")}
                     </button>
                     <button
-                      className={styles.addBtn}
+                      className={
+                        data.condition?.trim() !== "" &&
+                        data.operation?.trim() !== ""
+                          ? styles.addBtn
+                          : styles.disabledAddBtn
+                      }
                       onClick={() => handleAddFields()}
+                      disabled={
+                        data.condition?.trim() === "" &&
+                        data.operation?.trim() === ""
+                      }
                     >
                       {t("add")}
                     </button>
                   </td>
                 </tr>
-              ) : null}
+              )}
               {attachField.map((item, i) => (
                 <tr className={styles.showInput1}>
-                  <td className={styles.serialDiv}>
-                    {showInput ? i + 2 : i + 1}.
-                  </td>
+                  {props.isDrawerExpanded && (
+                    <td
+                      className={`${styles.serialDiv} ${
+                        direction === RTL_DIRECTION
+                          ? arabicStyles.divBody
+                          : styles.divBody
+                      }`}
+                    >
+                      {i + 1}.
+                    </td>
+                  )}
                   {props.isDrawerExpanded ? (
-                    <td className={`${styles.conditionDiv} ${direction === RTL_DIRECTION
-                      ? arabicStyles.divBody
-                      : styles.divBody}`}>
+                    <td
+                      className={`${styles.conditionDiv} ${
+                        direction === RTL_DIRECTION
+                          ? arabicStyles.divBody
+                          : styles.divBody
+                      }`}
+                    >
                       <input
                         className={styles.ruleInput}
                         value={item.ruleCondition}
-                        onChange={e => handleChange(e, i)}
-                        name="condition"
+                        onChange={(e) => handleChange(e, i)}
+                        name="ruleCondition"
                       />
                     </td>
                   ) : (
-                    <td className={`${styles.conditionDiv} ${direction === RTL_DIRECTION
-                      ? arabicStyles.divBody
-                      : styles.divBody}`}>
+                    <td
+                      className={`${styles.conditionDiv} ${
+                        direction === RTL_DIRECTION
+                          ? arabicStyles.divBody
+                          : styles.divBody
+                      }`}
+                    >
                       {item.ruleCondition}
                     </td>
                   )}
 
                   {props.isDrawerExpanded ? (
-                    <td className={`${styles.operationDiv} ${direction === RTL_DIRECTION
-                      ? arabicStyles.divBody
-                      : styles.divBody}`}>
+                    <td
+                      className={`${styles.operationDiv} ${
+                        direction === RTL_DIRECTION
+                          ? arabicStyles.divBody
+                          : styles.divBody
+                      }`}
+                    >
                       <input
                         className={styles.ruleInput}
                         value={item.ruleOperation}
-                        onChange={e => handleChange(e, i)}
-                        name="operation"
+                        onChange={(e) => handleChange(e, i)}
+                        name="ruleOperation"
                       />
                     </td>
                   ) : (
-                    <td className={`${styles.operationDiv} ${direction === RTL_DIRECTION
-                      ? arabicStyles.divBody
-                      : styles.divBody}`}>
+                    <td
+                      className={`${styles.operationDiv} ${
+                        direction === RTL_DIRECTION
+                          ? arabicStyles.divBody
+                          : styles.divBody
+                      }`}
+                      style={{
+                        paddingLeft: props.isDrawerExpanded ? "0" : "0.2rem",
+                      }}
+                    >
                       {item.ruleOperation}
                     </td>
                   )}
-                  <td className={`${styles.addDiv} ${direction === RTL_DIRECTION
-              ? arabicStyles.divBody
-              : styles.divBody}`}>
-                    <DeleteOutlineIcon
-                      onClick={() => handleRemoveFields(i)}
-                      className={styles.cancelIcon}
-                    />
+                  <td
+                    className={`${styles.addDiv} ${
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.divBody
+                        : styles.divBody
+                    }`}
+                  >
+                    {/*code edited on 5 August 2022 for BugId 110897*/}
+                    {item.isEdited ? (
+                      <React.Fragment>
+                        <button
+                          className={styles.cancelBtn}
+                          onClick={() => cancelEdit(i, item)}
+                        >
+                          {t("cancel")}
+                        </button>
+                        <button
+                          className={
+                            item.ruleCondition?.trim() !== "" &&
+                            item.ruleOperation?.trim() !== ""
+                              ? styles.addBtn
+                              : styles.disabledAddBtn
+                          }
+                          onClick={() => handleEditFields(item)}
+                          disabled={
+                            item.ruleCondition?.trim() === "" &&
+                            item.ruleOperation?.trim() === ""
+                          }
+                        >
+                          {t("save")}
+                        </button>
+                      </React.Fragment>
+                    ) : (
+                      <DeleteOutlineIcon
+                        onClick={() => handleRemoveFields(i, item.ruleId)}
+                        className={styles.cancelIcon}
+                       
+                      />
+                    )}
                   </td>
                 </tr>
               ))}
@@ -276,31 +454,14 @@ const InitialRule = props => {
 };
 const mapDispatchToProps = (dispatch) => {
   return {
-   
-    expandDrawer: (flag) =>
-      dispatch(actionCreators.expandDrawer(flag)),
+    expandDrawer: (flag) => dispatch(actionCreators.expandDrawer(flag)),
   };
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
-    showDrawer: state.showDrawerReducer.showDrawer,
-
-    cellID: state.selectedCellReducer.selectedId,
-
-    cellName: state.selectedCellReducer.selectedName,
-
-    cellType: state.selectedCellReducer.selectedType,
-
-    cellActivityType: state.selectedCellReducer.selectedActivityType,
-
-    cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
-
-    isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded
+    isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(InitialRule);
+export default connect(mapStateToProps, mapDispatchToProps)(InitialRule);

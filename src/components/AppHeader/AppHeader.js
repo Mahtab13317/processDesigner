@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import "./AppHeader.css";
-import src from "../../assets/Header/NewgenLogo.svg";
+import src from "../../assets/Header/NewgenWithIbps.svg";
 import { useTranslation } from "react-i18next";
 // import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
 import SearchBox from "../../UI/Search Component/index";
@@ -108,6 +108,9 @@ const AppHeader = (props) => {
           if (res.data.Status === 0) {
             setlocalLoadedProcessData(res.data.OpenProcess);
           }
+        })
+        .catch((err) => {
+          console.log(err);
         });
     } else {
       axios
@@ -124,6 +127,9 @@ const AppHeader = (props) => {
           if (res.data.Status === 0) {
             setlocalLoadedProcessData(res.data.OpenProcess);
           }
+        })
+        .catch((err) => {
+          console.log(err);
         });
     }
     props.openProcessClick(
@@ -220,13 +226,7 @@ const AppHeader = (props) => {
       style={{ direction: `${t("HTML_DIR")}`, height: APP_HEADER_HEIGHT }}
     >
       <div className="headerLogoName">
-        <img
-          src={src}
-          alt={t("img")}
-          className={
-            direction === RTL_DIRECTION ? "newgenLogo_rtl" : "newgenLogo"
-          }
-        />
+        <img src={src} alt={t("img")} className="newgenLogo" />
         <div className={direction === RTL_DIRECTION ? "vr_rtl" : "vr"}></div>
         <div
           onClick={backToProcessDesignerHome}
@@ -239,45 +239,52 @@ const AppHeader = (props) => {
           <p
             className={direction === RTL_DIRECTION ? "heading_rtl" : "heading"}
           >
-            <span className="ibps ">{t("iBPS")}</span> {t("ProcessDesigner")}
+            {t("ProcessDesigner")}
           </p>
         </div>
+
+        {tabInfoAtTop.length > 0 &&
+          tabInfoAtTop.map((data) => {
+            return (
+              <div
+                className={
+                  data.isActive && !isProcessDesignerTabActive
+                    ? "titleTabs activeTab"
+                    : "titleTabs"
+                }
+              >
+                <span style={{ marginTop: "0.8rem" }}>
+                  <img
+                    src={processIcon}
+                    style={{
+                      height: "1.5rem",
+                      width: "1.5rem",
+                    }}
+                    alt="Process Icon"
+                  />
+                </span>
+                <span
+                  onClick={() => clickHandler(data)}
+                  className="titleTextTabs"
+                >
+                  {data.ProcessName}
+                </span>
+                <span style={{ marginTop: "0.75rem" }}>
+                  <CloseIcon
+                    onClick={() => deleteProcessData(data)}
+                    style={{
+                      opacity: "0.2",
+                      width: "1.5rem",
+                      height: "1.5rem",
+                    }}
+                  />
+                </span>
+              </div>
+            );
+          })}
       </div>
-
-      {tabInfoAtTop.length > 0 &&
-        tabInfoAtTop.map((data) => {
-          return (
-            <div
-              className={
-                data.isActive && !isProcessDesignerTabActive
-                  ? "titleTabs activeTab"
-                  : "titleTabs"
-              }
-            >
-              <img
-                src={processIcon}
-                style={{
-                  height: "17.2px",
-                  width: "18px",
-                  marginLeft: direction === RTL_DIRECTION ? "0" : "0.5rem",
-                  marginRight: direction === RTL_DIRECTION ? "0.5rem" : "0",
-                  marginBottom: "4px",
-                }}
-                alt="Process Icon"
-              />
-              <div onClick={() => clickHandler(data)} className="titleTextTabs">
-                {data.ProcessName}{" "}
-              </div>{" "}
-              <CloseIcon
-                onClick={() => deleteProcessData(data)}
-                style={{ opacity: "0.2", marginBottom: "2px" }}
-                fontSize="small"
-              />
-            </div>
-          );
-        })}
-
-      {/* <SearchBox
+      <div className="flex alignCenter">
+        {/* <SearchBox
         searchIconAlign="right"
         placeholder={t("search")}
         style={{
@@ -293,24 +300,14 @@ const AppHeader = (props) => {
           marginRight: direction == "rtl" ? "auto" : "",
         }}
       /> */}
-      <img
-        src={QuestionMarkIcon}
-        className="AppHeaderIcon"
-        style={{
-          marginLeft: direction === RTL_DIRECTION ? "0" : "auto",
-          marginRight: direction === RTL_DIRECTION ? "auto" : "0",
-        }}
-        alt="Question Mark"
-      />
-      <div
-        className={
-          direction === RTL_DIRECTION
-            ? "collabTypeLogo_Home_rtl"
-            : "collabTypeLogo_Home"
-        }
-        style={{ background: "#F4A43C" }}
-      >
-        <span className="collabName_Home">SD</span>
+        <img
+          src={QuestionMarkIcon}
+          className="AppHeaderIcon"
+          alt="Question Mark"
+        />
+        <div className="collabTypeLogo_Home" style={{ background: "#F4A43C" }}>
+          <span className="collabName_Home">SD</span>
+        </div>
       </div>
     </div>
   );

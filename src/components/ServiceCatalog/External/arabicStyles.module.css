@@ -12,6 +12,7 @@
   text-align: right;
   font: normal normal 600 14px/19px Open Sans !important;
   letter-spacing: 0px;
+  flex: 0.1;
   color: #0072c6;
   white-space: nowrap;
 }
@@ -21,26 +22,26 @@
   font: normal normal normal 12px/17px Open Sans !important;
   letter-spacing: 0px;
   color: #000000;
-  opacity: 1;
+  flex: 0.1;
   margin: 1px 4.5px 0px 0px !important;
 }
 
 .accordianHeaderDividerUD {
   color: #c4c4c4;
-  width: 84%;
-  margin: 0.65rem 0.65rem 0px 0px !important;
+  flex: 5;
+  margin: 0.65rem 0.5vw 0px 0px !important;
 }
 
 .accordianHeaderDividerUD_noAdd {
   color: #c4c4c4;
-  width: 88.25%;
-  margin: 0.65rem 0.65rem 0px 0px !important;
+  flex: 5;
+  margin: 0.65rem 0.5vw 0px 0px !important;
 }
 
 .accordianHeaderDividerSD {
   color: #c4c4c4;
-  width: 91%;
-  margin: 0.65rem 0.65rem 0px 0px !important;
+  flex: 5;
+  margin: 0.65rem 0.5vw 0px 0px !important;
 }
 
 .accordionHeaderButton {
@@ -49,6 +50,7 @@
   color: #0072c6;
   margin-right: 0.25rem;
   white-space: nowrap;
+  flex: 0.1;
 }
 
 .properties_radioButton {

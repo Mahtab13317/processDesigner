@@ -28,6 +28,7 @@ import {
   DELETE_CONSTANT,
   MODIFY_CONSTANT,
   ENDPOINT_GET_GLOBALTASKTEMPLATES,
+  propertiesLabel,
 } from "../../Constants/appConstants";
 import { getActivityProps } from "../../utility/abstarctView/getActivityProps";
 import { useDispatch, useSelector, connect } from "react-redux";
@@ -52,6 +53,10 @@ import {
   OpenProcessSliceValue,
   setOpenProcess,
 } from "../../redux-store/slices/OpenProcessSlice";
+import {
+  setWebservice,
+  webserviceChangeVal,
+} from "../../redux-store/slices/webserviceChangeSlice";
 import { ProcessTaskTypeValue } from "../../redux-store/slices/ProcessTaskTypeSlice";
 import { propertiesTabsForActivities as Tab } from "../../utility/propertiesTabsForActivity/propertiesTabsForActivity";
 
@@ -81,14 +86,14 @@ function PropertiesTab(props) {
   const [selectedActivityIcon, setSelectedActivityIcon] = useState(null);
   const [isModified, setIsModified] = useState(false);
   const [isSavingAsGlobalTemp, setIsSavingAsGlobalTemp] = useState(false);
+  const [initialWebservice, setInitialWebservice] = useState(null);
   const globalTemplates = useSelector(
     (state) => state.globalTaskTemplate.globalTemplates
   );
+  const [initialTarget, setInitialTarget] = useState(0);
   const openProcessData = useSelector(OpenProcessSliceValue);
-
+  const webserviceVal = useSelector(webserviceChangeVal);
   const ProcessTaskType = useSelector(ProcessTaskTypeValue);
-
-  console.log("PROCESSTYPESelector", ProcessTaskType);
 
   // to call getActivityProperty API
   useEffect(() => {
@@ -170,10 +175,28 @@ function PropertiesTab(props) {
           let tabList = {};
           setTabsForActivity(tabs);
           tabs.forEach((tabEl) => {
-            tabList = {
-              ...tabList,
-              [tabEl.label]: { isModified: false, hasError: false },
-            };
+            if (
+              webserviceVal.webserviceChanged &&
+              tabEl.label === propertiesLabel.basicDetails
+            ) {
+              tabList = {
+                ...tabList,
+                [tabEl.label]: { isModified: true, hasError: false },
+              };
+            } else if (
+              webserviceVal.connChanged &&
+              tabEl.label === propertiesLabel.basicDetails
+            ) {
+              tabList = {
+                ...tabList,
+                [tabEl.label]: { isModified: true, hasError: false },
+              };
+            } else {
+              tabList = {
+                ...tabList,
+                [tabEl.label]: { isModified: false, hasError: false },
+              };
+            }
             tempComp.push(tabEl.name);
           });
           setTabComponents(tempComp);
@@ -214,6 +237,28 @@ function PropertiesTab(props) {
     }
   }, [showConfirmationAlert]);
 
+  const setWebserviceFunc = (localActProperty) => {
+    if (
+      (+localActProperty?.ActivityProperty?.actType === 40 &&
+        +localActProperty?.ActivityProperty?.actSubType === 1) ||
+      (+localActProperty?.ActivityProperty?.actType === 23 &&
+        +localActProperty?.ActivityProperty?.actSubType === 1) ||
+      (+localActProperty?.ActivityProperty?.actType === 24 &&
+        +localActProperty?.ActivityProperty?.actSubType === 1) ||
+      (+localActProperty?.ActivityProperty?.actType === 25 &&
+        +localActProperty?.ActivityProperty?.actSubType === 1) ||
+      (+localActProperty?.ActivityProperty?.actType === 22 &&
+        +localActProperty?.ActivityProperty?.actSubType === 1)
+    ) {
+      setInitialWebservice(localActProperty?.ActivityProperty?.actType);
+      dispatch(
+        setWebservice({
+          initialWebservice: localActProperty?.ActivityProperty?.actType,
+        })
+      );
+    }
+  };
+
   const fetchActivityProperties = () => {
     axios
       .get(
@@ -237,14 +282,27 @@ function PropertiesTab(props) {
         if (res.data.Status === 0) {
           // code added on 6 July 2022 for BugId 111910
           let localActProperty = { ...res.data };
+          let targetId = 0;
           localLoadedProcessData?.Connections?.forEach((conn) => {
             if (conn.SourceId == localActProperty?.ActivityProperty?.actId) {
-              localActProperty.ActivityProperty = {
-                ...localActProperty?.ActivityProperty,
-                targetId: conn.TargetId + "",
-              };
+              targetId = conn.TargetId;
             }
           });
+          localActProperty.ActivityProperty = {
+            ...localActProperty?.ActivityProperty,
+            targetId: targetId + "",
+            // code added on 6 July 2022 for BugId 110924
+            oldPrimaryAct: localActProperty?.ActivityProperty?.primaryAct
+              ? localActProperty.ActivityProperty.primaryAct
+              : "N",
+          };
+          setInitialTarget(targetId);
+          dispatch(
+            setWebservice({
+              initialConn: targetId,
+            })
+          );
+          setWebserviceFunc(localActProperty);
           setlocalLoadedActivityPropertyData(localActProperty);
           setoriginalProcessData(localActProperty);
         }
@@ -424,6 +482,7 @@ function PropertiesTab(props) {
             setIsModified(false);
             setoriginalProcessData(localLoadedActivityPropertyData);
             setsaveCancelDisabled(true);
+            setWebserviceFunc(localLoadedActivityPropertyData);
             if (saveCancelStatus.CloseClicked) {
               props.setShowDrawer(false);
               dispatch(setSave({ CloseClicked: false }));
@@ -452,6 +511,7 @@ function PropertiesTab(props) {
       } else {
         postDataForCallActivity();
       }
+      dispatch(setWebservice({ webserviceChanged: false }));
     } else {
       let isErrorOnSameScreen = true;
       let defaultTab = null;
@@ -475,7 +535,38 @@ function PropertiesTab(props) {
     setShowConfirmationAlert(false);
     setTabsWithError([]);
     setDefaultTabValue(null);
-    setLocalLoadedProcessData(openProcessData.loadedData);
+    dispatch(setWebservice({ webserviceChanged: false }));
+    dispatch(setWebservice({ connChanged: false }));
+    let tempLocal = JSON.parse(JSON.stringify(openProcessData.loadedData));
+    tempLocal?.Connections?.forEach((conn, index) => {
+      // revert the new connection added
+      if (initialTarget === 0) {
+        if (conn.SourceId === props.cellID) {
+          tempLocal.Connections.splice(index, 1);
+        }
+      }
+      // revert the connection deleted or modified
+      else if (conn.SourceId === props.cellID) {
+        tempLocal.Connections[index].TargetId = initialTarget;
+      }
+    });
+    if (
+      (+props.cellActivityType === 40 && +props.cellActivitySubType === 1) ||
+      (+props.cellActivityType === 23 && +props.cellActivitySubType === 1) ||
+      (+props.cellActivityType === 24 && +props.cellActivitySubType === 1) ||
+      (+props.cellActivityType === 25 && +props.cellActivitySubType === 1) ||
+      (+props.cellActivityType === 22 && +props.cellActivitySubType === 1)
+    ) {
+      tempLocal?.MileStones?.forEach((mile, index) => {
+        mile.Activities?.forEach((act, actIdx) => {
+          if (+act.ActivityId === +props.cellID) {
+            tempLocal.MileStones[index].Activities[actIdx].ActivityType =
+              initialWebservice;
+          }
+        });
+      });
+    }
+    setLocalLoadedProcessData(tempLocal);
     dispatch(setSave({ SaveClicked: false, CancelClicked: true }));
     dispatch(setActivityPropertyToDefault());
     setsaveCancelDisabled(true);
@@ -488,7 +579,6 @@ function PropertiesTab(props) {
 
   const handleTabError = () => {
     let temp = [];
-
     Object.keys(allTabStatus).forEach((tab) => {
       if (allTabStatus[tab].hasError) {
         temp.push(tab);
@@ -520,8 +610,8 @@ function PropertiesTab(props) {
                 : item.icon
             }
             style={{
-              height: "1.5rem",
-              width: "1.5rem",
+              height: "auto",
+              width: "1.75rem",
               backgroundColor: tabsWithError.includes(item.label)
                 ? "red"
                 : null,

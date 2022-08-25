@@ -116,8 +116,32 @@ function BusinessVariables(props) {
     getExtVarCount(localLoadedProcessData.Variable);
   }, []);
 
+  const checkIsUpdated = (data) => {
+    let tempData = structuredClone(data);
+    let isUpdated = false;
+    const newArr = data.columns
+      .filter((obj) => {
+        return obj.name !== "itemindex";
+      })
+      .filter((obj) => {
+        return obj.name !== "itemtype";
+      });
+    tempData.columns = newArr;
+    for (let col in tempData.columns) {
+      if (tempData.columns[col].status !== 4) {
+        isUpdated = true;
+        break;
+      }
+    }
+    tempData.isUpdate = isUpdated;
+    return tempData;
+  };
+
   const callbackFunction = async (data) => {
     data.id = data.id + "";
+    data["processName"] = localLoadedProcessData.ProcessName;
+    data = checkIsUpdated(data);
+
     if (data?.constraints?.hasOwnProperty("Indexes")) {
       if (
         !data?.constraints.Indexes.hasOwnProperty("definition") ||
@@ -250,7 +274,7 @@ function BusinessVariables(props) {
             </Typography>
             <Divider className={styles.accordianHeaderDivider} />
           </div>
-          {queueVariablesFlag && !primaryInputStrip && !isProcessReadOnly && (
+          {/* {queueVariablesFlag && !primaryInputStrip && !isProcessReadOnly && (
             <p
               id="primary_variables_add_variable_button"
               className={styles.accordionHeaderButton}
@@ -258,7 +282,7 @@ function BusinessVariables(props) {
             >
               {t("add").toUpperCase()}
             </p>
-          )}
+          )} */}
         </AccordionSummaryStyled>
         <AccordionDetails className={styles.accordianContent}>
           <PrimaryVariables
@@ -266,8 +290,8 @@ function BusinessVariables(props) {
             primaryVariableCount={primaryVariableCount}
             setPrimaryVariableCount={setPrimaryVariableCount}
             isProcessReadOnly={isProcessReadOnly}
-            bForInputStrip={primaryInputStrip}
-            setBForInputStrip={setPrimaryInputStrip}
+            // bForInputStrip={primaryInputStrip}
+            // setBForInputStrip={setPrimaryInputStrip}
           />
         </AccordionDetails>
       </Accordion>

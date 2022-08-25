@@ -48,7 +48,7 @@ function CommonModalBody(props) {
               <FormControlLabel
                 value={VERSION_TYPE_MAJOR}
                 id="major_version_opt"
-                control={<Radio />}
+                control={<Radio style={{ color: "var(--radio_color)" }} />}
                 label={`${t("Major")} ${t("Version")} (${(
                   +props.existingVersion + 1
                 ).toFixed(1)})`}
@@ -57,7 +57,7 @@ function CommonModalBody(props) {
               <FormControlLabel
                 value={VERSION_TYPE_MINOR}
                 id="minor_version_opt"
-                control={<Radio />}
+                control={<Radio style={{ color: "var(--radio_color)" }} />}
                 label={`${t("Minor")} ${t("Version")} (${(
                   +props.existingVersion + 0.1
                 ).toFixed(1)})`}

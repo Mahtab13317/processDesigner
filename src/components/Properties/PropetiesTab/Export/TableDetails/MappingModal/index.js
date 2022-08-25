@@ -21,6 +21,7 @@ function MappingModal(props) {
         id="table_details_more_options"
         onClick={() => setIsOpen(true)}
         fontSize="small"
+        className={styles.moreOptionIcon}
       />
       <Modal
         show={isOpen}

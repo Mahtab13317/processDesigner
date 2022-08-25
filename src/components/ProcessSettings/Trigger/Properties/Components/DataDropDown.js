@@ -133,7 +133,6 @@ function DataDropDown(props) {
         >
           <SearchComponent
             width="100%"
-            height="1.5rem"
             id={`${props.uniqueId}_${props.id}_search`}
           />
           <button

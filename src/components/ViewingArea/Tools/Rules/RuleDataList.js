@@ -161,7 +161,7 @@ function RuleDataList(props) {
             <div className="flex2">
               <SearchBox
                 width="100%"
-                height="1.5rem"
+                //  height="1.5rem"
                 setSearchTerm={setSearchRule}
               />
             </div>
@@ -189,7 +189,7 @@ function RuleDataList(props) {
           <div className="flex2">
             <SearchBox
               width="100%"
-              height="1.5rem"
+              // height="1.5rem"
               setSearchTerm={setSearchTerm}
             />
           </div>

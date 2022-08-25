@@ -6,6 +6,7 @@ import { RTL_DIRECTION } from "../../Constants/appConstants";
 import {
   dataInputs,
   getDropdownOptions,
+  MDMtoProcessDesignerVarTypes,
 } from "../../components/DataModel/BusinessVariables/PrimaryVariables/TypeAndFieldMapping";
 import {
   Checkbox,
@@ -24,7 +25,6 @@ import DateIcon from "../../assets/DataModalIcons/DM_Date.svg";
 import StringIcon from "../../assets/DataModalIcons/DM_String.svg";
 import LongIcon from "../../assets/DataModalIcons/DM_Long.svg";
 import ComplexIcon from "../../assets/DataModalIcons/VT_Complex.svg";
-import axios from "axios";
 
 function TypeAndFieldMapping(props) {
   let { t } = useTranslation();
@@ -49,7 +49,7 @@ function TypeAndFieldMapping(props) {
     dataField,
     dataTypeOnOpen,
     handleDataType,
-    selectDataTypeOption,
+    dataObjectTemplates,
     dataTypeOptions,
     // arrayType,
     // handleArrayType,
@@ -69,16 +69,6 @@ function TypeAndFieldMapping(props) {
     },
     getContentAnchorEl: null,
   };
-  const [DataFieldsOptions, setDataFieldsOptions] = useState([]);
-
-  useEffect(() => {
-    console.log("ccccccccccccccc", dataInputs);
-    dataInputs.forEach((d) => {
-      if (d.variableType === variableType) {
-        setDataFieldsOptions(d.dataFields);
-      }
-    });
-  }, [variableType]);
 
   useEffect(() => {
     let complexVariableTypes = [];
@@ -158,7 +148,7 @@ function TypeAndFieldMapping(props) {
         {
           name: aliasName.split(" ").join("_"),
           alias: aliasName,
-          type: "1",
+          type: MDMtoProcessDesignerVarTypes(variableType),
           key_field: false,
         },
         {
@@ -197,11 +187,17 @@ function TypeAndFieldMapping(props) {
       temp.default_data_fields = [...tempArr];
       temp.arr_type_do = "Y";
     }
+    if (param === "existingTemplate") {
+      temp["template_id"] = e;
+      temp.use_existing = "N";
+    }
     // else {
     //   microProps.unbounded = "N";
     // }
 
     // setmicroProps(temp);
+
+    console.log("vvvvvvvvvvvvvvvvvmode", temp);
 
     window.MdmDataModel(temp);
     handleClose();
@@ -219,7 +215,7 @@ function TypeAndFieldMapping(props) {
       data_object_alias_name: varData?.dataField.split("_").join(" "), // Mandatory in props in PD_EXT
       data_object_name: varData?.dataField, // Mandatory in props in PD_EXT
       data_object_id: +varData?.dataObjectId,
-
+      object_id: localLoadedProcessData.ProcessDefId,
       object_type: "P", //AP/P/C
 
       // parent_do: [
@@ -264,7 +260,7 @@ function TypeAndFieldMapping(props) {
 
       data_types: [1, 2, 3, 4, 5, 8, 9, 10],
     };
-    console.log("mmmmmmmmmmmmmmmicro", microMFProps);
+
     window.MdmDataModel(microMFProps);
   };
 
@@ -436,6 +432,32 @@ function TypeAndFieldMapping(props) {
               >
                 {t("new")}
               </p>
+            </div>
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+                overflowY: "scroll",
+              }}
+            >
+              {dataObjectTemplates?.map((template) => (
+                <div
+                  style={{
+                    width: "100%",
+                    height: "2.5rem",
+                    whiteSpace: "nowrap",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  onClick={() =>
+                    microAppsHandler(template.id, "existingTemplate")
+                  }
+                >
+                  <p className={styles.flexRow}>{template.alias_name}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

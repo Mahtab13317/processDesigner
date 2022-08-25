@@ -1,3 +1,5 @@
+// Changes made to solve Bug Id - 112252 (Not being able to export requirements)
+
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@material-ui/core";
 import Table from "@material-ui/core/Table";
@@ -15,9 +17,12 @@ import { makeStyles } from "@material-ui/styles";
 import { Checkbox } from "@material-ui/core";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import Tooltip from "@material-ui/core/Tooltip";
+import axios from "axios";
 import FileUpload from "../../../../../UI/FileUpload";
 import { FILETYPE_ZIP } from "../../../../../Constants/appConstants";
-
+import { SERVER_URL } from "../../../../../Constants/appConstants";
+import { base64toBlob } from "../../../../../utility/Base64Operations/base64Operations";
+import { contextType } from "react-datetime";
 
 function ExportImport(props) {
   const useStyles = makeStyles({
@@ -59,9 +64,23 @@ function ExportImport(props) {
     Buttons: {
       width: " 4.8125rem",
       height: " 1.75rem ",
-      backgroundColor: "#0072C6",
+      backgroundColor: "var(--button_color) !important",
       // border: "1px solid #C4C4C4 ",
-      // borderRadius: "2px ",
+      borderRadius: "2px ",
+      fontFamily: "Open Sans",
+      fontSize: "0.625rem",
+      marginTop: "0.5rem",
+      marginRight: "0.4375rem",
+      textTransform: "none",
+      whiteSpace: "nowrap",
+      color: "white",
+    },
+    cancelButton: {
+      width: " 4.8125rem",
+      height: " 1.75rem ",
+      backgroundColor: "white !important",
+      border: "1px solid #C4C4C4 ",
+      borderRadius: "2px ",
       fontFamily: "Open Sans",
       fontSize: "0.625rem",
       marginTop: "0.5rem",
@@ -92,20 +111,6 @@ function ExportImport(props) {
       whiteSpace: "nowrap",
       color: "white",
     },
-    cancelButton:{
-      width: " 5rem",
-      height: " 2rem ",
-      backgroundColor: "white",
-      // border: "1px solid #C4C4C4 ",
-      // borderRadius: "2px ",
-      fontFamily: "Open Sans",
-      fontSize: "0.625rem",
-      marginTop: "0.5rem",
-      marginRight: "0.4375rem",
-      textTransform: "none",
-      whiteSpace: "nowrap",
-      color: "black",
-    }
   });
   const styles = useStyles();
   let { t } = useTranslation();
@@ -199,6 +204,38 @@ function ExportImport(props) {
     inputFile.current.click();
   };
 
+  const exportRequirementHandler = () => {
+    let temp = [];
+    sectionsData?.map((el) => {
+      if (el.isChecked) {
+        temp.push({
+          sectionName: el.SectionName,
+          sectionOrderId: el.OrderId,
+          sectionId: el.SectionId,
+        });
+      }
+    });
+    let postBody = {
+      objInnerSections: [...temp],
+      sectionName: sectionsData[0].SectionName,
+    };
+    axios.post(SERVER_URL + `/exportSection`, postBody).then((res) => {
+      if (res.status === 200) {
+        // let tempp ="UEsDBBQACAgIAEeJBVUAAAAAAAAAAAAAAAARAAAAU0VDVElPTlNUQUJMRS54bWyzCU5NLsnMzysOSUzKSbXj4rQJyi93SSxJBDI5bfyLUlKLPFPsDG30YUwbqAa/xNxUOygbKI0sauOSWpxclFkAErDLyrLRR+bbBCQWpeaVeLrYGdjow9lAe/XhFsNNgzoKAFBLBwg3V2t6YgAAAKQAAABQSwECFAAUAAgICABHiQVVN1dremIAAACkAAAAEQAAAAAAAAAAAAAAAAAAAAAAU0VDVElPTlNUQUJMRS54bWxQSwUGAAAAAAEAAQA/AAAAoQAAAAAA"
+        const url = window.URL.createObjectURL(
+          base64toBlob(res.data.ZipData, res.headers["Content-Type"])
+        );
+        // var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+        // var matches = filenameRegex.exec(res.headers["content-disposition"]);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", res.data.ZipFileName); //or any other extension
+        document.body.appendChild(link);
+        link.click();
+      }
+    });
+  };
+
   const setDropzonewithFileStyle = (data) => {
     setnewStyle(data);
   };
@@ -234,7 +271,7 @@ function ExportImport(props) {
           >
             <p
               style={{
-                font: "1rem Open Sans",
+                font: "var(--title_text_font_size) Open Sans",
                 fontWeight: "bold",
                 width: "3.4375rem",
               }}
@@ -242,7 +279,12 @@ function ExportImport(props) {
               {t("export")}
             </p>
             <div style={{ textAlign: "justify", whiteSpace: "nowrap" }}>
-              <p style={{ font: "0.9rem Open Sans", color: "#727272" }}>
+              <p
+                style={{
+                  font: "var(--subtitle_text_font_size) Open Sans",
+                  color: "#727272",
+                }}
+              >
                 {t("selectSectionsExport")}
               </p>
             </div>
@@ -273,7 +315,7 @@ function ExportImport(props) {
                         }}
                       >
                         <Checkbox
-                          size="small"
+                          size="medium"
                           checked={allSectionChecked}
                           onChange={handleAllSectionChecked}
                         />
@@ -282,6 +324,7 @@ function ExportImport(props) {
                             marginLeft: "3rem",
                             marginTop: "0.4rem",
                             fontWeight: "bold",
+                            fontSize: "var(--subtitle_text_font_size)",
                           }}
                         >
                           {t("section")}s
@@ -316,7 +359,7 @@ function ExportImport(props) {
                                 }}
                               >
                                 <Checkbox
-                                  size="small"
+                                  size="medium"
                                   checked={data.isChecked}
                                   onChange={(e) =>
                                     handleEachSectionChange(e, data)
@@ -327,11 +370,17 @@ function ExportImport(props) {
                                     marginRight: "1.5rem",
                                     marginLeft: "3rem",
                                     paddingTop: "7px",
+                                    fontSize: "var(--base_text_font_size)",
                                   }}
                                 >
                                   {data.OrderId}.
                                 </p>
-                                <p style={{ paddingTop: "7px" }}>
+                                <p
+                                  style={{
+                                    paddingTop: "7px",
+                                    fontSize: "var(--base_text_font_size)",
+                                  }}
+                                >
                                   {data.SectionName}
                                 </p>
                                 {data.Description !== "" ? (
@@ -400,6 +449,8 @@ function ExportImport(props) {
                                             height: "1.5rem",
                                             marginTop: "0px",
                                             borderRight: "none",
+                                            fontSize:
+                                              "var(--base_text_font_size)",
                                           }}
                                         >
                                           {subsection.OrderId + "."}
@@ -412,6 +463,8 @@ function ExportImport(props) {
                                             margin: "0px 0 0 0px",
 
                                             borderLeft: "none",
+                                            fontSize:
+                                              "var(--base_text_font_size)",
                                           }}
                                         >
                                           {subsection.SectionName}
@@ -478,6 +531,8 @@ function ExportImport(props) {
                                                     height: "1.5rem",
                                                     marginTop: "0px",
                                                     borderRight: "none",
+                                                    fontSize:
+                                                      "var(--base_text_font_size)",
                                                   }}
                                                 >
                                                   {subsections2.OrderId + "."}
@@ -491,6 +546,8 @@ function ExportImport(props) {
 
                                                     marginLeft: "0px",
                                                     borderLeft: "none",
+                                                    fontSize:
+                                                      "var(--base_text_font_size)",
                                                   }}
                                                 >
                                                   {subsections2.SectionName}
@@ -538,20 +595,23 @@ function ExportImport(props) {
               marginTop: "10px",
               display: "flex",
               flexDirection: "row-reverse",
-              height: "3rem",
+              height: "4rem",
             }}
           >
             <Button
               className={styles.Buttons}
-              style={{ color: "white" }}
+              style={{
+                color: "white",
+                background: "var(--button_color) !important",
+              }}
               variant="contained"
-              size="small"
-              color="primary"
+              size="medium"
+              onClick={() => exportRequirementHandler()}
             >
               {t("export")}
             </Button>
             <Button
-              className={styles.Buttons}
+              className={styles.cancelButton}
               style={{
                 color: "#606060",
                 backgroundColor: "white",
@@ -559,7 +619,7 @@ function ExportImport(props) {
               }}
               variant="contained"
               onClick={closeModalHandler}
-              size="small"
+              size="medium"
             >
               {t("cancel")}
             </Button>
@@ -621,17 +681,42 @@ function ExportImport(props) {
               />
             </div>
           </div>
-         {newStyle ? <div style={{display: "flex", flexDirection: "row", width: "27rem", height: "5rem", justifyContent: "space-around"}}>
-            <Button onClick={closeModalHandler} variant="contained" size="small" className={styles.cancelButton} >
-              {t("cancel")}
-            </Button>
-            <Button variant="contained" size="small" color="primary" className={styles.importButtons}>
-              {t("importAndMergeSections")}
-            </Button>
-            <Button variant="contained" size="small" color="primary" className={styles.importButtons}>
-            {t("importAndOverrideSections")}
-            </Button>
-          </div> : null}
+          {newStyle ? (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                width: "27rem",
+                height: "5rem",
+                justifyContent: "space-around",
+              }}
+            >
+              <Button
+                onClick={closeModalHandler}
+                variant="contained"
+                size="medium"
+                className={styles.cancelButton}
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                variant="contained"
+                size="medium"
+                color="primary"
+                className={styles.importButtons}
+              >
+                {t("importAndMergeSections")}
+              </Button>
+              <Button
+                variant="contained"
+                size="medium"
+                color="primary"
+                className={styles.importButtons}
+              >
+                {t("importAndOverrideSections")}
+              </Button>
+            </div>
+          ) : null}
         </div>
       )}
     </div>

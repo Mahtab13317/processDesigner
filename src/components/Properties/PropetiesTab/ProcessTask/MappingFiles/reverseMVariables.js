@@ -26,6 +26,7 @@ import VariableList from "../MappingLists/variableListForward";
 import DeleteIcon from "@material-ui/icons/Delete";
 import VariableListReverse from "../MappingLists/variableListReverse";
 import "./index.css";
+import TabsHeading from "../../../../../UI/TabsHeading";
 
 function ReverseForVariables(props) {
   // Process Data
@@ -50,7 +51,7 @@ function ReverseForVariables(props) {
 
   useEffect(() => {
     let jsonBody = {
-      processDefId: "2145",
+      processDefId: localStorage.getItem("selectedTargetProcessID"),
       extTableDataFlag: "Y",
       docReq: "Y",
       omniService: "Y",
@@ -114,7 +115,10 @@ function ReverseForVariables(props) {
   const oneLineForMap = () => {
     return reverseVariablesList?.map((el) => {
       return (
-        <div
+        <>
+        <TabsHeading heading={props?.heading} />
+          <div
+          id="processTaskId1"
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -181,6 +185,7 @@ function ReverseForVariables(props) {
           </div>
           <div style={{ marginTop: "5px", flex: "0.2", textAlign: "center" }}>
             <DeleteIcon
+              className="deleteIconProcessTask"
               style={{
                 cursor: "pointer",
               }}
@@ -188,6 +193,7 @@ function ReverseForVariables(props) {
             />
           </div>
         </div>
+        </>
       );
     });
   };

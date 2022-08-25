@@ -4,9 +4,24 @@ import FileType from "../../../../../assets/ProcessView/FileType.svg";
 import "../../Projects/projects.css";
 import { useTranslation } from "react-i18next";
 import { tileProcess } from "../../../../../utility/HomeProcessView/tileProcess";
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles({
+  processType: {
+    textTransform: "uppercase",
+    fontFamily: "var(--font_family)",
+    fontWeight: "600",
+    fontSize: "11px",
+  },
+  checkedType: {
+    fontFamily: "var(--font_family)",
+    fontSize: "11px",
+  },
+});
 
 function Table(props) {
   let { t } = useTranslation();
+  const classes = useStyles();
   const [filteredRow, setFilteredRow] = useState([]);
 
   useEffect(() => {
@@ -55,30 +70,52 @@ function Table(props) {
             </span>
           </div>
           <div className="processListRow3">
-            <img
-              src={tileProcess(el.ProcessType)[0]}
-              style={{
-                height: "10px",
-                width: "10px",
-                marginTop: "1px",
-                marginRight: "0.125vw",
-              }}
-            />
-            {tileProcess(el.ProcessType)[1]} {tileProcess(el.Type)[1]}{" "}
-            {el.CheckedOut === "Y" ? `(${t("Checked")})` : null}
-            <img
-              src={tileProcess(el.ProcessType)[5] || tileProcess(el.Type)[5]}
-            />
-            <span>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <img
+                src={tileProcess(el.ProcessType)[0]}
+                style={{
+                  height: "0.75rem",
+                  width: "0.75rem",
+                  marginRight: "0.125vw",
+                }}
+              />
+              <p className={classes.processType}>
+                {tileProcess(el.ProcessType)[1]}{" "}
+                <img
+                  src={
+                    tileProcess(el.ProcessType)[5] || tileProcess(el.Type)[5]
+                  }
+                  alt=""
+                />
+              </p>
+              <span className={classes.checkedType}>
+                {el.CheckedOut === "Y" ? `(${t("Checked")})` : null}
+              </span>
+            </div>
+            <p style={{ fontSize: "11px" }}>
               {t("processesTable.createdOn")} {el.CreatedDate}
-            </span>
+            </p>
           </div>
           <div className="processListRow4">
-            {el.ModifiedDate}
-            <span>
-              {t("processesTable.editedBy")} {el.LastModifiedBy} {el.Editor}{" "}
+            <p
+              className="recentTableProcessDate"
+              style={{
+                fontFamily: "var(--font_family)",
+                fontWeight: "600",
+                fontSize: "11px",
+              }}
+            >
+              {el.ModifiedDate}
+            </p>
+            <p
+              style={{
+                fontFamily: "var(--font_family)",
+                fontSize: "11px",
+              }}
+            >
+              {t("processesTable.editedBy")} {el.LastModifiedBy}{" "}
               {t("processesTable.at")} {el.ModifiedTime}
-            </span>
+            </p>
           </div>
           <br />
           <br />

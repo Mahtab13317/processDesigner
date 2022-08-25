@@ -238,3 +238,22 @@ export function getVariableTypeCode(typeName) {
   }
   return typeCode;
 }
+
+export function MDMtoProcessDesignerVarTypes(pmwebType) {
+  //MDM "1" = String, "2" = Integer, "3" = Long, "4" = Float,"5" =Date and Time,
+  //"6" = Binary Data, "7" = Currency, "8" = Boolean,"9" = ShortDate, "10" = Ntext, "11" = Text, "12" = Nvarchar,"13" = Phone Number,"14" =Email.Binary,
+  let temp;
+  let arrObj = [
+    { mdm: "1", pm: "10" },
+    { mdm: "2", pm: "3" },
+    { mdm: "3", pm: "4" },
+    { mdm: "4", pm: "6" },
+    { mdm: "5", pm: "8" },
+  ];
+  arrObj.forEach((obj) => {
+    if (obj.pm === pmwebType) {
+      temp = obj.mdm;
+    }
+  });
+  return temp;
+}

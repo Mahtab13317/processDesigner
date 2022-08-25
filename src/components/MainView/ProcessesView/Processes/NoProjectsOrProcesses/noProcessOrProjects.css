@@ -1,15 +1,14 @@
 .noProjectsScreen {
-  display: "flex";
   text-align: center;
-  align-items: center;
+  margin: 2rem 0;
 }
 .noProjectsScreen h2 {
-  font-size: 1rem;
-  margin: 10px 0px;
+  font-size: var(--subtitle_text_font_size);
+  margin: 0.75rem 0;
 }
 .noProjectsScreen p {
-  font-size: 12px;
-  margin-bottom: 20px;
+  font-size: var(--base_text_font_size);
+  margin-bottom: 1.25rem;
   color: #3a3a3a;
 }
 .noProjectsScreen span {

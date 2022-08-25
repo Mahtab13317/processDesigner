@@ -35,7 +35,7 @@ function FileDetails(props) {
   const [filePath, setFilePath] = useState("");
   const [orderBy, setOrderBy] = useState(fields && fields[0]);
   const [fileType, setFileType] = useState("");
-  const [fieldType, setFieldType] = useState("");
+  const [fieldType, setFieldType] = useState("1");
   const [fileMoveInterval, setFileMoveInterval] = useState("");
   const [sleepTime, setSleepTime] = useState("");
   const [maskedValue, setMaskedValue] = useState("");
@@ -67,7 +67,7 @@ function FileDetails(props) {
       setFilePath(data.filePath);
       setOrderBy(data.orderBy);
       setFileType(data.fileType);
-      setFieldType(data.csvType);
+      setFieldType(data.csvType === "" ? "1" : data.csvType);
       setFileMoveInterval(data.fileExpiryTrig);
       setSleepTime(data.sleepTime);
       setMaskedValue(data.maskedValue);

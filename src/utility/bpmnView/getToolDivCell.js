@@ -282,6 +282,23 @@ let toDropOnGraph = (graph, cell, x, y, t, mainCell, props) => {
           }),
         };
       }
+      // code added on 22 July 2022 for BugId 113305
+      if (!queueInfo.queueExist) {
+        newProcessData.Queue?.splice(0, 0, {
+          QueueFilter: "",
+          OrderBy: queueInfo?.orderBy,
+          AllowReassignment: queueInfo?.allowReassignment,
+          UG: [],
+          FilterOption: "0",
+          RefreshInterval: queueInfo?.refreshInterval,
+          QueueId: queueInfo?.queueId,
+          SortOrder: queueInfo?.sortOrder,
+          QueueName: queueInfo?.queueName,
+          QueueDescription: queueInfo?.QueueDescription,
+          QueueType: queueInfo?.queueType,
+          FilterValue: "",
+        });
+      }
 
       return newProcessData;
     });

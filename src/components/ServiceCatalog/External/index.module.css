@@ -24,6 +24,7 @@
   letter-spacing: 0px;
   color: #0072c6;
   white-space: nowrap;
+  flex: 0.1;
 }
 
 .accordianHeaderCount {
@@ -31,26 +32,26 @@
   font: normal normal normal 12px/17px Open Sans !important;
   letter-spacing: 0px;
   color: #000000;
-  opacity: 1;
+  flex: 0.1;
   margin: 1px 0px 0px 4.5px !important;
 }
 
 .accordianHeaderDividerUD {
   color: #c4c4c4;
-  width: 84%;
-  margin: 0.65rem 0px 0px 0.65rem !important;
+  flex: 5;
+  margin: 0.65rem 0px 0px 0.5vw !important;
 }
 
-.accordianHeaderDividerUD_noAdd{
+.accordianHeaderDividerUD_noAdd {
   color: #c4c4c4;
-  width: 88.25%;
-  margin: 0.65rem 0px 0px 0.65rem !important;
+  flex: 5;
+  margin: 0.65rem 0px 0px 0.5vw !important;
 }
 
 .accordianHeaderDividerSD {
   color: #c4c4c4;
-  width: 91%;
-  margin: 0.65rem 0px 0px 0.65rem !important;
+  flex: 5;
+  margin: 0.65rem 0px 0px 0.5vw !important;
 }
 
 .accordionHeaderButton {
@@ -59,12 +60,13 @@
   color: #0072c6;
   margin-left: 0.25rem;
   white-space: nowrap;
+  flex: 0.1;
 }
 
 .accordianHeadingDiv {
   display: flex;
   flex-direction: row;
-  width: 80vw;
+  width: 100%;
 }
 
 .paramDiv {

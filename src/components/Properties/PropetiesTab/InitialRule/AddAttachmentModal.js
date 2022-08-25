@@ -1,3 +1,5 @@
+// Changes made to solve bugID - 110890 (Validation message should be aligned properly)
+
 import React, { useRef, useState } from "react";
 import { TextField } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
@@ -104,7 +106,9 @@ function AddAttachmentModal(props) {
         <CloseIcon onClick={handleClose} className={styles.closeIcon} />
       </div>
       <div className={styles.modalBody}>
-        <div className={styles.invocationDiv}>
+        <div className={styles.invocationDiv} style={{
+          marginTop: '-3px',
+        }}>
           <span className={styles.modalLabel}>
             {t("fileName")}
             <span className={styles.starIcon}>*</span>
@@ -134,7 +138,9 @@ function AddAttachmentModal(props) {
             />
           </div>
         </div>
-        <div className={styles.invocationDiv}>
+        <div className={styles.invocationDiv} style={{
+          marginTop: '-3px',
+        }}>
           <span className={styles.modalLabel}>
             {t("documentName")}
             <span className={styles.starIcon}>*</span>
@@ -150,10 +156,12 @@ function AddAttachmentModal(props) {
             />
           </div>
         </div>
-        <div className={styles.invocationDiv}>
+        <div className={styles.invocationDiv} style={{
+          marginTop: '-3px',
+        }}>
           <span className={styles.modalLabel}>
             {t("Discription")}
-            <span className={styles.starIcon}>*</span>
+            {/* <span className={styles.starIcon}>*</span> */}
           </span>
           <div className={styles.file}>
             <TextField

@@ -7,52 +7,82 @@ import FormControl from "@material-ui/core/FormControl";
 import Button from "@material-ui/core/Button";
 import "./index.css";
 import GroupsTab from "./groupsTab.js";
-import { useGlobalState } from "state-pool";
+import { store, useGlobalState } from "state-pool";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
+import { connect } from "react-redux";
 import {
   SERVER_URL,
   ENDPOINT_QUEUEASSOCIATION_GROUPLIST,
   ENDPOINT_QUEUELIST,
   ENDPOINT_QUEUEASSOCIATION_MODIFY,
   RTL_DIRECTION,
+  SAVE_QUEUEDATA,
 } from "../../../../Constants/appConstants.js";
+import { Checkbox, Select } from "@material-ui/core";
 
 function QueueAssociation(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const [addedVariableList, setAddedVariableList] = useState([]);
-  const [loadedVariables] = useGlobalState("variableDefinition");
   const [variableList, setVariableList] = useState(null);
   const [queueName, setQueueName] = useState("");
   const [queueDesc, setQueueDesc] = useState("");
+  const [queueTypeLocal, setQueueTypeLocal] = useState("fifo");
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData, setLocalLoadedProcessData] =
+    useGlobalState(loadedProcessData);
+  const localActivityPropertyData = store.getState("activityPropertyData");
+  const [
+    localLoadedActivityPropertyData,
+    setlocalLoadedActivityPropertyData,
+    updatelocalLoadedActivityPropertyData,
+  ] = useGlobalState(localActivityPropertyData);
 
   const associateQueueHandler = () => {
+    let tempKey = {};
+    addedVariableList.forEach((el) => {
+      tempKey = {
+        ...tempKey,
+        [el.ID]: {
+          uGId: el.ID,
+          uGName: el.GroupName,
+          associationType: "1",
+          queryFilter: "",
+          queryPreview: "",
+          status: "U",
+          m_strServerQueryFilter: "",
+          m_bCurrentFilter: false,
+          m_bServerFilter: false,
+          m_bConflictedFilter: false,
+          m_strServerQueryPreview: "",
+          m_bCurrentPreview: false,
+          m_bServerPreview: false,
+          m_bConflictedPreview: false,
+          m_strWorkitemEditable: "",
+        },
+      };
+    });
+    let tempQueue;
+    localLoadedProcessData.MileStones[0].Activities.map(el=>{
+      if(el.ActivityType== props.cellActivityType && el.ActivitySubType== props.cellActivitySubType){
+        tempQueue= el.QueueId;
+      }
+    })
     props.setShowQueueModal(false);
-    props.queueType == 0 ? props.setQueueType(1) : props.setQueueType(0);
     axios
       .post(SERVER_URL + ENDPOINT_QUEUEASSOCIATION_MODIFY, {
-        processDefId: "11920",
-        processState: "L",
+        processDefId: localLoadedProcessData.ProcessDefId,
+        processState: localLoadedProcessData.ProcessType,
         queueName: queueName,
-        QueueDesc: queueDesc,
-        queueId: "-4",
+        queueDesc: queueDesc,
+        queueId: props.queueFrom ==='graph'?props.showQueueModal.queueId: tempQueue,
         queueType: "M",
         allowReassignment: "N",
         orderBy: "2",
         refreshInterval: "0",
         sortOrder: "A",
-        ugMap: {
-          // 1: {
-          //   uGId: "1",
-          //   uGName: "Everyone",
-          //   associationType: "1",
-          //   queryFilter: "asdasd",
-          //   queryPreview: "N",
-          //   status: "I",
-          //   workitemEditable: "N",
-          // },
-        },
+        ugMap: tempKey,
       })
       .then((res) => {
         if (res.data.Status === 0) {
@@ -60,6 +90,73 @@ function QueueAssociation(props) {
         }
       });
   };
+  const createQueueHandler = () => {
+    console.log("KYAAAA1", props.selfQueueCreated);
+    let tempKey = {};
+    addedVariableList.forEach((el) => {
+      tempKey = {
+        ...tempKey,
+        [el.ID]: {
+          uGId: el.ID,
+          uGName: el.GroupName,
+          associationType: "1",
+          queryFilter: "",
+          queryPreview: "",
+          status: "U",
+          m_strServerQueryFilter: "",
+          m_bCurrentFilter: false,
+          m_bServerFilter: false,
+          m_bConflictedFilter: false,
+          m_strServerQueryPreview: "",
+          m_bCurrentPreview: false,
+          m_bServerPreview: false,
+          m_bConflictedPreview: false,
+          m_strWorkitemEditable: "",
+        },
+      };
+    });
+    let myArray = [];
+    localLoadedProcessData.Queue.map((el) => {
+      myArray.push(el.QueueId);
+    });
+    let minimumQueueId = Math.min(...myArray) - 1;
+    props.setShowQueueModal(false);
+    axios
+      .post(SERVER_URL + SAVE_QUEUEDATA, {
+        processDefId: localLoadedProcessData.ProcessDefId,
+        processState: localLoadedProcessData.ProcessType,
+        queueName: queueName,
+        queueId: minimumQueueId,
+        queueType: "N",
+        pendingActions: "N",
+        queueDesc: queueDesc,
+        allowReassignment: "N",
+        filterOption: "0",
+        filterValue: "",
+        orderBy: "2",
+        queueFilter: "",
+        refreshInterval: "0",
+        sortOrder: "A",
+        status: "N",
+        ugMap: tempKey,
+      })
+      .then((res) => {
+        if (res.data.Status === 0) {
+          props.setSelfQueueCreated(true);
+          let temp = JSON.parse(JSON.stringify(localLoadedProcessData));
+          temp.MileStones[0].Activities.map((el) => {
+            if (
+              el.ActivityType === props.cellActivityType &&
+              el.ActivitySubType === props.cellActivitySubType
+            ) {
+              el.QueueId = minimumQueueId;
+            }
+          });
+          setLocalLoadedProcessData(temp);
+        }
+      });
+  };
+
   const addAllVariable = () => {
     setAddedVariableList((prev) => {
       let newData = [...prev];
@@ -70,7 +167,6 @@ function QueueAssociation(props) {
     });
     setVariableList([]);
   };
-
   const addOneVariable = (variable) => {
     // if (existingTrigger) {
     //   props.setTriggerEdited(true);
@@ -87,7 +183,6 @@ function QueueAssociation(props) {
       });
     });
   };
-
   const removeAllVariable = () => {
     // if (existingTrigger) {
     //   props.setTriggerEdited(true);
@@ -101,7 +196,6 @@ function QueueAssociation(props) {
     });
     setAddedVariableList([]);
   };
-
   const removeOneVariable = (variable) => {
     // if (existingTrigger) {
     //   props.setTriggerEdited(true);
@@ -121,27 +215,58 @@ function QueueAssociation(props) {
 
   useEffect(() => {
     axios
-      .post(SERVER_URL + ENDPOINT_QUEUEASSOCIATION_GROUPLIST, {})
+      .post(SERVER_URL + ENDPOINT_QUEUEASSOCIATION_GROUPLIST, {
+        // m_strInit: "",
+        // m_strGroupId: "",
+        // m_strGroupName: "",
+        // m_arrGroupList: "",
+        // m_bError: false,
+        // m_strErrorMsg: "",
+        // m_bDescending: "",
+        // m_bEnablePrevBut: "",
+        // m_bEnableNextBut: "",
+        // m_strDefaultPrefix: "",
+      })
       .then((res) => {
-        if (res.data.Status === 0) {
+        if (res?.data?.Status === 0) {
           setVariableList(res.data.GroupInfo);
         }
       });
   }, []);
 
   useEffect(() => {
-    axios
-      .post(SERVER_URL + ENDPOINT_QUEUELIST, {
-        processDefId: "11920",
-        processState: "L",
-        queueId: "-4",
-      })
-      .then((res) => {
-        console.log("RESPONSE", res.data);
-        setQueueName(res.data.Queue[0].QueueName);
-        setQueueDesc(res.data.Queue[0].QueueDescription);
+    console.log('GENERAL', props?.queueFrom, props?.showQueueModal?.queueId);
+    if (props.queueType == 0 || props.selfQueueCreated) {
+      let temp = [];
+      let tempQueueId;
+      localLoadedProcessData.MileStones[0].Activities.map((el) => {
+        if (
+          el.ActivityType === props.cellActivityType &&
+          el.ActivitySubType === props.cellActivitySubType
+        ) {
+          tempQueueId = el.QueueId;
+        }
       });
-  }, []);
+      axios
+        .post(SERVER_URL + ENDPOINT_QUEUELIST, {
+          processDefId: localLoadedProcessData.ProcessDefId,
+          processState: localLoadedProcessData.ProcessType,
+          queueId: props.queueFrom ==='graph'?props.showQueueModal.queueId: tempQueueId,
+        })
+        .then((res) => {
+          setQueueName(res?.data?.Queue[0]?.queueName);
+          setQueueDesc(res?.data?.Queue[0]?.queueDesc);
+          Object.keys(res?.data?.Queue[0]?.ugMap).forEach((el) => {
+            let tOne = res?.data?.Queue[0]?.ugMap;
+            temp.push({
+              GroupName: tOne[el].m_strUGName,
+              ID: tOne[el].m_strUGId,
+            });
+          });
+          setAddedVariableList(temp);
+        });
+    }
+  }, [props.queueType, props.selfQueueCreated]);
 
   const editQueueNameHandler = (e) => {
     setQueueName(e.target.value);
@@ -151,6 +276,208 @@ function QueueAssociation(props) {
     setQueueDesc(e.target.value);
   };
 
+  const showFetchingOrder = () => {
+    return (
+      <div className="fetchingOrderFIFO">
+        {/* ------------------------------ */}
+        {queueTypeLocal == "wip" ? (
+          <>
+            <p
+              style={{
+                color: "#000000",
+                fontSize: "12px",
+                fontWeight: "700",
+              }}
+            >
+              ASSIGNMENT TYPE
+            </p>
+            <FormControl>
+              <RadioGroup
+                column
+                aria-labelledby="demo-row-radio-buttons-group-label"
+                name="row-radio-buttons-group"
+                defaultValue="one"
+              >
+                <FormControlLabel
+                  value="one"
+                  control={<Radio size="small" />}
+                  label={
+                    <p style={{ fontSize: "12px", height: "15px" }}>
+                      No Assignment
+                    </p>
+                  }
+                />
+                <FormControlLabel
+                  value="two"
+                  control={<Radio size="small" />}
+                  label={
+                    <p style={{ fontSize: "12px", height: "15px" }}>
+                      Dynamic Assignment
+                    </p>
+                  }
+                />
+                <FormControlLabel
+                  value="three"
+                  control={<Radio size="small" />}
+                  label={
+                    <p style={{ fontSize: "12px", height: "15px" }}>
+                      Permanent Assignment
+                    </p>
+                  }
+                />
+                <FormControlLabel
+                  value="three"
+                  control={<Radio size="small" />}
+                  label={
+                    <p style={{ fontSize: "12px", height: "15px" }}>Search</p>
+                  }
+                />
+              </RadioGroup>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  height: "20px",
+                  marginBottom: "20px",
+                  marginLeft: "-13px",
+                }}
+              >
+                <Checkbox size="small" />
+                <span style={{ fontSize: "11px", fontWeight: "700" }}>
+                  Allow Reassignment
+                </span>
+              </div>
+            </FormControl>
+          </>
+        ) : null}
+        {/* ------------------------------- */}
+        <p
+          style={{
+            color: "#000000",
+            fontSize: "12px",
+            fontWeight: "700",
+          }}
+        >
+          FETCHING ORDER
+        </p>
+        <FormControl>
+          <RadioGroup
+            column
+            aria-labelledby="demo-row-radio-buttons-group-label"
+            name="row-radio-buttons-group"
+            defaultValue="one"
+          >
+            <FormControlLabel
+              value="one"
+              control={<Radio size="small" />}
+              label={
+                <p style={{ fontSize: "12px", height: "15px" }}>
+                  In order of Process Instance ID
+                </p>
+              }
+            />
+            <FormControlLabel
+              value="two"
+              control={<Radio size="small" />}
+              label={
+                <p style={{ fontSize: "12px", height: "15px" }}>
+                  In order of entry date time
+                </p>
+              }
+            />
+            <FormControlLabel
+              value="three"
+              control={<Radio size="small" />}
+              label={
+                <p style={{ fontSize: "12px", height: "15px" }}>
+                  In order of priority level
+                </p>
+              }
+            />
+          </RadioGroup>
+        </FormControl>
+        {/* ------------------------------- */}
+        {queueTypeLocal == "wip" ? (
+          <>
+            <p
+              style={{
+                color: "#000000",
+                fontSize: "12px",
+                fontWeight: "700",
+                marginTop: "10px",
+              }}
+            >
+              WORKITEM VISIBILITY
+            </p>
+            <FormControl>
+              <RadioGroup
+                column
+                aria-labelledby="demo-row-radio-buttons-group-label"
+                name="row-radio-buttons-group"
+                defaultValue="one"
+              >
+                <FormControlLabel
+                  value="one"
+                  control={<Radio size="small" />}
+                  label={
+                    <p style={{ fontSize: "12px", height: "15px" }}>
+                      Show All WorkItems
+                    </p>
+                  }
+                />
+                <FormControlLabel
+                  value="two"
+                  control={<Radio size="small" />}
+                  label={
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <p style={{ fontSize: "12px", height: "15px" }}>
+                        Show WorkItem where logged-in index is equal to:
+                      </p>
+                      <Select
+                        style={{
+                          height: "10px !important",
+                          width: "98px",
+                          marginTop: "10px",
+                          background: "#FFFFFF 0% 0% no-repeat padding-box",
+                          border: "1px solid #DADADA",
+                          borderRadius: "2px",
+                          opacity: "1",
+                        }}
+                      />
+                    </div>
+                  }
+                />
+                <FormControlLabel
+                  value="three"
+                  control={<Radio size="small" />}
+                  label={
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <p style={{ fontSize: "12px", height: "15px" }}>
+                        Show WorkItem where logged-in index is not equal to:{" "}
+                      </p>
+                      <Select
+                        style={{
+                          height: "10px !important",
+                          width: "98px",
+                          marginTop: "10px",
+                          background: "#FFFFFF 0% 0% no-repeat padding-box",
+                          border: "1px solid #DADADA",
+                          borderRadius: "2px",
+                          opacity: "1",
+                        }}
+                      />
+                    </div>
+                  }
+                />
+              </RadioGroup>
+            </FormControl>
+          </>
+        ) : null}
+      </div>
+    );
+  };
+
+  console.log("KYAAAA2", props.selfQueueCreated);
   return (
     <div>
       <p style={{ fontSize: "16px", fontWeight: "600", padding: "12px" }}>
@@ -165,97 +492,106 @@ function QueueAssociation(props) {
         tabStyling="processViewTabs"
         TabNames={["General", "Groups"]}
         TabElement={[
-          <div
-            style={{
-              backgroundColor: "white",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-            }}
-          >
+          <div style={{ height: "250px" }}>
             <div
               style={{
+                backgroundColor: "white",
                 display: "flex",
-                alignItems: "center",
+                flexDirection: "column",
                 justifyContent: "space-between",
-                padding:
-                  direction == RTL_DIRECTION
-                    ? "10px 10px 10px 50px"
-                    : "10px 50px 10px 10px",
-                marginTop: "10px",
               }}
             >
-              <p style={{ fontSize: "12px", color: "#606060" }}>Queue Name</p>
-              <input
-                value={queueName}
+              <div
                 style={{
-                  width: "400px",
-                  height: "24px",
-                  border: "1px solid #DADADA",
-                  borderRadius: "2px",
-                  opacity: "1",
-                  padding: "0px 3px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding:
+                    direction == RTL_DIRECTION
+                      ? "10px 10px 10px 50px"
+                      : "10px 50px 10px 10px",
                 }}
-                onChange={(e) => editQueueNameHandler(e)}
-              />
-            </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginTop: "10px",
-                padding:
-                  direction == RTL_DIRECTION
-                    ? "10px 10px 10px 50px"
-                    : "10px 50px 10px 10px",
-              }}
-            >
-              <p style={{ fontSize: "12px", color: "#606060" }}>Description</p>
-              <textarea
-                onChange={(e) => editQueueDescHandler(e)}
-                value={queueDesc}
+              >
+                <p style={{ fontSize: "12px", color: "#606060" }}>Queue Name</p>
+                <input
+                  value={queueName}
+                  style={{
+                    width: "400px",
+                    height: "24px",
+                    border: "1px solid #DADADA",
+                    borderRadius: "2px",
+                    opacity: "1",
+                    padding: "0px 3px",
+                  }}
+                  onChange={(e) => editQueueNameHandler(e)}
+                />
+              </div>
+              <div
                 style={{
-                  width: "400px",
-                  height: "87px",
-                  border: "1px solid #DADADA",
-                  borderRadius: "2px",
-                  opacity: "1",
-                  padding: "2px 3px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding:
+                    direction == RTL_DIRECTION
+                      ? "10px 10px 10px 50px"
+                      : "10px 50px 10px 10px",
                 }}
-              />
-            </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginTop: "10px",
-                alignItems: "center",
-                padding:
-                  direction == RTL_DIRECTION
-                    ? "10px 10px 10px 50px"
-                    : "10px 50px 10px 10px",
-              }}
-            >
-              <p style={{ fontSize: "12px", color: "#606060" }}>Queue Type</p>
-              <FormControl style={{ marginRight: "265px" }}>
-                <RadioGroup
-                  row
-                  aria-labelledby="demo-row-radio-buttons-group-label"
-                  name="row-radio-buttons-group"
-                  defaultValue="fifo"
-                >
-                  <FormControlLabel
-                    value="fifo"
-                    control={<Radio size="small" />}
-                    label={<p style={{ fontSize: "12px" }}>FIFO</p>}
-                  />
-                  <FormControlLabel
-                    value="wip"
-                    control={<Radio size="small" />}
-                    label={<p style={{ fontSize: "12px" }}>WIP</p>}
-                  />
-                </RadioGroup>
-              </FormControl>
+              >
+                <p style={{ fontSize: "12px", color: "#606060" }}>
+                  Description
+                </p>
+                <textarea
+                  onChange={(e) => editQueueDescHandler(e)}
+                  value={queueDesc}
+                  style={{
+                    width: "400px",
+                    height: "87px",
+                    border: "1px solid #DADADA",
+                    borderRadius: "2px",
+                    opacity: "1",
+                    padding: "2px 3px",
+                  }}
+                />
+              </div>
+              {/* {props.queueType == 1 ? ( */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding:
+                    direction == RTL_DIRECTION
+                      ? "10px 10px 10px 50px"
+                      : "0px 50px 0px 10px",
+                }}
+              >
+                <p style={{ fontSize: "12px", color: "#606060" }}>Queue Type</p>
+                <FormControl style={{ marginRight: "245px" }}>
+                  <RadioGroup
+                    row
+                    aria-labelledby="demo-row-radio-buttons-group-label"
+                    name="row-radio-buttons-group"
+                    defaultValue="fifo"
+                    onChange={(e) => setQueueTypeLocal(e.target.value)}
+                  >
+                    <FormControlLabel
+                      value="fifo"
+                      control={<Radio size="small" />}
+                      label={<p style={{ fontSize: "12px" }}>FIFO</p>}
+                    />
+                    <FormControlLabel
+                      value="wip"
+                      control={<Radio size="small" />}
+                      label={<p style={{ fontSize: "12px" }}>WIP</p>}
+                    />
+                  </RadioGroup>
+                </FormControl>
+              </div>
+              {/* ) : null} */}
+              {/* )} */}
+              {/* =========================AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA============================= */}
+              {/* {props.queueType == 1 ? showFetchingOrder() : null} */}
+              {showFetchingOrder()}
+              {/* =======================AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA============================== */}
             </div>
             <div className="buttons_add buttonsAddToDo_Queue">
               <Button
@@ -269,9 +605,13 @@ function QueueAssociation(props) {
                 id="addAnotherTodo_Button"
                 variant="contained"
                 color="primary"
-                onClick={associateQueueHandler}
+                onClick={
+                  props.queueType == "0" || props.selfQueueCreated
+                    ? associateQueueHandler
+                    : createQueueHandler
+                }
               >
-                Associate
+                {props.queueType == "0" ? "Associate" : "Save"}
               </Button>
             </div>
           </div>,
@@ -279,6 +619,7 @@ function QueueAssociation(props) {
             style={{
               backgroundColor: "white",
               padding: "10px 10px 0px 10px",
+              height: "370px",
             }}
           >
             <p style={{ color: "black", display: "flex" }}>
@@ -312,9 +653,13 @@ function QueueAssociation(props) {
                 id="addAnotherTodo_Button"
                 variant="contained"
                 color="primary"
-                onClick={associateQueueHandler}
+                onClick={
+                  props.queueType == "0" && !props.selfQueueCreated
+                    ? associateQueueHandler
+                    : createQueueHandler
+                }
               >
-                Associate
+                {props.queueType == "0" ? "Associate" : "Save"}
               </Button>
             </div>
           </div>,
@@ -324,4 +669,16 @@ function QueueAssociation(props) {
   );
 }
 
-export default QueueAssociation;
+const mapStateToProps = (state) => {
+  return {
+    cellQueueId: state.selectedCellReducer.selectedQueueId,
+    showDrawer: state.showDrawerReducer.showDrawer,
+    cellID: state.selectedCellReducer.selectedId,
+    cellName: state.selectedCellReducer.selectedName,
+    cellType: state.selectedCellReducer.selectedType,
+    cellActivityType: state.selectedCellReducer.selectedActivityType,
+    cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
+    isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
+  };
+};
+export default connect(mapStateToProps, null)(QueueAssociation);

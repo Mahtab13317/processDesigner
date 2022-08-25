@@ -1,9 +1,9 @@
 .oms_templateTabs .MuiTabs-indicator {
-  background-color: #1072c6;
+  background-color: var(--selected_tab_color);
 }
 
 .oms_templateTabs .Mui-selected .MuiTab-wrapper {
-  color: #1072c6;
+  color: var(--selected_tab_color);
   font-weight: 600 !important;
 }
 

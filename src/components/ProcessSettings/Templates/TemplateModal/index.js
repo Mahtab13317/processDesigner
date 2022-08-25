@@ -1,3 +1,5 @@
+// #BugID - 111751
+// #BugDescription - Cleared input and output formats when user changes tools.
 import React, { useEffect, useState } from "react";
 import styles from "../index.module.css";
 import clsx from "clsx";
@@ -157,6 +159,8 @@ function TemplateModal(props) {
 
   const toolselectorHandler = (event) => {
     setSelectedTool(event.target.value);
+    setselectedInputFormat("");
+    setselectedOutput("");
 
     let InputFormatList = [];
 

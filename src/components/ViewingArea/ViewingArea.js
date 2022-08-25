@@ -421,7 +421,9 @@ function ViewingArea(props) {
                           processType !== PROCESSTYPE_LOCAL ? "none" : "",
                       }}
                     >
+                      <div className={classes.beforeDiv}></div>
                       <p className={classes.addicon}>+</p>
+                      <div className={classes.afterDiv}></div>
                     </div>
                   )}
                 </div>
@@ -451,7 +453,13 @@ function ViewingArea(props) {
           </div>
         ) : null}
       </div>
-      <div>
+      <div
+        style={{
+          width: "0.5vw",
+          boxShadow: "3px 4px 0px 4px #dadada",
+          position: "relative",
+        }}
+      >
         <button
           onClick={() => props.showDrawer(true)}
           className="propertiesButton_abstract"

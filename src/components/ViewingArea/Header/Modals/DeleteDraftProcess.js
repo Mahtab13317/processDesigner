@@ -55,8 +55,10 @@ function DeleteDraftProcess(props) {
       <div className={styles.subHeader}>{t("beforeDeleteSurity")}</div>
       <p className={styles.deleteModalSubHeading}>
         {t("processC")} :
-        <span className={styles.deleteProcessName}>
-          <span>{props.openProcessName}</span>
+        <span>
+          <span className={styles.deleteProcessName}>
+            {props.openProcessName}
+          </span>
           <span className={styles.deleteVersion}>
             {t("Version")} {props.existingVersion}
           </span>

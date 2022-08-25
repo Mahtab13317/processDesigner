@@ -1,14 +1,17 @@
 .tittle {
   text-align: right;
-  font: normal normal 600 16px/22px Open Sans;
+  font: normal normal 600 var(--title_text_font_size) / 1.375rem
+    var(--font_family) !important;
   letter-spacing: 0px;
   color: #000000;
   opacity: 1;
   margin-bottom: 2rem;
 }
+
 .tittleFilter {
   text-align: right;
-  font: normal normal 600 16px/22px Open Sans;
+  font: normal normal 600 var(--title_text_font_size) / 1.375rem
+    var(--font_family) !important;
   letter-spacing: 0px;
   color: #000000;
   opacity: 1;
@@ -17,7 +20,8 @@
 
 .variableName {
   text-align: right;
-  font: normal normal 600 14px/16px Open Sans;
+  font: normal normal 600 var(--subtitle_text_font_size) / 1rem
+    var(--font_family) !important;
   letter-spacing: 0.42px;
   color: #070707;
   opacity: 1;
@@ -26,9 +30,11 @@
   vertical-align: middle;
   padding-right: 10px;
 }
+
 .searchRights {
   text-align: right;
-  font: normal normal 600 14px/16px Open Sans;
+  font: normal normal 600 var(--subtitle_text_font_size) / 1rem
+    var(--font_family) !important;
   letter-spacing: 0.42px;
   color: #070707;
   opacity: 1;
@@ -39,7 +45,7 @@
 
 .query {
   text-align: right;
-  font: normal normal 600 12px/24px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 1.5rem var(--font_family) !important;
   letter-spacing: 0px;
   color: #000000;
   opacity: 1;
@@ -52,7 +58,7 @@
 
 .textBox {
   text-align: right;
-  font: normal normal 600 12px/24px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 1.5rem var(--font_family) !important;
   letter-spacing: 0px;
   color: #000000;
   opacity: 1;

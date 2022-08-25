@@ -1,3 +1,5 @@
+// Bug solved for: No validation when documents with same name is added - 109986
+
 import React, { useEffect, useState } from "react";
 import "../Interfaces.css";
 import Button from "@material-ui/core/Button";
@@ -57,13 +59,25 @@ function DocType(props) {
   const [docArray, setDocArray] = useState([]);
   const [docAllRules, setDocAllRules] = useState([]);
   const [selectedTab, setSelectedTab] = useState("screenHeading");
+  const [rulesLength, setRulesLength] = useState(false);
   const [subColumns, setSubColumns] = useState([]);
   const [splicedColumns, setSplicedColumns] = useState([]);
-
+  const [showDocNameError, setShowDocNameError] = useState(false);
+  const [processType, setProcessType] = useState(null);
+  const [addAnotherDoc, setAddAnotherDoc] = useState(false);
   //code added on 8 June 2022 for BugId 110212
+  const handleScreen = (screenType) => {
+    setSelectedTab(screenType);
+    setRulesLength(true);
+  };
+
   const tabChangeHandler = (e, tabName) => {
     setSelectedTab(tabName);
   };
+
+  useEffect(() => {
+    setIsLoading(true);
+  }, [localLoadedProcessData?.ProcessDefId]);
 
   useEffect(() => {
     let activityIdString = "";
@@ -75,7 +89,7 @@ function DocType(props) {
     axios
       .get(
         SERVER_URL +
-          `/doctypes/${props.openProcessID}/${props.openProcessType}/${props.openProcessName}/${activityIdString}`
+          `/doctypes/${localLoadedProcessData.ProcessDefId}/${localLoadedProcessData.ProcessType}/${localLoadedProcessData.ProcessName}/${activityIdString}`
       )
       .then((res) => {
         if (res.status === 200) {
@@ -94,7 +108,6 @@ function DocType(props) {
               setDocArray(array);
             });
           }
-
           res.data &&
             res.data.DocumentTypeList.map((docType, doc_idx) => {
               let allChecked = true;
@@ -153,11 +166,11 @@ function DocType(props) {
         }
       })
       .catch(() => setIsLoading(false));
-  }, []);
+  }, [localLoadedProcessData]);
 
   useEffect(() => {
     let arr = [];
-    loadedProcessData.value.MileStones.map((mileStone) => {
+    localLoadedProcessData.MileStones.map((mileStone) => {
       mileStone.Activities.map((activity, index) => {
         if (
           !(activity.ActivityType === 18 && activity.ActivitySubType === 1) &&
@@ -186,7 +199,8 @@ function DocType(props) {
     });
     setSubColumns(arr);
     setSplicedColumns(arr.slice(0, BATCH_COUNT));
-  }, [props]);
+    setProcessType(localLoadedProcessData?.ProcessType);
+  }, [localLoadedProcessData]);
 
   useEffect(() => {
     if (document.getElementById("oneBoxMatrix")) {
@@ -215,7 +229,8 @@ function DocType(props) {
     if (exist) {
       return;
     }
-    if (DocToAdd != "") {
+
+    if (DocToAdd?.trim() !== "") {
       let maxId = docData.DocumentTypeList.reduce(
         (acc, doc) => (acc = acc > doc.DocTypeId ? acc : doc.DocTypeId),
         0
@@ -267,22 +282,19 @@ function DocType(props) {
                 Activities: [...addedActivity],
               });
             setDocData(tempData);
+            // code added on 2 August 2022 for BugId 112251
+            if (button_type !== "addAnother") {
+              handleClose();
+              setAddAnotherDoc(false);
+            } else if (button_type === "addAnother") {
+              setAddAnotherDoc(true);
+              document.getElementById("DocNameInput").focus();
+            }
           }
         });
-      if (button_type != "addAnother") {
-        handleClose();
-      } else if (button_type == "addAnother") {
-        document.getElementById("DocNameInput").value = "";
-      }
-    } else if (DocToAdd.trim() == "") {
-      alert("Please enter Doc Name");
+    } else {
+      setShowDocNameError(true);
       document.getElementById("DocNameInput").focus();
-    }
-    if (button_type != "addAnother") {
-      handleClose();
-    }
-    if (button_type == "addAnother") {
-      document.getElementById("DocNameInput").value = "";
     }
   };
 
@@ -316,6 +328,7 @@ function DocType(props) {
   const handleClose = () => {
     setAddDocModal(false);
     setbDocExists(false);
+    setShowDocNameError(false);
   };
 
   const handleActivityModalOpen = (activity_id) => {
@@ -455,13 +468,22 @@ function DocType(props) {
         let newState = { ...docData };
         syncViewWithModify(newState, check_type, doc_idx, activity_id);
         fullRights_oneActivity_allDocs(activity_id, newState);
-        let demoOne = true;
         newState.DocumentTypeList[doc_idx].Activities.map((activity) => {
-          if (!activity[check_type] && demoOne) {
-            demoOne = false;
-            newState.DocumentTypeList[doc_idx].SetAllChecks[check_type] = false;
+          if (activity.ActivityId === +activity_id) {
+            activity[check_type] = !activity[check_type];
           }
         });
+        let demoOne = true;
+        newState.DocumentTypeList[doc_idx].Activities.map(
+          (activity, activityIndex) => {
+            if (!activity[check_type] && demoOne) {
+              demoOne = false;
+              newState.DocumentTypeList[doc_idx].SetAllChecks[
+                check_type
+              ] = false;
+            }
+          }
+        );
         if (demoOne) {
           newState.DocumentTypeList[doc_idx].SetAllChecks[check_type] = true;
         }
@@ -776,7 +798,6 @@ function DocType(props) {
             });
           });
         }
-
         setDocData(newState);
       }
     });
@@ -868,21 +889,32 @@ function DocType(props) {
       display.push(
         <div
           className="activities"
-          style={{ width: compact ? "12rem" : "12.5rem" }}
+          // style={{ width: compact ? "14rem" : "14.5rem" }}
         >
-          <div className="activityHeader">
+          <div
+            style={{
+              backgroundColor: "white",
+              height: "3.56rem",
+              width: "100%",
+              borderBottom: "1px solid rgb(218, 208, 194)",
+              display: "flex",
+              fontSize: "1rem",
+              padding: "0px 10px",
+              alignItems: "center",
+            }}
+          >
             {activity.ActivityName}
             <Checkbox
               id="masterCheck_oneActivity_docTypes"
               checked={
                 fullRightCheckOneActivityArr[activity.ActivityId] ? true : false
               }
-              disabled={props.openProcessType !== "L" ? true : false}
+              disabled={processType !== "L" ? true : false}
               onChange={() =>
                 GiveCompleteRightsToOneActivity(activity.ActivityId)
               }
             />
-            {props.openProcessType !== "L" ? null : (
+            {processType !== "L" ? null : (
               <React.Fragment>
                 <ArrowUpwardIcon
                   id="oneActivity_particularRight_docTypes"
@@ -921,13 +953,14 @@ function DocType(props) {
                   className="oneActivityColumn"
                   style={{
                     backgroundColor: index % 2 == 0 ? "#F2F2F2" : "white",
-                    height: compact ? "39px" : "111px",
+                    padding:
+                      "1.3rem 1.5vw" /*code changes on 3 August 2022 for BugId 112560*/,
                     borderBottom: "1px solid #C2B8A3",
-                    width: compact ? "12rem" : "12.51875rem",
+                    // width: compact ? "12rem" : "12.51875rem",
                   }}
                 >
                   <CheckBoxes //activity CheckBoxes
-                    processType={props.openProcessType}
+                    processType={processType}
                     compact={compact}
                     activityIndex={index}
                     activityId={activity.ActivityId}
@@ -959,8 +992,8 @@ function DocType(props) {
                   : "screenHeading"
               }
               style={{
-                margin:
-                  direction !== RTL_DIRECTION ? "0 30px 0 0" : "0 0 0 30px",
+                margin: direction !== RTL_DIRECTION ? "0 1vw 0 0" : "0 0 0 1vw",
+                padding: "1px 1vw",
               }}
               onClick={(e) => tabChangeHandler(e, "screenHeading")}
             >
@@ -970,6 +1003,9 @@ function DocType(props) {
               className={
                 selectedTab === "rules" ? "selectedBottomBorder Rules" : "Rules"
               }
+              style={{
+                padding: "1px 1vw",
+              }}
               onClick={(e) => tabChangeHandler(e, "rules")}
             >
               {t("rules")}
@@ -977,7 +1013,9 @@ function DocType(props) {
           </div>
           {selectedTab == "screenHeading" ? (
             <React.Fragment>
-              <div className="docSearchDiv">
+              <div className="docSearchDiv" style={{
+                margin: "1.4rem 0rem"
+              }}>
                 <div className="searchBarNFilterInterface">
                   <div className="docSearchBar">
                     <SearchProject
@@ -986,7 +1024,7 @@ function DocType(props) {
                       width="240px"
                     />
                   </div>
-                  {props.openProcessType !== "L" ? null : (
+                  {processType !== "L" ? null : (
                     <p
                       id="addDocButton"
                       onClick={() => {
@@ -1009,10 +1047,16 @@ function DocType(props) {
                       addDocToList={addDocToList}
                       handleClose={handleClose}
                       bDocExists={bDocExists}
+                      setbDocExists={setbDocExists}
+                      showDocNameError={showDocNameError}
+                      setShowDocNameError={setShowDocNameError}
+                      docData={docData}
                       modifyDescription={modifyDescription}
                       docDescToModify={docDescToModify}
                       docNameToModify={docNameToModify}
                       docIdToModify={docIdToModify}
+                      addAnotherDoc={addAnotherDoc}
+                      setAddAnotherDoc={setAddAnotherDoc}
                     />
                   </Modal>
                 </div>
@@ -1023,44 +1067,50 @@ function DocType(props) {
                     <div
                       style={{
                         backgroundColor: index % 2 == 0 ? "#F2F2F2" : "white",
-                        padding: "5px 0px 5px 12px",
+                        padding: "0.6rem 1.5vw",
                         borderBottom: "1px solid #C2B8A3",
                       }}
                     >
                       <div
                         className="activityNameDivDocs"
-                        style={{ justifyContent: "space-between" }}
+                        style={{
+                          justifyContent: "space-between",
+                          display: "flex",
+                        }}
                       >
                         <p className="docName">
-                          {type.DocName}
+                          <span
+                            style={{
+                              flex: "0.9",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {type.DocName}
+                          </span>
                           <FormControlLabel
                             control={
                               <Checkbox
                                 id="masterCheck_oneDoc_docTypes"
                                 name="checkedF"
                                 style={{
-                                  marginTop: "-10px",
-                                  marginLeft: "10px",
+                                  marginTop: "-0.125rem",
+                                  marginLeft: "0.4rem",
                                 }}
                                 checked={
-                                  fullRightCheckOneDocArr[index] &&
-                                  props.openProcessType == "L"
-                                    ? true
-                                    : false
+                                  fullRightCheckOneDocArr[index] ? true : false
                                 }
-                                disabled={
-                                  props.openProcessType !== "L" ? true : false
-                                }
+                                disabled={processType !== "L" ? true : false}
                                 onChange={() => GiveCompleteRights(index)}
                               />
                             }
+                            style={{ flex: "1" }}
                           />
                         </p>
-                        <p>{type.Description}</p>
-                        {compact && props.openProcessType !== "L" ? null : (
+                        {compact && processType === "L" ? (
                           <div className="relative">
                             <ArrowUpwardIcon
-                              style={{ cursor: "pointer" }}
+                              style={{ cursor: "pointer", flex: "1" }}
                               type="button"
                               onClick={() =>
                                 handleActivityModalOpen(type.DocTypeId)
@@ -1085,7 +1135,7 @@ function DocType(props) {
                                   }}
                                 >
                                   <CheckBoxes //setAll CheckBoxes
-                                    processType={props.openProcessType}
+                                    processType={processType}
                                     docIdx={index}
                                     docData={docData}
                                     id={type.ActivityId}
@@ -1097,55 +1147,61 @@ function DocType(props) {
                               </React.Fragment>
                             )}
                           </div>
-                        )}
-
-                        <DeleteDocModal
-                          backDrop={false}
-                          modalPaper="modalPaperActivity"
-                          sortByDiv="sortByDivActivity"
-                          oneSortOption="oneSortOptionActivity"
-                          docIndex={index}
-                          buttonToOpenModal={
-                            <button className="threeDotsButton" type="button">
-                              <MoreVertIcon
-                                style={{
-                                  color: "#606060",
-                                  height: "16px",
-                                  width: "16px",
-                                }}
-                              />
-                            </button>
-                          }
-                          modalWidth="180"
-                          sortSectionOne={[
-                            <p
-                              id="deleteDocOption"
-                              onClick={() =>
-                                deleteDocType(type.DocName, type.DocTypeId)
-                              }
-                            >
-                              {t("delete")}
-                            </p>,
-                            <p
-                              id="modifyDocOption"
-                              onClick={() =>
-                                editDescription(
-                                  type.DocTypeId,
-                                  type.DocName,
-                                  type.Description
-                                )
-                              }
-                            >
-                              {t("modify")}
-                            </p>,
-                          ]}
-                        />
+                        ) : null}
+                        {/*code edited on 29 July 2022 for BugId 112401 and BugId 112404*/}
+                        {processType === "L" ? (
+                          <DeleteDocModal
+                            backDrop={false}
+                            modalPaper="modalPaperActivity"
+                            sortByDiv="sortByDivActivity"
+                            oneSortOption="oneSortOptionActivity"
+                            docIndex={index}
+                            buttonToOpenModal={
+                              <button
+                                className="threeDotsButton"
+                                type="button"
+                                style={{ marginTop: "0.25rem" }}
+                              >
+                                <MoreVertIcon
+                                  style={{
+                                    color: "#606060",
+                                    height: "16px",
+                                    width: "16px",
+                                  }}
+                                />
+                              </button>
+                            }
+                            modalWidth="180"
+                            sortSectionOne={[
+                              <p
+                                id="deleteDocOption"
+                                onClick={() =>
+                                  deleteDocType(type.DocName, type.DocTypeId)
+                                }
+                              >
+                                {t("delete")}
+                              </p>,
+                              <p
+                                id="modifyDocOption"
+                                onClick={() =>
+                                  editDescription(
+                                    type.DocTypeId,
+                                    type.DocName,
+                                    type.Description
+                                  )
+                                }
+                              >
+                                {t("modify")}
+                              </p>,
+                            ]}
+                          />
+                        ) : null}
                       </div>
                       <div style={{ display: "flex" }}>
                         <p className="docDescription">{type.Description}</p>
                         {compact ? null : (
                           <CheckBoxes //setAll CheckBoxes
-                            processType={props.openProcessType}
+                            processType={processType}
                             compact={compact}
                             docIdx={index}
                             docData={docData}
@@ -1182,6 +1238,7 @@ function DocType(props) {
                       color="primary"
                     />
                   }
+                  labelPlacement="start"
                   label="Compact"
                 />
               </div>
@@ -1207,7 +1264,7 @@ function DocType(props) {
             hideGroup={true}
             listName={t("docList")}
             availableList={t("availableDoc")}
-            openProcessType={props.openProcessType}
+            openProcessType={processType}
           />
         )}
       </div>

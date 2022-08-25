@@ -62,7 +62,7 @@ function FormsAndValidations(props) {
         />
         <p
           style={{
-            paddingTop: "0.6rem",
+            paddingTop: "0.8rem",
 
             fontWeight: "600",
           }}
@@ -107,9 +107,8 @@ function FormsAndValidations(props) {
         {!customValidations ? (
           <p
             style={{
-              color: "#0072C6",
-              cursor: "pointer",
-
+              color: 'var(--link_color)',
+              cursor: "pointer",   
               marginTop: "1rem",
             }}
             onClick={() => setcustomValidations(true)}

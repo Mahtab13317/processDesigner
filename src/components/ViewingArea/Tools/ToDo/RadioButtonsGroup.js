@@ -10,6 +10,7 @@ import { makeStyles, Typography } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import PickListModal from "../../../../UI/Modal/Modal";
 import AddPickList from "./AddPickList";
+import styles from "../DocTypes/index.module.css";
 
 const useStyles = makeStyles((theme) => ({
   select: {
@@ -36,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 export default function RadioButtonsGroup(props) {
   const classes = useStyles({});
-  const [toDoType, setToDoType] = useState('M');
+  const [toDoType, setToDoType] = useState("M");
   const [selectedTrigger, setSelectedTrigger] = useState("defaultValue");
   const onSelect = (e) => {
     setSelectedTrigger(e.target.value);
@@ -46,11 +47,13 @@ export default function RadioButtonsGroup(props) {
   const handleChange = (event) => {
     props.toDoType(event.target.value);
     setToDoType(event.target.value);
+    props.setTodoTypeValue(event.target.value);
   };
 
   useEffect(() => {
     if (props.toDoTypeToModify) {
       setToDoType(props.toDoTypeToModify);
+      props.setTodoTypeValue(props.toDoTypeToModify);
     }
 
     if (props.toDoToModifyTrigger) {
@@ -73,38 +76,39 @@ export default function RadioButtonsGroup(props) {
         onChange={handleChange}
         row={true}
         name="row-radio-buttons-group"
+        className={styles.properties_radioDiv}
       >
         <FormControlLabel
           value="M"
           control={<Radio checked={toDoType == "M" ? true : false} />}
           label="Mark"
+          className={styles.properties_radioButton}
         />
-        <div>
-          <FormControlLabel
-            value="P"
-            control={<Radio checked={toDoType == "P" ? true : false} />}
-            label="PickList"
-          />
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <FormControlLabel
-            disabled={
-              props.triggerList && props.triggerList.length > 0 ? false : true
-            }
-            value="T"
-            control={<Radio checked={toDoType == "T" ? true : false} />}
-            label="Trigger"
-          />
-        </div>
+        <FormControlLabel
+          value="P"
+          control={<Radio checked={toDoType == "P" ? true : false} />}
+          label="PickList"
+          className={styles.properties_radioButton}
+        />
+
+        <FormControlLabel
+          disabled={
+            props.triggerList && props.triggerList.length > 0 ? false : true
+          }
+          value="T"
+          control={<Radio checked={toDoType == "T" ? true : false} />}
+          label="Trigger"
+          className={styles.properties_radioButton}
+        />
       </RadioGroup>
 
-      {toDoType == "P" ? <AddPickList addPickList={props.addPickList} /> : null}
+      {toDoType == "P" ? (
+        <AddPickList
+          pickList={props.pickList}
+          setPickList={props.setPickList}
+          addPickList={props.addPickList}
+        />
+      ) : null}
 
       {toDoType == "T" ? (
         <Select

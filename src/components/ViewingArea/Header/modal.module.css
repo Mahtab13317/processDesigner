@@ -10,7 +10,8 @@
 
 .subHeader {
   text-align: left;
-  font: normal normal 600 13px/17px Open Sans;
+  font-size: var(--subtitle_text_font_size);
+  font-weight: 600;
   letter-spacing: 0px;
   color: #383737;
   padding: 1rem 1rem 0.75rem;
@@ -28,6 +29,8 @@
 .labelHeading {
   text-align: left;
   font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px;
   color: #383737;
   margin-bottom: 0.125rem;
@@ -36,6 +39,8 @@
 .commentHeading {
   text-align: left;
   font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px;
   color: #383737;
   margin-right: 1.5rem;
@@ -44,12 +49,16 @@
 .saveDraftVersion {
   text-align: left;
   font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   color: #383737;
 }
 
 .saveDraftLabel {
   text-align: left;
   font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px;
   color: #383737;
   margin-right: 0.25rem;
@@ -60,6 +69,8 @@
 .deleteCommentHeading {
   text-align: left;
   font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px;
   color: #383737;
   margin-right: 0.5rem;
@@ -74,6 +85,8 @@
   width: 5vw;
   text-align: left;
   font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px;
   color: #383737;
   margin-bottom: 0.5rem;
@@ -100,6 +113,8 @@
 .saveNew_radioButton span {
   text-align: left;
   font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px;
 }
 
@@ -120,6 +135,8 @@
   margin-bottom: 0.5rem;
   text-align: left;
   font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px;
   color: #000000;
   border: 1px solid#DADADA;
@@ -132,6 +149,8 @@
   margin-bottom: 0.5rem;
   text-align: left;
   font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px;
   color: #000000;
   border: 1px solid#DADADA;
@@ -140,10 +159,12 @@
 
 .nameInput {
   width: 25vw !important;
-  height: 1.5rem;
+  height: 2.5rem;
   margin-bottom: 1rem;
   text-align: left;
   font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px;
   color: #000000;
   border: 1px solid#DADADA;
@@ -156,6 +177,8 @@
   margin-bottom: 1rem;
   text-align: left;
   font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px;
   color: #000000;
   border: 1px solid#DADADA;
@@ -184,10 +207,10 @@
   position: absolute;
   width: 20vw;
   height: 1rem;
-  top: 0.25rem;
-  left: 0.25vw;
   z-index: 100;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   border: none;
 }
 
@@ -198,7 +221,9 @@
   top: 0.25rem;
   left: 0.25vw;
   z-index: 100;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   border: none;
 }
 
@@ -208,6 +233,8 @@
   margin-bottom: 0.5rem;
   text-align: left;
   font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px;
   color: #000000;
   border: 1px solid#DADADA;
@@ -233,10 +260,12 @@
 }
 
 .addCategoryButton {
-  background: #0072c6 0% 0% no-repeat padding-box !important;
+  background: var(--button_color) !important;
   border-radius: 2px !important;
-  border: 1px solid #0072c6 !important;
+  border: 1px solid var(--button_color) !important;
   font: normal normal 600 12px/17px Open Sans !important;
+  font-size: var(--base_text_font_size) !important;
+
   letter-spacing: 0px !important;
   color: #ffffff !important;
   text-transform: none !important;
@@ -248,7 +277,9 @@
   background: #ffffff 0% 0% no-repeat padding-box !important;
   border: 1px solid #c4c4c4 !important;
   border-radius: 2px !important;
-  font: normal normal 600 12px/17px Open Sans !important;
+  font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px !important;
   color: #606060 !important;
   text-transform: none !important;
@@ -260,7 +291,9 @@
   background: rgba(0, 0, 0, 0.12) !important;
   border-radius: 2px !important;
   border: none !important;
-  font: normal normal 600 12px/17px Open Sans !important;
+  font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px !important;
   color: rgba(0, 0, 0, 0.5) !important;
   text-transform: none !important;
@@ -271,6 +304,8 @@
 
 .errorMessage {
   font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px;
   text-align: left;
   color: red;
@@ -282,10 +317,12 @@
 .outlinedButton {
   background: white !important;
   border-radius: 2px !important;
-  border: 1px solid #0072c6 !important;
-  font: normal normal 600 12px/17px Open Sans !important;
+  border: 1px solid var(--button_color) !important;
+  font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px !important;
-  color: #0072c6 !important;
+  color: var(--button_color) !important;
   text-transform: none !important;
   margin-right: 0.5rem !important;
   padding: 0.25rem 0.75rem !important;
@@ -294,6 +331,7 @@
 .checkoutString {
   text-align: left;
   font: normal normal normal 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
   letter-spacing: 0px;
   color: #606060;
   padding-bottom: 0.5rem;
@@ -305,6 +343,8 @@
   border-radius: 2px;
   text-align: left;
   font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--base_text_font_size);
+
   letter-spacing: 0px;
   color: #383737;
   margin: 0 1rem 0.5rem;
@@ -314,6 +354,8 @@
 .deleteModalSubHeading {
   text-align: left;
   font: normal normal 600 12px/17px Open Sans;
+  font-size: var(--subtitle_text_font_size);
+
   letter-spacing: 0px;
   color: #383737;
   padding: 1rem 1rem 0.75rem;
@@ -324,10 +366,15 @@
   margin-left: 0.5vw;
   display: flex;
   flex-direction: column;
+  font-weight: 600;
+  font-size: var(--base_text_font_size);
 }
 
 .deleteVersion {
+  margin-left: 0.5vw;
+
   margin-top: 0.25rem;
+  font-size: var(--sub_text_font_size);
 }
 
 .deleteComment {

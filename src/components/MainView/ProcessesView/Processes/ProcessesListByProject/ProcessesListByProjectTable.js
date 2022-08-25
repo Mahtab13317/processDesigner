@@ -1,4 +1,4 @@
-import React, {useState,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import ProcessIcon from "../../../../../assets/HomePage/HS_Process.svg";
 import FileType from "../../../../../assets/ProcessView/FileType.svg";
 import "../../Projects/projects.css";
@@ -6,10 +6,25 @@ import { useTranslation } from "react-i18next";
 import { tileProcess } from "../../../../../utility/HomeProcessView/tileProcess";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
+import { makeStyles } from "@material-ui/core/styles";
 import * as actionCreators from "../../../../../redux-store/actions/processView/actions.js";
+
+const useStyles = makeStyles({
+  processType: {
+    textTransform: "uppercase",
+    fontFamily: "var(--font_family)",
+    fontWeight: "600",
+    fontSize: "11px",
+  },
+  checkedType: {
+    fontFamily: "var(--font_family)",
+    fontSize: "11px",
+  },
+});
 
 function Table(props) {
   let { t } = useTranslation();
+  const classes = useStyles();
   const history = useHistory();
   const clickRow = (el) => {
     props.openProcessClick(
@@ -23,14 +38,14 @@ function Table(props) {
     history.push("/process");
   };
 
-  const [processPerProject, setprocessPerProject] = useState([])
+  const [processPerProject, setprocessPerProject] = useState([]);
 
   useEffect(() => {
-   setprocessPerProject(props.processesPerProject)
-  }, [props])
+    setprocessPerProject(props.processesPerProject);
+  }, [props]);
   let rowDisplay =
-  processPerProject &&
-  processPerProject.map((el) => {
+    processPerProject &&
+    processPerProject.map((el) => {
       return (
         <div className="tableRow" onClick={() => clickRow(el)}>
           <div className="processListRow1">
@@ -38,37 +53,54 @@ function Table(props) {
           </div>
           <div className="processListRow2">
             {el.ProcessName}
-            <span>v {el.Version} . {el.ProjectName}</span>
+            <span>
+              v {el.Version} . {el.ProjectName}
+            </span>
           </div>
           <div className="processListRow3">
-            <img
-              src={tileProcess(el.ProcessType)[0]}
-              style={{
-                height: "10px",
-                width: "10px",
-                marginTop: "1px",
-                marginRight: "0.125vw",
-              }}
-              alt=""
-            />
-            {tileProcess(el.ProcessType)[1]}{" "}
-            {el.CheckedOut === "Y" ? `(${t("Checked")})` : null}
-            <img src={tileProcess(el.ProcessType)[5]} />{" "}
-            <span>
-              <span>
-                {t("processesTable.createdOn")} {el.CreatedDate}
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <img
+                src={tileProcess(el.ProcessType)[0]}
+                style={{
+                  height: "0.75rem",
+                  width: "0.75rem",
+                  marginRight: "0.125vw",
+                }}
+                alt=""
+              />
+              <p className={classes.processType}>
+                {tileProcess(el.ProcessType)[1]}{" "}
+                <img src={tileProcess(el.ProcessType)[5]} alt="" />
+              </p>
+              <span className={classes.checkedType}>
+                {el.CheckedOut === "Y" ? `(${t("Checked")})` : null}
               </span>
-            </span>
+            </div>
+            <p style={{ fontSize: "11px" }}>
+              {t("processesTable.createdOn")} {el.CreatedDate}
+            </p>
           </div>
           <div className="processListRow4">
-            {el.ModifiedDate}
-            <span>
+            <p
+              className="recentTableProcessDate"
+              style={{
+                fontFamily: "var(--font_family)",
+                fontWeight: "600",
+                fontSize: "11px",
+              }}
+            >
+              {el.ModifiedDate}
+            </p>
+            <p
+              style={{
+                fontFamily: "var(--font_family)",
+                fontSize: "11px",
+              }}
+            >
               {t("processesTable.editedBy")} {el.LastModifiedBy}{" "}
               {t("processesTable.at")} {el.ModifiedTime}
-            </span>
+            </p>
           </div>
-          <br />
-          <br />
         </div>
       );
     });

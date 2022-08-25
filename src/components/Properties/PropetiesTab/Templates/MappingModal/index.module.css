@@ -11,7 +11,7 @@
 }
 
 .modalHeading {
-  font: normal normal 600 16px/21px Open Sans;
+  font: normal normal 600 var(--title_text_font_size) / 21px var(--font_family);
   text-align: left;
   letter-spacing: 0px;
   color: #000000;
@@ -29,7 +29,8 @@
 .dataModelTab {
   min-height: 1.5rem !important;
   padding: 0rem 0.5vw !important;
-  font: normal normal 600 14px/19px Open Sans;
+  font: normal normal 600 var(--subtitle_text_font_size) / 19px
+    var(--font_family);
   letter-spacing: 0rem !important;
   color: black !important;
   margin: 0.125rem !important;
@@ -38,17 +39,18 @@
 
 .starIcon {
   color: red;
-  font-size: 0.75rem;
+  font-size: 1rem;
 }
 
 .modalLabel {
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
   color: #606060;
 }
 
 .labelIntervals {
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #606060;
 }
@@ -71,12 +73,13 @@
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   background-color: #fff;
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #606060;
   margin: 0 0.25vw 0 1vw;
   padding: 0.125rem 0.5rem;
-  height: 1.5rem;
+  height: var(--line_height);
 }
 
 .modalInput:disabled {
@@ -90,7 +93,7 @@
 
 .headerDiv {
   background: #f0f0f0 0% 0% no-repeat padding-box;
-  height: 2rem;
+  height: 3rem;
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -108,7 +111,7 @@
 
 .variableName {
   text-align: left;
-  font: normal normal 600 12px/24px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   width: 55%;
@@ -116,7 +119,7 @@
 
 .dataType {
   text-align: left;
-  font: normal normal 600 12px/24px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0rem;
   color: #000000;
   width: 40%;
@@ -158,7 +161,8 @@
 
 .omsTemplateCheckbox span {
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   height: 1.25rem;
   width: 1.25rem;
@@ -167,7 +171,8 @@
 
 .variableNameData {
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0px;
   color: #000000;
   width: 55%;
@@ -178,7 +183,8 @@
 
 .dataTypeValue {
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family);
   letter-spacing: 0rem;
   color: #000000;
   width: 40%;
@@ -189,21 +195,23 @@
   border-radius: 2px;
   background-color: #fff;
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   letter-spacing: 0px;
   color: #606060;
   margin: 0.5rem 0;
   display: block;
   padding: 0.125rem !important;
   width: 15vw;
-  height: 1.5rem;
+  height: var(--line_height);
 }
 
 .templateDropdownData {
   padding: 0.125rem 0.5rem !important;
   width: 15vw;
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   letter-spacing: 0px;
   color: #606060;
 }
@@ -213,26 +221,27 @@
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   text-align: center;
-  font: normal normal 600 13px/18px Open Sans;
+  font: normal normal 600 var(--subtitle_text_font_size) / 19px
+    var(--font_family);
   letter-spacing: 0px;
   color: #606060;
-  padding: 0.25rem 1vw;
-  margin-right: 0.5vw;
-  display: flex;
+  padding: 0 1vw !important;
   cursor: pointer;
+  margin: 0 0.5vw 0 0 !important;
 }
 
 .okButton {
-  background: #0072c5 0% 0% no-repeat padding-box;
-  border: 1px solid #0072c5;
+  background: var(--button_color) 0% 0% no-repeat padding-box;
+  border: 1px solid var(--button_color);
   border-radius: 2px;
   text-align: center;
-  font: normal normal 600 13px/18px Open Sans;
+  font: normal normal 600 var(--subtitle_text_font_size) / 19px
+    var(--font_family);
   letter-spacing: 0px;
   color: white;
-  padding: 0.25rem 1vw;
-  display: flex;
+  padding: 0 1vw !important;
   cursor: pointer;
+  margin: 0 0.5vw 0 0 !important;
 }
 
 .modalFooter {

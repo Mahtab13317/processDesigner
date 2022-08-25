@@ -79,7 +79,7 @@
   cursor: pointer;
 }
 .createDisable {
-  background: #0072c6 0% 0% no-repeat padding-box;
+  background: rgba(0, 0, 0, 0.12) 0% 0% no-repeat padding-box;
   border-radius: 2px;
   opacity: 1;
   padding: 0px 15px;
@@ -90,15 +90,12 @@
   color: #606060;
 }
 .cancel {
-  padding: 0.25rem 0.5rem;
-  font: normal normal 600 12px/17px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   letter-spacing: 0px;
   color: #606060;
   cursor: pointer;
-  margin: 0 0.25rem;
+  min-width: 5vw;
   background: #ffffff 0% 0% no-repeat padding-box;
   border: 1px solid #c4c4c4;
-  height: 28px;
   border-radius: 2px;
-  margin-left: auto;
 }

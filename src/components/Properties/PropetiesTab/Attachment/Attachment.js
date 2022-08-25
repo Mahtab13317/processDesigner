@@ -23,6 +23,7 @@ import { setActivityPropertyChange } from "../../../../redux-store/slices/Activi
 import axios from "axios";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 import arabicStyles from "../InitialRule/arabicStyles.module.css";
+import TabsHeading from "../../../../UI/TabsHeading/index.js";
 function Attachment(props) {
   console.log(props)
   let { t } = useTranslation();
@@ -215,6 +216,7 @@ function Attachment(props) {
 
   return (
     <div>
+     <TabsHeading heading={props?.heading} />
       {spinner ? (
         <CircularProgress style={{ marginTop: "30vh", marginLeft: "40%" }} />
       ) : (

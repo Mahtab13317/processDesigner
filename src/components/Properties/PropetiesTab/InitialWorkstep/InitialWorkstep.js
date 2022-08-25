@@ -14,6 +14,7 @@ import Modal from "../../../../UI/Modal/Modal.js";
 import ReusableInputs_Var from "../callActivity/reusables/reusableInputs_Var.js";
 import VariableList from "../callActivity/reusables/variableList";
 import ErrorToast from "../../../../UI/ErrorToast/index.js";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 function InitialWorkstep(props) {
   let { t } = useTranslation();
@@ -143,6 +144,7 @@ function InitialWorkstep(props) {
   const content = () => {
     return (
       <React.Fragment>
+      <TabsHeading heading={props?.heading} />
         <div
           style={{
             backgroundColor: props.isDrawerExpanded ? "white" : null,

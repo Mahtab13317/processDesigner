@@ -69,7 +69,6 @@ function EnhancedTableHead(props) {
               root: clsx({
                 [classes.rootHeadCell]: true,
                 [classes.projectNameCell]: index === 0,
-                [classes.ownedByCell]: index === 1,
               }),
             }}
             //classes = {{root : classes.rootHeadCell}}
@@ -110,50 +109,17 @@ EnhancedTableHead.propTypes = {
 const useStyles = makeStyles({
   root: {
     width: "100%",
-    //height : '80%',
-    //overflow : 'auto',
-    //position: 'relative',
   },
   tableHeadRoot: {
     position: "unset !important",
   },
-  tableBodyRoot: {
-    //  position : 'fixed',
-    //height : '390px',
-    //overflowY : 'auto',
-    //position:'relative'
-  },
-  // paginationRoot : {
-  //   position : 'fixed'
-  // },
-  // paginationActions : {
-  //   marginLeft : '0px',
-  //   marginRight : '20px'
-  // },
-  // paginationToolbar : {
-  //   '&	.MuiTablePagination-caption:first-of-type':{
-  //     display : 'none'
-  //   },
-  //   '& .MuiTablePagination-spacer' :{
-  //     display : 'none'
-  //   },
-  //   display : 'flex',
-  //   justifyContent : 'center'
-  // },
-  // paginationInput : {
-  //   display : 'none',
-  // },
   rootHeadCell: {
-    // position : 'absolute',
-    // top : '0px',
-    // left : '0px',
-    fontFamily: "Open Sans , sans-serif",
+    fontFamily: "var(--font_family)",
     fontWeight: 600,
     fontSize: "12px",
-    color: "#606060",
+    color: "#000",
     borderBottom: "0px",
     padding: "0",
-    paddingLeft: "4px",
     backgroundColor: "#F8F8F8",
   },
   projectNameCell: {
@@ -162,28 +128,19 @@ const useStyles = makeStyles({
   ownedByCell: {
     minWidth: "100px",
   },
-  // processCountCell : {
-  //   width : '100%',
-  // },
   paper: {
     width: "100%",
     position: "relative",
-    //marginBottom: theme.spacing(2),
   },
-  // tableContainerRoot : {
-  //     height : '450px',
-  //     overflowY : 'auto'
-  // },
   table: {
     minWidth: "100%",
     maxWidth: "100%",
   },
   tableCellRoot: {
-    fontFamily: "Open Sans , Roboto , Helvetica , Arial , sans-serif",
+    fontFamily: "var(--font_family)",
     borderBottom: "0px",
     fontSize: "12px",
-    padding: "8px 2px",
-    paddingLeft: "4px",
+    padding: "8px 0",
     marginRight: "14px",
   },
   selectedTableRow: {

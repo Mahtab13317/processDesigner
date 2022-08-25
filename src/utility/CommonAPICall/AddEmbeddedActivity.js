@@ -96,6 +96,41 @@ export const AddEmbeddedActivity = (
               id: "",
               AssociatedTasks: [],
             });
+            // code added on 22 July 2022 for BugId 113305
+            if (!activity.queueInfo?.queueExist) {
+              processObject.Queue?.splice(0, 0, {
+                QueueFilter: "",
+                OrderBy: activity.queueInfo?.orderBy,
+                AllowReassignment: activity.queueInfo?.allowReassignment,
+                UG: [],
+                FilterOption: "0",
+                RefreshInterval: activity.queueInfo?.refreshInterval,
+                QueueId: activity.queueInfo?.queueId,
+                SortOrder: activity.queueInfo?.sortOrder,
+                QueueName: activity.queueInfo?.queueName,
+                QueueDescription: activity.queueInfo?.queueDesc,
+                QueueType: activity.queueInfo?.queueType,
+                FilterValue: "",
+              });
+            }
+            processObject.Queue?.splice(0, 0, {
+              QueueFilter: "",
+              OrderBy: embeddedActivitiesArr[0].queueInfo?.orderBy,
+              AllowReassignment:
+                embeddedActivitiesArr[0].queueInfo?.allowReassignment,
+              UG: [],
+              FilterOption: "0",
+              RefreshInterval:
+                embeddedActivitiesArr[0].queueInfo?.refreshInterval,
+              QueueId: embeddedActivitiesArr[0].queueInfo?.queueId,
+              SortOrder: embeddedActivitiesArr[0].queueInfo?.sortOrder,
+              QueueName: embeddedActivitiesArr[0].queueInfo?.queueName,
+              QueueDescription:
+                embeddedActivitiesArr[0].queueInfo?.QueueDescription,
+              QueueType: embeddedActivitiesArr[0].queueInfo?.queueType,
+              FilterValue: "",
+            });
+
             return processObject;
           });
         }
@@ -116,6 +151,13 @@ export const AddEmbeddedActivity = (
             processObject.MileStones[milestone.mileIndex].Activities = [
               ...newArr,
             ];
+            // code added on 22 July 2022 for BugId 113305
+            if (!activity.queueInfo.queueExist) {
+              processObject.Queue?.splice(0, 1);
+            }
+            if (+activity.actType === 41 && +activity.actSubType === 1) {
+              processObject.Queue?.splice(0, 1);
+            }
             return processObject;
           });
           hideIcons();

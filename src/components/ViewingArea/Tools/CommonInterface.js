@@ -69,8 +69,8 @@ function CommonInterface(props) {
             <p
               onClick={(e) => tabChangeHandler(e, "screenHeading")}
               style={{
-                margin:
-                  direction !== RTL_DIRECTION ? "0 30px 0 0" : "0 0 0 30px",
+                margin: direction !== RTL_DIRECTION ? "0 1vw 0 0" : "0 0 0 1vw",
+                padding: "1px 1vw",
               }}
               className={
                 selectedTab === "screenHeading"
@@ -85,13 +85,25 @@ function CommonInterface(props) {
               className={
                 selectedTab === "rules" ? "selectedBottomBorder Rules" : "Rules"
               }
+              style={{
+                padding: "1px 1vw",
+              }}
             >
               {t("rules")}
             </p>
           </div>
           {selectedTab == "screenHeading" ? (
             <React.Fragment>
-              <div className="docSearchDiv">
+              <div
+                className="docSearchDiv"
+                style={{
+                  marginBottom:
+                    props.screenType == SCREENTYPE_EXCEPTION
+                      ? "0.8rem"
+                      : "0.75rem",
+                  marginTop:"2.1rem",
+                }}
+              >
                 <div className="searchBarNFilterInterface">
                   <div className="docSearchBar">
                     <SearchProject
@@ -123,6 +135,7 @@ function CommonInterface(props) {
                       groupName={props.groupName}
                       setGroupName={props.setGroupName}
                       groupsList={props.groupsList}
+                      showGroupNameError={props.showGroupNameError}
                     />
                   </Modal>
                 </div>
@@ -154,7 +167,7 @@ function CommonInterface(props) {
                       color="primary"
                     />
                   }
-                  label="Compact"
+                  label={<span style={{ marginBottom: "auto" }}>Compact</span>}
                 />
               </div>
             </div>

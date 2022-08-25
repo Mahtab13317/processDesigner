@@ -59,12 +59,13 @@ function stableSort(array, comparator) {
 }
 
 function EnhancedTableHead(props) {
+  // Changes made to fix bug with ID 110676
   let { t } = useTranslation();
   const { headCells, hideHeader, setCategoryLength } = props;
   const { classes, order, orderBy, onRequestSort } = props;
   const dropdown = [
     { Name: "L" },
-    { Name: "D" || "R" },
+    { Name: "R" },
     { Name: "RP" },
     { Name: "E" },
     { Name: "EP" },
@@ -161,12 +162,12 @@ function EnhancedTableHead(props) {
     <div className={classes.headerDiv}>
       <div className={classes.heading}>
         <p className={classes.recentTitle}>
-          {`${t("Recents")}`} ({props.count})
+          {`${t("Recents")}`} ({props.rowCount})
         </p>
         <div className={classes.headerRightWrapper}>
           {props.isSearch ? (
             <SearchBox
-              height="28px"
+              height="2.7rem"
               width="150px"
               onSearchChange={onSearchSubmit}
               clearSearchResult={clearResult}
@@ -191,7 +192,7 @@ function EnhancedTableHead(props) {
             onChange={(e) => onSelect(e)}
           >
             <MenuItem
-              className={classes.dropdownData}
+              className={`${classes.dropdownData} tableSelect`}
               style={{ marginTop: ".5px" }}
               value="defaultValue"
             >
@@ -200,7 +201,7 @@ function EnhancedTableHead(props) {
             {dropdown.map((x) => {
               return (
                 <MenuItem
-                  className={classes.dropdownData}
+                  className={`${classes.dropdownData} tableSelect`}
                   key={x.Name}
                   value={x.Name}
                 >
@@ -291,6 +292,8 @@ const useStyles = makeStyles({
   heading: {
     display: "flex",
     justifyContent: "space-between",
+    alignItems: "center",
+    paddingBottom: "1rem",
   },
   headerRightWrapper: {
     display: "flex",
@@ -298,15 +301,10 @@ const useStyles = makeStyles({
     marginLeft: (props) => (props.direction === "ltr" ? "auto" : "none"),
   },
   dropdownData: {
-    height: "17px",
     textAlign: "left",
-    font: "normal normal normal 12px/17px Open Sans",
-    letterSpacing: "0px",
     color: "#000000",
-    opacity: "1",
-    marginTop: "8px",
-    paddingLeft: "10px !important",
-    marginLeft: "0px",
+    margin: "0",
+    padding: "0.25rem 0.5rem",
   },
   tableHeadRoot: {
     // position : 'fixed'
@@ -325,7 +323,7 @@ const useStyles = makeStyles({
     background: "#F8F8F8",
   },
   recentTitle: {
-    font: "normal normal 600 16px/22px Open Sans",
+    font: "normal normal 600 var(--title_text_font_size)/22px var(--font_family)",
     color: "#000000",
     height: "22px",
     textAlign: "left",
@@ -405,9 +403,8 @@ const useStyles = makeStyles({
     maxWidth: "100%",
   },
   tableCellRoot: {
-    fontFamily: "Open Sans , Roboto , Helvetica , Arial , sans-serif",
+    fontFamily: "var(--font_family)",
     borderBottom: "0px",
-    fontSize: "12px",
     padding: "8px 2px",
     paddingLeft: "3px",
     marginRight: "14px",
@@ -418,12 +415,13 @@ const useStyles = makeStyles({
   },
   select: {
     width: "138px",
-    height: "28px",
+    height: "2.7rem",
     background: "#FFFFFF 0% 0% no-repeat padding-box",
     font: "normal normal normal 12px/17px Open Sans",
-    border: "1px solid #C4C4C4",
+    border: "1px solid #d7d7d7",
     borderRadius: "2px",
     opacity: "1",
+    textAlign: "left",
     marginLeft: (props) =>
       props.direction !== RTL_DIRECTION ? "10px" : "none",
     marginRight: (props) =>
@@ -435,6 +433,9 @@ const useStyles = makeStyles({
     "& .MuiSelect-icon": {
       left: (props) => (props.direction === RTL_DIRECTION ? "0" : "unset"),
       right: (props) => (props.direction !== RTL_DIRECTION ? "0" : "unset"),
+      height: "1.5rem",
+      width: "1.5rem",
+      top: "calc(50% - 0.75rem)",
     },
     "&::before": {
       display: "none",
@@ -461,14 +462,14 @@ const useStyles = makeStyles({
     fontSize: "30px",
   },
   separatorHeading: {
-    paddingTop: "0.95rem",
-    paddingBottom: "0.95rem",
+    paddingTop: "1.25rem",
+    paddingBottom: "1.25rem",
     overflow: "hidden",
     textAlign: "left",
     whiteSpace: "nowrap",
     background: "#F8F8F8",
     textOverflow: "ellipsis",
-    fontSize: "13px",
+    fontSize: "var(--subtitle_text_font_size)",
     fontWeight: "600",
   },
 });
@@ -562,7 +563,7 @@ function TabularData(props) {
     async function getPinned() {
       const res = await axios.get(SERVER_URL_LAUNCHPAD + "/pinnedList/1");
 
-      res.data?.forEach((data) => {
+      res?.data?.forEach((data) => {
         setpinnedProcessDefIdArr((prev) => {
           let temp = [...prev];
           temp.push(data.Id + "");

@@ -25,6 +25,7 @@ import Output from "./Output";
 import Table from "./Table";
 import Tabs from "../../../../UI/Tab/Tab.js";
 import axios from "axios";
+import TabsHeading from "../../../../UI/TabsHeading";
 
 function Sap(props) {
   let { t } = useTranslation();
@@ -169,6 +170,7 @@ function Sap(props) {
 
   return (
     <React.Fragment>
+    <TabsHeading heading={props?.heading} />
       {props.isDrawerExpanded && sapOutput ? (
         <div style={{ margin: "1%" }}>
           <h4>{t("SAP")}</h4>

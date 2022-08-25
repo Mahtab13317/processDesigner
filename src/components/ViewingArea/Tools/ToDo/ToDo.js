@@ -407,23 +407,15 @@ function ToDo(props) {
   };
 
   // code added on 4 July 2022 for BugId 111567
-  const modifyToDoFromList = (ToDoToAdd, button_type, groupId, ToDoDesc) => {
-    let toDoId = null;
-    toDoData?.TodoGroupLists?.forEach((group) => {
-      group?.ToDoList?.forEach((todo) => {
-        if (todo.ToDoName.toLowerCase() == ToDoToAdd.toLowerCase()) {
-          toDoId = +todo.ToDoId;
-        }
-      });
-    });
-
-    if (ToDoDesc.trim() == "") {
-      setShowDescError(true);
-      document.getElementById("ToDoDescInput").focus();
-    }
+  // code added on 4 August 2022 for BugId 113920
+  const modifyToDoFromList = (ToDoToAdd, groupId, ToDoDesc, toDoIdToModify) => {
     if (ToDoToAdd.trim() == "") {
       setShowNameError(true);
       document.getElementById("ToDoNameInput").focus();
+    }
+    if (ToDoDesc.trim() == "") {
+      setShowDescError(true);
+      document.getElementById("ToDoDescInput").focus();
     }
 
     if (ToDoToAdd.trim() !== "" && ToDoDesc.trim() !== "") {
@@ -434,7 +426,7 @@ function ToDo(props) {
           .post(SERVER_URL + ENDPOINT_MODIFY_TODO, {
             processDefId: props.openProcessID,
             todoName: ToDoToAdd,
-            todoId: toDoId,
+            todoId: toDoIdToModify,
             groupId: groupId,
             todoDesc: ToDoDesc,
             viewType: toDoType,
@@ -481,13 +473,7 @@ function ToDo(props) {
                 }
               });
               setLocalLoadedProcessData(newProcessData);
-              if (button_type != "addAnother") {
-                handleToDoClose();
-              } else if (button_type == "addAnother") {
-                // document.getElementById("ToDoNameInput").value = "";
-                setTodoName("");
-                document.getElementById("ToDoNameInput").focus();
-              }
+              handleToDoClose();
             }
           })
           .catch((err) => {
@@ -725,14 +711,15 @@ function ToDo(props) {
       loadedMileStones.map((mileStone) => {
         let activities = [];
         mileStone.Activities.map((activity, index) => {
-          if (activity.ActivityName.includes(value)) {
+          console.log('EXCEPTIONVALUE', activity);
+          if (activity.ActivityName.toLowerCase().includes(value.toLowerCase())) {
             activityIdString = activityIdString + activity.ActivityId + ",";
             activities.push(activity);
           }
         });
         temp.push({ ...mileStone, Activities: activities });
       });
-      MapAllActivities(activityIdString);
+      // MapAllActivities(activityIdString);
       setLoadedMileStones(temp);
     } else {
       clearActivitySearchResult();
@@ -1494,6 +1481,7 @@ function ToDo(props) {
                 alignItems: "center",
                 justifyContent: "space-between",
                 paddingRight: "10px",
+                height:'34px'
               }}
             >
               <p
@@ -1528,36 +1516,38 @@ function ToDo(props) {
                   >
                     {t("todo") + "+"}
                   </span>
-                  <DeleteModal
-                    backDrop={false}
-                    modalPaper="modalPaperActivity"
-                    sortByDiv="sortByDivActivity"
-                    oneSortOption="oneSortOptionActivity"
-                    docIndex={groupIndex}
-                    buttonToOpenModal={
-                      <button className="threeDotsButton" type="button">
-                        <MoreVertIcon
-                          style={{
-                            color: "#606060",
-                            height: "16px",
-                            width: "16px",
-                          }}
-                        />
-                      </button>
-                    }
-                    modalWidth="180"
-                    sortSectionOne={[
-                      <p
-                        id="deleteGroup_todo"
-                        onClick={() =>
-                          deleteGroup(group.GroupName, group.GroupId)
-                        }
-                      >
-                        {t("delete")}
-                      </p>,
-                      <p id="deleteGroup_todo">{t("modify")}</p>,
-                    ]}
-                  />
+                  {/*code added on 4 August 2022 for BugId 113920 */}
+                  {+group.GroupId !== 0 ? (
+                    <DeleteModal
+                      backDrop={false}
+                      modalPaper="modalPaperActivity"
+                      sortByDiv="sortByDivActivity"
+                      oneSortOption="oneSortOptionActivity"
+                      docIndex={groupIndex}
+                      buttonToOpenModal={
+                        <button className="threeDotsButton" type="button">
+                          <MoreVertIcon
+                            style={{
+                              color: "#606060",
+                              height: "16px",
+                              width: "16px",
+                            }}
+                          />
+                        </button>
+                      }
+                      modalWidth="180"
+                      sortSectionOne={[
+                        <p
+                          id="deleteGroup_todo"
+                          onClick={() =>
+                            deleteGroup(group.GroupName, group.GroupId)
+                          }
+                        >
+                          {t("delete")}
+                        </p>,
+                      ]}
+                    />
+                  ) : null}
                 </div>
               )}
             </div>
@@ -1629,102 +1619,105 @@ function ToDo(props) {
                         updateAllTodoRights={updateAllTodoRights}
                         GiveCompleteRights={GiveCompleteRights}
                       />
-                      <DeleteModal
-                        backDrop={false}
-                        modalPaper="modalPaperActivity"
-                        sortByDiv="sortByDivActivity"
-                        oneSortOption="oneSortOptionActivity"
-                        docIndex={todoIndex}
-                        buttonToOpenModal={
-                          <button className="threeDotsButton" type="button">
-                            <MoreVertIcon
-                              style={{
-                                color: "#606060",
-                                height: "16px",
-                                width: "16px",
-                              }}
-                            />
-                          </button>
-                        }
-                        modalWidth="180"
-                        sortSectionOne={[
-                          <p
-                            id="deleteTodoOption"
-                            onClick={() =>
-                              deleteToDo(todo.ToDoName, todo.ToDoId)
-                            }
-                          >
-                            {t("delete")}
-                          </p>,
-                          <p
-                            id="modifyTodoOption"
-                            onClick={() =>
-                              editToDo(
-                                group.GroupId,
-                                todo.ToDoName,
-                                todo.Description,
-                                todo.ToDoId,
-                                todo.FieldName,
-                                todo.Type,
-                                todo.Mandatory,
-                                todo.TriggerName,
-                                todo
-                              )
-                            }
-                          >
-                            {t("modify")}
-                          </p>,
-                          <p
-                            id="moveTodo_To_OtherGroup"
-                            style={{ display: "flex", alignItems: "center" }}
-                          >
-                            {t("moveTo")}
-                            <DeleteModal
-                              addNewGroupFunc={() => {
-                                addGroupViaMoveTo(
-                                  todo.ToDoId,
+                      {/*code edited on 29 July 2022 for BugId 112411 */}
+                      {props.openProcessType === "L" ? (
+                        <DeleteModal
+                          backDrop={false}
+                          modalPaper="modalPaperActivity"
+                          sortByDiv="sortByDivActivity"
+                          oneSortOption="oneSortOptionActivity"
+                          docIndex={todoIndex}
+                          buttonToOpenModal={
+                            <button className="threeDotsButton" type="button">
+                              <MoreVertIcon
+                                style={{
+                                  color: "#606060",
+                                  height: "16px",
+                                  width: "16px",
+                                }}
+                              />
+                            </button>
+                          }
+                          modalWidth="180"
+                          sortSectionOne={[
+                            <p
+                              id="deleteTodoOption"
+                              onClick={() =>
+                                deleteToDo(todo.ToDoName, todo.ToDoId)
+                              }
+                            >
+                              {t("delete")}
+                            </p>,
+                            <p
+                              id="modifyTodoOption"
+                              onClick={() =>
+                                editToDo(
+                                  group.GroupId,
                                   todo.ToDoName,
                                   todo.Description,
-                                  group.GroupId
-                                );
-                              }}
-                              getActionName={(targetGroupName) =>
-                                MoveToOtherGroup(
-                                  targetGroupName,
                                   todo.ToDoId,
-                                  todo.ToDoName,
-                                  todo.Description,
-                                  group.GroupId
+                                  todo.FieldName,
+                                  todo.Type,
+                                  todo.Mandatory,
+                                  todo.TriggerName,
+                                  todo
                                 )
                               }
-                              backDrop={false}
-                              modalPaper="modalPaperActivity exceptionMoveTo"
-                              sortByDiv="sortByDivActivity"
-                              oneSortOption="oneSortOptionActivity"
-                              docIndex={todoIndex}
-                              buttonToOpenModal={
-                                <button
-                                  className="threeDotsButton"
-                                  type="button"
-                                >
-                                  <ArrowForwardIosIcon
-                                    style={{
-                                      color: "#606060",
-                                      height: "12px",
-                                      width: "12px",
-                                    }}
-                                  />
-                                </button>
-                              }
-                              modalWidth="180"
-                              sortSectionOne={[
-                                ...ToDoGroup,
-                                <p id="addGroup">{t("newGroup")}</p>,
-                              ]}
-                            />
-                          </p>,
-                        ]}
-                      />
+                            >
+                              {t("modify")}
+                            </p>,
+                            <p
+                              id="moveTodo_To_OtherGroup"
+                              style={{ display: "flex"}}
+                            >
+                              {t("moveTo")}
+                              <DeleteModal
+                                addNewGroupFunc={() => {
+                                  addGroupViaMoveTo(
+                                    todo.ToDoId,
+                                    todo.ToDoName,
+                                    todo.Description,
+                                    group.GroupId
+                                  );
+                                }}
+                                getActionName={(targetGroupName) =>
+                                  MoveToOtherGroup(
+                                    targetGroupName,
+                                    todo.ToDoId,
+                                    todo.ToDoName,
+                                    todo.Description,
+                                    group.GroupId
+                                  )
+                                }
+                                backDrop={false}
+                                modalPaper="modalPaperActivity exceptionMoveTo"
+                                sortByDiv="sortByDivActivity"
+                                oneSortOption="oneSortOptionActivity"
+                                docIndex={todoIndex}
+                                buttonToOpenModal={
+                                  <button
+                                    className="expandIcon"
+                                    type="button"
+                                  >
+                                    <ArrowForwardIosIcon
+                                      style={{
+                                        color: "#606060",
+                                        height: "12px",
+                                        width: "12px",
+                                      }}
+                                    />
+                                  </button>
+                                }
+                                modalWidth="180"
+                                sortSectionOne={[
+                                  ...ToDoGroup,
+                                  <p id="addGroup">{t("newGroup")}</p>,
+                                ]}
+                              />
+                            </p>,
+                          ]}
+                        />
+                      ) : null}
                     </div>
                   )}
                 </div>

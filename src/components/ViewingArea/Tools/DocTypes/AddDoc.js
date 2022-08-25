@@ -12,8 +12,22 @@ function AddDoc(props) {
   const [nameInput, setNameInput] = useState("");
   const [descInput, setDescInput] = useState("");
   const [docModalHead, setDocModalHead] = useState("");
+
   const setNameFunc = (e) => {
+    if (e.target.value !== "" && props.setShowDocNameError) {
+      props.setShowDocNameError(false);
+    }
     setNameInput(e.target.value);
+    // Changes made to solve bug ID 109986
+    props.docData?.DocumentTypeList?.forEach((type) => {
+      if (props.setbDocExists) {
+        if (type.DocName.toLowerCase() == e.target.value) {
+          props.setbDocExists(true);
+        } else {
+          props.setbDocExists(false);
+        }
+      }
+    });
   };
   const setDescFunc = (e) => {
     setDescInput(e.target.value);
@@ -36,6 +50,15 @@ function AddDoc(props) {
       setNameInput(props.docNameToModify);
     }
   }, [props.docDescToModify, props.docNameToModify]);
+
+  // code added on 2 August 2022 for BugId 112251
+  useEffect(() => {
+    if (props.addAnotherDoc) {
+      setNameInput("");
+      setDescInput("");
+      props.setAddAnotherDoc(false);
+    }
+  }, [props.addAnotherDoc]);
 
   return (
     <div className="addDocs">
@@ -67,6 +90,32 @@ function AddDoc(props) {
             className={styles.modalInput}
           />
         </form>
+        {props.showDocNameError ? (
+          <span
+            style={{
+              color: "red",
+              fontSize: "10px",
+              marginTop: "-1.25rem",
+              marginBottom: "0.5rem",
+              display: "block",
+            }}
+          >
+            {t("filltheDocumentName")}
+          </span>
+        ) : null}
+        {props.bDocExists ? (
+          <span
+            style={{
+              color: "red",
+              fontSize: "10px",
+              marginTop: "-1.25rem",
+              marginBottom: "0.5rem",
+              display: "block",
+            }}
+          >
+            {t("docAlreadyExists")}
+          </span>
+        ) : null}
         <label className={styles.modalLabel}>{t("description")}</label>
         <textarea
           id="DocDescInput"

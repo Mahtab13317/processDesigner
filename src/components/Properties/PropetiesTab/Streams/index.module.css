@@ -1,40 +1,43 @@
 .streamScreen {
   display: flex;
-  height: 80vh;
-  max-height: 80vh;
+  height: 66vh;
+  gap: 1vw;
+  max-height: 66vh;
   background-color: white;
   width: 100%;
 }
 
 .leftPanel {
   height: 100%;
-  width: 26%;
-  margin-top: 0.625rem;
+  flex: 1;
+  border-right: 1px solid #c4c4c4;
+  padding: 0.5rem 0;
   display: flex;
   flex-direction: column;
-  margin-left: 10px;
 }
 
 .rightPanel {
   height: 100%;
-  margin-top: 10px;
-  margin-left: 1.1875rem;
+  flex: 3;
+  padding: 0.5rem 1vw 0.5rem 0;
   width: 75%;
 }
 
 .labelTittle {
-  font: normal normal normal 12px/16px Open Sans;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
   margin-top: 1rem;
+  margin-bottom: 0.25rem;
 }
 
 .radiobtn svg {
-  width: 1rem;
-  height: 1rem;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
 }
 
 .radiobtn span {
   text-align: left;
-  font: normal normal normal 11px/15px Open Sans;
+  font: normal normal normal 11px/15px var(--font_family);
+  font-size: var(--base_text_font_size) !important;
   letter-spacing: 0px;
   /* color: #707070; */
 }
@@ -57,14 +60,12 @@
 .addButton {
   background: #ffffff 0% 0% no-repeat padding-box !important;
   border-radius: 2px !important;
-  border: 1px solid #0072c5 !important;
-  font: normal normal 600 12px/17px Open Sans !important;
+  border: 1px solid var(--button_color) !important;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family) !important;
   letter-spacing: 0px !important;
-  color: #0072c6;
+  color: var(--button_color);
   text-transform: none !important;
-  margin-right: 0.5rem !important;
-  padding: 0.25rem 0.75rem !important;
-  margin-left: auto;
+  margin: 0 0 0 auto !important;
   cursor: pointer;
 }
 
@@ -72,7 +73,7 @@
   background: #ffffff 0% 0% no-repeat padding-box !important;
   border: 1px solid #c4c4c4 !important;
   border-radius: 2px !important;
-  font: normal normal 600 12px/17px Open Sans !important;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family) !important;
   letter-spacing: 0px !important;
   color: #606060 !important;
   text-transform: none !important;
@@ -93,8 +94,8 @@ ul {
 }
 
 ul li {
-  font: normal normal normal 14px/16px Open Sans;
-  padding-left: 1rem;
+  font: normal normal normal var(--subtitle_text_font_size) / 19px
+    var(--font_family);
 }
 
 ul li:hover {
@@ -103,10 +104,11 @@ ul li:hover {
 
 .menuItemStyles {
   text-align: left;
-  font: normal normal normal 12px/24px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   letter-spacing: 0px;
   color: #000000;
-  opacity: 1;
+  width: 138px;
 }
 
 .addNewRule {
@@ -125,18 +127,31 @@ ul li:hover {
   width: 138px;
   height: 28px;
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
-  opacity: 1;
   margin-right: 10px;
 }
 
-.toogleBtn {
-  width: 3rem;
-  height: 28px;
+.nameInput {
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
+  font-size: var(--base_text_font_size);
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  padding: 0.25rem 0.5vw;
+  height: 2.5rem;
+}
+
+.toogleBtn {
+  margin-top: 0px !important;
+  width: 3rem;
+  height: 28px !important;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
   opacity: 1;
@@ -152,13 +167,50 @@ ul li:hover {
 }
 
 .showIndex {
-  margin-top: 15px;
-  padding-right: 10px;
-  font: normal normal bold 12px/17px Open Sans !important;
+  padding: 0 0.26vw;
+  font: normal normal bold var(--base_text_font_size) / 1.5rem
+    var(--font_family) !important;
 }
 
 .footerStream {
-  position: absolute;
-  bottom: 0;
-  right: 0;
+  text-align: right;
+  margin-top: 0.5rem;
+}
+
+.addCondDiv {
+  height: 38vh;
+  overflow: auto;
+}
+
+.addCondDiv::-webkit-scrollbar {
+  background-color: transparent;
+  width: 0.375rem;
+  height: 1.125rem;
+}
+
+.addCondDiv::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 0.313rem;
+}
+
+.addCondDiv:hover::-webkit-scrollbar {
+  overflow-y: visible;
+  width: 0.375rem;
+  height: 1.125rem;
+}
+.addCondDiv:hover::-webkit-scrollbar-thumb {
+  background-color: #dadada;
+  border-radius: 0.313rem;
+}
+
+.starIcon {
+  color: red;
+  margin-left: 0.25vw;
+  font-size: 1rem;
+}
+
+/*code added on 23 August 2022 for BugId 114355*/
+.streamListDiv {
+  height: 55vh;
+  overflow: auto;
 }
