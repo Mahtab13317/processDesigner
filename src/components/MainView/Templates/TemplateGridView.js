@@ -36,6 +36,8 @@ function TemplateGridView(props) {
     props.setTemplatePage(PREVIOUS_PAGE_GRID);
     props.setTemplateDetails(props.category, TEMPLATE_GRID_VIEW);
     props.openTemplate(template.Id, template.Name, true);
+    // code edited on 10 Oct 2022 for BugId 112343 and BugId 112684
+    props.openProcessClick("", "", "", "", "");
     history.push("/process");
   };
 
@@ -115,6 +117,10 @@ const mapDispatchToProps = (dispatch) => {
   return {
     openTemplate: (id, name, flag) =>
       dispatch(actionCreators.openTemplate(id, name, flag)),
+    openProcessClick: (id, name, type, version, processName) =>
+      dispatch(
+        actionCreators.openProcessClick(id, name, type, version, processName)
+      ),
     setTemplatePage: (value) =>
       dispatch(actionCreators_template.storeTemplatePage(value)),
     setTemplateDetails: (category, view, createBtnClick, template) =>

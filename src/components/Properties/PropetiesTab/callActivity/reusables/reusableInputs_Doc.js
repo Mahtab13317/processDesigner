@@ -3,35 +3,55 @@ import { Select, MenuItem } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 import "../../callActivity/commonCallActivity.css";
 import { store, useGlobalState } from "state-pool";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
+import { setActivityPropertyChange } from "../../../../../redux-store/slices/ActivityPropertyChangeSlice";
+import { propertiesLabel } from "../../../../../Constants/appConstants";
 
+/*code edited on 6 Sep 2022 for BugId 115378 */
 function ReusableInputs(props) {
+  const { isReadOnly } = props;
+  const dispatch = useDispatch();
   const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcessData, setlocalLoadedProcessData] =
-    useGlobalState(loadedProcessData);
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [selectedMappingField, setSelectedMappingField] = useState(null);
-  const loadedVariables = localLoadedProcessData.DocumentTypeList;
+  const loadedVariables = localLoadedProcessData?.DocumentTypeList;
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
+
   const handleFieldMapping = (document, event) => {
     setSelectedMappingField(event.target.value);
     let forwardMapArr = [];
-    let tempLocalState = { ...localLoadedActivityPropertyData };
+    let tempLocalState = JSON.parse(
+      JSON.stringify(localLoadedActivityPropertyData)
+    );
     props.docList.forEach((doc) => {
       forwardMapArr.push({
-        importedFieldName: doc.importedFieldName,
+        ...doc,
         mappedFieldName:
-          doc.importedFieldName == document.importedFieldName
+          doc.DocName === document.DocName
             ? event.target.value
             : doc.mappedFieldName,
       });
     });
-
-    tempLocalState.ActivityProperty.SubProcess.fwdDocMapping = [
-      ...forwardMapArr,
-    ];
+    tempLocalState?.ActivityProperty?.SubProcess?.fwdDocMapping?.map(
+      (el, idx) => {
+        if (el.importedFieldName === document.DocName) {
+          tempLocalState.ActivityProperty.SubProcess.fwdDocMapping[idx] = {
+            ...el,
+            mappedFieldName: event.target.value,
+            m_bSelected: true,
+          };
+        }
+      }
+    );
+    props.setDocList(forwardMapArr);
     setlocalLoadedActivityPropertyData(tempLocalState);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.fwdDocMapping]: { isModified: true, hasError: false },
+      })
+    );
   };
 
   useEffect(() => {
@@ -43,16 +63,16 @@ function ReusableInputs(props) {
       <p
         style={{
           fontSize: "11px",
-          position: "absolute",
-          left: props.isDrawerExpanded ? "12px" : "42px",
+          width: props.isDrawerExpanded ? "281px" : "136px",
+          padding: "0 8px",
         }}
       >
-        {props.document.importedFieldName}
+        {props.document.DocName}
       </p>
       <span
         style={{
-          position: "absolute",
-          left: props.isDrawerExpanded ? "314px" : "188px",
+          width: props.isDrawerExpanded ? "61px" : "25px",
+          textAlign: "center",
         }}
       >
         =
@@ -61,9 +81,12 @@ function ReusableInputs(props) {
         className="selectTwo_callActivity"
         onChange={(e) => handleFieldMapping(props.document, e)}
         style={{
-          position: "absolute",
-          right: props.isDrawerExpanded ? "26px" : "25px",
           width: props.isDrawerExpanded ? "280px" : "135px",
+          border:
+            (!selectedMappingField || selectedMappingField.trim() == "") &&
+            props.showRedBorder
+              ? "1px solid red"
+              : null,
         }}
         value={selectedMappingField}
         MenuProps={{
@@ -77,6 +100,7 @@ function ReusableInputs(props) {
           },
           getContentAnchorEl: null,
         }}
+        disabled={isReadOnly}
       >
         {loadedVariables.map((loadedVar) => {
           return (
@@ -89,14 +113,16 @@ function ReusableInputs(props) {
           );
         })}
       </Select>
-      <DeleteIcon
-        style={{
-          cursor: "pointer",
-          position: "absolute",
-          right: props.isDrawerExpanded ? "-5px" : "1px",
-        }}
-        onClick={() => props.deleteVariablesFromList(props.document)}
-      />
+      {!isReadOnly && (
+        <DeleteIcon
+          style={{
+            cursor: "pointer",
+            width: props.isDrawerExpanded ? "3rem" : "2rem",
+            height: "1.5rem",
+          }}
+          onClick={() => props.deleteVariablesFromList(props.document)}
+        />
+      )}
     </div>
   );
 }

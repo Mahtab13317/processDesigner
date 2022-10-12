@@ -1,65 +1,55 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "../../../ProcessSettings/Trigger/Properties/properties.module.css";
-// import arabicStyles from "./propertiesArabicStyles.module.css";
 import style from "./scan.module.css";
 import { connect } from "react-redux";
 import * as actionCreators from "../../../../redux-store/actions/Trigger";
-import DataDropDown from "../../../ProcessSettings/Trigger/Properties/Components/DataDropDown";
-import deleteIcon from "../../../../assets/subHeader/delete.svg";
 import { store, useGlobalState } from "state-pool";
-import {
-  PROCESSTYPE_LOCAL,
-  RTL_DIRECTION,
-} from "../../../../Constants/appConstants";
+import CloseIcon from "@material-ui/icons/Close";
+import { PROCESSTYPE_LOCAL } from "../../../../Constants/appConstants";
+import ScanRule from "./ScanRule";
 
 function SetProperties(props) {
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
-  const variableDefinition = localLoadedProcessData?.Variable;
   let { t } = useTranslation();
-  const direction = `${t("HTML_DIR")}`;
-  const [rowSelected, setRowSelected] = useState(null);
   const [addedFields, setAddedFields] = useState([
     { row_id: 1, field: null, value: null },
   ]);
   const [fieldValue, setFieldValue] = useState();
+  const [isEdited, setIsEdited] = useState(false);
   let readOnlyProcess = props.openProcessType !== PROCESSTYPE_LOCAL;
 
   useEffect(() => {
     if (props.selectedDoc?.scanActionList?.length > 0) {
       let tempFields = [];
-      props.selectedDoc.scanActionList.forEach((doc, index) => {
-        let field = variableDefinition.filter((el) => {
+      props.selectedDoc?.scanActionList?.forEach((doc, index) => {
+        let field = localLoadedProcessData?.Variable?.filter((el) => {
           if (el.VariableName == doc.param1) {
             return el;
           }
         })[0];
-
-        let fieldValue = variableDefinition.filter((el) => {
-          if (el.VariableName == doc.param2) {
-            return el;
-          }
-        })[0];
+        // code edited on 19 Sep 2022 for BugId 115558
+        let fieldValue =
+          doc.varScope2 === "C"
+            ? {
+                VariableName: doc.param2,
+                ExtObjectId: doc.extObjID2,
+                VariableType: doc.type2,
+                VariableScope: doc.varScope2,
+                VariableId: doc.variableId_2,
+                constant: true,
+              }
+            : localLoadedProcessData?.Variable?.filter((el) => {
+                if (el.VariableName == doc.param2) {
+                  return el;
+                }
+              })[0];
         tempFields.push({ row_id: index + 1, field: field, value: fieldValue });
       });
       setAddedFields(tempFields);
     }
   }, [props.selectedDoc]);
-
-  useEffect(() => {
-    if (props.reload) {
-      setAddedFields([{ row_id: 1, field: null, value: null }]);
-      props.setReload(false);
-    }
-  }, [props.reload]);
-
-  useEffect(() => {
-    if (props.initialValues) {
-      setAddedFields(props.set);
-      props.setInitialValues(false);
-    }
-  }, [props.initialValues]);
 
   const okHandler = () => {
     if (addedFields && addedFields.length > 0) {
@@ -69,14 +59,15 @@ function SetProperties(props) {
         }
       });
       if (arr.length >= 1) {
-        props.selectedScanActionHandler(arr);
+        props.selectedScanActionHandler(arr, isEdited);
       }
     } else {
-      props.selectedScanActionHandler([]);
+      props.selectedScanActionHandler([], isEdited);
     }
   };
 
   const addNewField = () => {
+    setIsEdited(true);
     setAddedFields((prev) => {
       let newData = [...prev];
       newData.push({
@@ -89,7 +80,7 @@ function SetProperties(props) {
   };
 
   const deleteField = (index) => {
-    setRowSelected(null);
+    setIsEdited(true);
     if (addedFields.length > 1) {
       setAddedFields((prev) => {
         let newData = [...prev];
@@ -137,15 +128,15 @@ function SetProperties(props) {
 
   return (
     <React.Fragment>
-      <div className={styles.propertiesColumnView} style={{ width: "55vw" }}>
-        <h5>Scan Action</h5>
-        <div className="flex">
+      <div className={style.modalHeader}>
+        <h5 className={style.modalHeading}>{t("scanAction")}</h5>
+        <CloseIcon onClick={props.modalClosed} className={style.closeIcon} />
+      </div>
+      <div className={style.modalBody}>
+        <div className="flex alignCenter">
           <div className={styles.propertiesTriggerLabel}>
-            {t("SET")}{" "}
-            <span className="relative">
-              {t("variable(s)")}
-              <span className={styles.starIcon}>★</span>
-            </span>
+            {t("SET")} {t("variable(s)")}
+            <span className={styles.starIcon}>*</span>
           </div>
           {!readOnlyProcess ? (
             <button
@@ -157,75 +148,33 @@ function SetProperties(props) {
             </button>
           ) : null}
         </div>
-        <div className={styles.setTriggerList}>
-          {addedFields && addedFields.length > 0
-            ? addedFields.map((childField, index) => {
+        <div className={style.variableList}>
+          {addedFields?.length > 0
+            ? addedFields?.map((childField, index) => {
                 return (
-                  <div
-                    onMouseEnter={() => setRowSelected(childField.row_id)}
-                    onMouseLeave={() => setRowSelected(null)}
-                    className={`${styles.setTriggerDropDowns} flex`}
-                    style={{
-                      backgroundColor:
-                        rowSelected === childField.row_id ? "#F0F0F0" : "white",
-                    }}
-                  >
-                    <DataDropDown
-                      triggerTypeOptions={variableDefinition}
-                      setFieldValue={setFieldValue}
-                      id={childField.row_id}
-                      type="F"
-                      value={childField.field}
-                      setRowSelected={setRowSelected}
-                      uniqueId="trigger_setKey_dropdown"
-                    />
-                    <span className={styles.triggerEqualTo}>=</span>
-                    <DataDropDown
-                      triggerTypeOptions={variableDefinition}
-                      setFieldValue={setFieldValue}
-                      id={childField.row_id}
-                      type="V"
-                      value={childField.value}
-                      setRowSelected={setRowSelected}
-                      constantAdded={true}
-                      uniqueId="trigger_setValue_dropdown"
-                    />
-                    {rowSelected === childField.row_id && !readOnlyProcess ? (
-                      <div
-                        onClick={() => deleteField(index)}
-                        className={styles.triggerDeleteIcon}
-                        id={`trigger_set_delete_${childField.row_id}`}
-                      >
-                        <img
-                          src={deleteIcon}
-                          width="16px"
-                          height="16px"
-                          title="Delete"
-                        />
-                      </div>
-                    ) : (
-                      ""
-                    )}
-                  </div>
+                  <ScanRule
+                    childField={childField}
+                    index={index}
+                    readOnlyProcess={readOnlyProcess}
+                    deleteField={deleteField}
+                    setFieldValue={setFieldValue}
+                    setIsEdited={setIsEdited}
+                  />
                 );
               })
             : null}
         </div>
-        <div className={style.ScanFooter}>
-          <button
-            className={style.okBtn}
-            onClick={okHandler}
-            id="trigger_set_add_btn"
-          >
-            {t("ok")}
-          </button>
-          <button
-            className={style.CancelBtn}
-            onClick={() => props.setopenModal(null)}
-          >
-            Cancel
-          </button>
-        </div>
+      </div>
+      <div className={style.modalFooter}>
+        <button
+          className={style.cancelButton}
+          onClick={() => props.setopenModal(null)}
+        >
+          {t("cancel")}
+        </button>
+        <button className={style.okButton} onClick={okHandler}>
+          {t("ok")}
+        </button>
       </div>
     </React.Fragment>
   );

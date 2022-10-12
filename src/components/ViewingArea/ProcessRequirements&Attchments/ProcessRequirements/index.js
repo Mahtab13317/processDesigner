@@ -19,7 +19,6 @@ import RightSection from "./requirementsRightSection";
 import { connect } from "react-redux";
 import TabsHeading from "../../../../UI/TabsHeading";
 
-
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "16%",
@@ -54,11 +53,17 @@ function ProcessRequirements(props) {
       if (res.status === 200) {
         setSections(res?.data?.Requirement);
         setSelectedOrder({
-          SectionId: res?.data?.Requirement
+          Attachment: [],
+          ReqDesc: res?.data?.Requirement
+            ? res?.data?.Requirement[0]?.ReqDesc
+            : null,
+          ReqImpl: res?.data?.Requirement
+            ? res?.data?.Requirement[0]?.ReqImpl
+            : null,
+          RequirementId: res?.data?.Requirement
             ? res?.data?.Requirement[0]?.RequirementId
             : null,
-          SectionLevel: "0",
-          SectionName: res?.data?.Requirement
+          RequirementName: res?.data?.Requirement
             ? res?.data?.Requirement[0]?.RequirementName
             : null,
         });
@@ -67,178 +72,190 @@ function ProcessRequirements(props) {
     getSections();
   }, []);
 
+  console.log("SECTIONS", sections);
   return (
     <>
       <TabsHeading heading={props.heading} />
       <div style={{ display: "flex", height: "100%" }}>
-    
-    {props.isDrawerExpanded ? (
-      <div className={classes.root}>
-        <p
+        {props.isDrawerExpanded || props.fromArea == "ProcessLevel" ? (
+          <div className={classes.root}>
+            <p
+              style={{
+                fontSize: "var(--subtitle_text_font_size)",
+                fontWeight: "700",
+                backgroundColor: "white",
+                paddingLeft: "8px",
+              }}
+            >
+              Sections
+            </p>
+            {sections?.map((sec) => {
+              return (
+                <Accordion>
+                  <AccordionSummary
+                    style={{
+                      flexDirection: "row-reverse",
+                      backgroundColor:
+                        sec.RequirementId == selectedOrder?.SectionId
+                          ? "#0072C626"
+                          : "white",
+                      fontWeight:
+                        sec.RequirementId == selectedOrder?.SectionId
+                          ? "600"
+                          : "400",
+                    }}
+                    expandIcon={<ArrowRightIcon />}
+                    aria-controls="panel1a-content"
+                    id="panel1a-header"
+                  >
+                    <Typography
+                      className={classes.heading}
+                      onClick={() =>
+                        setSelectedOrder({
+                          Attachment: [],
+                          ReqDesc: sec.ReqDesc,
+                          ReqImpl: sec.ReqImpl,
+                          RequirementId: sec.RequirementId,
+                          RequirementName: sec.RequirementName,
+                          SectionLevel: "0",
+                        })
+                      }
+                    >
+                      {sec.RequirementName}
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails
+                    onClick={() => handleAccordionClick()}
+                    style={{
+                      backgroundColor: props.isActive ? "#0072C626" : "",
+                    }}
+                  >
+                    <Typography>
+                      {sec?.InnerRequirement?.map((secInner) => {
+                        return (
+                          <Accordion>
+                            <AccordionSummary
+                              style={{
+                                flexDirection: "row-reverse",
+                                backgroundColor:
+                                  secInner.RequirementId ==
+                                  selectedOrder?.SectionId
+                                    ? "#0072C626"
+                                    : "white",
+                                fontWeight:
+                                  sec.RequirementId == selectedOrder?.SectionId
+                                    ? "600"
+                                    : "400",
+                              }}
+                              expandIcon={<ArrowRightIcon />}
+                              aria-controls="panel1a-content"
+                              id="panel1a-header"
+                            >
+                              <Typography
+                                className={classes.heading}
+                                onClick={() =>
+                                  setSelectedOrder({
+                                    Attachment: [],
+                                    ReqDesc: secInner.ReqDesc,
+                                    ReqImpl: secInner.ReqImpl,
+                                    RequirementId: secInner.RequirementId,
+                                    RequirementName: secInner.RequirementName,
+                                    SectionLevel: "1",
+                                  })
+                                }
+                              >
+                                {secInner.RequirementName}
+                              </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails
+                              onClick={() => handleAccordionClick()}
+                              style={{
+                                backgroundColor: props.isActive
+                                  ? "#0072C626"
+                                  : "",
+                              }}
+                            >
+                              <Typography>
+                                {secInner?.InnerRequirement2?.map((el) => {
+                                  return (
+                                    <Accordion>
+                                      <AccordionSummary
+                                        style={{
+                                          flexDirection: "row-reverse",
+                                          backgroundColor:
+                                            el.RequirementId ==
+                                            selectedOrder?.SectionId
+                                              ? "#0072C626"
+                                              : "white",
+                                          fontWeight:
+                                            sec.RequirementId ==
+                                            selectedOrder?.SectionId
+                                              ? "600"
+                                              : "400",
+                                        }}
+                                        expandIcon={<ArrowRightIcon />}
+                                        aria-controls="panel1a-content"
+                                        id="panel1a-header"
+                                      >
+                                        <Typography
+                                          className={classes.heading}
+                                          onClick={() =>
+                                            setSelectedOrder({
+                                              SectionLevel: "2",
+                                              Attachment: [],
+                                              ReqDesc: el.ReqDesc,
+                                              ReqImpl: el.ReqImpl,
+                                              RequirementId: el.RequirementId,
+                                              RequirementName:
+                                                el.RequirementName,
+                                            })
+                                          }
+                                        >
+                                          {el.RequirementName || "Inner2"}
+                                        </Typography>
+                                      </AccordionSummary>
+                                      <AccordionDetails
+                                        onClick={() => handleAccordionClick()}
+                                        style={{
+                                          backgroundColor: props.isActive
+                                            ? "#0072C626"
+                                            : "",
+                                        }}
+                                      >
+                                        {/* <Typography>'HELL'</Typography> */}
+                                      </AccordionDetails>
+                                    </Accordion>
+                                  );
+                                })}
+                              </Typography>
+                            </AccordionDetails>
+                          </Accordion>
+                        );
+                      })}
+                    </Typography>
+                  </AccordionDetails>
+                </Accordion>
+              );
+            })}
+          </div>
+        ) : null}
+        <div
           style={{
-            fontSize: "var(--subtitle_text_font_size)",
-            fontWeight: "700",
+            padding: props.isDrawerExpanded ? "10px 25px 17px 17px" : "0px",
             backgroundColor: "white",
-            paddingLeft: "8px",
+            width: props.isDrawerExpanded ? "84%" : "100%",
+            marginTop: "4px",
+            overflowY: "scroll",
+            height: "75vh",
           }}
         >
-          Sections
-        </p>
-        {sections?.map((sec) => {
-          return (
-            <Accordion>
-              <AccordionSummary
-                style={{
-                  flexDirection: "row-reverse",
-                  backgroundColor:
-                    sec.RequirementId == selectedOrder?.SectionId
-                      ? "#0072C626"
-                      : "white",
-                  fontWeight:
-                    sec.RequirementId == selectedOrder?.SectionId
-                      ? "600"
-                      : "400",
-                }}
-                expandIcon={<ArrowRightIcon />}
-                aria-controls="panel1a-content"
-                id="panel1a-header"
-              >
-                <Typography
-                  className={classes.heading}
-                  onClick={() =>
-                    setSelectedOrder({
-                      SectionId: sec.RequirementId,
-                      SectionLevel: "0",
-                      SectionName: sec.RequirementName,
-                    })
-                  }
-                >
-                  {sec.RequirementName}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails
-                onClick={() => handleAccordionClick()}
-                style={{ backgroundColor: props.isActive ? "#0072C626" : "" }}
-              >
-                <Typography>
-                  {sec?.InnerRequirement?.map((secInner) => {
-                    return (
-                      <Accordion>
-                        <AccordionSummary
-                          style={{
-                            flexDirection: "row-reverse",
-                            backgroundColor:
-                              secInner.RequirementId ==
-                              selectedOrder?.SectionId
-                                ? "#0072C626"
-                                : "white",
-                            fontWeight:
-                              sec.RequirementId == selectedOrder?.SectionId
-                                ? "600"
-                                : "400",
-                          }}
-                          expandIcon={<ArrowRightIcon />}
-                          aria-controls="panel1a-content"
-                          id="panel1a-header"
-                        >
-                          <Typography
-                            className={classes.heading}
-                            onClick={() =>
-                              setSelectedOrder({
-                                SectionId: secInner.RequirementId,
-                                SectionLevel: "1",
-                                SectionName: secInner.RequirementName,
-                              })
-                            }
-                          >
-                            {secInner.RequirementName}
-                          </Typography>
-                        </AccordionSummary>
-                        <AccordionDetails
-                          onClick={() => handleAccordionClick()}
-                          style={{
-                            backgroundColor: props.isActive
-                              ? "#0072C626"
-                              : "",
-                          }}
-                        >
-                          <Typography>
-                            {secInner?.InnerRequirement2?.map((el) => {
-                              return (
-                                <Accordion>
-                                  <AccordionSummary
-                                    style={{
-                                      flexDirection: "row-reverse",
-                                      backgroundColor:
-                                        el.RequirementId ==
-                                        selectedOrder?.SectionId
-                                          ? "#0072C626"
-                                          : "white",
-                                      fontWeight:
-                                        sec.RequirementId ==
-                                        selectedOrder?.SectionId
-                                          ? "600"
-                                          : "400",
-                                    }}
-                                    expandIcon={<ArrowRightIcon />}
-                                    aria-controls="panel1a-content"
-                                    id="panel1a-header"
-                                  >
-                                    <Typography
-                                      className={classes.heading}
-                                      onClick={() =>
-                                        setSelectedOrder({
-                                          SectionId: el.RequirementId,
-                                          SectionLevel: "2",
-                                          SectionName: el.RequirementName,
-                                        })
-                                      }
-                                    >
-                                      {el.RequirementName || "Inner2"}
-                                    </Typography>
-                                  </AccordionSummary>
-                                  <AccordionDetails
-                                    onClick={() => handleAccordionClick()}
-                                    style={{
-                                      backgroundColor: props.isActive
-                                        ? "#0072C626"
-                                        : "",
-                                    }}
-                                  >
-                                    {/* <Typography>'HELL'</Typography> */}
-                                  </AccordionDetails>
-                                </Accordion>
-                              );
-                            })}
-                          </Typography>
-                        </AccordionDetails>
-                      </Accordion>
-                    );
-                  })}
-                </Typography>
-              </AccordionDetails>
-            </Accordion>
-          );
-        })}
+          <RightSection
+            completeSections={sections}
+            selectedOrder={selectedOrder}
+          />
+        </div>
       </div>
-    ) : null}
-    <div
-      style={{
-        padding: props.isDrawerExpanded ? "10px 25px 17px 17px" : "0px",
-        backgroundColor: "white",
-        width: props.isDrawerExpanded ? "84%" : "100%",
-        marginTop: "4px",
-        overflowY: "scroll",
-      }}
-    >
-      <RightSection
-        completeSections={sections}
-        selectedOrder={selectedOrder}
-      />
-    </div>
-  </div>
     </>
-    
   );
 }
 

@@ -1,3 +1,4 @@
+// Changes made to solve Bug 113657 - Process Report: Not able to download archived reports in Process report
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./ProjectReport.css";
@@ -25,19 +26,21 @@ function ProjectReport(props) {
       <p className="hrLineProjectCreation" />
 
       <Tabs
-        tabType="processSubTab"
-        tabContentStyle="processSubTabContentStyle"
-        tabBarStyle="processSubTabBarStyle"
+        // tabType="processSubTab"
+        // tabContentStyle="processSubTabContentStyle"
+        tabBarStyle="processSubTabBarStyleReport"
         oneTabStyle="processSubOneTabStyle"
-        tabStyling="processViewTabs"
-        tabsStyle="processViewSubTabs"
+        tabStyling="processViewTabsReport"
+        tabsStyle="processViewSubTabsReport"
         TabNames={[t("genrateReport"), t("archivedReport")]}
         TabElement={[
           <GenrateReport
             setShowModal={props.setshowProcessReport}
             openProcessType={props.openProcessType}
           />,
-          <ArchiveReport setShowModal={props.setshowProcessReport} />,
+          <ArchiveReport
+            setShowModal={props.setshowProcessReport}
+          />,
         ]}
       />
     </div>

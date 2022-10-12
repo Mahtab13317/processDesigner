@@ -178,7 +178,7 @@ function CheckBoxes(props) {
           disabled={
             DisableCheckBox(TempView, props) || isProcessReadOnly ? true : false
           }
-          style={{ marginLeft: "1px" }}
+          style={{ marginLeft: "8px" }}
           onChange={() => changeChecks("View")}
         />
         <FormControlLabel
@@ -188,7 +188,7 @@ function CheckBoxes(props) {
               ? true
               : false
           }
-          style={{ marginLeft: "2px" }}
+          style={{ marginLeft: "8px" }}
           onChange={() => changeChecks("Modify")}
           control={<Checkbox id="modifyRight_exception" name="checkedF" />}
           label={t("modify")}

@@ -1,4 +1,6 @@
-import React from "react";
+// #BugID - 112343	
+// #BugDescription - preview button of Template the screen redirection of blank screen fixed
+import React, { useState } from "react";
 import { Card, CardContent } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 import { LightTooltip } from "../StyledTooltip";
@@ -19,6 +21,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 
 function SingleTemplateCard(props) {
   let { t } = useTranslation();
+  const [showMoreDesc, setShowMoreDesc] = useState(false);
   const { item } = props;
   const direction = `${t("HTML_DIR")}`;
 
@@ -128,12 +131,13 @@ function SingleTemplateCard(props) {
                 <div>{item.Description}</div>
               ) : (
                 <div>
-                  {item.Description &&
-                    item.Description.split(" ")
-                      .splice(0, WORD_LIMIT_DESC)
-                      .join(" ")}
+                  {item.Description && showMoreDesc
+                    ? item.Description
+                    : item.Description.split(" ")
+                        .splice(0, WORD_LIMIT_DESC)
+                        .join(" ")}
 
-                  <TemplateTooltip
+                  {/* <TemplateTooltip
                     arrow={true}
                     enterDelay={100}
                     placement={
@@ -142,15 +146,16 @@ function SingleTemplateCard(props) {
                         : "bottom-start"
                     }
                     title={item.Description}
+                  >*/}
+                  <span
+                    style={{
+                      color: "blue",
+                    }}
+                    onClick={() => setShowMoreDesc(!showMoreDesc)}
                   >
-                    <span
-                      style={{
-                        color: "blue",
-                      }}
-                    >
-                      &nbsp;{t("showMore")}
-                    </span>
-                  </TemplateTooltip>
+                    &nbsp;{showMoreDesc ? t("showLess") : t("showMore")}
+                  </span>
+                  {/*</TemplateTooltip>*/}
                 </div>
               )
             ) : null}

@@ -4,7 +4,7 @@ import {
   STATE_CREATED,
   userRightsMenuNames,
 } from "../../Constants/appConstants";
-import { Tab, Tabs, Icon } from "@material-ui/core";
+import { Tab, Tabs, Icon, CircularProgress } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 import { TabPanel } from "../ProcessSettings";
 import styles from "./index.module.css";
@@ -186,38 +186,44 @@ function DataModel(props) {
   };
 
   return (
-    <div className={styles.mainDiv}>
-      <div
-        className={
-          direction === RTL_DIRECTION
-            ? `${arabicStyles.dataModelNavBar} tabStyle`
-            : `${styles.dataModelNavBar} tabStyle`
-        }
-      >
-        <Tabs
-          orientation="vertical"
-          variant="scrollable"
-          style={{ height: "100vh" }}
-          value={value}
-          onChange={handleChange}
-        >
-          {dataModelTabs?.map((element, index) => (
-            <Tab
-              icon={value === index ? element.selectedIcon : element.icon}
-              className={styles.dataModelTab}
-              label={element.label}
-            />
-          ))}
-        </Tabs>
-      </div>
-      <div style={{ width: "82.5vw" }}>
-        {dataModelTabs?.map((element, index) => (
-          <TabPanel style={element?.style} value={value} index={index}>
-            {element.component}
-          </TabPanel>
-        ))}
-      </div>
-    </div>
+    <>
+      {localLoadedProcessData === null ? (
+        <CircularProgress style={{ marginTop: "40vh", marginLeft: "50%" }} />
+      ) : (
+        <div className={styles.mainDiv}>
+          <div
+            className={
+              direction === RTL_DIRECTION
+                ? `${arabicStyles.dataModelNavBar} tabStyle`
+                : `${styles.dataModelNavBar} tabStyle`
+            }
+          >
+            <Tabs
+              orientation="vertical"
+              variant="scrollable"
+              style={{ height: "100vh" }}
+              value={value}
+              onChange={handleChange}
+            >
+              {dataModelTabs?.map((element, index) => (
+                <Tab
+                  icon={value === index ? element.selectedIcon : element.icon}
+                  className={styles.dataModelTab}
+                  label={element.label}
+                />
+              ))}
+            </Tabs>
+          </div>
+          <div style={{ width: "82.5vw" }}>
+            {dataModelTabs?.map((element, index) => (
+              <TabPanel style={element?.style} value={value} index={index}>
+                {element.component}
+              </TabPanel>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

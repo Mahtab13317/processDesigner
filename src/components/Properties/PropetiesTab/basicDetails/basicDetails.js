@@ -1,3 +1,4 @@
+// Changes made to solve Bug with Id 113573 => Basicdetails=>associatedqueue and use swimlane queue not working in expanded mode
 import React, { useState, useEffect } from "react";
 import Checkbox from "@material-ui/core/Checkbox";
 import "../../Properties.css";
@@ -11,14 +12,13 @@ import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import AddIcon from "@material-ui/icons/Add";
-import RefreshSharpIcon from "@material-ui/icons/RefreshSharp";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { store, useGlobalState } from "state-pool";
 import * as actionCreators from "../../../../redux-store/actions/selectedCellActions";
 import CreateIcon from "@material-ui/icons/Create";
+import FormsAndValidations from "./FormsAndValidations";
 import {
   activityType,
-  PROCESSTYPE_LOCAL,
   SERVER_URL,
   ENDPOINT_ADD_CONNECTION,
   ENDPOINT_DELETE_CONNECTION,
@@ -28,17 +28,16 @@ import {
   RESCONSUMERJMS,
   RESCONSUMERSOAP,
   REQUESTCONSUMERSOAP,
-  RTL_DIRECTION,
   propertiesLabel,
 } from "../../../../Constants/appConstants.js";
 import PeopleAndSystems from "./PeopleAndSystems";
+import EditOutlinedIcon from "@material-ui/icons/Edit";
 import {
   arrMobileEnabledAbsent,
   arrEntrySettingsPresent,
   arrFormValidationAbsent,
 } from "../../PropertyTabConstants";
 import SetIconWithActivityType from "./SetIconWithActivityType.js";
-import FormsAndValidations from "./FormsAndValidations.js";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import axios from "axios";
 import { ChangeActivityType } from "../../../../utility/CommonAPICall/ChangeActivityType";
@@ -62,6 +61,7 @@ import {
   setWebservice,
   webserviceChangeVal,
 } from "../../../../redux-store/slices/webserviceChangeSlice";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function BasicDetails(props) {
   let { t } = useTranslation();
@@ -71,34 +71,35 @@ function BasicDetails(props) {
   const [addDescriptionBoolean, setAddDescriptionBoolean] = useState(false);
   const [configPeopleAndSystem, setConfigPeopleAndSystem] = useState(false);
   const localActivityPropertyData = store.getState("activityPropertyData");
+  const calendarList = store.getState("calendarList");
   const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData, setLocalLoadedProcessData] =
     useGlobalState(loadedProcessData);
+
+  const [localCalendarList, setlocalCalendarList] =
+    useGlobalState(calendarList);
   const [
     localLoadedActivityPropertyData,
     setlocalLoadedActivityPropertyData,
     updatelocalLoadedActivityPropertyData,
   ] = useGlobalState(localActivityPropertyData);
   const [selectedWebService, setSelectedWebService] = useState(null);
-  const [openCalenderMfBool, setopenCalenderMfBool] = useState(false);
   const [targetId, setTargetId] = useState("None");
-  const [basicDetails, setbasicDetails] = useState();
+  const [basicDetails, setbasicDetails] = useState({});
   const [spinner, setspinner] = useState(true);
   const [allActivitiesTargetDropdown, setAllActivitiesTargetDropdown] =
     useState([]);
   const [selectedActivityType, setSelectedActivityType] = useState(null);
-  const [isDisableTab, setisDisableTab] = useState(false);
-  const [selectedRegisteredProcess, setSelectedRegisteredProcess] = useState();
+  const [selectedRegisteredProcess, setSelectedRegisteredProcess] =
+    useState(null);
   const [deployedProcesses, setDeployedProcesses] = useState([]);
   const [showCostError, setShowCostError] = useState(false);
   const [costInput, setCostInput] = useState();
   const [queueType, setQueueType] = useState(0);
-  const [disableSwim, setDisableSwim] = useState(false);
   const [isUsingSwimlaneQueue, setIsUsingSwimlaneQueue] = useState(false);
   const [isUsingSelfQueue, setIsUsingSelfQueue] = useState(false);
   const [showQueueModal, setShowQueueModal] = useState(false);
-  const [startActivities, setStartActivities] = useState(null);
   // code added on 6 July 2022 for BugId 111910
   const openProcessData = useSelector(OpenProcessSliceValue);
   // code added on 6 July 2022 for BugId 110924
@@ -106,6 +107,7 @@ function BasicDetails(props) {
   const [defaultCheckDisabled, setDefaultCheckDisabled] = useState(false);
   const [localState, setLocalState] = useState(null);
   const webserviceVal = useSelector(webserviceChangeVal);
+  const [showCalenderMFBool, setshowCalenderMFBool] = useState(false);
   const webServiceDropdownOptions = [
     {
       value: WEBSERVICESOAP,
@@ -138,7 +140,8 @@ function BasicDetails(props) {
       name: t("requestConsumerSoap"),
     },
   ];
-
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
+  console.log("444", "read status", isReadOnly);
   useEffect(() => {
     let flag = false;
     localLoadedProcessData?.Lanes?.map((el) => {
@@ -157,13 +160,24 @@ function BasicDetails(props) {
   }, []);
 
   useEffect(() => {
-    if (props.cellID) {
+    if (
+      (props.cellActivityType === 18 && props.cellActivitySubType === 1) ||
+      (props.cellActivityType === 2 && props.cellActivitySubType === 2)
+    ) {
       axios.get(SERVER_URL + `/getprocesslist/R/-1`).then((res) => {
         if (res.data.Status === 0) {
           setDeployedProcesses(res.data.Processes);
         }
       });
     }
+    let activityProps = getActivityProps(
+      props.cellActivityType,
+      props.cellActivitySubType
+    );
+    setSelectedActivityType(activityProps[5]);
+  }, []);
+
+  useEffect(() => {
     if (props.cellActivityType === 18 && props.cellActivitySubType === 1) {
       setSelectedRegisteredProcess(
         localLoadedActivityPropertyData?.ActivityProperty?.SubProcess
@@ -178,31 +192,17 @@ function BasicDetails(props) {
           ?.processName
       );
     }
-    let activityProps = getActivityProps(
-      props.cellActivityType,
-      props.cellActivitySubType
-    );
-    setSelectedActivityType(activityProps[5]);
-  }, []);
+  }, [deployedProcesses, localLoadedActivityPropertyData]);
 
   useEffect(() => {
-    let startActivities = [];
     let temp = JSON.parse(JSON.stringify(openProcessData.loadedData));
     setLocalState(temp);
     getAllActivities();
-    temp?.MileStones?.map((mile) => {
-      mile.Activities.map((activity) => {
-        if (+activity.ActivityType === 1 && +activity.ActivitySubType === 1) {
-          startActivities.push(activity);
-        }
-      });
-    });
-    setStartActivities(startActivities);
   }, [openProcessData.loadedData]);
 
   useEffect(() => {
     if (localLoadedActivityPropertyData?.Status === 0) {
-      setbasicDetails(localLoadedActivityPropertyData?.ActivityProperty);
+      setbasicDetails({ ...localLoadedActivityPropertyData?.ActivityProperty });
       if (
         (+localLoadedActivityPropertyData?.ActivityProperty?.actType === 40 &&
           +localLoadedActivityPropertyData?.ActivityProperty?.actSubType ===
@@ -239,14 +239,19 @@ function BasicDetails(props) {
       setDefaultCheckDisabled(
         localLoadedActivityPropertyData?.ActivityProperty?.oldPrimaryAct === "Y"
       );
+      let valid = validateActivity();
+      if (!valid) {
+        dispatch(
+          setActivityPropertyChange({
+            [propertiesLabel.basicDetails]: {
+              isModified: false,
+              hasError: true,
+            },
+          })
+        );
+      }
     }
   }, [localLoadedActivityPropertyData]);
-
-  useEffect(() => {
-    if (localState?.ProcessType == "R" || localState?.ProcessType == "D") {
-      setisDisableTab(true);
-    }
-  }, [localState?.ProcessType]);
 
   useEffect(() => {
     if (saveCancelStatus.CancelClicked) {
@@ -269,7 +274,8 @@ function BasicDetails(props) {
           1,
           null,
           null,
-          getSelectedCellType("ACTIVITY")
+          getSelectedCellType("ACTIVITY"),
+          props.cellCheckedOut
         );
       }
     }
@@ -313,6 +319,20 @@ function BasicDetails(props) {
     }
     dispatch(setSave({ SaveClicked: false, CancelClicked: false }));
   }, [saveCancelStatus.CancelClicked, saveCancelStatus.SaveClicked]);
+
+  const validateActivity = () => {
+    if (+props.cellActivityType === 18 && +props.cellActivitySubType === 1) {
+      if (
+        localLoadedActivityPropertyData?.ActivityProperty?.SubProcess?.importedProcessDefId?.trim() ===
+          "" ||
+        !localLoadedActivityPropertyData?.ActivityProperty?.SubProcess
+          ?.importedProcessDefId
+      ) {
+        return false;
+      }
+    }
+    return true;
+  };
 
   const getAllActivities = () => {
     let actList = [];
@@ -369,7 +389,8 @@ function BasicDetails(props) {
       actSubType,
       null,
       null,
-      getSelectedCellType("ACTIVITY")
+      getSelectedCellType("ACTIVITY"),
+      props.cellCheckedOut
     );
     let temp = { ...localLoadedActivityPropertyData };
     temp.ActivityProperty.actType = actType;
@@ -393,10 +414,10 @@ function BasicDetails(props) {
 
   const useStyles = makeStyles({
     input: {
-      height: "2.0625rem",
+      height: "var(--line_height)",
     },
     inputWithError: {
-      height: "2.5rem",
+      height: "var(--line_height)",
       width: "5.875rem",
     },
     errorStatement: {
@@ -404,10 +425,10 @@ function BasicDetails(props) {
       fontSize: "11px",
     },
     mainDiv: {
-      overflowY: "scroll",
+      overflowY: "auto",
       display: "flex",
       flexDirection: "column",
-      height: "71vh",
+      height: "61vh",
       fontFamily: "Open Sans",
       width: "100%",
       paddingTop: props.isDrawerExpanded ? "0" : "0.4rem",
@@ -573,35 +594,50 @@ function BasicDetails(props) {
   };
 
   const HandleRegisteredProcessChange = (e) => {
-    // if (confirm("All mapping data will be lost") == true) {
     setSelectedRegisteredProcess(e.target.value);
-    let tempLocalState = { ...localLoadedActivityPropertyData };
+    let tempLocalState = JSON.parse(
+      JSON.stringify(localLoadedActivityPropertyData)
+    );
     if (props.cellActivityType === 2 && props.cellActivitySubType === 2) {
       tempLocalState.ActivityProperty.pMMessageEnd.mapFwdVarMapping = {};
       tempLocalState.ActivityProperty.pMMessageEnd.processName = e.target.value;
     } else {
-      tempLocalState.ActivityProperty.SubProcess.importedProcessName =
-        e.target.value;
+      tempLocalState.ActivityProperty.SubProcess = {
+        importedProcessName: e.target.value,
+      };
     }
-    deployedProcesses &&
-      deployedProcesses.map((process) => {
-        if (process.ProcessName == e.target.value) {
-          {
-            props.cellActivityType === 2 && props.cellActivitySubType === 2
-              ? (tempLocalState.ActivityProperty.pMMessageEnd.processId =
-                  process.ProcessDefId)
-              : (tempLocalState.ActivityProperty.SubProcess.importedProcessDefId =
-                  process.ProcessDefId);
-          }
+    deployedProcesses?.map((process) => {
+      if (process.ProcessName == e.target.value) {
+        {
+          props.cellActivityType === 2 && props.cellActivitySubType === 2
+            ? (tempLocalState.ActivityProperty.pMMessageEnd.processId =
+                process.ProcessDefId)
+            : tempLocalState?.ActivityProperty?.SubProcess
+            ? (tempLocalState.ActivityProperty.SubProcess.importedProcessDefId =
+                process.ProcessDefId)
+            : (tempLocalState.ActivityProperty.SubProcess = {
+                ...tempLocalState.ActivityProperty.SubProcess,
+                importedProcessDefId: process.ProcessDefId,
+              });
         }
-      });
+      }
+    });
     setlocalLoadedActivityPropertyData(tempLocalState);
-    // }
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.basicDetails]: { isModified: true, hasError: false },
+        [propertiesLabel.fwdVarMapping]: { isModified: true, hasError: true },
+        [propertiesLabel.revVarMapping]: { isModified: true, hasError: true },
+      })
+    );
   };
 
   const editQueueHandler = () => {
-    setShowQueueModal(true);
-    queueType == 0 ? setQueueType(1) : setQueueType(0);
+    if (isReadOnly) {
+    } else {
+      setShowQueueModal(true);
+      queueType == 0 ? setQueueType(1) : setQueueType(0);
+    }
   };
 
   const changeBasicDetails = (e, customName) => {
@@ -704,12 +740,14 @@ function BasicDetails(props) {
             <CreateIcon
               style={{ height: "15px", width: "15px" }}
               onClick={editQueueHandler}
+              disabled={isReadOnly}
             />
           </p>
         </div>
       );
     } else if (
-      checkQueueType(props.cellActivityType, props.cellActivitySubType) == 0
+      checkQueueType(props.cellActivityType, props.cellActivitySubType) == 0 ||
+      (isUsingSwimlaneQueue && props.openProcessType == "R")
     ) {
       return null;
     } else if (
@@ -789,41 +827,161 @@ function BasicDetails(props) {
     });
     return count;
   };
-
-  const openCalenderMf = () => {
-    let props = {
-      Component: "ProcessCalendar", // change here
-      Callback: (data) => console.log(data),
-      source: "CAL_PRO",
-      popupIndex: "2",
-      ProcessDefinitionId: localLoadedProcessData.ProcessDefId + "",
-
-      AssociationFlag: "N",
-      CalendarType: "G",
-      RegisteredProcess:
-        localLoadedProcessData?.ProcessType === "R" ? "Y" : "N",
-
-      ContainerId: "calenderDiv",
-      Module: "MDM",
-      InFrame: false,
-      Renderer: "renderProcessCalendar",
-    };
-
-    console.log("calenderprops", props);
-    window.loadCalender(props);
-  };
-
   const handleQueueSwitching = () => {
     // queueType == 0?setQueueType(1):setQueueType(0);
     setShowQueueModal(true);
   };
 
+  const addNewCalendar = (data) => {
+    let temp = global.structuredClone(localCalendarList);
+    temp.push({
+      CalendarName: data.calName,
+      CalendarId: data.calId,
+      DefinedWithProcessDefId:
+        data.calType === "L" ? localLoadedProcessData.ProcessDefId : "0",
+    });
+    setlocalCalendarList(temp);
+  };
+
+  const openCalenderMf = () => {
+    let microProps = {
+      Component: "ProcessCalendar", // change here
+      Callback: (data) => addNewCalendar(data),
+      source: "CAL_PRO",
+      popupIndex: "1",
+      ProcessDefinitionId: localLoadedProcessData.ProcessDefId + "",
+      calId: -1,
+      AssociationFlag: "N",
+      CalendarType: "G",
+      RegisteredProcess:
+        localLoadedProcessData?.ProcessType === "R" ? "Y" : "N",
+      ActivityId: +props.cellID,
+      ContainerId: "calenderDiv",
+      Module: "WCL",
+      InFrame: false,
+      Renderer: "renderProcessCalendar",
+      closeDialog: () => {
+        setshowCalenderMFBool(false);
+        var elem = document.getElementById("oapweb_assetManifest");
+
+        elem.parentNode.removeChild(elem);
+      },
+    };
+    window.MdmDataModel(microProps);
+    if (isReadOnly) {
+    } else {
+      setshowCalenderMFBool(true);
+    }
+  };
+
+  const handleCalendarChange = (e) => {
+    let calName = "";
+    let temp = global.structuredClone(localLoadedActivityPropertyData);
+    temp.ActivityProperty.actGenPropInfo.calendarType =
+      e.target.value.substring(0, 1);
+    temp.ActivityProperty.actGenPropInfo.calendarId =
+      e.target.value.substring(1);
+
+    localCalendarList
+      .filter((cal) => {
+        if (e.target.value.substring(0, 1) === "G")
+          return cal.DefinedWithProcessDefId === "0";
+        else return cal.DefinedWithProcessDefId !== "0";
+      })
+      .forEach((cal) => {
+        if (cal.CalendarId === e.target.value.substring(1)) {
+          calName = cal.CalendarName;
+        }
+      });
+    temp.ActivityProperty.actGenPropInfo.calenderName = calName;
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.basicDetails]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
+  };
+
+  const handleCalendarEdit = () => {
+    let microProps = {
+      Component: "ProcessCalendar", // change here
+      Callback: (id, name) => console.log(id, name),
+      source: "CAL_PRO",
+      popupIndex: "2",
+      ProcessDefinitionId:
+        localLoadedActivityPropertyData.ActivityProperty.actGenPropInfo
+          .calendarType === "L"
+          ? localLoadedProcessData.ProcessDefId + ""
+          : "0",
+      calId:
+        +localLoadedActivityPropertyData.ActivityProperty.actGenPropInfo
+          .calendarId,
+      AssociationFlag: "N",
+      CalendarType:
+        localLoadedActivityPropertyData.ActivityProperty.actGenPropInfo
+          .calendarType,
+      RegisteredProcess:
+        localLoadedProcessData?.ProcessType === "R" ? "Y" : "N",
+      ActivityId: +props.cellID,
+      ContainerId: "calenderDiv",
+      Module: "WCL",
+      InFrame: false,
+      Renderer: "renderProcessCalendar",
+      closeDialog: () => {
+        setshowCalenderMFBool(false);
+        var elem = document.getElementById("oapweb_assetManifest");
+
+        elem.parentNode.removeChild(elem);
+      },
+    };
+
+    console.log("calenderprops", microProps);
+    window.MdmDataModel(microProps);
+    setshowCalenderMFBool(true);
+  };
+
+  const setGenerateSummaryFunc = (e) => {
+    let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
+    temp.ActivityProperty.isGenerateSummaryDoc = e.target.checked;
+    if (!e.target.checked) {
+      temp.ActivityProperty.m_strCaseSummaryDocName = "";
+      temp.ActivityProperty.sDocTypeId = "-1";
+    } else if (e.target.checked) {
+      let docId = 0;
+      let tempLocal = JSON.parse(JSON.stringify(localState));
+      tempLocal?.DocumentTypeList?.forEach((doc) => {
+        if (+doc.DocTypeId > +docId) {
+          docId = doc.DocTypeId;
+        }
+      });
+      temp.ActivityProperty.m_strCaseSummaryDocName = `CaseSummary - ${props.cellName}`;
+      temp.ActivityProperty.sDocTypeId = `${+docId + 1}`;
+    }
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.basicDetails]: { isModified: true, hasError: false },
+      })
+    );
+  };
+
+  const setCaseNameFunc = (e) => {
+    let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
+    temp.ActivityProperty.m_strCaseSummaryDocName = e.target.value;
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.basicDetails]: { isModified: true, hasError: false },
+      })
+    );
+  };
+
   return (
     <div className="flexScreen basicDetails-mainDiv">
-      {
-        //added by mahtab
-        <div className="headingSectionTab">{<h4>{props?.heading}</h4>}</div>
-      }
+      <div className="headingSectionTab">{<h4>{props?.heading}</h4>}</div>
       {spinner ? (
         <CircularProgress style={{ marginTop: "30vh", marginLeft: "40%" }} />
       ) : (
@@ -834,7 +992,6 @@ function BasicDetails(props) {
             fontSize: "var(--subtitle_text_font_size)",
           }}
         >
-          <div style={{ display: "hidden" }} id="calenderDiv"></div>
           <div
             style={{
               marginLeft: "0.8rem",
@@ -863,26 +1020,34 @@ function BasicDetails(props) {
                   style={{ color: "rgba(0, 0, 0, 0.54)" }}
                   checked={hasDefaultCheck} // code added on 6 July 2022 for BugId 110924
                   onChange={(e) => setDefaultCheckFunc(e)} // code added on 6 July 2022 for BugId 110924
-                  disabled={defaultCheckDisabled} // code added on 6 July 2022 for BugId 110924
+                  disabled={defaultCheckDisabled || isReadOnly} // code added on 6 July 2022 for BugId 110924
                 ></Checkbox>
-                <p style={{ fontWeight: "600" }}>{t("setAsDefaultStart")}</p>
+                <p
+                  style={{
+                    fontSize: "var(--base_text_font_size)",
+                    fontWeight: "600",
+                  }}
+                >
+                  {t("setAsDefaultStart")}
+                </p>
               </div>
             ) : null}
 
-            {!addDescriptionBoolean ? (
+            {!addDescriptionBoolean && !isReadOnly && (
               <p
                 id="add_description"
                 style={{
                   color: "var(--button_color)",
                   cursor: "pointer",
                   fontSize: "var(--base_text_font_size)",
+                  fontWeight: "600",
                 }}
                 onClick={() => setAddDescriptionBoolean(true)}
               >
                 {t("add")} {t("Discription")}
               </p>
-            ) : null}
-            {addDescriptionBoolean ? (
+            )}
+            {addDescriptionBoolean && (
               <div style={{ marginBlock: "1.7rem" }}>
                 <p
                   style={{
@@ -901,10 +1066,11 @@ function BasicDetails(props) {
                     localLoadedActivityPropertyData?.ActivityProperty
                       .actGenPropInfo.genPropInfo.description
                   }
+                  disabled={isReadOnly}
                   getValue={(e) => changeBasicDetails(e, "descBasicDetails")}
                 />
               </div>
-            ) : null}
+            )}
             {(+props.cellActivityType === 40 &&
               +props.cellActivitySubType === 1) ||
             (+props.cellActivityType === 23 &&
@@ -921,23 +1087,20 @@ function BasicDetails(props) {
                   width: props.isDrawerExpanded ? "80%" : "100%",
                 }}
               >
-                <div className="basicDetails-webService">
-                  <p
-                    style={{
-                      color: "#727272",
-                      fontWeight: "bolder",
-                    }}
-                  >
-                    {t("webServiceType")}
-                  </p>
-                </div>
+                <p
+                  style={{
+                    color: "#727272",
+                    fontSize: "var(--base_text_font_size)",
+                  }}
+                >
+                  {t("webServiceType")}
+                </p>
                 <div
                   style={{
                     display: "flex",
                     flexDirection: "row",
                     color: "#727272",
-
-                    marginTop: "0.5rem",
+                    marginTop: "0.25rem",
                     width: "95%",
                   }}
                 >
@@ -948,10 +1111,11 @@ function BasicDetails(props) {
                     IconComponent={ExpandMoreIcon}
                     style={{
                       width: "95%",
-                      height: "3rem",
+                      height: "var(--line_height)",
                     }}
                     variant="outlined"
                     defaultValue="WSRC"
+                    disabled={isReadOnly}
                   >
                     {webServiceDropdownOptions.map((item) => {
                       return (
@@ -962,8 +1126,9 @@ function BasicDetails(props) {
                         >
                           <p
                             style={{
-                              marginInline: "0.8rem",
-                              font: "0.8rem Open Sans",
+                              marginInline: "0.5rem",
+                              fontSize: "var(--base_text_font_size)",
+                              fontFamily: "var(--font_family)",
                             }}
                           >
                             {item.name}
@@ -975,6 +1140,7 @@ function BasicDetails(props) {
                 </div>
               </div>
             ) : null}
+
             {!arrMobileEnabledAbsent().includes(selectedActivityType) ? (
               <div
                 style={{
@@ -985,10 +1151,10 @@ function BasicDetails(props) {
               >
                 <Checkbox
                   id="mobile_enabled"
-                  disabled={isDisableTab}
+                  disabled={isReadOnly}
                   checked={
                     localLoadedActivityPropertyData?.ActivityProperty
-                      .isMobileEnabled
+                      ?.isMobileEnabled
                   }
                   size="medium"
                   name="mobileEnabled"
@@ -997,7 +1163,7 @@ function BasicDetails(props) {
                 <p
                   style={{
                     paddingTop: "0.6rem",
-
+                    fontSize: "var(--base_text_font_size)",
                     fontWeight: "600",
                   }}
                 >
@@ -1005,22 +1171,36 @@ function BasicDetails(props) {
                 </p>
                 <InfoOutlinedIcon
                   style={{
-                    marginTop: "0.7rem",
-                    padding: "0.1rem",
+                    margin: "0.5rem 0.5vw",
+                    width: "1.25rem",
+                    height: "1.25rem",
                     opacity: "0.7",
                   }}
                 />
               </div>
             ) : null}
-            <div>
+
+            <div style={{ margin: "0.5rem 0 1rem" }}>
+              <p
+                style={{
+                  fontWeight: "600",
+                  fontSize: "var(--base_text_font_size)",
+                  cursor: "pointer",
+                  margin: "0.25rem 0 0",
+                }}
+              >
+                {isUsingSwimlaneQueue && props.openProcessType == "R"
+                  ? null
+                  : t("associatedQueue")}
+              </p>
               {queueContent()}
               {showQueueModal ? (
                 <Modal
                   show={showQueueModal}
                   backDropStyle={{ backgroundColor: "transparent" }}
                   style={{
-                    top: "10%",
-                    left: direction == RTL_DIRECTION ? "10%" : "-200%",
+                    top: props.isDrawerExpanded ? "6%" : "10%",
+                    left: props.isDrawerExpanded ? "25%" : "-200%",
                     position: "absolute",
                     width: "702px",
                     height: "475px",
@@ -1043,79 +1223,122 @@ function BasicDetails(props) {
                   }
                 ></Modal>
               ) : null}
-              <div>
-                <p
+              {showCalenderMFBool ? (
+                <Modal
+                  show={showCalenderMFBool}
+                  backDropStyle={{ backgroundColor: "transparent" }}
                   style={{
-                    fontWeight: "700",
-                    fontSize: "12px",
-                    cursor: "pointer",
+                    width: "auto",
+                    // height: "60vh",
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%,-50%)",
+                    background: "white",
                   }}
-                >
-                  {t("associatedQueue")}
-                </p>
-                <p
-                  style={{
-                    fontWeight: "700",
-                    color: "var(--brand_color1)",
-                    fontSize: "12px",
-                    cursor: "pointer",
-                    marginRight: "0.625rem",
-                  }}
-                  onClick={handleQueueSwitching}
-                >
-                  {queueType == 0
-                    ? t("useSwimlaneQueue")
-                    : t("useWorkstepQueue")}
-                </p>
-              </div>
-            </div>
+                  modalClosed={() => {
+                    setshowCalenderMFBool(false);
+                    var elem = document.getElementById("oapweb_assetManifest");
 
-            <div style={{ marginBlock: "0.5rem" }}>
-              <p
-                style={{ color: "#727272", fontSize: "0.875rem" }}
-                id="targetWorkStep_basicDetails"
-              >
-                {t("targetWorkstep")}
-              </p>
-              <div style={{ width: props.isDrawerExpanded ? "60%" : "100%" }}>
-                <SetIconWithActivityType
-                  id="target_workstep"
-                  disabled={isDisableTab}
-                  selectedActivity={targetId}
-                  activityList={allActivitiesTargetDropdown}
-                  getSelectedActivity={(val) => getSelectedActivity(val)}
-                />
+                    elem?.parentNode.removeChild(elem);
+                  }}
+                >
+                  <div
+                    id="calenderDiv"
+                    style={{ width: "100%", height: "100%" }}
+                  ></div>
+                </Modal>
+              ) : null}
+              <div>
+                {!isReadOnly && (
+                  <p
+                    style={{
+                      fontWeight: "600",
+                      color: "var(--button_color)",
+                      fontSize: "var(--base_text_font_size)",
+                      cursor: "pointer",
+                      margin: "0.5rem 0",
+                    }}
+                    onClick={handleQueueSwitching}
+                  >
+                    {queueType == 0
+                      ? t("useSwimlaneQueue")
+                      : t("useWorkstepQueue")}
+                  </p>
+                )}
               </div>
             </div>
+            {/*code edited on 7 Sep 2022 for BugId 115321*/}
+            {selectedActivityType !== activityType.query &&
+              selectedActivityType !== activityType.endEvent &&
+              selectedActivityType !== activityType.terminate &&
+              selectedActivityType !== activityType.messageEnd && (
+                <div style={{ marginBlock: "0.5rem" }}>
+                  <p
+                    style={{
+                      fontSize: "var(--base_text_font_size)",
+                      margin: "0 0 0.25rem",
+                    }}
+                    id="targetWorkStep_basicDetails"
+                  >
+                    {t("targetWorkstep")}
+                  </p>
+                  <div
+                    style={{ width: props.isDrawerExpanded ? "60%" : "100%" }}
+                  >
+                    <SetIconWithActivityType
+                      id="target_workstep"
+                      disabled={isReadOnly}
+                      selectedActivity={targetId}
+                      activityList={allActivitiesTargetDropdown}
+                      getSelectedActivity={(val) => getSelectedActivity(val)}
+                    />
+                  </div>
+                </div>
+              )}
+
             {selectedActivityType !== activityType.subProcess ? (
               <div>
                 <div
                   style={{
                     display: "flex",
                     flexDirection: "row",
-                    color: "#727272",
-
-                    // marginBlock: "1rem",
+                    gap: "0.125vw",
+                    marginTop: "0.5rem",
+                    marginBottom: "0.25rem",
                   }}
                 >
-                  <p id="cost_basicDetails">{t("cost")}</p>
+                  <span
+                    id="cost_basicDetails"
+                    style={{
+                      fontFamily: "var(--font_family)",
+                      fontSize: "var(--base_text_font_size)",
+                    }}
+                  >
+                    {t("cost")}
+                  </span>
                   <span
                     style={{
                       color: "red",
-                      padding: "0.35rem",
-                      marginLeft: "-0.375rem",
-                      marginTop: "-0.5rem",
+                      fontSize: "1rem",
                     }}
                   >
                     *
                   </span>
-
-                  <p>({t("in $")})</p>
+                  <span
+                    style={{
+                      fontFamily: "var(--font_family)",
+                      fontSize: "var(--base_text_font_size)",
+                    }}
+                  >
+                    {" "}
+                    ({t("in $")})
+                  </span>
                 </div>
                 <TextInput
                   type="number"
                   classTag={classes.inputWithError}
-                  readOnlyCondition={isDisableTab}
+                  readOnlyCondition={isReadOnly}
                   inputValue={
                     localLoadedActivityPropertyData?.ActivityProperty
                       ?.actGenPropInfo?.genPropInfo?.cost
@@ -1127,7 +1350,7 @@ function BasicDetails(props) {
                     costInput ? setShowCostError(false) : setShowCostError(true)
                   }
                   onChangeEvent={(e) => changeBasicDetails(e)}
-                  errorStatement="This is inValid!!"
+                  errorStatement="This is invalid!!"
                   errorStatementClass={classes.errorStatement}
                 />
               </div>
@@ -1138,14 +1361,24 @@ function BasicDetails(props) {
               props.cellActivitySubType === 1) ||
             (props.cellActivityType === 2 &&
               props.cellActivitySubType === 2) ? (
-              <div
-                className={
-                  props.isDrawerExpanded
-                    ? "dropDownSelectLabel_expanded"
-                    : "dropDownSelectLabel"
-                }
-              >
-                <p id="archieve_dataClass">{t("registeredProcessName")}</p>
+              <div style={{ marginBlock: "1rem" }}>
+                <p
+                  style={{
+                    fontFamily: "var(--font_family)",
+                    fontSize: "var(--base_text_font_size)",
+                    marginBottom: "0.25rem",
+                  }}
+                >
+                  {t("registeredProcessName")}
+                  <span
+                    style={{
+                      color: "red",
+                      fontSize: "1rem",
+                    }}
+                  >
+                    *
+                  </span>
+                </p>
                 <div style={{ display: "flex", alignItems: "center" }}>
                   <Select
                     className={
@@ -1164,32 +1397,35 @@ function BasicDetails(props) {
                       },
                       getContentAnchorEl: null,
                     }}
+                    IconComponent={ExpandMoreIcon}
                     value={selectedRegisteredProcess}
                     onChange={(e) => HandleRegisteredProcessChange(e)}
+                    disabled={isReadOnly}
                   >
-                    {deployedProcesses &&
-                      deployedProcesses.map((process) => {
-                        return (
-                          <MenuItem
-                            value={process.ProcessName}
-                            className="statusSelect"
-                          >
-                            {process.ProcessName}
-                          </MenuItem>
-                        );
-                      })}
+                    {deployedProcesses?.map((process) => {
+                      return (
+                        <MenuItem
+                          value={process.ProcessName}
+                          style={{
+                            fontFamily: "var(--font_family)",
+                            fontSize: "var(--base_text_font_size)",
+                          }}
+                        >
+                          {process.ProcessName}
+                        </MenuItem>
+                      );
+                    })}
                   </Select>
                 </div>
               </div>
             ) : null}
 
             {selectedActivityType === activityType.caseWorkdesk ? (
-              <div style={{ marginBlock: "0.5rem" }}>
+              <div style={{ marginBlock: "1rem" }}>
                 <p
                   style={{
-                    color: "#727272",
-
-                    fontWeight: "bolder",
+                    fontSize: "var(--base_text_font_size)",
+                    fontWeight: "700",
                   }}
                 >
                   {t("caseSummaryDetails")}
@@ -1197,20 +1433,23 @@ function BasicDetails(props) {
                 <div
                   style={{
                     display: "flex",
-                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: "-0.6875rem",
-                    marginTop: "-0.1rem",
                   }}
                 >
                   <Checkbox
+                    size="medium"
                     id="generateSummaryDoc"
-                    disabled={isDisableTab}
-                    checked={basicDetails.GenerateSummaryDoc}
-                    size="small"
-                  />
+                    style={{ color: "rgba(0, 0, 0, 0.54)" }}
+                    checked={basicDetails.isGenerateSummaryDoc}
+                    onChange={(e) => {
+                      setGenerateSummaryFunc(e);
+                    }}
+                    disabled={isReadOnly}
+                  ></Checkbox>
                   <p
                     style={{
-                      paddingTop: "0.6rem",
+                      fontSize: "var(--base_text_font_size)",
                       fontWeight: "600",
                     }}
                   >
@@ -1219,8 +1458,8 @@ function BasicDetails(props) {
                 </div>
                 <p
                   style={{
-                    paddingTop: "0rem",
-                    fontWeight: "600",
+                    fontSize: "var(--base_text_font_size)",
+                    marginBottom: "0.25rem",
                   }}
                 >
                   {t("mappedDocumentType")}
@@ -1229,14 +1468,18 @@ function BasicDetails(props) {
                   id="mapped_documentType"
                   InputProps={{
                     className: classes.input,
-                    readOnly: isDisableTab,
+                    readOnly: isReadOnly,
                   }}
+                  value={basicDetails.m_strCaseSummaryDocName}
+                  onChange={(e) => setCaseNameFunc(e)}
                   style={{ width: "95%" }}
                   variant="outlined"
                   size="small"
+                  disabled={!basicDetails.isGenerateSummaryDoc}
                 />
               </div>
             ) : null}
+
             <div style={{ marginBlock: "1rem" }}>
               {arrEntrySettingsPresent().includes(selectedActivityType) ? (
                 <>
@@ -1244,12 +1487,14 @@ function BasicDetails(props) {
                     style={{
                       display: "flex",
                       flexDirection: "row",
-                      color: "#727272",
-
-                      marginTop: "1.7rem",
                     }}
                   >
-                    <p>
+                    <p
+                      style={{
+                        fontSize: "var(--base_text_font_size)",
+                        marginBottom: "0.25rem",
+                      }}
+                    >
                       {t("entrySettings")} {"count"}
                     </p>
                   </div>
@@ -1266,84 +1511,90 @@ function BasicDetails(props) {
                   />
                 </>
               ) : null}
+
               {selectedActivityType === activityType.inclusiveDistribute ||
               selectedActivityType === activityType.parallelDistribute ? (
-                <>
-                  <div
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    width: "95%",
+                    margin: "1rem 0rem",
+                  }}
+                >
+                  <p
                     style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      width: "95%",
+                      fontSize: "var(--base_text_font_size)",
+                      marginBottom: "0.25rem",
                     }}
+                    className="disCount_basicDetails"
                   >
-                    <p
-                      style={{
-                        color: "#727272",
-                        fontWeight: "bolder",
-                      }}
-                      className="disCount_basicDetails"
-                    >
-                      {t("distribute")} {t("count")}
-                    </p>
-                    <TextField
-                      aria-readonly
-                      id="distribute_count"
-                      InputProps={{
-                        className: classes.input,
-                        readOnly: true,
-                      }}
-                      style={{ width: "100%", cursor: "not-allowed" }}
-                      variant="outlined"
-                      size="small"
-                      value={getDistributeCount()}
-                    />
-                  </div>
-                </>
+                    {t("distribute")} {t("count")}
+                  </p>
+                  <TextField
+                    disabled
+                    id="distribute_count"
+                    InputProps={{
+                      className: classes.input,
+                      readOnly: true,
+                    }}
+                    style={{ width: "100%", cursor: "not-allowed" }}
+                    variant="outlined"
+                    size="small"
+                    value={getDistributeCount()}
+                  />
+                </div>
               ) : null}
-              {selectedActivityType === activityType.dataBasedExclusive ? (
-                <>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      width: "95%",
-                      margin: "1rem 0rem",
-                    }}
-                  >
-                    <p
-                      id="routingCriteriaCount_basicDetails"
-                      style={{
-                        color: "#727272",
 
-                        fontWeight: "bolder",
-                      }}
-                    >
-                      {t("routingCriteria")} {t("count")}
-                    </p>
-                    <TextField
-                      InputProps={{
-                        className: classes.input,
-                        readOnly: true,
-                      }}
-                      style={{ width: "100%", fontSize: "1rem" }}
-                      id="routing_criteriaCount"
-                      variant="outlined"
-                      size="small"
-                    />
-                  </div>
-                </>
+              {selectedActivityType === activityType.dataBasedExclusive ? (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    width: "95%",
+                    margin: "1rem 0rem",
+                  }}
+                >
+                  <p
+                    id="routingCriteriaCount_basicDetails"
+                    style={{
+                      fontSize: "var(--base_text_font_size)",
+                      marginBottom: "0.25rem",
+                    }}
+                  >
+                    {t("routingCriteria")} {t("count")}
+                  </p>
+                  <TextField
+                    InputProps={{
+                      className: classes.input,
+                      readOnly: true,
+                    }}
+                    style={{
+                      width: "100%",
+                      fontSize: "var(--base_text_font_size)",
+                    }}
+                    id="routing_criteriaCount"
+                    variant="outlined"
+                    size="small"
+                  />
+                </div>
               ) : null}
+
               {selectedActivityType === activityType.conditionalStart ? (
                 <>
                   <div
                     style={{
                       display: "flex",
                       flexDirection: "row",
-                      color: "#727272",
-                      marginTop: "1.7rem",
+                      margin: "1rem 0",
                     }}
                   >
-                    <p>
+                    <p
+                      style={{
+                        fontSize: "var(--base_text_font_size)",
+                        marginBottom: "0.25rem",
+                      }}
+                    >
                       {t("conditional")} {t("Text")}
                     </p>
                   </div>
@@ -1358,6 +1609,7 @@ function BasicDetails(props) {
                   />
                 </>
               ) : null}
+
               {!(
                 selectedActivityType === activityType.event ||
                 selectedActivityType === activityType.inclusiveCollect ||
@@ -1367,9 +1619,8 @@ function BasicDetails(props) {
                 <>
                   <p
                     style={{
-                      color: "#727272",
-
-                      fontWeight: "bolder",
+                      fontSize: "var(--base_text_font_size)",
+                      marginBottom: "0.25rem",
                     }}
                     className="calender_basicDetails"
                   >
@@ -1379,8 +1630,7 @@ function BasicDetails(props) {
                     style={{
                       display: "flex",
                       flexDirection: "row",
-                      marginBottom: "1.7rem",
-                      justifyContent: "space-between",
+                      marginBottom: "1.5rem",
                       width: props.isDrawerExpanded ? "60%" : "98%",
                     }}
                   >
@@ -1389,40 +1639,86 @@ function BasicDetails(props) {
                         display: "flex",
                         flexDirection: "row",
                         width: "20vw",
+                        alignItems: "center",
                       }}
                     >
+                      {/*code updated on 21 September 2022 for BugId 115467*/}
                       <Select
                         IconComponent={ExpandMoreIcon}
-                        style={{ width: "100%", height: "2.5rem" }}
+                        style={{
+                          width: "100%",
+                          height: "var(--line_height)",
+                          fontSize: "var(--base_text_font_size)",
+                        }}
                         variant="outlined"
-                        defaultValue={1}
+                        value={
+                          localLoadedActivityPropertyData?.ActivityProperty
+                            ?.actGenPropInfo?.calendarType +
+                          localLoadedActivityPropertyData?.ActivityProperty
+                            ?.actGenPropInfo?.calendarId
+                        }
+                        onChange={handleCalendarChange}
+                        disabled={isReadOnly}
                       >
-                        <MenuItem
-                          style={{ width: "10rem", margin: "0.5rem" }}
-                          value={1} //1 is set as default value for this selectbox
-                        >
-                          <p style={{ fontsize: "var(--base_text_font_size)" }}>
-                            {t("default24/7")}
-                          </p>
-                        </MenuItem>
+                        {localCalendarList.map((cal) => {
+                          return (
+                            <MenuItem
+                              style={{ width: "10rem", margin: "0.5rem" }}
+                              value={
+                                cal.DefinedWithProcessDefId !== "0"
+                                  ? "L" + cal.CalendarId
+                                  : "G" + cal.CalendarId
+                              } //1 is set as default value for this selectbox
+                            >
+                              <p
+                                style={{
+                                  fontsize: "var(--base_text_font_size)",
+                                }}
+                              >
+                                {cal.CalendarName}
+                              </p>
+                            </MenuItem>
+                          );
+                        })}
                       </Select>
-                      <AddIcon
-                        //onClick={() => openCalenderMf()}
-                        className="basicDetails-addIcon"
+
+                      <div className="basicDetails-addIcon">
+                        <AddIcon
+                          onClick={() => {
+                            openCalenderMf();
+                          }}
+                          className="basicDetails-addIconSvg"
+                          disabled={isReadOnly}
+                        />
+                      </div>
+                      <EditOutlinedIcon
+                        id="editIcon_1"
+                        style={{
+                          color: "grey",
+                          height: "2rem",
+                          width: "2rem",
+                          cursor: "pointer",
+                          marginBlock: "0.5rem",
+                        }}
+                        onClick={(e) => handleCalendarEdit()}
+                        disabled={isReadOnly}
                       />
                     </div>
-                    <RefreshSharpIcon
+                    {/* <RefreshSharpIcon
                       style={{
                         color: "#606060",
-                        marginLeft: "0.2rem",
+                        marginLeft: "0.5rem",
                         marginTop: "0.5rem",
+                        width: "1.5rem",
+                        height: "1.5rem",
                       }}
-                    />
+                    /> */}
                   </div>
                 </>
               ) : null}
             </div>
           </div>
+
           {selectedActivityType !== activityType.subProcess ? (
             <hr
               style={{
@@ -1431,11 +1727,11 @@ function BasicDetails(props) {
               }}
             />
           ) : null}
+
           {selectedActivityType !== activityType.subProcess ? (
             <div
               style={{
                 marginLeft: "0.8rem",
-                marginTop: "1.5rem",
                 width: props.isDrawerExpanded ? "50%" : null,
                 height: "100%",
               }}
@@ -1449,9 +1745,9 @@ function BasicDetails(props) {
                 <>
                   <p
                     style={{
-                      color: "#727272",
-
-                      fontWeight: "bolder",
+                      fontSize: "var(--base_text_font_size)",
+                      marginBottom: "0.25rem",
+                      marginTop: "1rem",
                     }}
                   >
                     {t("calendar")}
@@ -1460,8 +1756,7 @@ function BasicDetails(props) {
                     style={{
                       display: "flex",
                       flexDirection: "row",
-                      marginBottom: "1.7rem",
-                      justifyContent: "space-between",
+                      marginBottom: "1.5rem",
                       width: props.isDrawerExpanded ? "60%" : "98%",
                     }}
                   >
@@ -1470,49 +1765,88 @@ function BasicDetails(props) {
                         display: "flex",
                         flexDirection: "row",
                         width: "20vw",
+                        alignItems: "center",
                       }}
                     >
                       <Select
                         IconComponent={ExpandMoreIcon}
-                        style={{ width: "100%", height: "2.5rem" }}
+                        style={{
+                          width: "100%",
+                          height: "var(--line_height)",
+                          fontSize: "var(--base_text_font_size)",
+                        }}
                         variant="outlined"
-                        defaultValue={1}
+                        value={
+                          localLoadedActivityPropertyData?.ActivityProperty
+                            ?.actGenPropInfo?.calendarType +
+                          localLoadedActivityPropertyData?.ActivityProperty
+                            ?.actGenPropInfo?.calendarId
+                        }
+                        onChange={handleCalendarChange}
+                        disabled={isReadOnly}
                       >
-                        <MenuItem
-                          style={{ width: "10rem", margin: "1rem" }}
-                          value={1} //1 is set as default value for this selectbox
-                        >
-                          <p style={{ fontSize: "var(--base_text_font_size)" }}>
-                            {t("default24/7")}
-                          </p>
-                        </MenuItem>
+                        {localCalendarList.map((cal) => (
+                          <MenuItem
+                            style={{ width: "10rem", margin: "0.5rem" }}
+                            value={
+                              cal.DefinedWithProcessDefId !== "0"
+                                ? "L" + cal.CalendarId
+                                : "G" + cal.CalendarId
+                            } //1 is set as default value for this selectbox
+                          >
+                            <p
+                              style={{ fontsize: "var(--base_text_font_size)" }}
+                            >
+                              {cal.CalendarName}
+                            </p>
+                          </MenuItem>
+                        ))}
                       </Select>
-                      <AddIcon
-                        //onClick={() => openCalenderMf()}
-                        className="basicDetails-addIcon"
+
+                      <div className="basicDetails-addIcon">
+                        <AddIcon
+                          onClick={() => openCalenderMf()}
+                          className="basicDetails-addIconSvg"
+                          disabled={isReadOnly}
+                        />
+                      </div>
+                      <EditOutlinedIcon
+                        id="editIcon_1"
+                        style={{
+                          color: "grey",
+                          height: "2rem",
+                          width: "2rem",
+                          cursor: "pointer",
+                          marginBlock: "0.5rem",
+                        }}
+                        onClick={(e) => handleCalendarEdit()}
+                        disabled={isReadOnly}
                       />
                     </div>
-                    <RefreshSharpIcon
+                    {/* <RefreshSharpIcon
                       style={{
                         color: "#606060",
-                        marginLeft: "0.2rem",
+                        marginLeft: "0.5rem",
                         marginTop: "0.5rem",
+                        width: "1.5rem",
+                        height: "1.5rem",
                       }}
-                    />
+                    /> */}
                   </div>
                 </>
               ) : null}
-              {/* {!arrFormValidationAbsent().includes(selectedActivityType) ? (
+              {!arrFormValidationAbsent().includes(selectedActivityType) ? (
                 <FormsAndValidations
                   formEnabled={basicDetails.FormId}
-                  disabled={isDisableTab}
+                  // disabled={isDisableTab}
                   customStyle={props.isDrawerExpanded ? "60%" : "95%"}
                   value={basicDetails.CustomValidation}
                   changeBasicDetails={changeBasicDetails}
+                  disabled={isReadOnly}
                 />
-              ) : null} */}
+              ) : null}
               <div>
-                {!configPeopleAndSystem ? (
+                {!configPeopleAndSystem && !isReadOnly ? (
                   <p
                     className="basicDetails-peopleAndSysHeading"
                     onClick={() => {
@@ -1524,10 +1858,7 @@ function BasicDetails(props) {
                 ) : null}
               </div>
               {configPeopleAndSystem ? (
-                <PeopleAndSystems
-                  id="peopleAndSystems"
-                  disabled={isDisableTab}
-                />
+                <PeopleAndSystems id="peopleAndSystems" disabled={isReadOnly} />
               ) : null}
             </div>
           ) : null}
@@ -1546,7 +1877,8 @@ const mapDispatchToProps = (dispatch) => {
       activitySubType,
       seqId,
       queueId,
-      type
+      type,
+      checkedOut
     ) =>
       dispatch(
         actionCreators.selectedCell(
@@ -1556,7 +1888,8 @@ const mapDispatchToProps = (dispatch) => {
           activitySubType,
           seqId,
           queueId,
-          type
+          type,
+          checkedOut
         )
       ),
   };
@@ -1570,8 +1903,10 @@ const mapStateToProps = (state) => {
     cellType: state.selectedCellReducer.selectedType,
     cellActivityType: state.selectedCellReducer.selectedActivityType,
     cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
     cellQueueId: state.selectedCellReducer.selectedQueueId,
+    openProcessType: state.openProcessClick.selectedType,
   };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(BasicDetails);

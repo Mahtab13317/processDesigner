@@ -1,6 +1,6 @@
 .wrapperDiv {
   width: 100vw;
-  font-family: "Open Sans";
+  font-family: var(--font_family);
   overflow: hidden;
   padding: 1rem;
 }
@@ -70,7 +70,7 @@
 }
 
 .queuetable {
-  font-family: "Open Sans";
+  font-family: var(--font_family);
   border-collapse: collapse;
   width: 100% !important;
   display: flex;
@@ -100,21 +100,21 @@
 }
 
 .tableCellText {
-  font-family: "Open Sans";
-  font-size: var(--subtitle_text_font_size);
-  font-weight: 700;
+  font-family: var(--font_family);
+  font-size: var(--base_text_font_size);
+  font-weight: 600;
   padding: 0;
   color: #000000;
-  /* letter-spacing: 0.0262rem; */
 }
+
 .tableRow {
-  font-family: "Open Sans";
+  font-family: var(--font_family);
   background-color: #ffffff !important;
 }
+
 .tableCellBody {
-  font-family: "Open Sans";
+  font-family: var(--font_family);
   font-size: var(--base_text_font_size);
-  color: #000000;
   opacity: 1;
 }
 
@@ -133,7 +133,7 @@
   border-radius: 2px;
   padding-top: 3px;
   padding-left: 9px;
-  font-family: "Open Sans";
+  font-family: var(--font_family);
   font-size: var(--base_text_font_size);
   color: #000000;
   opacity: 1;
@@ -157,7 +157,7 @@
   min-height: 2.5rem !important;
   padding: 0rem !important;
 
-  font: 0.7rem "Open Sans" !important;
+  font: 0.7rem var(--font_family) !important;
   letter-spacing: 0rem !important;
   color: rgb(0, 0, 0) !important;
   opacity: 1;
@@ -180,7 +180,125 @@
 }
 
 .taskHeading {
-  font-size: var(--title_text_font_size);
-  font-weight: bold;
+  font-size: var(--subtitle_text_font_size);
+  font-weight: 600;
 }
 
+.streamListDiv {
+  height: 55vh;
+  overflow: auto;
+}
+
+.waitingTextArea {
+  height: var(--line_height);
+  width: 34.5vw;
+}
+
+.emptyStateMainDiv {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+}
+
+.emptyStateImage {
+  width: 9rem;
+  height: 9rem;
+  margin-bottom: 0.5rem;
+}
+
+.emptyStateText {
+  text-align: center;
+  font-size: var(--base_text_font_size);
+  letter-spacing: 0rem;
+  color: #3a3a3a !important;
+  margin-bottom: 1rem;
+}
+
+.addRuleLocallyButton {
+  background: var(--button_color);
+  border: 1px solid var(--button_color);
+  border-radius: 2px;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
+  letter-spacing: 0px;
+  color: #ffffff;
+  text-align: center;
+  margin: 0 0.5vw !important;
+  padding: 0 0.75vw !important;
+  cursor: pointer;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1vw;
+  border-bottom: 1px solid #c4c4c4;
+}
+
+.modalBody {
+  padding: 0.5rem 1vw;
+}
+
+.modalHeading {
+  font: normal normal 600 var(--subtitle_text_font_size) / 21px
+    var(--font_family);
+  text-align: left;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.cancelButton {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  text-align: center;
+  font: normal normal 600 var(--subtitle_text_font_size) / 19px
+    var(--font_family);
+  letter-spacing: 0px;
+  color: #606060;
+  padding: 0 1vw !important;
+  cursor: pointer;
+  margin: 0 0.5vw 0 0 !important;
+}
+
+.okButton {
+  background: var(--button_color) 0% 0% no-repeat padding-box;
+  border: 1px solid var(--button_color);
+  border-radius: 2px;
+  text-align: center;
+  font: normal normal 600 var(--subtitle_text_font_size) / 19px
+    var(--font_family);
+  letter-spacing: 0px;
+  color: white;
+  padding: 0 1vw !important;
+  cursor: pointer;
+  margin: 0 0.5vw 0 0 !important;
+}
+
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  padding: 0.75rem 1vw;
+  border-top: 1px solid #c4c4c4;
+}
+
+.closeIcon {
+  cursor: pointer;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+.mainCheckbox {
+  margin-right: 0.25rem !important;
+  margin-left: 0rem !important;
+  padding: 0 0.5vw 0 0 !important;
+}
+
+.mainCheckbox span {
+  text-align: left;
+  font: normal normal normal 11px/15px var(--font_family);
+  letter-spacing: 0px;
+  /* color: #707070; */
+}

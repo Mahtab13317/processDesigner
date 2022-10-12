@@ -4,7 +4,7 @@ import { deleteCell } from "../../../utility/bpmnView/deleteCell";
 import { addMxGraph } from "../../../utility/bpmnView/addMxGraph";
 import { drawOnGraph } from "../../../utility/bpmnView/drawOnGraph";
 import { getSelectedCell } from "../../../utility/bpmnView/getSelectedCell";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import * as actionCreators from "../../../redux-store/actions/selectedCellActions";
 import { removeToolDivCell } from "../../../utility/bpmnView/getToolDivCell";
 import { hideIcons } from "../../../utility/bpmnView/cellOnMouseClick";
@@ -23,7 +23,18 @@ import { getSelectedCellType } from "../../../utility/abstarctView/getSelectedCe
 import { pasteFunction } from "../../../utility/bpmnView/createPopupMenu";
 import ObjectDependencies from "../../../UI/ObjectDependencyModal";
 import Modal from "../../../UI/Modal/Modal";
+import {
+  MENUOPTION_CHECKIN_ACT,
+  MENUOPTION_CHECKOUT_ACT,
+  MENUOPTION_UNDO_CHECKOUT_ACT,
+  PROCESSTYPE_DEPLOYED,
+  PROCESSTYPE_LOCAL,
+  PROCESSTYPE_REGISTERED,
+} from "../../../Constants/appConstants";
+import CheckOutActModal from "../AbstractView/Milestones/Milestone/ActivityView/Activity/CheckoutActivity";
+import UndoCheckoutActivity from "../AbstractView/Milestones/Milestone/ActivityView/Activity/UndoCheckoutActivity";
 import QueueAssociation from "../../Properties/PropetiesTab/QueueAssociation";
+import CheckInActivity from "../AbstractView/Milestones/Milestone/ActivityView/Activity/CheckInActivity";
 
 let swimlaneLayer, milestoneLayer, rootLayer;
 let buttons = {};
@@ -40,11 +51,12 @@ function Graph(props) {
   const [showDependencyModal, setShowDependencyModal] = useState(false);
   const [showQueueModal, setShowQueueModal] = useState({
     show: false,
-    queueId: null
+    queueId: null,
   });
   const [taskAssociation, setTaskAssociation] = useState([]);
-
+  const [actionModal, setActionModal] = useState({ type: null, activity: {} });
   const history = useHistory();
+  const dispatch = useDispatch();
 
   const loadedProcessData = store.getState("loadedProcessData");
   const [setlocalLoadedProcessData] = useGlobalState(loadedProcessData);
@@ -54,7 +66,9 @@ function Graph(props) {
       deleteGraph,
       props.setProcessData,
       setTaskAssociation,
-      setShowDependencyModal
+      setShowDependencyModal,
+      dispatch,
+      t
     );
     //remove other related attributes when particular entity is deleted
     removeToolDivCell();
@@ -78,13 +92,14 @@ function Graph(props) {
             obj.activitySubType,
             obj.seqId,
             obj.queueId,
-            obj.type
+            obj.type,
+            obj.checkedOut
           );
         }
       } else {
         //if properties drawer is closed and screen is clicked then deselect any selected entity
         if (!props.showDrawer) {
-          props.selectedCell(null, null, null, null, null, null, null);
+          props.selectedCell(null, null, null, null, null, null, null, null);
           props.selectedTask(null, null, null, null);
         }
       }
@@ -97,26 +112,37 @@ function Graph(props) {
     // Detecting Ctrl
     let ctrl = event.ctrlKey ? event.ctrlKey : keyCode === 17 ? true : false;
 
-    // If keyCode pressed is V and if ctrl is true.
-    if (keyCode == 86 && ctrl) {
-      // Ctrl+V is pressed
-      pasteFunction(
-        graph,
-        null,
-        props.setProcessData,
-        props.setNewId,
-        t,
-        caseEnabled
-      );
-    } else if (keyCode == 67 && ctrl) {
-      // Ctrl+C is pressed
-      copy(graph, null);
-      removeToolDivCell();
-      removeContextMenu();
-      hideIcons();
+    if (
+      props.processType === PROCESSTYPE_LOCAL ||
+      ((props.processType === PROCESSTYPE_REGISTERED ||
+        props.processType === PROCESSTYPE_DEPLOYED) &&
+        props.processData.CheckedOut === "Y")
+    ) {
+      // If keyCode pressed is V and if ctrl is true.
+      if (keyCode == 86 && ctrl) {
+        // Ctrl+V is pressed
+        pasteFunction(
+          graph,
+          null,
+          props.setProcessData,
+          props.setNewId,
+          t,
+          caseEnabled
+        );
+      } else if (keyCode == 67 && ctrl) {
+        // Ctrl+C is pressed
+        copy(graph, null);
+        removeToolDivCell();
+        removeContextMenu();
+        hideIcons();
+      }
     }
-    if (key === "Delete") {
-      deleting(graph);
+
+    // code added on 7 Sep 2022 for BugId 115477
+    if (props.processType === PROCESSTYPE_LOCAL) {
+      if (key === "Delete") {
+        deleting(graph);
+      }
     }
   };
 
@@ -135,7 +161,9 @@ function Graph(props) {
         setOpenDeployedProcess,
         setTaskAssociation,
         setShowDependencyModal,
-        setShowQueueModal
+        setShowQueueModal,
+        setActionModal,
+        dispatch
       ),
     ];
     setGraphObj(tempGraph);
@@ -186,11 +214,18 @@ function Graph(props) {
 
   return (
     /*height and width are set according to canvas width of graph in bpmn*/
+    /*code edited on 7 Oct 2022 for BugId 115317 */
     <div
       className="Graph"
       style={{
-        width: `${graphMinDimension.w + gridSize}px`,
-        height: `${graphMinDimension.h + gridSize}px`,
+        width:
+          containerRef.current === null
+            ? graphMinDimension.w
+            : containerRef.current?.firstChild?.width?.baseVal?.value,
+        height:
+          containerRef.current === null
+            ? graphMinDimension.h
+            : containerRef.current?.firstChild?.height?.baseVal?.value,
       }}
     >
       <div className="Grid" ref={containerRef}></div>
@@ -213,7 +248,80 @@ function Graph(props) {
           }
         />
       ) : null}
-      
+
+      {actionModal.type === MENUOPTION_CHECKOUT_ACT ? (
+        <Modal
+          show={actionModal.type === MENUOPTION_CHECKOUT_ACT}
+          style={{
+            padding: "0",
+            width: "33vw",
+            left: "33%",
+            top: "30%",
+          }}
+          modalClosed={() => setActionModal({ type: null, activity: {} })}
+          children={
+            <CheckOutActModal
+              setModalClosed={() =>
+                setActionModal({ type: null, activity: {} })
+              }
+              modalType={MENUOPTION_CHECKOUT_ACT}
+              actName={actionModal.activity.ActivityName}
+              actId={actionModal.activity.ActivityId}
+              laneId={actionModal.activity.LaneId}
+              setprocessData={props.setProcessData}
+            />
+          }
+        />
+      ) : null}
+      {actionModal.type === MENUOPTION_UNDO_CHECKOUT_ACT ? (
+        <Modal
+          show={actionModal.type === MENUOPTION_UNDO_CHECKOUT_ACT}
+          style={{
+            padding: "0",
+            width: "33vw",
+            left: "33%",
+            top: "30%",
+          }}
+          modalClosed={() => setActionModal({ type: null, activity: {} })}
+          children={
+            <UndoCheckoutActivity
+              setModalClosed={() =>
+                setActionModal({ type: null, activity: {} })
+              }
+              modalType={MENUOPTION_UNDO_CHECKOUT_ACT}
+              actName={actionModal.activity.ActivityName}
+              actId={actionModal.activity.ActivityId}
+              laneId={actionModal.activity.LaneId}
+              setprocessData={props.setProcessData}
+            />
+          }
+        />
+      ) : null}
+      {actionModal.type === MENUOPTION_CHECKIN_ACT ? (
+        <Modal
+          show={actionModal.type === MENUOPTION_CHECKIN_ACT}
+          style={{
+            padding: "0",
+            width: "33vw",
+            left: "33%",
+            top: "30%",
+          }}
+          modalClosed={() => setActionModal({ type: null, activity: {} })}
+          children={
+            <CheckInActivity
+              setModalClosed={() =>
+                setActionModal({ type: null, activity: {} })
+              }
+              modalType={MENUOPTION_CHECKIN_ACT}
+              actName={actionModal.activity.ActivityName}
+              actId={actionModal.activity.ActivityId}
+              activity={actionModal.activity}
+              setprocessData={props.setProcessData}
+            />
+          }
+        />
+      ) : null}
+
       {showQueueModal.show ? (
         <Modal
           show={showQueueModal.show}
@@ -222,11 +330,16 @@ function Graph(props) {
             left: "28%",
             top: "21.5%",
             padding: "0",
-            height:'475px'
+            height: "475px",
           }}
           modalClosed={() => setShowQueueModal(false)}
           children={
-            <QueueAssociation queueType='0' queueFrom='graph' showQueueModal={showQueueModal} setShowQueueModal={setShowQueueModal}/>
+            <QueueAssociation
+              queueType="0"
+              queueFrom="graph"
+              showQueueModal={showQueueModal}
+              setShowQueueModal={setShowQueueModal}
+            />
           }
         />
       ) : null}
@@ -244,7 +357,8 @@ const mapDispatchToProps = (dispatch) => {
       activitySubType,
       seqId,
       queueId,
-      type
+      type,
+      checkedOut
     ) =>
       dispatch(
         actionCreators.selectedCell(
@@ -254,7 +368,8 @@ const mapDispatchToProps = (dispatch) => {
           activitySubType,
           seqId,
           queueId,
-          type
+          type,
+          checkedOut
         )
       ),
     openProcessClick: (id, name, type, version, processName) =>

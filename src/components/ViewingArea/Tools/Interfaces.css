@@ -12,15 +12,9 @@
 }
 
 .DocTypes .MuiFormControlLabel-root span {
-  /*font-size: 0.75rem !important;*/
   font-size: var(--base_text_font_size);
-
-  padding: 0.125rem 0.525rem;
-}
-
-.DocTypes #searchBoxId {
-  /* width: 12.8125rem !important;*/
-  width: 12.8125rem;
+  padding: 0;
+  margin: 0.125rem 0.25rem;
 }
 
 .DocTypes .oneBox {
@@ -28,8 +22,27 @@
   display: flex;
   flex-direction: column;
   width: 80vw;
-  overflow-x: auto;
+  min-height: 92%;
+  overflow-x: scroll;
   overflow-y: hidden;
+}
+
+.DocTypes .oneBox::-webkit-scrollbar {
+  background-color: transparent !important;
+  width: 1.125rem !important;
+  height: 0.875rem !important;
+}
+.DocTypes .oneBox::-webkit-scrollbar-thumb {
+  background-color: transparent !important;
+  border-radius: 0.313rem !important;
+}
+.DocTypes .oneBox:hover::-webkit-scrollbar {
+  width: 1.125rem !important;
+  height: 0.875rem !important;
+}
+.DocTypes .oneBox:hover::-webkit-scrollbar-thumb {
+  background: #8c8c8c 0% 0% no-repeat padding-box !important;
+  border-radius: 0.313rem !important;
 }
 
 .DocTypes
@@ -193,7 +206,7 @@
   display: flex;
   margin-bottom: 0rem;
   padding: 0.25rem 0rem;
-  font-size: 14px;
+  font-size: var(--sub_text_font_size);
   position: sticky;
   top: 0;
   z-index: 1;
@@ -208,7 +221,7 @@
 
 .docDescription {
   font-size: var(--sub_text_font_size);
-  width: 35%;
+  width: 80%;
 }
 .oneDocDiv {
   height: 100%;
@@ -260,7 +273,6 @@
   height: 100%;
   width: 80%;
   /* background-color: white; */
-  margin-top: 0.625rem;
   margin-left: 0.1875rem;
   /* border-left: 1px solid rgb(218, 208, 194); */
 }
@@ -269,7 +281,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
+  padding: 0.25rem 1rem 0.25rem;
   /* padding-bottom: 10px;*/
   border-bottom: 1px solid #dad0c2;
   border-left: 1px solid rgb(218, 208, 194);
@@ -385,12 +397,12 @@
 .activityHeader {
   background-color: white;
   height: 3.56rem;
-  width: 12.4rem;
+  width: 13.5rem;
   border-bottom: 1px solid rgb(218, 208, 194);
   display: flex;
   font-size: 1rem;
   padding: 0px 10px;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
 }
 
@@ -408,12 +420,8 @@
   display: flex;
   font-size: 1rem;
   padding: 0px 10px;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-}
-
-.oneBox::-webkit-scrollbar {
-  display: none;
 }
 
 .groupNamesDiv {
@@ -594,7 +602,7 @@
   cursor: pointer;
   display: flex;
   justify-content: right;
-  margin-left: -11px;
+  margin-left: 0px;
   margin-right: 16px;
   vertical-align: middle;
   -webkit-tap-highlight-color: transparent;
@@ -607,5 +615,5 @@
   border: none !important;
   cursor: pointer;
   background-color: transparent;
-  transform: translateY(-4px);
+  transform: translateY(-10px);
 }

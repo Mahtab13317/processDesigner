@@ -1,16 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { store, useGlobalState } from "state-pool";
-import * as actionCreators from "../../../../redux-store/actions/selectedCellActions";
-import { connect } from "react-redux";
-import { getActivityProps } from "../../../../utility/abstarctView/getActivityProps";
 import styles from "./index.module.css";
 import { Select, MenuItem } from "@material-ui/core";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  setSave,
-  ActivityPropertySaveCancelValue,
-} from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked.js";
+import { useDispatch } from "react-redux";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import {
   propertiesLabel,
@@ -20,6 +13,7 @@ import arabicStyles from "./ArabicStyles.module.css";
 
 function Output(props) {
   let { t } = useTranslation();
+  const { isReadOnly } = props;
   const direction = `${t("HTML_DIR")}`;
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
@@ -168,7 +162,7 @@ function Output(props) {
 
     dispatch(
       setActivityPropertyChange({
-        SAPAdapter: { isModified: true, hasError: false },
+        [propertiesLabel.sap]: { isModified: true, hasError: false },
       })
     );
   };
@@ -209,6 +203,7 @@ function Output(props) {
                       onChange={(e) => {
                         changeVariable(e, i, val.Name);
                       }}
+                      disabled={isReadOnly}
                     >
                       {getFilterList(i, val)?.map((option) => {
                         return (

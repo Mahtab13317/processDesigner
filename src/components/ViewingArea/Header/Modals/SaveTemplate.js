@@ -1,3 +1,5 @@
+// #BugID - 115569
+// #BugDescription - template save error issue resolved.
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "../modal.module.css";

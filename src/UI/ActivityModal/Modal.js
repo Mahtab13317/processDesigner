@@ -5,6 +5,7 @@ import { ClickAwayListener } from "@material-ui/core";
 import { PROCESSTYPE_LOCAL } from "../../Constants/appConstants";
 
 export default function SimpleModal(props) {
+  console.log("111","options",props)
   const [open, setOpen] = useState(false);
   let sortSectionOne = props.sortSectionOne;
   let sortSectionThree = props.sortSectionThree;

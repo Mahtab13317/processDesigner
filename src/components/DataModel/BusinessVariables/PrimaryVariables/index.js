@@ -7,7 +7,11 @@ import {
   getDropdownOptions,
   getVariableIdFromSysDefinedName,
 } from "./TypeAndFieldMapping";
-import { SERVER_URL, RTL_DIRECTION } from "../../../../Constants/appConstants";
+import {
+  SERVER_URL,
+  RTL_DIRECTION,
+  ALPHANUMERIC_REGEX_UNIVERSAL,
+} from "../../../../Constants/appConstants";
 import { Checkbox } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 import DeleteOutlinedIcon from "@material-ui/icons/DeleteOutlined";
@@ -23,6 +27,7 @@ import { connect, useDispatch } from "react-redux";
 import EditIcon from "@material-ui/icons/Edit";
 import axios from "axios";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
+import ObjectDependencies from "../../../../UI/ObjectDependencyModal";
 
 function Edit(props) {
   const {
@@ -104,6 +109,8 @@ function PrimaryVariables(props) {
   const [modifyComplexJson, setModifyComplexJson] = useState({});
   const [modifyButtonDisableId, setmodifyButtonDisableId] = useState();
   const [dataObjectTemplates, setdataObjectTemplates] = useState([]);
+  const [dependencyModalBool, setdependencyModalBool] = useState(false);
+  const [validationsArray, setvalidationsArray] = useState([]);
 
   const callbackMethod = (data) => {
     let temp = false;
@@ -302,34 +309,41 @@ function PrimaryVariables(props) {
 
     axios.post(SERVER_URL + `/deleteVariable`, postBody).then((res) => {
       if (res.status === 200 && res.data.Status === 0) {
-        const temp = [...userDefinedVariables];
-        const [removedElement] = temp.splice(index, 1);
-        // Updating processData on deleting Variable
-        let newProcessData = JSON.parse(JSON.stringify(localLoadedProcessData));
-        let indexValue;
-        newProcessData.Variable.map((variable, index) => {
-          if (variable.VariableId == selectedVariable.variableId) {
-            indexValue = index;
-          }
-        });
-        newProcessData.Variable.splice(indexValue, 1);
-        setLocalLoadedProcessData(newProcessData);
-        const removedDataField = removedElement.dataField;
-        dataInputs.forEach((element) => {
-          if (element.variableType === removedElement.variableType) {
-            element.dataFields.push(removedDataField);
-          }
-        });
-        setUserDefinedVariables(temp);
-        setPrimaryVariableCount(temp.length);
-        if (temp.length === 0) setBForInputStrip(false);
-        dispatch(
-          setToastDataFunc({
-            message: t("variableDeleted"),
-            severity: "success",
-            open: true,
-          })
-        );
+        if (res.data.hasOwnProperty("Validations")) {
+          setvalidationsArray(res.data.Validations);
+          setdependencyModalBool(true);
+        } else {
+          const temp = [...userDefinedVariables];
+          const [removedElement] = temp.splice(index, 1);
+          // Updating processData on deleting Variable
+          let newProcessData = JSON.parse(
+            JSON.stringify(localLoadedProcessData)
+          );
+          let indexValue;
+          newProcessData.Variable.map((variable, index) => {
+            if (variable.VariableId == selectedVariable.variableId) {
+              indexValue = index;
+            }
+          });
+          newProcessData.Variable.splice(indexValue, 1);
+          setLocalLoadedProcessData(newProcessData);
+          const removedDataField = removedElement.dataField;
+          dataInputs.forEach((element) => {
+            if (element.variableType === removedElement.variableType) {
+              element.dataFields.push(removedDataField);
+            }
+          });
+          setUserDefinedVariables(temp);
+          setPrimaryVariableCount(temp.length);
+          if (temp.length === 0) setBForInputStrip(false);
+          dispatch(
+            setToastDataFunc({
+              message: t("variableDeleted"),
+              severity: "success",
+              open: true,
+            })
+          );
+        }
       }
     });
 
@@ -553,11 +567,7 @@ function PrimaryVariables(props) {
           const availableDataFields = dataInputObj.dataFields?.filter(
             (q) => q !== dataField
           );
-          // dataInputs.forEach((element) => {
-          //   if (element.variableType === variableType) {
-          //     element.dataFields = availableDataFields;
-          //   }
-          // });
+
           updateIsDisabledDataType();
         }
         setAliasName("");
@@ -610,6 +620,11 @@ function PrimaryVariables(props) {
               severity: "success",
               open: true,
             });
+          } else {
+            setAliasName("");
+            setVariableType("");
+            setDataField("");
+            setArrayType(false);
           }
         }
       }
@@ -724,7 +739,6 @@ function PrimaryVariables(props) {
     // setUserDefinedVariables(temp);
   };
 
-  console.log("vvvvvvvvvvvvvmodata", complexDataJSON);
   const modifyVarDataHandler = async (varData) => {
     const formData = new FormData();
 
@@ -764,11 +778,49 @@ function PrimaryVariables(props) {
     }
   };
 
+  //for showing alert on blank variable name
+  useEffect(() => {
+    if (!!dataField && !!variableType && !aliasName) {
+      dispatch(
+        setToastDataFunc({
+          message: t("enterVariableName"),
+          severity: "error",
+          open: true,
+        })
+      );
+    }
+  }, [aliasName, dataField, variableType]);
+
   return (
     <div className={styles.mainDiv}>
       <div className={styles.headerDiv}>
-        <div style={{ display: "flex", flexDirection: "row" }}>
-          <Checkbox
+        {dependencyModalBool ? (
+          <Modal
+            show={dependencyModalBool}
+            modalClosed={() => setdependencyModalBool(false)}
+            style={{
+              width: "45vw",
+              left: "50%",
+              top: "50%",
+              padding: "0",
+              position: "absolute",
+              transform: "translate(-50%,-50%)",
+            }}
+          >
+            <ObjectDependencies
+              processAssociation={validationsArray}
+              cancelFunc={() => setdependencyModalBool(false)}
+            />
+          </Modal>
+        ) : null}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            marginInline: "34px",
+          }}
+        >
+          {/* <Checkbox
             className={
               direction === RTL_DIRECTION
                 ? arabicStyles.mainCheckbox
@@ -776,7 +828,7 @@ function PrimaryVariables(props) {
             }
             checked={false}
             size="medium"
-          />
+          /> */}
           <p
             className={
               direction === RTL_DIRECTION
@@ -899,7 +951,13 @@ function PrimaryVariables(props) {
           >
             <ClearOutlinedIcon
               id="primary_variables_close_input_strip"
-              onClick={() => setBForInputStrip(false)}
+              onClick={() => {
+                setBForInputStrip(false);
+                setDataField("");
+                setVariableType("");
+                setAliasName("");
+                setArrayType(false);
+              }}
               classes={{
                 root:
                   direction === RTL_DIRECTION
@@ -938,12 +996,20 @@ function PrimaryVariables(props) {
           </p>
         </div>
       ) : (
-        <div style={{ width: "100%", height: "75%", overflowY: "scroll" }}>
+        <div
+          style={{
+            width: "100%",
+            height: "75%",
+            overflowY: "scroll",
+            scrollbarColor: "red yellow",
+            scrollbarWidth: "10px",
+          }}
+        >
           {userDefinedVariables &&
             userDefinedVariables.map((d, index) => {
               return (
                 <div className={styles.dataDiv}>
-                  <Checkbox
+                  {/* <Checkbox
                     disabled={isProcessReadOnly}
                     id="primary_variables_data_checkbox"
                     className={
@@ -953,7 +1019,7 @@ function PrimaryVariables(props) {
                     }
                     checked={false}
                     size="medium"
-                  />
+                  /> */}
                   <TypeAndFieldMapping
                     dataObjectTemplates={dataObjectTemplates}
                     modifyVariableData={(data) => {
@@ -992,7 +1058,7 @@ function PrimaryVariables(props) {
                     varData={d}
                   />
 
-                  {d.variableType === "11" ? (
+                  {d.variableType === "11" && !isProcessReadOnly ? (
                     <>
                       {!d.isEditable ? (
                         <div

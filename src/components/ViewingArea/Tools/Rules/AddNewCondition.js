@@ -36,14 +36,23 @@ function AddNewCondition(props) {
     rules,
   } = props;
 
+  /*****************************************************************************************
+   * @author asloob_ali BUG ID : 115319 Rules: activity name is not modifiable and should not be allowed in Rules like in IBPS 5 sp2
+   *  Resolution : removed ActivityName variable from dropdown.
+   *  Date : 13/09/2022             ****************/
+
   const [parameter1dropdown, setDropdown] = useState(
-    localLoadedProcessData?.Variable
+    //Bug id 115319 Rules: activity name is not modifiable and should not be allowed in Rules like in IBPS 5 sp2
+
+    localLoadedProcessData?.Variable?.filter(
+      (variable) => variable.VariableId !== "49"
+    )
   );
 
   const [param2Dropdown, setparam2Dropdown] = useState(
     localLoadedProcessData?.Variable
   );
-
+  console.log(parameter1dropdown);
   useEffect(() => {
     if (variableType == 10) {
       let localArr = ConditionalOperator.filter((val) => {
@@ -206,7 +215,7 @@ function AddNewCondition(props) {
   return (
     <React.Fragment>
       <div
-        style={{ marginTop: "20px", height: "2rem" }}
+        style={{ marginTop: "20px", height: "2rem", marginLeft: "15px" }}
         className={styles.addNewRule}
       >
         <Select

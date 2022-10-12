@@ -1,5 +1,5 @@
 // #BugID - 114308
-// #BugDescription - Delete button added in expand view
+// #BugDescription - Delete button added in expand view,drag drop functionality added and disabled add button designed changed 
 import React, { useState, useEffect } from "react";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice.js";
 import {
@@ -14,10 +14,13 @@ import { useTranslation } from "react-i18next";
 import { connect, useDispatch } from "react-redux";
 import styles from "./Rule.module.css";
 import * as actionCreators from "../../../../redux-store/actions/Properties/showDrawerAction";
+import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import DragIndicatorOutlined from "@material-ui/icons/DragIndicatorOutlined.js";
 
 const InitialRule = (props) => {
   let dispatch = useDispatch();
   let { t } = useTranslation();
+  const { isReadOnly } = props;
   const direction = `${t("HTML_DIR")}`;
   const [showInput, setShowInput] = useState(false);
   const [data, setData] = useState({
@@ -29,6 +32,8 @@ const InitialRule = (props) => {
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(localActivityPropertyData);
   const [attachField, setAttachField] = useState([]);
+
+  const [showDragIcon, setshowDragIcon] = useState(false);
 
   useEffect(() => {
     if (localLoadedActivityPropertyData?.Status === 0) {
@@ -198,6 +203,37 @@ const InitialRule = (props) => {
     setAttachField(values);
   };
 
+  ///mahtab code added
+
+  function handleOnDragEnd(result) {
+    if (!result.destination) return;
+
+    const items = Array.from(attachField);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // updateCharacters(items);
+    setAttachField(items);
+
+    let tempLocal = { ...localLoadedActivityPropertyData };
+    tempLocal.ActivityProperty.objPMRuleDetails.m_arrRuleInfo = items;
+    tempLocal.ActivityProperty.objPMRuleDetails.m_arrRuleInfo.forEach(
+      (data, i) => {
+        data.ruleId = i + 1;
+      }
+    );
+
+    setlocalLoadedActivityPropertyData(tempLocal);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.initialRules]: {
+          isModified: true,
+          hasError: false,
+        },
+      })
+    );
+  }
+
   return (
     <div>
       {spinner ? (
@@ -242,7 +278,7 @@ const InitialRule = (props) => {
                   {t("operation")}
                 </td>
                 <td className={styles.addDiv}>
-                  {!showInput ? (
+                  {(!showInput || !isReadOnly) && (
                     <button
                       className={
                         direction === RTL_DIRECTION
@@ -256,12 +292,12 @@ const InitialRule = (props) => {
                     >
                       {t("add")}
                     </button>
-                  ) : null}
+                  )}
                 </td>
               </tr>
             </thead>
             <tbody>
-              {showInput && props.isDrawerExpanded && (
+              {showInput && props.isDrawerExpanded && !isReadOnly && (
                 <tr className={styles.showInput}>
                   <td
                     className={`${styles.serialDiv} ${
@@ -334,121 +370,208 @@ const InitialRule = (props) => {
                   </td>
                 </tr>
               )}
-              {attachField.map((item, i) => (
-                <tr className={styles.showInput1}>
-                  {props.isDrawerExpanded && (
-                    <td
-                      className={`${styles.serialDiv} ${
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.divBody
-                          : styles.divBody
-                      }`}
-                    >
-                      {i + 1}.
-                    </td>
-                  )}
-                  {props.isDrawerExpanded ? (
-                    <td
-                      className={`${styles.conditionDiv} ${
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.divBody
-                          : styles.divBody
-                      }`}
-                    >
-                      <input
-                        className={styles.ruleInput}
-                        value={item.ruleCondition}
-                        onChange={(e) => handleChange(e, i)}
-                        name="ruleCondition"
-                      />
-                    </td>
-                  ) : (
-                    <td
-                      className={`${styles.conditionDiv} ${
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.divBody
-                          : styles.divBody
-                      }`}
-                    >
-                      {item.ruleCondition}
-                    </td>
-                  )}
 
-                  {props.isDrawerExpanded ? (
-                    <td
-                      className={`${styles.operationDiv} ${
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.divBody
-                          : styles.divBody
-                      }`}
+              <DragDropContext onDragEnd={handleOnDragEnd}>
+                <Droppable droppableId="characters">
+                  {(provided) => (
+                    <div
+                      className="characters"
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
                     >
-                      <input
-                        className={styles.ruleInput}
-                        value={item.ruleOperation}
-                        onChange={(e) => handleChange(e, i)}
-                        name="ruleOperation"
-                      />
-                    </td>
-                  ) : (
-                    <td
-                      className={`${styles.operationDiv} ${
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.divBody
-                          : styles.divBody
-                      }`}
-                      style={{
-                        paddingLeft: props.isDrawerExpanded ? "0" : "0.2rem",
-                      }}
-                    >
-                      {item.ruleOperation}
-                    </td>
+                      {attachField.map((item, i) => {
+                        return (
+                          <Draggable
+                            draggableId={`${i}`}
+                            key={`${i}`}
+                            index={i}
+                          >
+                            {(provided) => (
+                              <tr
+                                className={styles.showInput1}
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                
+                              >
+                                {props.isDrawerExpanded && (
+                                  <td
+                                    className={`${styles.serialDiv} ${
+                                      direction === RTL_DIRECTION
+                                        ? arabicStyles.divBody
+                                        : styles.divBody
+                                    }`}
+                                    onMouseOver={() => {
+                                      if (!isReadOnly) {
+                                        setshowDragIcon(true);
+                                      }
+                                    }}
+                                    onMouseLeave={() => setshowDragIcon(false)}
+                                    {...provided.dragHandleProps}
+                                  >
+                                    {showDragIcon ? (
+                                      <span>
+                                        <DragIndicatorOutlined />
+                                      </span>
+                                    ) : (
+                                      <span>{i + 1}.</span>
+                                    )}
+                                  </td>
+                                )}
+                                {props.isDrawerExpanded && !isReadOnly ? (
+                                  <td
+                                    className={`${styles.conditionDiv} ${
+                                      direction === RTL_DIRECTION
+                                        ? arabicStyles.divBody
+                                        : styles.divBody
+                                    }`}
+                                  >
+                                    <input
+                                      className={styles.ruleInput}
+                                      value={item.ruleCondition}
+                                      onChange={(e) => handleChange(e, i)}
+                                      name="ruleCondition"
+                                    />
+                                  </td>
+                                ) : (
+                                  <td
+                                    className={`${styles.conditionDiv} ${
+                                      direction === RTL_DIRECTION
+                                        ? arabicStyles.divBody
+                                        : styles.divBody
+                                    }`}
+                                  >
+                                    {item.ruleCondition}
+                                  </td>
+                                )}
+
+                                {props.isDrawerExpanded && !isReadOnly ? (
+                                  <td
+                                    className={`${styles.operationDiv} ${
+                                      direction === RTL_DIRECTION
+                                        ? arabicStyles.divBody
+                                        : styles.divBody
+                                    }`}
+                                  >
+                                    <input
+                                      className={styles.ruleInput}
+                                      value={item.ruleOperation}
+                                      onChange={(e) => handleChange(e, i)}
+                                      name="ruleOperation"
+                                    />
+                                  </td>
+                                ) : (
+                                  <td
+                                    className={`${styles.operationDiv} ${
+                                      direction === RTL_DIRECTION
+                                        ? arabicStyles.divBody
+                                        : styles.divBody
+                                    }`}
+                                    style={{
+                                      paddingLeft: props.isDrawerExpanded
+                                        ? "0"
+                                        : "0.2rem",
+                                    }}
+                                  >
+                                    {item.ruleOperation}
+                                  </td>
+                                )}
+
+                                <td
+                                  className={`${styles.addDiv} ${
+                                    direction === RTL_DIRECTION
+                                      ? arabicStyles.divBody
+                                      : styles.divBody
+                                  }`}
+                                >
+                                  {/*code edited on 5 August 2022 for BugId 110897*/}
+                                  {!isReadOnly &&
+                                    (item.isEdited ? (
+                                      <React.Fragment>
+                                        <button
+                                          className={styles.cancelBtn}
+                                          onClick={() => cancelEdit(i, item)}
+                                        >
+                                          {t("cancel")}
+                                        </button>
+                                        <button
+                                          className={
+                                            item.ruleCondition?.trim() !== "" &&
+                                            item.ruleOperation?.trim() !== ""
+                                              ? styles.addBtn
+                                              : styles.disabledAddBtn
+                                          }
+                                          onClick={() => handleEditFields(item)}
+                                          disabled={
+                                            item.ruleCondition?.trim() === "" &&
+                                            item.ruleOperation?.trim() === ""
+                                          }
+                                        >
+                                          {t("save")}
+                                        </button>
+                                      </React.Fragment>
+                                    ) : (
+                                      <DeleteOutlineIcon
+                                        onClick={() =>
+                                          handleRemoveFields(i, item.ruleId)
+                                        }
+                                        className={styles.cancelIcon}
+                                      />
+                                    ))}
+                                </td>
+                              </tr>
+                            )}
+                          </Draggable>
+                        );
+                      })}
+                      {provided.placeholder}
+                    </div>
                   )}
-                  <td
-                    className={`${styles.addDiv} ${
-                      direction === RTL_DIRECTION
-                        ? arabicStyles.divBody
-                        : styles.divBody
-                    }`}
-                  >
-                    {/*code edited on 5 August 2022 for BugId 110897*/}
-                    {item.isEdited ? (
-                      <React.Fragment>
-                        <button
-                          className={styles.cancelBtn}
-                          onClick={() => cancelEdit(i, item)}
-                        >
-                          {t("cancel")}
-                        </button>
-                        <button
-                          className={
-                            item.ruleCondition?.trim() !== "" &&
-                            item.ruleOperation?.trim() !== ""
-                              ? styles.addBtn
-                              : styles.disabledAddBtn
-                          }
-                          onClick={() => handleEditFields(item)}
-                          disabled={
-                            item.ruleCondition?.trim() === "" &&
-                            item.ruleOperation?.trim() === ""
-                          }
-                        >
-                          {t("save")}
-                        </button>
-                      </React.Fragment>
-                    ) : (
-                      <DeleteOutlineIcon
-                        onClick={() => handleRemoveFields(i, item.ruleId)}
-                        className={styles.cancelIcon}
-                       
-                      />
-                    )}
-                  </td>
-                </tr>
-              ))}
+                </Droppable>
+              </DragDropContext>
             </tbody>
           </table>
         </div>
       )}
+
+      {/* mahtab testing code */}
+
+      {/*  <header className="App-header">
+        <h1>Final Space Characters</h1>
+
+        <DragDropContext onDragEnd={handleOnDragEnd}>
+          <Droppable droppableId="characters">
+            {(provided) => (
+              <ul
+                className="characters"
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+              >
+                {characters.map((item, index) => {
+                  return (
+                    <Draggable
+                      draggableId={`${index}`}
+                      key={`${index}`}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <li
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          <div className="charactersthumb"></div>
+                          <p>{item.name}</p>
+                        </li>
+                      )}
+                    </Draggable>
+                  );
+                })}
+                {provided.placeholder}
+              </ul>
+            )}
+          </Droppable>
+        </DragDropContext>
+      </header> */}
     </div>
   );
 };

@@ -11,11 +11,14 @@ import CheckIcon from "@material-ui/icons/Check";
 import CloseIcon from "@material-ui/icons/Close";
 import "./AddToListDropdown.css";
 import { useTranslation } from "react-i18next";
+import { useRef } from "react";
+import { FieldValidations } from "../../utility/FieldValidations/fieldValidations";
 
 function AddToListDropdown(props) {
   let { t } = useTranslation();
   const [showInput, setshowInput] = useState(false);
   const [checked, setChecked] = useState(null);
+  const swimLaneRef = useRef();
 
   const clickNew = () => {
     setshowInput(true);
@@ -93,10 +96,12 @@ function AddToListDropdown(props) {
               <div
                 style={{ display: "flex", alignItems: "center", gap: "0.5vw" }}
               >
+                {/*code added on 8 August 2022 for BugId 112903*/}
                 <input
                   className={`altd_inputField`}
                   autoFocus
                   value={props.inputValue}
+                  id={props.inputValue}
                   type="text"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -106,7 +111,9 @@ function AddToListDropdown(props) {
                       setshowInput(false);
                       props.onKeydown(e.target.value);
                     }
+                    FieldValidations(e, 180, swimLaneRef.current, 30);
                   }}
+                  ref={swimLaneRef}
                   // onKeyPress={(e)=>{
                   //   var validateBool = validateRegex(String.fromCharCode(e.which), REGEX.AlphaSpaceUs);
                   //   if (!validateBool) {
@@ -116,8 +123,13 @@ function AddToListDropdown(props) {
                   //   }
                   // }}
                 />
+
                 <CloseIcon
-                  style={{ width: "1.25rem", height: "1.25rem", color: "#414141" }}
+                  style={{
+                    width: "1.25rem",
+                    height: "1.25rem",
+                    color: "#414141",
+                  }}
                   onClick={() => setshowInput(false)}
                 />
               </div>

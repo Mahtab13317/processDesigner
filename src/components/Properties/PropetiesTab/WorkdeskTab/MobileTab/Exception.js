@@ -11,9 +11,10 @@ import {
 import { useDispatch } from "react-redux";
 import { setActivityPropertyChange } from "../../../../../redux-store/slices/ActivityPropertyChangeSlice";
 
-function Exception() {
+function Exception(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
+  const { isReadOnly } = props;
   const dispatch = useDispatch();
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
@@ -134,6 +135,7 @@ function Exception() {
                   : styles.mainCheckbox
               }
               checked={allChecked}
+              disabled={isReadOnly}
               onChange={() => allCheckHandler()}
               style={{ flex: "0.125", justifyContent: "left" }}
             />
@@ -150,6 +152,7 @@ function Exception() {
                         : styles.mainCheckbox
                     }
                     checked={checked[val]}
+                    disabled={isReadOnly}
                     onChange={() => CheckExpHandler(val)}
                     style={{ flex: "0.125", justifyContent: "left" }}
                   />

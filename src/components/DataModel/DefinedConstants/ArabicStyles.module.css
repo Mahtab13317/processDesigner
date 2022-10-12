@@ -165,7 +165,9 @@
 .deleteIcon {
   float: right;
   color: grey;
-  margin: 0.809rem 34.125rem 0.875rem 1.188rem;
+  margin: 1.2rem 1.188rem 0.875rem 0rem;
   cursor: pointer;
-  margin-right: auto;
+  margin-left: auto;
+  width: 1.7rem !important;
+  height: 1.7rem !important;
 }

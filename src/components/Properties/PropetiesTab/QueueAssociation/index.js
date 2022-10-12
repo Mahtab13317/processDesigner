@@ -1,3 +1,5 @@
+// Changes made to solve ID Bug 116180 - Associated Queue: not able to create own Queue in Associated Queue &
+// Bug 116178 - Associated Queue: not able to save any changes in associated Queue
 import React, { useState, useEffect } from "react";
 import Tabs from "../../../../UI/Tab/Tab.js";
 import Radio from "@material-ui/core/Radio";
@@ -10,6 +12,7 @@ import GroupsTab from "./groupsTab.js";
 import { store, useGlobalState } from "state-pool";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
+import { Select, MenuItem, Checkbox } from "@material-ui/core";
 import { connect } from "react-redux";
 import {
   SERVER_URL,
@@ -19,7 +22,9 @@ import {
   RTL_DIRECTION,
   SAVE_QUEUEDATA,
 } from "../../../../Constants/appConstants.js";
-import { Checkbox, Select } from "@material-ui/core";
+import { toHaveFormValues } from "@testing-library/jest-dom/dist/matchers.js";
+import { useRef } from "react";
+import { FieldValidations } from "../../../../utility/FieldValidations/fieldValidations.js";
 
 function QueueAssociation(props) {
   let { t } = useTranslation();
@@ -28,8 +33,14 @@ function QueueAssociation(props) {
   const [variableList, setVariableList] = useState(null);
   const [queueName, setQueueName] = useState("");
   const [queueDesc, setQueueDesc] = useState("");
+  const [fetchingOrder, setFetchingOrder] = useState(null);
+  const [fetchingOrderLast, setFetchingOrderLast] = useState(null);
   const [queueTypeLocal, setQueueTypeLocal] = useState("fifo");
+  const [allowReassignment, setAllowReassignment] = useState(null);
+  const [wipAssignmentType, setWipAssignmentType] = useState("N");
   const loadedProcessData = store.getState("loadedProcessData");
+  const [workItemVisibility, setWorkItemVisibility] = useState("0");
+  const [wipSortOrder, setWipSortOrder] = useState("A");
   const [localLoadedProcessData, setLocalLoadedProcessData] =
     useGlobalState(loadedProcessData);
   const localActivityPropertyData = store.getState("activityPropertyData");
@@ -38,7 +49,170 @@ function QueueAssociation(props) {
     setlocalLoadedActivityPropertyData,
     updatelocalLoadedActivityPropertyData,
   ] = useGlobalState(localActivityPropertyData);
+  const [workItemDropDownValues, setWorkItemDropDownValues] = useState([
+    {
+      name: "ActivityName",
+      orderBy: "3",
+    },
+    {
+      name: "CheckListCompleteFlag",
+      orderBy: "7",
+    },
+    {
+      name: "EntryDateTime",
+      orderBy: "10",
+    },
+    {
+      name: "InstrumentStatus",
+      orderBy: "6",
+    },
+    {
+      name: "IntroducedBy",
+      orderBy: "5",
+    },
+    {
+      name: "IntroductionDateTime",
+      orderBy: "13",
+    },
+    {
+      name: "LockedByName",
+      orderBy: "4",
+    },
+    {
+      name: "LockedTime",
+      orderBy: "12",
+    },
+    {
+      name: "LockStatus",
+      orderBy: "8",
+    },
+    {
+      name: "PriorityLevel",
+      orderBy: "1",
+    },
+    {
+      name: "ProcessInstanceName",
+      orderBy: "2",
+    },
+    {
+      name: "Status",
+      orderBy: "17",
+    },
+    {
+      name: "ValidTill",
+      orderBy: "11",
+    },
+    {
+      name: "VAR_INT1",
+      orderBy: "101",
+    },
+    {
+      name: "VAR_INT2",
+      orderBy: "102",
+    },
+    {
+      name: "VAR_INT3",
+      orderBy: "103",
+    },
+    {
+      name: "VAR_INT4",
+      orderBy: "104",
+    },
+    {
+      name: "VAR_INT5",
+      orderBy: "105",
+    },
+    {
+      name: "VAR_INT5",
+      orderBy: "105",
+    },
+    {
+      name: "VAR_INT6",
+      orderBy: "106",
+    },
+    {
+      name: "VAR_INT7",
+      orderBy: "107",
+    },
+    {
+      name: "VAR_INT8",
+      orderBy: "108",
+    },
+    {
+      name: "VAR_FLOAT1",
+      orderBy: "109",
+    },
+    {
+      name: "VAR_FLOAT2",
+      orderBy: "110",
+    },
+    {
+      name: "VAR_DATE1",
+      orderBy: "111",
+    },
+    {
+      name: "VAR_DATE2",
+      orderBy: "112",
+    },
+    {
+      name: "VAR_DATE3",
+      orderBy: "113",
+    },
+    {
+      name: "VAR_DATE4",
+      orderBy: "114",
+    },
+    {
+      name: "VAR_LONG1",
+      orderBy: "115",
+    },
+    {
+      name: "VAR_LONG2",
+      orderBy: "116",
+    },
+    {
+      name: "VAR_LONG3",
+      orderBy: "117",
+    },
+    {
+      name: "VAR_LONG4",
+      orderBy: "118",
+    },
+    {
+      name: "VAR_STR1",
+      orderBy: "119",
+    },
+    {
+      name: "VAR_STR2",
+      orderBy: "120",
+    },
+    {
+      name: "VAR_STR3",
+      orderBy: "121",
+    },
+    {
+      name: "VAR_STR4",
+      orderBy: "122",
+    },
+    {
+      name: "VAR_STR5",
+      orderBy: "123",
+    },
+    {
+      name: "VAR_STR6",
+      orderBy: "124",
+    },
+    {
+      name: "VAR_STR7",
+      orderBy: "125",
+    },
+    {
+      name: "VAR_STR8",
+      orderBy: "126",
+    },
+  ]);
 
+  const queueNameRef = useRef();
   const associateQueueHandler = () => {
     let tempKey = {};
     addedVariableList.forEach((el) => {
@@ -64,34 +238,64 @@ function QueueAssociation(props) {
       };
     });
     let tempQueue;
-    localLoadedProcessData.MileStones[0].Activities.map(el=>{
-      if(el.ActivityType== props.cellActivityType && el.ActivitySubType== props.cellActivitySubType){
-        tempQueue= el.QueueId;
+    localLoadedProcessData.MileStones[0].Activities.map((el) => {
+      if (
+        el.ActivityType == props.cellActivityType &&
+        el.ActivitySubType == props.cellActivitySubType
+      ) {
+        tempQueue = el.QueueId;
       }
-    })
+    });
     props.setShowQueueModal(false);
+    let tempOrder, tempFilterValue;
+    if (queueTypeLocal == "fifo") {
+      tempOrder = fetchingOrder;
+    } else if (workItemVisibility == "1") {
+      tempOrder = "888";
+    } else if (workItemVisibility == "2") {
+      tempOrder = fetchingOrder;
+    } else if (workItemVisibility == "3") {
+      tempOrder = fetchingOrderLast;
+    }
+
+    workItemDropDownValues?.map((el) => {
+      if (el.orderBy == tempOrder) {
+        tempFilterValue = el.name;
+      }
+    });
+
     axios
       .post(SERVER_URL + ENDPOINT_QUEUEASSOCIATION_MODIFY, {
         processDefId: localLoadedProcessData.ProcessDefId,
         processState: localLoadedProcessData.ProcessType,
         queueName: queueName,
         queueDesc: queueDesc,
-        queueId: props.queueFrom ==='graph'?props.showQueueModal.queueId: tempQueue,
-        queueType: "M",
-        allowReassignment: "N",
-        orderBy: "2",
+        queueId:
+          props.queueFrom === "graph"
+            ? props.showQueueModal.queueId
+            : tempQueue,
+        queueType: queueTypeLocal == "fifo" ? "F" : wipAssignmentType,
+        allowReassignment: allowReassignment ? "Y" : "N",
+        orderBy: tempOrder,
         refreshInterval: "0",
-        sortOrder: "A",
+        sortOrder: queueTypeLocal == "fifo" ? "D" : wipSortOrder,
+        ugMap: tempKey,
+        filterOption: queueTypeLocal == "fifo" ? "0" : workItemVisibility,
+        filterValue: queueTypeLocal == "fifo" ? "" : tempFilterValue,
+        pendingActions: "N",
+        queueFilter: "",
+        status: "N",
+        actId: +localLoadedActivityPropertyData.ActivityProperty.actId,
         ugMap: tempKey,
       })
       .then((res) => {
         if (res.data.Status === 0) {
-          alert("Queue Added Successfully!");
+          alert("Queue Modified Successfully!");
         }
       });
   };
+
   const createQueueHandler = () => {
-    console.log("KYAAAA1", props.selfQueueCreated);
     let tempKey = {};
     addedVariableList.forEach((el) => {
       tempKey = {
@@ -120,25 +324,43 @@ function QueueAssociation(props) {
       myArray.push(el.QueueId);
     });
     let minimumQueueId = Math.min(...myArray) - 1;
+    console.log("QUEUEUEUEUE", myArray, localLoadedProcessData.Queue);
     props.setShowQueueModal(false);
+    let tempOrder, tempFilterValue;
+    if (queueTypeLocal == "fifo") {
+      tempOrder = fetchingOrder;
+    } else if (workItemVisibility == "1") {
+      tempOrder = "888";
+    } else if (workItemVisibility == "2") {
+      tempOrder = fetchingOrder;
+    } else if (workItemVisibility == "3") {
+      tempOrder = fetchingOrderLast;
+    }
+    workItemDropDownValues?.map((el) => {
+      if (el.orderBy == tempOrder) {
+        tempFilterValue = el.name;
+      }
+    });
+
     axios
       .post(SERVER_URL + SAVE_QUEUEDATA, {
         processDefId: localLoadedProcessData.ProcessDefId,
         processState: localLoadedProcessData.ProcessType,
         queueName: queueName,
-        queueId: minimumQueueId,
-        queueType: "N",
+        queueId: minimumQueueId == null ? "1" : minimumQueueId,
+        queueType: queueTypeLocal == "fifo" ? "F" : wipAssignmentType,
         pendingActions: "N",
         queueDesc: queueDesc,
-        allowReassignment: "N",
-        filterOption: "0",
-        filterValue: "",
-        orderBy: "2",
+        allowReassignment: allowReassignment ? "Y" : "N",
+        filterOption: queueTypeLocal == "fifo" ? "0" : workItemVisibility,
+        filterValue: queueTypeLocal == "fifo" ? "" : tempFilterValue,
+        orderBy: tempOrder,
         queueFilter: "",
         refreshInterval: "0",
-        sortOrder: "A",
+        sortOrder: queueTypeLocal == "fifo" ? "D" : wipSortOrder,
         status: "N",
         ugMap: tempKey,
+        actId: +localLoadedActivityPropertyData.ActivityProperty.actId,
       })
       .then((res) => {
         if (res.data.Status === 0) {
@@ -151,6 +373,19 @@ function QueueAssociation(props) {
             ) {
               el.QueueId = minimumQueueId;
             }
+          });
+          temp.Queue.push({
+            AllowReassignment: allowReassignment ? "Y" : "N",
+            FilterOption: queueTypeLocal == "fifo" ? "0" : workItemVisibility,
+            FilterValue: queueTypeLocal == "fifo" ? "" : tempFilterValue,
+            OrderBy: tempOrder,
+            QueueDescription: queueDesc,
+            QueueFilter: "",
+            QueueId: minimumQueueId == null ? "1" : minimumQueueId,
+            QueueName: queueName,
+            QueueType: queueTypeLocal == "fifo" ? "F" : wipAssignmentType,
+            RefreshInterval: "0",
+            SortOrder: queueTypeLocal == "fifo" ? "D" : wipSortOrder,
           });
           setLocalLoadedProcessData(temp);
         }
@@ -235,15 +470,11 @@ function QueueAssociation(props) {
   }, []);
 
   useEffect(() => {
-    console.log('GENERAL', props?.queueFrom, props?.showQueueModal?.queueId);
-    if (props.queueType == 0 || props.selfQueueCreated) {
+    if (+props.queueType == 0 || props.selfQueueCreated) {
       let temp = [];
       let tempQueueId;
       localLoadedProcessData.MileStones[0].Activities.map((el) => {
-        if (
-          el.ActivityType === props.cellActivityType &&
-          el.ActivitySubType === props.cellActivitySubType
-        ) {
+        if (el.ActivityId === props.cellID) {
           tempQueueId = el.QueueId;
         }
       });
@@ -251,36 +482,56 @@ function QueueAssociation(props) {
         .post(SERVER_URL + ENDPOINT_QUEUELIST, {
           processDefId: localLoadedProcessData.ProcessDefId,
           processState: localLoadedProcessData.ProcessType,
-          queueId: props.queueFrom ==='graph'?props.showQueueModal.queueId: tempQueueId,
+          queueId:
+            props.queueFrom === "graph"
+              ? props.showQueueModal.queueId
+              : tempQueueId,
         })
         .then((res) => {
+          if (res?.data?.Queue[0]?.queueType == "F") {
+            setFetchingOrder(res?.data?.Queue[0]?.orderBy);
+          } else if (res?.data?.Queue[0]?.queueType != "F") {
+            if (
+              res?.data?.Queue[0]?.filterOption == "1" ||
+              res?.data?.Queue[0]?.filterOption == "2"
+            ) {
+              setFetchingOrder(res?.data?.Queue[0]?.orderBy);
+            } else {
+              setFetchingOrderLast(res?.data?.Queue[0]?.orderBy);
+            }
+          }
+          if (res?.data?.Queue[0].allowReassignment == "Y") {
+            setAllowReassignment(true);
+          } else {
+            setAllowReassignment(false);
+          }
           setQueueName(res?.data?.Queue[0]?.queueName);
           setQueueDesc(res?.data?.Queue[0]?.queueDesc);
-          Object.keys(res?.data?.Queue[0]?.ugMap).forEach((el) => {
-            let tOne = res?.data?.Queue[0]?.ugMap;
-            temp.push({
-              GroupName: tOne[el].m_strUGName,
-              ID: tOne[el].m_strUGId,
+          setQueueTypeLocal(
+            res?.data?.Queue[0]?.queueType == "F" ? "fifo" : "wip"
+          );
+          setWorkItemVisibility(res?.data?.Queue[0]?.filterOption);
+          setWipAssignmentType(res?.data?.Queue[0]?.queueType);
+          setWipSortOrder(res?.data?.Queue[0]?.sortOrder);
+          if (res.data.Queue[0].ugMap) {
+            Object.keys(res?.data?.Queue[0]?.ugMap).forEach((el) => {
+              let tOne = res?.data?.Queue[0]?.ugMap;
+              temp.push({
+                GroupName: tOne[el].m_strUGName,
+                ID: tOne[el].m_strUGId,
+              });
             });
-          });
+          }
           setAddedVariableList(temp);
         });
     }
-  }, [props.queueType, props.selfQueueCreated]);
-
-  const editQueueNameHandler = (e) => {
-    setQueueName(e.target.value);
-  };
-
-  const editQueueDescHandler = (e) => {
-    setQueueDesc(e.target.value);
-  };
+  }, [props.queueType, props.selfQueueCreated, localLoadedProcessData]);
 
   const showFetchingOrder = () => {
     return (
       <div className="fetchingOrderFIFO">
         {/* ------------------------------ */}
-        {queueTypeLocal == "wip" ? (
+        {queueTypeLocal === "wip" ? (
           <>
             <p
               style={{
@@ -296,10 +547,11 @@ function QueueAssociation(props) {
                 column
                 aria-labelledby="demo-row-radio-buttons-group-label"
                 name="row-radio-buttons-group"
-                defaultValue="one"
+                value={wipAssignmentType}
+                onChange={(e) => setWipAssignmentType(e.target.value)}
               >
                 <FormControlLabel
-                  value="one"
+                  value="N"
                   control={<Radio size="small" />}
                   label={
                     <p style={{ fontSize: "12px", height: "15px" }}>
@@ -308,7 +560,7 @@ function QueueAssociation(props) {
                   }
                 />
                 <FormControlLabel
-                  value="two"
+                  value="D"
                   control={<Radio size="small" />}
                   label={
                     <p style={{ fontSize: "12px", height: "15px" }}>
@@ -317,19 +569,12 @@ function QueueAssociation(props) {
                   }
                 />
                 <FormControlLabel
-                  value="three"
+                  value="S"
                   control={<Radio size="small" />}
                   label={
                     <p style={{ fontSize: "12px", height: "15px" }}>
                       Permanent Assignment
                     </p>
-                  }
-                />
-                <FormControlLabel
-                  value="three"
-                  control={<Radio size="small" />}
-                  label={
-                    <p style={{ fontSize: "12px", height: "15px" }}>Search</p>
                   }
                 />
               </RadioGroup>
@@ -342,7 +587,11 @@ function QueueAssociation(props) {
                   marginLeft: "-13px",
                 }}
               >
-                <Checkbox size="small" />
+                <Checkbox
+                  size="small"
+                  checked={allowReassignment}
+                  onChange={() => setAllowReassignment(!allowReassignment)}
+                />
                 <span style={{ fontSize: "11px", fontWeight: "700" }}>
                   Allow Reassignment
                 </span>
@@ -360,44 +609,79 @@ function QueueAssociation(props) {
         >
           FETCHING ORDER
         </p>
-        <FormControl>
-          <RadioGroup
-            column
-            aria-labelledby="demo-row-radio-buttons-group-label"
-            name="row-radio-buttons-group"
-            defaultValue="one"
-          >
-            <FormControlLabel
-              value="one"
-              control={<Radio size="small" />}
-              label={
-                <p style={{ fontSize: "12px", height: "15px" }}>
-                  In order of Process Instance ID
-                </p>
-              }
-            />
-            <FormControlLabel
-              value="two"
-              control={<Radio size="small" />}
-              label={
-                <p style={{ fontSize: "12px", height: "15px" }}>
-                  In order of entry date time
-                </p>
-              }
-            />
-            <FormControlLabel
-              value="three"
-              control={<Radio size="small" />}
-              label={
-                <p style={{ fontSize: "12px", height: "15px" }}>
-                  In order of priority level
-                </p>
-              }
-            />
-          </RadioGroup>
-        </FormControl>
+        {/* --------------------------------*/}
+        {queueTypeLocal === "fifo" ? (
+          <FormControl>
+            <RadioGroup
+              column
+              aria-labelledby="demo-row-radio-buttons-group-label"
+              name="row-radio-buttons-group"
+              value={fetchingOrder}
+              onChange={(e) => setFetchingOrder(e.target.value)}
+            >
+              <FormControlLabel
+                value="2"
+                control={<Radio size="small" />}
+                label={
+                  <p style={{ fontSize: "12px", height: "15px" }}>
+                    In order of Process Instance ID
+                  </p>
+                }
+              />
+              <FormControlLabel
+                value="10"
+                control={<Radio size="small" />}
+                label={
+                  <p style={{ fontSize: "12px", height: "15px" }}>
+                    In order of entry date time
+                  </p>
+                }
+              />
+              <FormControlLabel
+                value="1"
+                control={<Radio size="small" />}
+                label={
+                  <p style={{ fontSize: "12px", height: "15px" }}>
+                    In order of priority level
+                  </p>
+                }
+              />
+            </RadioGroup>
+          </FormControl>
+        ) : (
+          <div>
+            <p>Fetching workItems in order of</p>
+            <p>
+              Sort Order{" "}
+              <Select
+                style={{
+                  height: "10px !important",
+                  width: "98px",
+                  marginTop: "10px",
+                  background: "#FFFFFF 0% 0% no-repeat padding-box",
+                  border: "1px solid #DADADA",
+                  borderRadius: "2px",
+                  opacity: "1",
+                }}
+                value={wipSortOrder}
+                onChange={(e) => setWipSortOrder(e.target.value)}
+              >
+                <MenuItem value="A">
+                  <em style={{ fontSize: "12px", fontStyle: "normal" }}>
+                    Ascending
+                  </em>
+                </MenuItem>
+                <MenuItem value="D">
+                  <em style={{ fontSize: "12px", fontStyle: "normal" }}>
+                    Descending
+                  </em>
+                </MenuItem>
+              </Select>
+            </p>
+          </div>
+        )}
         {/* ------------------------------- */}
-        {queueTypeLocal == "wip" ? (
+        {queueTypeLocal === "wip" ? (
           <>
             <p
               style={{
@@ -414,10 +698,11 @@ function QueueAssociation(props) {
                 column
                 aria-labelledby="demo-row-radio-buttons-group-label"
                 name="row-radio-buttons-group"
-                defaultValue="one"
+                value={workItemVisibility}
+                onChange={(e) => setWorkItemVisibility(e.target.value)}
               >
                 <FormControlLabel
-                  value="one"
+                  value="1"
                   control={<Radio size="small" />}
                   label={
                     <p style={{ fontSize: "12px", height: "15px" }}>
@@ -426,7 +711,7 @@ function QueueAssociation(props) {
                   }
                 />
                 <FormControlLabel
-                  value="two"
+                  value="2"
                   control={<Radio size="small" />}
                   label={
                     <div style={{ display: "flex", alignItems: "center" }}>
@@ -443,12 +728,31 @@ function QueueAssociation(props) {
                           borderRadius: "2px",
                           opacity: "1",
                         }}
-                      />
+                        value={
+                          queueTypeLocal == "fifo" ? "none" : fetchingOrder
+                        }
+                        onChange={(e) => setFetchingOrder(e.target.value)}
+                      >
+                        {workItemDropDownValues.map((el) => {
+                          return (
+                            <MenuItem value={el.orderBy}>
+                              <em
+                                style={{
+                                  fontSize: "12px",
+                                  fontStyle: "normal",
+                                }}
+                              >
+                                {el.name}
+                              </em>
+                            </MenuItem>
+                          );
+                        })}
+                      </Select>
                     </div>
                   }
                 />
                 <FormControlLabel
-                  value="three"
+                  value="3"
                   control={<Radio size="small" />}
                   label={
                     <div style={{ display: "flex", alignItems: "center" }}>
@@ -465,7 +769,26 @@ function QueueAssociation(props) {
                           borderRadius: "2px",
                           opacity: "1",
                         }}
-                      />
+                        value={
+                          queueTypeLocal == "fifo" ? "none" : fetchingOrderLast
+                        }
+                        onChange={(e) => setFetchingOrderLast(e.target.value)}
+                      >
+                        {workItemDropDownValues.map((el) => {
+                          return (
+                            <MenuItem value={el.orderBy}>
+                              <em
+                                style={{
+                                  fontSize: "12px",
+                                  fontStyle: "normal",
+                                }}
+                              >
+                                {el.name}
+                              </em>
+                            </MenuItem>
+                          );
+                        })}
+                      </Select>
                     </div>
                   }
                 />
@@ -477,7 +800,6 @@ function QueueAssociation(props) {
     );
   };
 
-  console.log("KYAAAA2", props.selfQueueCreated);
   return (
     <div>
       <p style={{ fontSize: "16px", fontWeight: "600", padding: "12px" }}>
@@ -487,7 +809,7 @@ function QueueAssociation(props) {
       <Tabs
         tabType="processSubTab"
         tabContentStyle="processSubTabContentStyle"
-        tabBarStyle="processSubTabBarStyle"
+        tabBarStyle="processSubQueueBarStyle"
         oneTabStyle="processSubOneTabStyle"
         tabStyling="processViewTabs"
         TabNames={["General", "Groups"]}
@@ -513,6 +835,7 @@ function QueueAssociation(props) {
                 }}
               >
                 <p style={{ fontSize: "12px", color: "#606060" }}>Queue Name</p>
+                {/*code updated on 15 September 2022 for BugId 112903*/}
                 <input
                   value={queueName}
                   style={{
@@ -523,7 +846,11 @@ function QueueAssociation(props) {
                     opacity: "1",
                     padding: "0px 3px",
                   }}
-                  onChange={(e) => editQueueNameHandler(e)}
+                  onChange={(e) => setQueueName(e.target.value)}
+                  ref={queueNameRef}
+                  onKeyPress={(e) =>
+                    FieldValidations(e, 150, queueNameRef.current, 10)
+                  }
                 />
               </div>
               <div
@@ -540,7 +867,7 @@ function QueueAssociation(props) {
                   Description
                 </p>
                 <textarea
-                  onChange={(e) => editQueueDescHandler(e)}
+                  onChange={(e) => setQueueDesc(e.target.value)}
                   value={queueDesc}
                   style={{
                     width: "400px",
@@ -570,7 +897,7 @@ function QueueAssociation(props) {
                     row
                     aria-labelledby="demo-row-radio-buttons-group-label"
                     name="row-radio-buttons-group"
-                    defaultValue="fifo"
+                    value={queueTypeLocal}
                     onChange={(e) => setQueueTypeLocal(e.target.value)}
                   >
                     <FormControlLabel
@@ -586,12 +913,7 @@ function QueueAssociation(props) {
                   </RadioGroup>
                 </FormControl>
               </div>
-              {/* ) : null} */}
-              {/* )} */}
-              {/* =========================AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA============================= */}
-              {/* {props.queueType == 1 ? showFetchingOrder() : null} */}
               {showFetchingOrder()}
-              {/* =======================AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA============================== */}
             </div>
             <div className="buttons_add buttonsAddToDo_Queue">
               <Button
@@ -654,7 +976,7 @@ function QueueAssociation(props) {
                 variant="contained"
                 color="primary"
                 onClick={
-                  props.queueType == "0" && !props.selfQueueCreated
+                  props.queueType == "0" || props.selfQueueCreated
                     ? associateQueueHandler
                     : createQueueHandler
                 }

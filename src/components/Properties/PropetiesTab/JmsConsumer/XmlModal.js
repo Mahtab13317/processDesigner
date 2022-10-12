@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "./JmsConsumer.module.css";
 import axios from "axios";
@@ -6,38 +6,48 @@ import {
   ENDPOINT_READXML,
   SERVER_URL,
 } from "../../../../Constants/appConstants";
+import { Buffer } from "buffer";
 
 function XmlModal(props) {
   let { t } = useTranslation();
+  const { responseXmlData, setModalClicked } = props;
   const [inputXml, setinputXml] = useState(
     `<start>\n<data1>${t("testData1")}</data1>\n<data2>${t(
       "testData2"
     )}</data2>\n</start>`
   );
 
+  // Function that gets called when the user changes the input XML.
   const inputXMLHandler = (e) => {
     setinputXml(e.target.value);
   };
 
-  const readXmlHandler = () => {
+  // Function that encodes the input XML into Base64.
+  const encodeBase64 = (data) => {
+    return Buffer.from(data).toString("base64");
+  };
+
+  // Function that calls the API that reads the XML.
+  const readXmlHandler = async () => {
+    console.log("999", "INPUT XML", inputXml);
+    const encodedInputXml = encodeBase64(inputXml);
     let jsonBody = {
-      inputXML: inputXml,
-      destinationName: props.destinationName,
-      processDefId: props.processId,
-      activityId: props.activityId,
+      xmlString: encodedInputXml,
     };
-    axios.post(SERVER_URL + ENDPOINT_READXML, jsonBody).then((res) => {
-      if (res?.data?.Status === 0) {
-        props.responseXmlData(res.data);
-        props.setModalClicked(false);
-      }
-    });
+    const config = { headers: { "Content-Type": "application/json" } };
+    const res = await axios.post(
+      SERVER_URL + ENDPOINT_READXML,
+      jsonBody,
+      config
+    );
+    responseXmlData(res?.data);
+    setModalClicked(false);
   };
 
   return (
     <div>
       <React.Fragment>
-        <h5 className={styles.readXml}>{t("readXml")}</h5>
+        <p className={styles.readXml}>{t("InputXML")}</p>
         <p className={styles.pasteXml}>{t("pastexml")}</p>
         <textarea
           className={styles.inputXml}

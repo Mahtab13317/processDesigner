@@ -20,6 +20,10 @@ import {
   ActivityPropertySaveCancelValue,
   setSave,
 } from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked.js";
+import {
+  isProcessDeployedFunc,
+  isReadOnlyFunc,
+} from "../../../../utility/CommonFunctionCall/CommonFunctionCall.js";
 
 function Restful(props) {
   let { t } = useTranslation();
@@ -32,14 +36,19 @@ function Restful(props) {
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
+  const loadedProcessData = store.getState("loadedProcessData"); //current processdata clicked
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [showCatelogScreen, setShowCatelogScreen] = useState(false);
   const [associateButtonClicked, setAssociateButtonClicked] = useState(false);
   const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
+  const [value, setValue] = useState(0); // Function to handle tab change.
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   useEffect(() => {
     if (saveCancelStatus.SaveClicked) {
       let isValidObj = validateFunc();
       if (!isValidObj.isValid && isValidObj.type === "FW") {
+        setValue(0);
         dispatch(
           setToastDataFunc({
             message: `${t("PleaseDefineAtleastOneForwardMapping")}`,
@@ -48,6 +57,7 @@ function Restful(props) {
           })
         );
       } else if (!isValidObj.isValid && isValidObj.type === "RW") {
+        setValue(1);
         dispatch(
           setToastDataFunc({
             message: `${t("PleaseDefineAtleastOneReverseMapping")}`,
@@ -291,19 +301,21 @@ function Restful(props) {
                   fontWeight: "700",
                 }}
               >
-                {t("webService")}
+                {props.heading ? props.heading : t("webService")}
               </p>
-              <p
-                style={{
-                  fontSize: "var(--base_text_font_size)",
-                  color: "var(--link_color)",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                }}
-                onClick={() => LandOnCatelogHandler()}
-              >
-                {t("GoToCatalog")}
-              </p>
+              {!isProcessDeployedFunc(localLoadedProcessData) && (
+                <p
+                  style={{
+                    fontSize: "var(--base_text_font_size)",
+                    color: "var(--link_color)",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => LandOnCatelogHandler()}
+                >
+                  {t("GoToCatalog")}
+                </p>
+              )}
             </div>
             <div
               style={{
@@ -321,7 +333,11 @@ function Restful(props) {
                 }}
               >
                 <p
-                  style={{ fontSize: "var(--base_text_font_size)", color: "#886F6F", width: "100%" }}
+                  style={{
+                    fontSize: "var(--base_text_font_size)",
+                    color: "#886F6F",
+                    width: "100%",
+                  }}
                 >
                   {t("method")}
                 </p>
@@ -337,6 +353,7 @@ function Restful(props) {
                     width: props.isDrawerExpanded ? "22vw" : "100%",
                   }}
                   value={selectedMethod}
+                  disabled={isReadOnly}
                   MenuProps={{
                     anchorOrigin: {
                       vertical: "bottom",
@@ -379,8 +396,12 @@ function Restful(props) {
                 }}
               >
                 <button
-                  variant="outlined"
-                  className="associateButton_webSProp"
+                  className={
+                    isReadOnly
+                      ? "disabledButton_webSProp"
+                      : "associateButton_webSProp"
+                  }
+                  disabled={isReadOnly}
                   onClick={() => associateMethod()}
                 >
                   {t("associate")}
@@ -416,6 +437,7 @@ function Restful(props) {
             setMethodClicked={setMethodClicked}
             isDrawerExpanded={props.isDrawerExpanded}
             handleAssociationDelete={handleAssociationDelete}
+            isReadOnly={isReadOnly}
           />
         </div>
         {props.isDrawerExpanded && showMapping ? (
@@ -426,6 +448,9 @@ function Restful(props) {
               localLoadedActivityPropertyData?.ActivityProperty?.restFullInfo
                 ?.assocMethodList
             }
+            isReadOnly={isReadOnly}
+            value={value}
+            setValue={setValue}
           />
         ) : null}
       </div>
@@ -440,7 +465,6 @@ function Restful(props) {
             boxShadow: "0px 3px 6px #00000029",
             padding: "0",
           }}
-          modalClosed={() => setShowCatelogScreen(false)}
           children={
             // code edited on 20 June 2022 for BugId 110910
             <CatalogScreenModal closeFunc={() => setShowCatelogScreen(false)} />
@@ -455,6 +479,7 @@ const mapStateToProps = (state) => {
     showDrawer: state.showDrawerReducer.showDrawer,
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
     openProcessID: state.openProcessClick.selectedId,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

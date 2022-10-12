@@ -19,6 +19,11 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import Toast from "../UI/ErrorToast";
 import { setLaunchpadToken } from "../redux-store/slices/LaunchpadTokenSlice";
+import {
+  StylesProvider,
+  createGenerateClassName,
+} from "@material-ui/core/styles";
+import { removeUserSession } from "../utility/CommonFunctionCall/CommonFunctionCall";
 
 function initializeStore() {
   store.setState("arrProcessesData", [], { persist: false });
@@ -30,6 +35,7 @@ function initializeStore() {
   store.setState("originalProcessData", null, { persist: false });
   store.setState("allFormsList", [], { persist: false });
   store.setState("allFormAssociationData", []);
+  store.setState("calendarList", []);
   store.setState("selectedTemplateData", {});
 }
 
@@ -80,6 +86,7 @@ const App = (props) => {
           {
             AuthData: {
               authtype: "JWT",
+
               JwtToken: JSON.parse(localStorage.getItem("launchpadKey"))?.token,
               from: "LPWEB",
             },
@@ -126,23 +133,24 @@ const App = (props) => {
       return response;
     },
     function (error) {
+      console.log("999","error messgae",error?.response?.data)
       if (error?.response?.status === 401) {
         dispatch(
           setToastDataFunc({
-            message: t("Unauthorized"),
+            message: t("loggedOutMessage"),
             severity: "error",
             open: true,
           })
         );
         const timeout = setTimeout(() => {
+          removeUserSession();
           window.location.href = window.location.origin + `/lpweb`;
-          localStorage.clear();
         }, 200);
         return () => clearTimeout(timeout);
       } else {
         dispatch(
           setToastDataFunc({
-            message: error?.response?.data?.error,
+            message: error?.response?.data?.error?.message,
             severity: "error",
             open: true,
           })
@@ -190,67 +198,83 @@ const App = (props) => {
     return props.t(langKey, defaultWord);
   };
 
+  /*****************************************************************************************
+   * @author asloob_ali BUG ID: 113218  control window is closing on single click
+   * Reason:there was some css styles which were getting overrides.
+   * Resolution : added styles provider to distinguish beetween css classes names.
+   * Date : 19/09/2022
+   ****************/
+  /*const generateClassName = createGenerateClassName({
+    productionPrefix: `processDesignerPmWeb`,
+    disableGlobal: true,
+  });*/
   return (
-    <React.Fragment className="App">
-      {isLoading ? (
-        <div
-          style={{
-            width: "100vw",
-            height: "100vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <CircularProgress />
-        </div>
-      ) : (
-        <BrowserRouter basename="/processDesigner">
-          <AppHeader />
-          {toastDataValue?.open ? (
-            <Toast
-              open={toastDataValue.open}
-              closeToast={() => dispatch(setToastDataFunc({ open: false }))}
-              message={toastDataValue.message}
-              severity={toastDataValue.severity}
-            />
-          ) : null}
-          <DisplayMessage
-            displayMessage={state.displayMessage}
-            setDisplayMessage={(message, toShow) =>
-              setDisplayMessage(message, toShow)
-            }
-          />
+    <React.StrictMode>
+      {/*<StylesProvider generateClassName={generateClassName}>*/}
+      <React.Fragment className="App">
+        {isLoading ? (
           <div
-            className="pmwidth100"
             style={{
-              direction: direction,
-              height: `calc(100vh - ${APP_HEADER_HEIGHT})`,
+              width: "100vw",
+              height: "100vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
-            <Switch>
-              <Route
-                exact
-                path="/"
-                render={(props) => (
-                  <MainView {...props} mainContainer={mainContainer} />
-                )}
-              />
-              <Route
-                path="/process"
-                render={(props) => (
-                  <ProcessView
-                    {...props}
-                    mainContainer={mainContainer}
-                    setDisplayMessage={setDisplayMessage}
-                  />
-                )}
-              />
-            </Switch>
+            <CircularProgress />
           </div>
-        </BrowserRouter>
-      )}
-    </React.Fragment>
+        ) : (
+          <BrowserRouter basename="/processDesigner">
+            <AppHeader />
+
+            {toastDataValue?.open ? (
+              <Toast
+                open={toastDataValue.open}
+                closeToast={() => dispatch(setToastDataFunc({ open: false }))}
+                message={toastDataValue.message}
+                severity={toastDataValue.severity}
+              />
+            ) : null}
+            <DisplayMessage
+              displayMessage={state.displayMessage}
+              setDisplayMessage={(message, toShow) =>
+                setDisplayMessage(message, toShow)
+              }
+            />
+
+            <div
+              className="pmwidth100"
+              style={{
+                direction: direction,
+                height: `calc(100vh - ${APP_HEADER_HEIGHT})`,
+              }}
+            >
+              <Switch>
+                <Route
+                  exact
+                  path="/"
+                  render={(props) => (
+                    <MainView {...props} mainContainer={mainContainer} />
+                  )}
+                />
+                <Route
+                  path="/process"
+                  render={(props) => (
+                    <ProcessView
+                      {...props}
+                      mainContainer={mainContainer}
+                      setDisplayMessage={setDisplayMessage}
+                    />
+                  )}
+                />
+              </Switch>
+            </div>
+          </BrowserRouter>
+        )}
+      </React.Fragment>
+      {/*</StylesProvider>*/}
+    </React.StrictMode>
   );
 };
 

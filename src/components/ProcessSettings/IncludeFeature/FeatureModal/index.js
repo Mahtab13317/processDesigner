@@ -12,6 +12,8 @@ import {
 } from "../../../../Constants/appConstants";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 import { REGEX, validateRegex } from "../../../../validators/validator";
+import { useRef } from "react";
+import { FieldValidations } from "../../../../utility/FieldValidations/fieldValidations";
 
 function FeatureModal(props) {
   let { t } = useTranslation();
@@ -36,6 +38,12 @@ function FeatureModal(props) {
   const menuNameHandler = (e) => {
     setmenuName(e.target.value);
   };
+
+  const featureNameRef = useRef();
+  const propertyInterfaceRef = useRef();
+  const tableNameRef = useRef();
+  const executionNameRef = useRef();
+  const menuNameRef = useRef();
 
   useEffect(() => {
     if (props.selected && props.type == "Edit") {
@@ -220,6 +228,11 @@ function FeatureModal(props) {
           value={featureName}
           onChange={featureNameandler}
           style={{ width: "100%" }}
+          id="featureName"
+          ref={featureNameRef}
+          onKeyPress={(e) =>
+            FieldValidations(e, 150, featureNameRef.current, 255)
+          }
         />
       </div>
 
@@ -233,6 +246,11 @@ function FeatureModal(props) {
           value={propertyPath}
           onChange={propertyPathHandler}
           style={{ width: "100%" }}
+          id="propertyPathInterface"
+          ref={propertyInterfaceRef}
+          onKeyPress={(e) =>
+            FieldValidations(e, 116, propertyInterfaceRef.current, 255)
+          }
         />
       </div>
 
@@ -246,6 +264,11 @@ function FeatureModal(props) {
           value={tableName}
           onChange={tableNameHandler}
           style={{ width: "100%" }}
+          id="tableName"
+          ref={tableNameRef}
+          onKeyPress={(e) =>
+            FieldValidations(e, 151, tableNameRef.current, 255)
+          }
         />
       </div>
 
@@ -259,6 +282,11 @@ function FeatureModal(props) {
           value={executionPath}
           onChange={executionPathHandler}
           style={{ width: "100%" }}
+          id="executionName"
+          ref={executionNameRef}
+          onKeyPress={(e) =>
+            FieldValidations(e, 116, executionNameRef.current, 255)
+          }
         />
       </div>
 
@@ -272,6 +300,9 @@ function FeatureModal(props) {
           value={menuName}
           onChange={menuNameHandler}
           style={{ width: "100%" }}
+          id="menuName"
+          ref={menuNameRef}
+          onKeyPress={(e) => FieldValidations(e, 150, menuNameRef.current, 50)}
         />
       </div>
 

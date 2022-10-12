@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Button, Divider, ClickAwayListener } from "@material-ui/core";
 import styles from "./trigger.module.css";
 import arabicStyles from "./triggerArabicStyles.module.css";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import * as actionCreators from "../../../redux-store/actions/Trigger";
 import {
   triggerTypeOptions,
@@ -49,6 +49,9 @@ import {
 } from "../../../Constants/triggerConstants";
 import "./commonTrigger.css";
 import clsx from "clsx";
+import DefaultModal from "../../../UI/Modal/Modal";
+import ObjectDependencies from "../../../UI/ObjectDependencyModal";
+import { setToastDataFunc } from "../../../redux-store/slices/ToastDataHandlerSlice";
 
 function TriggerDefinition(props) {
   const loadedProcessData = store.getState("loadedProcessData");
@@ -56,7 +59,7 @@ function TriggerDefinition(props) {
     useGlobalState(loadedProcessData);
   const variableDefinition = localLoadedProcessData?.Variable;
   let { t } = useTranslation();
-  const { hideLeftPanel, handleCloseModal } = props;
+  const { hideLeftPanel, handleCloseModal, isModalOpen } = props;
   const direction = `${t("HTML_DIR")}`;
   const [nameInput, setNameInput] = useState("");
   const [typeInput, setTypeInput] = useState();
@@ -79,6 +82,13 @@ function TriggerDefinition(props) {
     TRIGGER_TYPE_CHILDWORKITEM,
   ];
   let readOnlyProcess = props.openProcessType !== PROCESSTYPE_LOCAL;
+
+  // added by mahtab
+  const [showDependencyModal, setShowDependencyModal] = useState(false);
+  const [taskAssociation, setTaskAssociation] = useState([]);
+  const dispatch=useDispatch();
+  // const [showAddTriggerButtonScreen, setShowAddTriggerButtonScreen] =
+  //   useState(false);
 
   //api call to load existing triggers
   useEffect(() => {
@@ -230,6 +240,7 @@ function TriggerDefinition(props) {
     }
   };
 
+  /*code updated on 30 September 2022 for BugId 116352 */
   const validateFunc = () => {
     let requiredFieldsFilled = true;
     if (props[triggerTypeOptions(typeInput)[0]]) {
@@ -270,19 +281,51 @@ function TriggerDefinition(props) {
     }
     //function to check whether all required fields are filled or not
     if (nameInput.trim() === "") {
-      alert("Please fill all mandatory fields");
+      //alert("Please fill all mandatory fields");
+      dispatch(
+        setToastDataFunc({
+          message: "Please fill trigger name",
+          severity: "error",
+          open: true,
+        })
+      );
       document.getElementById("trigger_name").focus();
     } else if (descInput?.trim()?.length === 0) {
-      alert("Please fill all mandatory fields");
+      //alert("Please fill all mandatory fields");
+      dispatch(
+        setToastDataFunc({
+          message: "Please fill description",
+          severity: "error",
+          open: true,
+        })
+      );
       document.getElementById("trigger_description").focus();
     } else if (
       props[triggerTypeOptions(typeInput)[0]] &&
       !requiredFieldsFilled
     ) {
-      alert("Please fill the required field values in definition");
+      //alert("Please fill the required field values in definition");
+      dispatch(
+        setToastDataFunc({
+          message: "Please fill description",
+          severity: "error",
+          open: true,
+        })
+      );
     } else {
       return 1;
     }
+  };
+
+  // Function to get maximum trigger id.
+  const getMaxTriggerId = () => {
+    let maxId = 0;
+    triggerData?.forEach((trigger) => {
+      if (trigger.TriggerId > maxId) {
+        maxId = trigger.TriggerId;
+      }
+    });
+    return +maxId;
   };
 
   // to add or modify trigger in database using api
@@ -298,7 +341,9 @@ function TriggerDefinition(props) {
       const jsonBody = {
         processDefId: processDefId,
         triggerName: nameInput,
-        triggerId: selectedField.id,
+        triggerId: hideLeftPanel
+          ? `${getMaxTriggerId() + 1}`
+          : selectedField.id,
         triggerType: typeInput,
         triggerTypeName: t(triggerTypeOptions(typeInput)[0]),
         triggerDesc: descInput,
@@ -401,16 +446,22 @@ function TriggerDefinition(props) {
     };
     axios.post(SERVER_URL + ENDPOINT_REMOVETRIGGER, jsonBody).then((res) => {
       if (res.data.Status === 0) {
-        cancelAddTriggerFunc();
-        let newData = JSON.parse(JSON.stringify(localLoadedProcessData));
-        let indexVal;
-        newData.TriggerList?.forEach((trigEl, index) => {
-          if (trigEl.TriggerId === selectedField.id) {
-            indexVal = index;
-          }
-        });
-        newData.TriggerList.splice(indexVal, 1);
-        setlocalLoadedProcessData(newData);
+        setTaskAssociation(res?.data?.Validations);
+        if (res?.data?.Validations?.length > 0) {
+          setShowDependencyModal(true);
+          return false;
+        } else {
+          cancelAddTriggerFunc();
+          let newData = JSON.parse(JSON.stringify(localLoadedProcessData));
+          let indexVal;
+          newData.TriggerList?.forEach((trigEl, index) => {
+            if (trigEl.TriggerId === selectedField.id) {
+              indexVal = index;
+            }
+          });
+          newData.TriggerList.splice(indexVal, 1);
+          setlocalLoadedProcessData(newData);
+        }
       }
     });
   };
@@ -625,7 +676,7 @@ function TriggerDefinition(props) {
               </p>
               {triggerTypeOptions(typeInput)[1]}
             </div>
-          ) : triggerData && triggerData.length && hideLeftPanel > 0 ? (
+          ) : triggerData && triggerData.length > 0 && hideLeftPanel ? (
             <NoTriggerScreen
               typeList={triggerTypeOptionList}
               setTypeInput={setTypeInput}
@@ -637,6 +688,25 @@ function TriggerDefinition(props) {
           ) : (
             <NoSelectedTriggerScreen />
           )}
+          {showDependencyModal ? (
+            <DefaultModal
+              show={showDependencyModal}
+              style={{
+                width: "45vw",
+                left: "28%",
+                top: "21.5%",
+                padding: "0",
+              }}
+              modalClosed={() => setShowDependencyModal(false)}
+              children={
+                <ObjectDependencies
+                  {...props}
+                  processAssociation={taskAssociation}
+                  cancelFunc={() => setShowDependencyModal(false)}
+                />
+              }
+            />
+          ) : null}
         </React.Fragment>
       ) : (
         <NoTriggerScreen

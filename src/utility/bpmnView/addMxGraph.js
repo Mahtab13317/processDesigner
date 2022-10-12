@@ -120,8 +120,10 @@ export function addMxGraph(
   caseEnabled,
   setOpenDeployedProcess,
   setTaskAssociation,
-  setShowDependencyModal, 
-  setShowQueueModal
+  setShowDependencyModal,
+  setShowQueueModal,
+  setActionModal,
+  dispatch
 ) {
   mxConnectionHandler.prototype.connectImage = new mxImage(
     connector,
@@ -171,7 +173,7 @@ export function addMxGraph(
           tmp +
           "</div>";
       } else {
-        tmp = `<div style="white-space:nowrap;">` + tmp + "</div>";
+        tmp = `<div style="white-space:pre-wrap;">` + tmp + "</div>";
       }
     }
     return tmp;
@@ -184,11 +186,11 @@ export function addMxGraph(
   // Implements a listener for hover and click handling on edges
   edgeOnMouseHover(graph, setProcessData);
 
-  createConnections(graph, setProcessData, setNewId);
+  createConnections(graph, setProcessData, setNewId, dispatch, translation);
   cellRepositioned(graph, setProcessData, caseEnabled);
 
   //overwrite some function of mxCellEditor
-  cellEditor(graph, displayMessage, setProcessData, translation);
+  cellEditor(graph, displayMessage, setProcessData, translation, dispatch);
 
   //to show icons, tooldiv on mouse click on cell
   cellOnMouseClick(
@@ -201,11 +203,13 @@ export function addMxGraph(
     processType,
     setOpenDeployedProcess,
     setTaskAssociation,
-    setShowDependencyModal
+    setShowDependencyModal,
+    setActionModal,
+    dispatch
   );
 
-  //show icon for click on embedded subprocess and call Activity
-  cellOnMouseHover(graph, setProcessData, translation);
+  //show icon for click on embedded subprocess and call Activity/ more options for milestone
+  cellOnMouseHover(graph, setProcessData, translation, processType, dispatch);
 
   // Enables new connections in the graph
   graph.setConnectable(true);
@@ -451,24 +455,25 @@ export function addMxGraph(
   var vertexHandlerRedraw = mxVertexHandler.prototype.redrawHandles;
   mxVertexHandler.prototype.redrawHandles = function () {
     var result = vertexHandlerRedraw.apply(this, arguments);
+    //code edited on 26 August 2022 for BugId 110986
     if (this.sizers != null && this.sizers.length > 7) {
       //cursor drags for milestone
       if (this.state.style.horizontal) {
-        this.sizers[0].node.style.cursor = "default"; //nw
+        this.sizers[0].node.style.display = "none"; //nw
         this.sizers[1].node.style.display = "none"; //n
-        this.sizers[2].node.style.cursor = "default"; //ne
-        this.sizers[3].node.style.cursor = "default"; //w
-        this.sizers[5].node.style.cursor = "default"; //sw
+        this.sizers[2].node.style.display = "none"; //ne
+        this.sizers[3].node.style.display = "none"; //w
+        this.sizers[5].node.style.display = "none"; //sw
         this.sizers[6].node.style.display = "none"; //s
-        this.sizers[7].node.style.cursor = "default"; //se
+        this.sizers[7].node.style.display = "none"; //se
       }
       //cursor drags for swimlane
       else {
-        this.sizers[0].node.style.cursor = "default"; //nw
-        this.sizers[1].node.style.cursor = "default"; //n
-        this.sizers[2].node.style.cursor = "default"; //ne
-        this.sizers[3].node.style.cursor = "default"; //w
-        this.sizers[5].node.style.cursor = "default"; //sw
+        this.sizers[0].node.style.display = "none"; //nw
+        this.sizers[1].node.style.display = "none"; //n
+        this.sizers[2].node.style.display = "none"; //ne
+        this.sizers[3].node.style.display = "none"; //w
+        this.sizers[5].node.style.display = "none"; //sw
       }
     }
   };
@@ -490,16 +495,24 @@ export function addMxGraph(
   graph.popupMenuHandler.autoExpand = true;
   // Installs a popupmenu handler using local function (see below).
   graph.popupMenuHandler.factoryMethod = function (menu) {
-    let isSwimlanePresent = getSwimlaneAt(graph.popupMenuHandler.triggerX, graph.popupMenuHandler.triggerY, null, graph, AddVertexType);
+    let isSwimlanePresent = getSwimlaneAt(
+      graph.popupMenuHandler.triggerX,
+      graph.popupMenuHandler.triggerY,
+      null,
+      graph,
+      AddVertexType
+    );
     createPopupMenu(
       graph,
       menu,
       setProcessData,
       setNewId,
       translation,
-      caseEnabled, 
-      setShowQueueModal, 
-      isSwimlanePresent
+      caseEnabled,
+      setShowQueueModal,
+      isSwimlanePresent,
+      processType,
+      setActionModal
     );
   };
 
@@ -592,6 +605,16 @@ export function addMxGraph(
                 newProcessData.MileStones[index].Width = cell.geometry.width;
               }
             });
+            prevProcessData.Connections?.forEach((conn, index) => {
+              conn.xLeft?.forEach((x, idx) => {
+                if (x > cell.geometry.x + prevMileWidth) {
+                  newProcessData.Connections[index].xLeft[idx] =
+                    x +
+                    cell.geometry.width -
+                    dimensionInMultipleOfGridSize(prevMileWidth);
+                }
+              });
+            });
             ProcessDefId = newProcessData.ProcessDefId;
             return newProcessData;
           });
@@ -662,6 +685,16 @@ export function addMxGraph(
               +newProcessData.MileStones[newProcessData.MileStones.length - 1]
                 .Width +
               (cell.geometry.width - +swimlaneTitleSize - +totalMileWidth);
+            prevProcessData.Connections?.forEach((conn, index) => {
+              conn.yTop?.forEach((y, idx) => {
+                if (y > +cell.geometry.y + +oldHeight) {
+                  newProcessData.Connections[index].yTop[idx] =
+                    y +
+                    +cell.geometry.height -
+                    dimensionInMultipleOfGridSize(+oldHeight);
+                }
+              });
+            });
             ProcessDefId = newProcessData.ProcessDefId;
             return newProcessData;
           });

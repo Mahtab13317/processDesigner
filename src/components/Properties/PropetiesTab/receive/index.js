@@ -10,6 +10,7 @@ import { connect, useDispatch } from "react-redux";
 import CustomizedDropdown from "../../../../UI/Components_With_ErrrorHandling/Dropdown";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import TabsHeading from "../../../../UI/TabsHeading";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function ReceiveInvocation(props) {
   let { t } = useTranslation();
@@ -18,9 +19,11 @@ function ReceiveInvocation(props) {
   const [localActivityPropertyData, setLocalActivityPropertyData] =
     useGlobalState(globalActivityData);
   const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [replyActivities, setReplyActivities] = useState([]); // State that stores the list of all reply type activities.
   const [invocationType, setInvocationType] = useState(t("ReplyImmediate")); // State that stores the invocation type.
   const [selectedReplyActivityId, setSelectedReplyActivityId] = useState(0); // State that stores the selected reply activity id.
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   // Function that runs when the loadedProcessData value changes.
   useEffect(() => {
@@ -48,7 +51,7 @@ function ReceiveInvocation(props) {
   // Function that returns the list of all reply type activities with its activity name and activity id.
   const getReplyTypeActivities = () => {
     let tempArr = [];
-    loadedProcessData?.value?.MileStones?.map((mile) => {
+    localLoadedProcessData?.MileStones?.map((mile) => {
       mile?.Activities?.map((activity) => {
         if (activity.ActivityType === 26 && activity.ActivitySubType === 1) {
           tempArr.push({
@@ -101,81 +104,76 @@ function ReceiveInvocation(props) {
     <>
       <TabsHeading heading={props?.heading} />
       <div className="receiveInvocation">
-      <p className={styles.heading}>{t("InvocationType")}</p>
-      <div className={styles.invocationTypeDiv}>
-        <div className={styles.flexRow}>
-          <Radio
-            id="recieve_reply_immediate_radio"
-            checked={invocationType === t("ReplyImmediate")}
-            onChange={() => handleRadioChange(t("ReplyImmediate"))}
-            value={t("ReplyImmediate")}
-            size="small"
-          />
-          <p
-            className={styles.labelStyles}
-            id="reply_immediate_label"
-            onClick={() => handleRadioChange(t("ReplyImmediate"))}
-          >
-            {t("ReplyImmediate")}
-          </p>
+        <p className={styles.heading}>{t("InvocationType")}</p>
+        <div className={styles.invocationTypeDiv}>
+          <div className={styles.flexRow}>
+            <Radio
+              id="recieve_reply_immediate_radio"
+              checked={invocationType === t("ReplyImmediate")}
+              onChange={() => handleRadioChange(t("ReplyImmediate"))}
+              value={t("ReplyImmediate")}
+              disabled={isReadOnly}
+              size="small"
+            />
+            <p className={styles.labelStyles} id="reply_immediate_label">
+              {t("ReplyImmediate")}
+            </p>
+          </div>
+          <div className={styles.flexRow}>
+            <Radio
+              id="recieve_reply_after_completion_radio"
+              checked={invocationType === t("ReplyAfterCompletion")}
+              onChange={() => handleRadioChange(t("ReplyAfterCompletion"))}
+              value={t("ReplyAfterCompletion")}
+              disabled={isReadOnly}
+              size="small"
+            />
+            <p className={styles.labelStyles} id="reply_after_completion_label">
+              {t("ReplyAfterCompletion")}
+            </p>
+          </div>
         </div>
-        <div className={styles.flexRow}>
-          <Radio
-            id="recieve_reply_after_completion_radio"
-            checked={invocationType === t("ReplyAfterCompletion")}
-            onChange={() => handleRadioChange(t("ReplyAfterCompletion"))}
-            value={t("ReplyAfterCompletion")}
-            size="small"
-          />
-          <p
-            className={styles.labelStyles}
-            id="reply_after_completion_label"
-            onClick={() => handleRadioChange(t("ReplyAfterCompletion"))}
-          >
-            {t("ReplyAfterCompletion")}
-          </p>
-        </div>
-      </div>
-      <div>
-        <div className={clsx(styles.flexRow, styles.replyActivityDiv)}>
-          {invocationType === t("ReplyAfterCompletion") && (
-            <div className={styles.flexRow}>
-              <p className={styles.subHeading}>{t("replyActivities")}</p>
-              <p className={styles.asterisk}>*</p>
-              <CustomizedDropdown
-                id="receive_reply_activities_dropdown"
-                className={styles.dropdownInput}
-                value={selectedReplyActivityId}
-                onChange={(event) => {
-                  setSelectedReplyActivityId(event.target.value);
-                  setGlobalData(invocationType, event.target.value);
-                }}
-                isNotMandatory={false}
-              >
-                {replyActivities?.map((reply) => {
-                  return (
-                    <MenuItem
-                      value={reply.activityId}
-                      className={styles.menuItemStyles}
-                    >
-                      {reply.activityName}
-                    </MenuItem>
-                  );
-                })}
-              </CustomizedDropdown>
-            </div>
-          )}
+        <div>
+          <div className={clsx(styles.flexRow, styles.replyActivityDiv)}>
+            {invocationType === t("ReplyAfterCompletion") && (
+              <div className={styles.flexRow}>
+                <p className={styles.subHeading}>{t("replyActivities")}</p>
+                <p className={styles.asterisk}>*</p>
+                <CustomizedDropdown
+                  id="receive_reply_activities_dropdown"
+                  className={styles.dropdownInput}
+                  value={selectedReplyActivityId}
+                  onChange={(event) => {
+                    setSelectedReplyActivityId(event.target.value);
+                    setGlobalData(invocationType, event.target.value);
+                  }}
+                  disabled={isReadOnly}
+                  isNotMandatory={false}
+                >
+                  {replyActivities?.map((reply) => {
+                    return (
+                      <MenuItem
+                        value={reply.activityId}
+                        className={styles.menuItemStyles}
+                      >
+                        {reply.activityName}
+                      </MenuItem>
+                    );
+                  })}
+                </CustomizedDropdown>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </>
-   
   );
 }
 
 const mapStateToProps = (state) => {
   return {
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

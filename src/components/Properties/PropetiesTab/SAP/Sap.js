@@ -3,14 +3,9 @@ import { useTranslation } from "react-i18next";
 import { store, useGlobalState } from "state-pool";
 import * as actionCreators from "../../../../redux-store/actions/Properties/showDrawerAction";
 import { connect } from "react-redux";
-import { getActivityProps } from "../../../../utility/abstarctView/getActivityProps";
 import styles from "./index.module.css";
 import { Select, MenuItem } from "@material-ui/core";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  setSave,
-  ActivityPropertySaveCancelValue,
-} from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked.js";
+import { useDispatch } from "react-redux";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import {
   ENDPOINT_REGISTER_SAP,
@@ -26,16 +21,17 @@ import Table from "./Table";
 import Tabs from "../../../../UI/Tab/Tab.js";
 import axios from "axios";
 import TabsHeading from "../../../../UI/TabsHeading";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function Sap(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
+  const dispatch = useDispatch();
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
-  const [sapActivityData, setsapActivityData] = useState(null);
   const [registerFunctionList, setregisterFunctionList] = useState([]);
   const [configDrop, setconfigDrop] = useState([]);
   const [selectedFunction, setselectedFunction] = useState(null);
@@ -43,9 +39,9 @@ function Sap(props) {
   const [sapUserDrop, setSAPUserDrop] = useState([]);
   const [processVarDropdown, setprocessVarDropdown] = useState([]);
   const [selectedUserName, setSelectedUserName] = useState(null);
-  const dispatch = useDispatch();
   const [sapOutput, setSapOutput] = useState(null);
   const [isChangeFunc, setIsChangeFunc] = useState(null);
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   const parameterHandler = () => {
     props.expandDrawer(!props.isDrawerExpanded);
@@ -70,13 +66,10 @@ function Sap(props) {
               localLoadedActivityPropertyData?.ActivityProperty
                 ?.m_objPMSAPAdapterInfo?.m_strSelectedSAPFunction
           );
-         
 
           setSapOutput(filterFuncList);
         }
       });
-
-   
 
     axios.get(SERVER_URL + ENDPOINT_REGISTER_SAP).then((res) => {
       setconfigDrop(res.data);
@@ -87,21 +80,15 @@ function Sap(props) {
         (val) => val.VariableType == "10"
       )
     );
-    let tempProcessdropDown = [];
-    
-    setprocessVarDropdown(localLoadedProcessData?.Variable);
 
+    setprocessVarDropdown(localLoadedProcessData?.Variable);
     let temp =
       localLoadedActivityPropertyData?.ActivityProperty?.m_objPMSAPAdapterInfo;
     setselectedFunction(temp?.m_strSelectedSAPFunction);
     setselectedConfig(temp?.m_strSelectedSAPConfig);
     setSelectedUserName(temp?.m_sSapUserName);
-    setsapActivityData(temp);
     setIsChangeFunc(temp?.m_strSelectedSAPFunction);
   }, []);
-
-
- 
 
   const getSelectedVal = (e) => {
     setselectedFunction(e.target.value);
@@ -109,38 +96,31 @@ function Sap(props) {
     const funcList = temp.filter((d) => d.FunctionID === e.target.value);
     setSapOutput(funcList);
 
-    
     const tempLocalState = { ...localLoadedActivityPropertyData };
     tempLocalState.ActivityProperty.m_objPMSAPAdapterInfo.m_strSelectedSAPFunction =
       e.target.value;
 
-      if(isChangeFunc!=e.target.value)
-      {
-        tempLocalState.ActivityProperty.m_objPMSAPAdapterInfo.mapSAPInputParamMapInfo =
+    if (isChangeFunc != e.target.value) {
+      tempLocalState.ActivityProperty.m_objPMSAPAdapterInfo.mapSAPInputParamMapInfo =
         [];
-  
-        tempLocalState.ActivityProperty.m_objPMSAPAdapterInfo.mapSAPOutputParamMapInfoComplex =
-        [];
-  
-        tempLocalState.ActivityProperty.m_objPMSAPAdapterInfo.mapSAPtableParamMapInfoComplex =
-        [];
-      }
 
-    
+      tempLocalState.ActivityProperty.m_objPMSAPAdapterInfo.mapSAPOutputParamMapInfoComplex =
+        [];
+
+      tempLocalState.ActivityProperty.m_objPMSAPAdapterInfo.mapSAPtableParamMapInfoComplex =
+        [];
+    }
 
     setlocalLoadedActivityPropertyData(tempLocalState);
 
     dispatch(
       setActivityPropertyChange({
-        SAPAdapter: { isModified: true, hasError: false },
+        [propertiesLabel.sap]: { isModified: true, hasError: false },
       })
     );
-
-
   };
 
   const changeUsername = (userVal) => {
-    
     setSelectedUserName(userVal);
     const tempLocalState = { ...localLoadedActivityPropertyData };
     tempLocalState.ActivityProperty.m_objPMSAPAdapterInfo.m_sSapUserName =
@@ -149,7 +129,7 @@ function Sap(props) {
 
     dispatch(
       setActivityPropertyChange({
-        SAPAdapter: { isModified: true, hasError: false },
+        [propertiesLabel.sap]: { isModified: true, hasError: false },
       })
     );
   };
@@ -163,14 +143,14 @@ function Sap(props) {
 
     dispatch(
       setActivityPropertyChange({
-        SAPAdapter: { isModified: true, hasError: false },
+        [propertiesLabel.sap]: { isModified: true, hasError: false },
       })
     );
   };
 
   return (
     <React.Fragment>
-    <TabsHeading heading={props?.heading} />
+      <TabsHeading heading={props?.heading} />
       {props.isDrawerExpanded && sapOutput ? (
         <div style={{ margin: "1%" }}>
           <h4>{t("SAP")}</h4>
@@ -193,6 +173,7 @@ function Sap(props) {
                   },
                   getContentAnchorEl: null,
                 }}
+                disabled={isReadOnly}
                 style={{ width: "10rem", border: ".5px solid #c4c4c4" }}
                 value={selectedFunction}
                 onChange={getSelectedVal}
@@ -233,6 +214,7 @@ function Sap(props) {
                   },
                   getContentAnchorEl: null,
                 }}
+                disabled={isReadOnly}
                 style={{ width: "10rem", border: ".5px solid #c4c4c4" }}
                 value={selectedConfig}
                 onChange={(e) => changeConfig(e.target.value)}
@@ -273,6 +255,7 @@ function Sap(props) {
                   },
                   getContentAnchorEl: null,
                 }}
+                disabled={isReadOnly}
                 style={{ width: "10rem", border: ".5px solid #c4c4c4" }}
                 value={selectedUserName}
                 onChange={(e) => changeUsername(e.target.value)}
@@ -297,7 +280,6 @@ function Sap(props) {
           </div>
 
           <h4 style={{ marginTop: "2%" }}>{t("parameterMapping")}</h4>
-
           <Tabs
             tabType={styles.sapSubTab}
             tabContentStyle="processSubTabContentStyle"
@@ -306,23 +288,24 @@ function Sap(props) {
             tabStyling="processViewTabs"
             tabsStyle="processViewSubTabs"
             TabNames={[t("Input"), t("Output"), t("table")]}
-            
             TabElement={[
               <Input
                 sapOutput={sapOutput}
                 processVarDropdown={processVarDropdown}
                 changeFunction={isChangeFunc}
-                
+                isReadOnly={isReadOnly}
               />,
               <Output
                 sapOutput={sapOutput}
                 processVarDropdown={processVarDropdown}
                 changeFunction={isChangeFunc}
+                isReadOnly={isReadOnly}
               />,
               <Table
                 sapOutput={sapOutput}
                 processVarDropdown={processVarDropdown}
                 changeFunction={isChangeFunc}
+                isReadOnly={isReadOnly}
               />,
             ]}
           />
@@ -352,6 +335,7 @@ function Sap(props) {
                 }}
                 style={{ width: "10rem", border: ".5px solid #c4c4c4" }}
                 value={selectedFunction}
+                disabled={isReadOnly}
                 onChange={(e) => setselectedFunction(e.target.value)}
                 id="sap_selectedFunction"
               >
@@ -390,6 +374,7 @@ function Sap(props) {
                   },
                   getContentAnchorEl: null,
                 }}
+                disabled={isReadOnly}
                 style={{ width: "10rem", border: ".5px solid #c4c4c4" }}
                 value={selectedConfig}
                 onChange={(e) => setselectedConfig(e.target.value)}
@@ -430,6 +415,7 @@ function Sap(props) {
                   },
                   getContentAnchorEl: null,
                 }}
+                disabled={isReadOnly}
                 style={{ width: "10rem", border: ".5px solid #c4c4c4" }}
                 value={selectedUserName}
                 onChange={(e) => setSelectedUserName(e.target.value)}
@@ -464,16 +450,8 @@ function Sap(props) {
 
 const mapStateToProps = (state) => {
   return {
-    showDrawer: state.showDrawerReducer.showDrawer,
-    cellID: state.selectedCellReducer.selectedId,
-    cellName: state.selectedCellReducer.selectedName,
-    cellType: state.selectedCellReducer.selectedType,
-    cellActivityType: state.selectedCellReducer.selectedActivityType,
-    cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
-    openProcessID: state.openProcessClick.selectedId,
-    openProcessName: state.openProcessClick.selectedProcessName,
-    openProcessType: state.openProcessClick.selectedType,
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

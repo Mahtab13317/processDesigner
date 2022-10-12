@@ -115,9 +115,9 @@ function BusinessVariables(props) {
   useEffect(() => {
     getExtVarCount(localLoadedProcessData.Variable);
   }, []);
-
+  
   const checkIsUpdated = (data) => {
-    let tempData = structuredClone(data);
+    let tempData = global.structuredClone(data);
     let isUpdated = false;
     const newArr = data.columns
       .filter((obj) => {

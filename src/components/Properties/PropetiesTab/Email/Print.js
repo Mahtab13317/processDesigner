@@ -1,3 +1,5 @@
+// #BugID - 115277
+// #BugDescription - handled checks for redirecting blank page on close.
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import CustomizedDropdown from "../../../../UI/Components_With_ErrrorHandling/Dropdown";
@@ -22,6 +24,7 @@ import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -78,6 +81,8 @@ function Print(props) {
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const DropdownOptions = ["Status"];
   const [varDocSelected, setVarDocSelected] = useState(DropdownOptions[0]);
   const [checked, setChecked] = useState({});
@@ -85,6 +90,7 @@ function Print(props) {
   const openProcessData = useSelector(OpenProcessSliceValue);
   const [isStatusCreated, setIsStatusCreated] = useState(null);
   const [allData, setAllData] = useState({});
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   const docTypeHandler = (e) => {
     setVarDocSelected(e.target.value);
@@ -202,18 +208,19 @@ function Print(props) {
     let tempCheck = {};
     let isPrintAllChecked = true;
     Object.keys(temp)?.forEach((el) => {
-      tempCheck = {
+      console.log("mahtab", typeof tempList)
+       tempCheck = {
         ...tempCheck,
         [el]: {
-          m_bCreateCheckbox: tempList[el]?.m_bCreateCheckbox
+          m_bCreateCheckbox: typeof tempList != "undefined" && tempList[el]?.m_bCreateCheckbox
             ? tempList[el].m_bCreateCheckbox
             : false,
-          m_bPrint: tempList[el]?.m_bPrint ? tempList[el].m_bPrint : false,
+          m_bPrint: typeof tempList != "undefined" && tempList[el]?.m_bPrint ? tempList[el].m_bPrint : false, 
         },
       };
-      if (!tempList[el]?.m_bPrint) {
+       if (typeof tempList != "undefined" && !tempList[el]?.m_bPrint) {
         isPrintAllChecked = false;
-      }
+      }  
     });
     setChecked(tempCheck);
     setAllChecked(isPrintAllChecked);
@@ -384,6 +391,7 @@ function Print(props) {
           MenuProps={menuProps}
           value={varDocSelected}
           onChange={(event) => docTypeHandler(event)}
+          disabled={isReadOnly}
         >
           {DropdownOptions?.map((element) => {
             return (
@@ -401,8 +409,11 @@ function Print(props) {
           className={
             direction === RTL_DIRECTION
               ? arabicStyles.addbtnEmail
+              : isReadOnly
+              ? "disabledbtnEmail"
               : "addbtnEmail"
           }
+          disabled={isReadOnly}
           onClick={addHandler}
         >
           {t("add")}
@@ -436,6 +447,7 @@ function Print(props) {
                   className="emailCheck"
                   checked={allChecked}
                   onChange={(e) => handleAllCheck(e)}
+                  disabled={isReadOnly}
                 />
                 {t("Print")}
               </StyledTableCell>
@@ -472,6 +484,7 @@ function Print(props) {
                     name="m_bPrint"
                     checked={checked[el]?.m_bPrint}
                     onChange={(e) => CheckHandler(e, el)}
+                    disabled={isReadOnly}
                   />
                 </StyledTableCell>
                 <StyledTableCell
@@ -482,11 +495,13 @@ function Print(props) {
                     className="emailCheck"
                     name="m_bCreateCheckbox"
                     disabled={
-                      allData[el].DocName !== "Status"
+                      allData[el].DocName !== "Status" || isReadOnly
                         ? true
-                        : isStatusCreated && allData[el].DocName === "Status"
+                        : (isStatusCreated &&
+                            allData[el].DocName === "Status") ||
+                          isReadOnly
                         ? true
-                        : !checked[el]?.m_bPrint
+                        : !checked[el]?.m_bPrint || isReadOnly
                         ? true
                         : false
                     }
@@ -508,6 +523,7 @@ function Print(props) {
 const mapStateToProps = (state) => {
   return {
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

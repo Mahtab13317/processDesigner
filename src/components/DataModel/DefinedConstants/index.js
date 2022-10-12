@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from "react";
+// #BugID - 115465 112538
+// #BugDescription - the deletion of constants already handled.
+// #BugID - 112538
+// #BugDescription - Feature has been removed. No need of it now
+import React, { useState, useEffect, useRef } from "react";
 import styles from "./index.module.css";
 import arabicStyles from "./ArabicStyles.module.css";
 import {
@@ -18,6 +22,8 @@ import DeleteOutlinedIcon from "@material-ui/icons/DeleteOutlined";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import EmptyStateIcon from "../../../assets/ProcessView/EmptyState.svg";
 import { useGlobalState } from "state-pool";
+import EditIcon from "@material-ui/icons/Edit";
+import { FieldValidations } from "../../../utility/FieldValidations/fieldValidations";
 
 function DefinedConstants(props) {
   let { t } = useTranslation();
@@ -31,6 +37,8 @@ function DefinedConstants(props) {
   const [previousDefaultValue, setPreviousDefaultValue] = useState("");
   const [constantsArray, setConstantsArray] = useState([]);
   const [isProcessReadOnly, setIsProcessReadOnly] = useState(false);
+  const constantNameRef = useRef();
+  const constantValueRef = useRef();
 
   // Function that runs when the component mounts.
   useEffect(() => {
@@ -38,7 +46,12 @@ function DefinedConstants(props) {
       setIsProcessReadOnly(true);
     }
     if (loadedProcessData) {
-      setConstantsArray(loadedProcessData.DynamicConstant);
+      let modifiedConstant = loadedProcessData?.DynamicConstant?.map(
+        (constant) => {
+          return { isEditable: false, ...constant };
+        }
+      );
+      setConstantsArray(modifiedConstant);
     }
   }, [openProcessType, loadedProcessData.DynamicConstant]);
 
@@ -66,7 +79,7 @@ function DefinedConstants(props) {
     handleConstantApiCall(changedObject, ENDPOINT_ADD_CONSTANT);
     setConstantsArray((prevState) => {
       let temp = [...prevState];
-      temp.splice(0, 0, newConstantObject);
+      temp?.splice(0, 0, newConstantObject);
       return temp;
     });
     let temp = { ...loadedProcessData };
@@ -104,19 +117,19 @@ function DefinedConstants(props) {
   };
 
   // Function that checks if default value has been changed for a particular constant or not and does the API call accordingly.
-  const checkDefaultValueChange = (event, index) => {
-    if (previousDefaultValue !== event.target.value) {
-      const changedObject = {
-        processDefId: openProcessID,
-        constantName: constantsArray[index].ConstantName,
-        constantValue: event.target.value.trim(),
-      };
-      let temp = { ...loadedProcessData };
-      temp.DynamicConstant[index].DefaultValue = event.target.value;
-      setLoadedProcessData(temp);
-      handleConstantApiCall(changedObject, ENDPOINT_MODIFY_CONSTANT);
-    }
-  };
+  // const checkDefaultValueChange = (event, index) => {
+  //   if (previousDefaultValue !== event.target.value) {
+  //     const changedObject = {
+  //       processDefId: openProcessID,
+  //       constantName: constantsArray[index].ConstantName,
+  //       constantValue: event.target.value.trim(),
+  //     };
+  //     let temp = { ...loadedProcessData };
+  //     temp.DynamicConstant[index].DefaultValue = event.target.value;
+  //     setLoadedProcessData(temp);
+  //     handleConstantApiCall(changedObject, ENDPOINT_MODIFY_CONSTANT);
+  //   }
+  // };
 
   // Function that handles add, modify and delete api calls.
   const handleConstantApiCall = (object, url) => {
@@ -124,6 +137,37 @@ function DefinedConstants(props) {
       .post(SERVER_URL + url, object)
       .then()
       .catch((err) => console.log(err));
+  };
+
+  const editConstData = (data) => {
+    let temp = global.structuredClone(constantsArray);
+    temp.forEach((cData) => {
+      if (cData.ConstantName === data.ConstantName) {
+        cData.isEditable = true;
+      }
+    });
+    setConstantsArray(temp);
+  };
+
+  const modifyConstantHandler = async (data) => {
+    const res = await axios.post(SERVER_URL + ENDPOINT_MODIFY_CONSTANT, {
+      processDefId: +loadedProcessData.ProcessDefId,
+      constantName: data.ConstantName,
+      constantValue: data.DefaultValue,
+    });
+    if (res.status === 200) {
+      let temp = global.structuredClone(constantsArray);
+      temp.forEach((cData) => {
+        if (cData.ConstantName === data.ConstantName) {
+          cData.isEditable = false;
+        }
+      });
+      setConstantsArray(temp);
+    }
+  };
+
+  const cancelHandler = () => {
+    setConstantsArray(loadedProcessData.DynamicConstant);
   };
 
   if (isLoading) {
@@ -158,7 +202,7 @@ function DefinedConstants(props) {
           >
             {t("constants")}
           </p>
-          <button
+          {/* <button
             id="constants_audit_history_button"
             className={
               direction === RTL_DIRECTION
@@ -176,7 +220,7 @@ function DefinedConstants(props) {
           </button>
           <div className={styles.moreOptionsIcon}>
             <MoreHorizOutlinedIcon id="constants_more_options" />
-          </div>
+          </div> */}
         </div>
         <div
           className={
@@ -222,7 +266,7 @@ function DefinedConstants(props) {
         >
           <div className={styles.inputSubDivs}>
             <InputBase
-              id="constants_constant_name_input"
+              id="constants_input"
               autoFocus
               className={
                 direction === RTL_DIRECTION
@@ -233,9 +277,13 @@ function DefinedConstants(props) {
               onChange={handleConstantName}
               value={constantName}
               disabled={isProcessReadOnly}
+              inputRef={constantNameRef}
+              onKeyPress={(e) =>
+                FieldValidations(e, 161, constantNameRef.current, 50)
+              }
             />
             <InputBase
-              id="constants_default_value_input"
+              id="constants_input_value"
               className={
                 direction === RTL_DIRECTION
                   ? arabicStyles.defaultValueInputField
@@ -245,6 +293,10 @@ function DefinedConstants(props) {
               onChange={handleDefaultValue}
               value={defaultValue}
               disabled={isProcessReadOnly}
+              inputRef={constantValueRef}
+              onKeyPress={(e) =>
+                FieldValidations(e, 10, constantValueRef.current, 255)
+              }
             />
           </div>
           <button
@@ -282,53 +334,108 @@ function DefinedConstants(props) {
             </p>
           </div>
         ) : (
-          <div>
+          <div style={{ height: "63vh", overflowY: "scroll" }}>
             {constantsArray &&
               constantsArray.map((d, index) => {
                 return (
                   <div className={styles.constantsDataDiv}>
-                    {/* <Checkbox
-                      className={
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.dataCheckbox
-                          : styles.dataCheckbox
-                      }
-                      checked={false}
-                      size="small"
-                    /> */}
-                    <p
-                      className={
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.constantsNameData
-                          : styles.constantsNameData
-                      }
+                    <div style={{ display: "flex", flexDirection: "row" }}>
+                      <p
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.constantsNameData
+                            : styles.constantsNameData
+                        }
+                      >
+                        {d.ConstantName}
+                      </p>
+                      <InputBase
+                        id="constants_input"
+                        onFocus={() => setPreviousDefaultValue(d.DefaultValue)}
+                        // onBlur={(event) =>
+                        //   checkDefaultValueChange(event, index)
+                        // }
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.defaultValueData
+                            : styles.defaultValueData
+                        }
+                        variant="outlined"
+                        value={d.DefaultValue}
+                        onChange={(event) =>
+                          handleDefaultValueChange(event, index)
+                        }
+                        disabled={!d.isEditable}
+                      />
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        width: "8rem",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
                     >
-                      {d.ConstantName}
-                    </p>
-                    <InputBase
-                      id="constants_default_value_data_input"
-                      onFocus={() => setPreviousDefaultValue(d.DefaultValue)}
-                      onBlur={(event) => checkDefaultValueChange(event, index)}
-                      className={
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.defaultValueData
-                          : styles.defaultValueData
-                      }
-                      variant="outlined"
-                      value={d.DefaultValue}
-                      onChange={(event) =>
-                        handleDefaultValueChange(event, index)
-                      }
-                    />
-                    <DeleteOutlinedIcon
-                      id="constants_delete_constant_button"
-                      className={
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.deleteIcon
-                          : styles.deleteIcon
-                      }
-                      onClick={() => handleConstantDelete(index)}
-                    />
+                      {!d.isEditable ? (
+                        <EditIcon
+                          classes={{
+                            root:
+                              direction === RTL_DIRECTION
+                                ? arabicStyles.infoIcon
+                                : styles.dataInfoIcon, // class name, e.g. `classes-nesting-root-x`
+                          }}
+                          fontSize="medium"
+                          onClick={() => editConstData(d)}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "flex-end",
+                            width: "100%",
+                            marginTop: "10px",
+                          }}
+                        >
+                          <button
+                            className={styles.cancelButton}
+                            onClick={() => {
+                              cancelHandler();
+                            }}
+                          >
+                            {t("cancel")}
+                          </button>
+                          <button
+                            // style={{
+                            //   background:
+                            //     d.variableId === modifyButtonDisableId
+                            //       ? "#0072C6"
+                            //       : "#0073c64c",
+                            // }}
+                            className={styles.updateButton}
+                            onClick={() => modifyConstantHandler(d)}
+                            // disabled={!d.variableId === modifyButtonDisableId}
+                          >
+                            {t("update")}
+                          </button>
+                        </div>
+                      )}
+
+                      {!d.isEditable ? (
+                        <DeleteOutlinedIcon
+                          id="constants_delete_constant_button"
+                          classes={{
+                            root:
+                              direction === RTL_DIRECTION
+                                ? arabicStyles.deleteIcon
+                                : styles.deleteIcon,
+                          }}
+                          onClick={() => handleConstantDelete(index)}
+                        />
+                      ) : null}
+                    </div>
                   </div>
                 );
               })}

@@ -1,3 +1,6 @@
+// #BugID - 109986
+// #BugDescription - validation for ToDO dulicate name has been added.
+
 import React, { useEffect, useState } from "react";
 import "../Interfaces.css";
 import { useTranslation } from "react-i18next";
@@ -33,6 +36,9 @@ import {
   isValidTodoAct,
 } from "../../../../utility/Tools/DisableFunc";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
+import DeletePopup from "../DeletePopup";
+import DefaultModal from "../../../../UI/Modal/Modal";
+import ObjectDependencies from "../../../../UI/ObjectDependencyModal";
 
 function ToDo(props) {
   const loadedProcessData = store.getState("loadedProcessData");
@@ -83,9 +89,14 @@ function ToDo(props) {
   const [todoRules, setTodoRules] = useState([]);
   const [ruleDataArray, setRuleDataArray] = useState("");
 
+  //added by mahtab
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [showDependencyModal, setShowDependencyModal] = useState(false);
+  const [taskAssociation, setTaskAssociation] = useState([]);
+
   useEffect(() => {
     let todoIdString = "";
-    localLoadedProcessData?.MileStones?.forEach((mileStone) => {
+    loadedMileStones?.forEach((mileStone) => {
       mileStone?.Activities?.forEach((activity) => {
         if (isValidTodoAct(activity.ActivityType, activity.ActivitySubType)) {
           todoIdString = todoIdString + activity.ActivityId + ",";
@@ -103,7 +114,7 @@ function ToDo(props) {
     });
     setSubColumns(arr);
     setSplicedColumns(arr.slice(0, BATCH_COUNT));
-  }, [localLoadedProcessData, props.openProcessID]);
+  }, [loadedMileStones]);
 
   useEffect(() => {
     if (document.getElementById("oneBoxMatrix")) {
@@ -264,7 +275,9 @@ function ToDo(props) {
     let exist = false;
     toDoData?.TodoGroupLists?.forEach((group) => {
       group?.ToDoList?.forEach((todo) => {
-        if (todo.ToDoName.toLowerCase() == ToDoToAdd.toLowerCase()) {
+        if (
+          todo.ToDoName.trim().toLowerCase() == ToDoToAdd.trim().toLowerCase()
+        ) {
           exist = true;
         }
       });
@@ -554,6 +567,10 @@ function ToDo(props) {
     }
   };
 
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+  };
+
   const deleteToDo = (todoName, todoId) => {
     axios
       .post(SERVER_URL + ENDPOINT_DELETE_TODO, {
@@ -565,47 +582,53 @@ function ToDo(props) {
       })
       .then((res) => {
         if (res.data.Status == 0) {
-          let tempData = { ...toDoData };
-          let exceptionToDeleteIndex, parentIndex;
-          tempData.TodoGroupLists.forEach((group, groupIndex) => {
-            group.ToDoList.forEach((exception, exceptionIndex) => {
-              if (exception.ToDoId == todoId) {
-                exceptionToDeleteIndex = exceptionIndex;
-                parentIndex = groupIndex;
+          setTaskAssociation(res?.data?.Validations);
+          if (res?.data?.Validations?.length > 0) {
+            //setIsDeleteModalOpen(true);
+            setShowDependencyModal(true);
+          } else {
+            let tempData = { ...toDoData };
+            let exceptionToDeleteIndex, parentIndex;
+            tempData.TodoGroupLists.forEach((group, groupIndex) => {
+              group.ToDoList.forEach((exception, exceptionIndex) => {
+                if (exception.ToDoId == todoId) {
+                  exceptionToDeleteIndex = exceptionIndex;
+                  parentIndex = groupIndex;
+                }
+              });
+            });
+            //code added on 8 June 2022 for BugId 110197
+            //Updating RuleDataArray
+            let tempRule = [...ruleDataArray];
+            let idx = null;
+            tempRule.forEach((exp, index) => {
+              if (exp.NameId === todoId) {
+                idx = index;
               }
             });
-          });
-          //code added on 8 June 2022 for BugId 110197
-          //Updating RuleDataArray
-          let tempRule = [...ruleDataArray];
-          let idx = null;
-          tempRule.forEach((exp, index) => {
-            if (exp.NameId === todoId) {
-              idx = index;
-            }
-          });
-          tempRule.splice(idx, 1);
-          setRuleDataArray(tempRule);
+            tempRule.splice(idx, 1);
+            setRuleDataArray(tempRule);
 
-          tempData.TodoGroupLists[parentIndex].ToDoList.splice(
-            exceptionToDeleteIndex,
-            1
-          );
-          setToDoData(tempData);
-          handleClose();
+            tempData.TodoGroupLists[parentIndex].ToDoList.splice(
+              exceptionToDeleteIndex,
+              1
+            );
+            setToDoData(tempData);
+            handleClose();
 
-          // Updating processData on deleting ToDo
-          let newProcessData = JSON.parse(
-            JSON.stringify(localLoadedProcessData)
-          );
-          let indexValue;
-          newProcessData.ToDoList.forEach((todo, index) => {
-            if (todo.ToDoName === todoName) {
-              indexValue = index;
-            }
-          });
-          newProcessData.ToDoList.splice(indexValue, 1);
-          setLocalLoadedProcessData(newProcessData);
+            // Updating processData on deleting ToDo
+            let newProcessData = JSON.parse(
+              JSON.stringify(localLoadedProcessData)
+            );
+            let indexValue;
+            newProcessData.ToDoList.forEach((todo, index) => {
+              if (todo.ToDoName === todoName) {
+                indexValue = index;
+              }
+            });
+            newProcessData.ToDoList.splice(indexValue, 1);
+            setLocalLoadedProcessData(newProcessData);
+          }
         }
       })
       .catch((err) => {
@@ -704,6 +727,7 @@ function ToDo(props) {
   };
 
   const onActivitySearchChange = (value) => {
+    console.log('SECRET', value);
     let temp = [];
     setActivitySearchTerm(value);
     if (value.trim() !== "") {
@@ -711,16 +735,18 @@ function ToDo(props) {
       loadedMileStones.map((mileStone) => {
         let activities = [];
         mileStone.Activities.map((activity, index) => {
-          console.log('EXCEPTIONVALUE', activity);
-          if (activity.ActivityName.toLowerCase().includes(value.toLowerCase())) {
+          if (
+            activity.ActivityName.toLowerCase().includes(value.toLowerCase())
+          ) {
             activityIdString = activityIdString + activity.ActivityId + ",";
             activities.push(activity);
+            console.log("EXCEPTIONVALUE===", activity.ActivityName);
           }
         });
         temp.push({ ...mileStone, Activities: activities });
       });
-      // MapAllActivities(activityIdString);
       setLoadedMileStones(temp);
+      console.log("EXCEPTIONVALUE", temp, loadedMileStones);
     } else {
       clearActivitySearchResult();
     }
@@ -1303,6 +1329,23 @@ function ToDo(props) {
     setToDoData(newState);
   };
 
+  /* function checkToDoRight(toDoData) {
+    let tempArr = [];
+    toDoData?.TodoGroupLists?.forEach((data, i) => {
+      data?.ToDoList?.forEach((item, j) => {
+        item?.Activities?.forEach((dt, x) => {
+          if (dt.View == true || dt.Modify == true) {
+            tempArr.push(dt);
+          }
+        });
+      });
+    });
+
+    return tempArr;
+  }
+
+  const showRight = checkToDoRight(toDoData); */
+
   const GetActivities = () => {
     let display = [];
     splicedColumns?.forEach((activity, activityIndex) => {
@@ -1481,7 +1524,7 @@ function ToDo(props) {
                 alignItems: "center",
                 justifyContent: "space-between",
                 paddingRight: "10px",
-                height:'34px'
+                height: "34px",
               }}
             >
               <p
@@ -1668,7 +1711,7 @@ function ToDo(props) {
                             </p>,
                             <p
                               id="moveTodo_To_OtherGroup"
-                              style={{ display: "flex"}}
+                              style={{ display: "flex", height:'20px'}}
                             >
                               {t("moveTo")}
                               <DeleteModal
@@ -1691,22 +1734,15 @@ function ToDo(props) {
                                 }
                                 backDrop={false}
                                 modalPaper="modalPaperActivity exceptionMoveTo"
-                                sortByDiv="sortByDivActivity"
-                                oneSortOption="oneSortOptionActivity"
-                                docIndex={todoIndex}
                                 buttonToOpenModal={
-                                  <button
-                                    className="expandIcon"
-                                    type="button"
-                                  >
                                     <ArrowForwardIosIcon
                                       style={{
                                         color: "#606060",
                                         height: "12px",
                                         width: "12px",
+                                        margin:'3px 8px'
                                       }}
                                     />
-                                  </button>
                                 }
                                 modalWidth="180"
                                 sortSectionOne={[
@@ -1732,33 +1768,60 @@ function ToDo(props) {
     return <CircularProgress className="circular-progress" />;
   } else
     return (
-      <CommonInterface
-        newGroupToMove={newGroupToMove}
-        onActivitySearchChange={onActivitySearchChange}
-        onSearchChange={onSearchChange}
-        screenHeading={t("navigationPanel.toDos")}
-        bGroupExists={bGroupExists}
-        setbGroupExists={setbGroupExists}
-        addGroupToList={addGroupToList}
-        addGroupModal={addGroupModal}
-        handleOpen={handleOpen}
-        handleClose={handleClose}
-        compact={compact}
-        GetActivities={GetActivities}
-        GetList={GetDocList}
-        screenType={SCREENTYPE_TODO} //code added on 8 June 2022 for BugId 110197
-        todoAllRules={todoRules} //code added on 8 June 2022 for BugId 110197
-        ruleDataType={ruleDataArray} //code added on 8 June 2022 for BugId 110197
-        setSearchTerm={setToDoSearchTerm}
-        setActivitySearchTerm={setActivitySearchTerm}
-        clearSearchResult={clearSearchResult}
-        clearActivitySearchResult={clearActivitySearchResult}
-        openProcessType={props.openProcessType}
-        loadedMileStones={loadedMileStones}
-        groupName={groupName}
-        setGroupName={setGroupName}
-        groupsList={toDoData.TodoGroupLists}
-      />
+      <>
+        <CommonInterface
+          newGroupToMove={newGroupToMove}
+          onActivitySearchChange={onActivitySearchChange}
+          onSearchChange={onSearchChange}
+          screenHeading={t("navigationPanel.toDos")}
+          bGroupExists={bGroupExists}
+          setbGroupExists={setbGroupExists}
+          addGroupToList={addGroupToList}
+          addGroupModal={addGroupModal}
+          handleOpen={handleOpen}
+          handleClose={handleClose}
+          compact={compact}
+          GetActivities={GetActivities}
+          GetList={GetDocList}
+          screenType={SCREENTYPE_TODO} //code added on 8 June 2022 for BugId 110197
+          todoAllRules={todoRules} //code added on 8 June 2022 for BugId 110197
+          ruleDataType={ruleDataArray} //code added on 8 June 2022 for BugId 110197
+          ruleType="T" //code added on 23 September 2022 for BugId 111853 
+          setSearchTerm={setToDoSearchTerm}
+          setActivitySearchTerm={setActivitySearchTerm}
+          clearSearchResult={clearSearchResult}
+          clearActivitySearchResult={clearActivitySearchResult}
+          openProcessType={props.openProcessType}
+          loadedMileStones={loadedMileStones}
+          groupName={groupName}
+          setGroupName={setGroupName}
+          groupsList={toDoData.TodoGroupLists}
+        />
+
+        {/*  <DeletePopup
+          isDeleteModalOpen={isDeleteModalOpen}
+          closeDeleteModal={closeDeleteModal}
+        /> */}
+        {showDependencyModal ? (
+          <DefaultModal
+            show={showDependencyModal}
+            style={{
+              width: "45vw",
+              left: "28%",
+              top: "21.5%",
+              padding: "0",
+            }}
+            modalClosed={() => setShowDependencyModal(false)}
+            children={
+              <ObjectDependencies
+                {...props}
+                processAssociation={taskAssociation}
+                cancelFunc={() => setShowDependencyModal(false)}
+              />
+            }
+          />
+        ) : null}
+      </>
     );
 }
 

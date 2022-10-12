@@ -12,6 +12,8 @@ import {
   PROCESSTYPE_LOCAL,
   RTL_DIRECTION,
 } from "../../../../Constants/appConstants";
+import { useRef } from "react";
+import { FieldValidations } from "../../../../utility/FieldValidations/fieldValidations";
 
 function LaunchApplicationProperties(props) {
   const loadedProcessData = store.getState("loadedProcessData");
@@ -24,6 +26,8 @@ function LaunchApplicationProperties(props) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [existingTrigger, setExistingTrigger] = useState(false);
   let readOnlyProcess = props.openProcessType !== PROCESSTYPE_LOCAL;
+  const launchAppRef=useRef();
+  const launchAppArg=useRef()
 
   useEffect(() => {
     props.setLaunchAppProperties({});
@@ -102,7 +106,13 @@ function LaunchApplicationProperties(props) {
                 ? arabicStyles.propertiesFormInput
                 : styles.propertiesFormInput
             }
+
+            ref={launchAppRef}
+							onKeyPress={(e) =>
+							FieldValidations(e,150, launchAppRef.current,255)
+							 }
           />
+          
         </div>
         <div className="flex">
           <span
@@ -160,6 +170,11 @@ function LaunchApplicationProperties(props) {
                   }
                 }}
                 className={`${styles.triggerFormInput} ${styles.argStringBodyInput}`}
+
+                ref={launchAppArg}
+                onKeyPress={(e) =>
+							FieldValidations(e,142, launchAppArg.current, 255)
+							 }
               />
             </div>
           </div>

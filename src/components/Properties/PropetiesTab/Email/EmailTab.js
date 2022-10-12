@@ -1,9 +1,11 @@
+// #BugID - 115485
+// #BugDescription - save button enabled after adding variables.
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.css";
 import { Select, MenuItem } from "@material-ui/core";
 import { Checkbox } from "@material-ui/core";
-import { useDispatch, useSelector } from "react-redux";
+import { connect, useDispatch, useSelector } from "react-redux";
 import { store, useGlobalState } from "state-pool";
 import arabicStyles from "./ArabicStyles.module.css";
 import {
@@ -28,6 +30,7 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -125,6 +128,7 @@ function EmailTab(props) {
     getContentAnchorEl: null,
   };
   const dispatch = useDispatch();
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   useEffect(() => {
     if (saveCancelStatus.SaveClicked) {
@@ -200,13 +204,13 @@ function EmailTab(props) {
       tempCheck = {
         ...tempCheck,
         [el]: {
-          m_bCreateCheckbox: tempList[el]?.m_bCreateCheckbox
+          m_bCreateCheckbox: typeof tempList != "undefined" && tempList[el]?.m_bCreateCheckbox
             ? tempList[el].m_bCreateCheckbox
             : false,
-          m_bPrint: tempList[el]?.m_bPrint ? tempList[el].m_bPrint : false,
+          m_bPrint: typeof tempList != "undefined" && tempList[el]?.m_bPrint ? tempList[el].m_bPrint : false,
         },
       };
-      if (!tempList[el]?.m_bPrint) {
+      if (typeof tempList != "undefined" && !tempList[el]?.m_bPrint) {
         isEmailAllChecked = false;
       }
     });
@@ -217,63 +221,63 @@ function EmailTab(props) {
     let mailInfo =
       localLoadedActivityPropertyData?.ActivityProperty?.sendInfo?.emailInfo
         ?.mailInfo;
-    if (mailInfo.m_bFromConst) {
+    if (mailInfo?.m_bFromConst) {
       setFromConstant(true);
-      tempData = { ...tempData, from: mailInfo.fromConstant };
+      tempData = { ...tempData, from: mailInfo?.fromConstant };
     } else {
       setFromConstant(false);
       tempData = {
         ...tempData,
         from: getVariableByName(
-          mailInfo.fromUser,
+          mailInfo?.fromUser,
           localLoadedProcessData?.Variable
         ),
       };
     }
-    if (mailInfo.m_bToConst) {
+    if (mailInfo?.m_bToConst) {
       settoConstant(true);
-      tempData = { ...tempData, to: mailInfo.toConstant };
+      tempData = { ...tempData, to: mailInfo?.toConstant };
     } else {
       settoConstant(false);
       tempData = {
         ...tempData,
         to: getVariableByName(
-          mailInfo.toUser,
+          mailInfo?.toUser,
           localLoadedProcessData?.Variable
         ),
       };
     }
-    if (mailInfo.m_bCcConst) {
+    if (mailInfo?.m_bCcConst) {
       setccConstant(true);
-      tempData = { ...tempData, cc: mailInfo.ccConstant };
+      tempData = { ...tempData, cc: mailInfo?.ccConstant };
     } else {
       setccConstant(false);
       tempData = {
         ...tempData,
         cc: getVariableByName(
-          mailInfo.ccUser,
+          mailInfo?.ccUser,
           localLoadedProcessData?.Variable
         ),
       };
     }
-    if (mailInfo.m_bBCcConst) {
+    if (mailInfo?.m_bBCcConst) {
       setbccConstant(true);
-      tempData = { ...tempData, bcc: mailInfo.bccConstant };
+      tempData = { ...tempData, bcc: mailInfo?.bccConstant };
     } else {
       setbccConstant(false);
       tempData = {
         ...tempData,
         bcc: getVariableByName(
-          mailInfo.bccUser,
+          mailInfo?.bccUser,
           localLoadedProcessData?.Variable
         ),
       };
     }
     setIsDefaultVal(true);
     setData(tempData);
-    setPriority(mailInfo.priority);
-    setcontentSubject(mailInfo.subject);
-    setcontentMessage(mailInfo.message);
+    setPriority(mailInfo?.priority);
+    setcontentSubject(mailInfo?.subject);
+    setcontentMessage(mailInfo?.message);
   }, [openProcessData.loadedData, localLoadedActivityPropertyData]);
 
   useEffect(() => {
@@ -325,6 +329,11 @@ function EmailTab(props) {
         [`v_42_0`]: tempdata,
       };
       setlocalLoadedActivityPropertyData(temp);
+      dispatch(
+        setActivityPropertyChange({
+          [propertiesLabel.send]: { isModified: true, hasError: false },
+        })
+      );
     }
   };
 
@@ -501,13 +510,24 @@ function EmailTab(props) {
     temp.ActivityProperty.sendInfo.emailInfo.mailInfo = {
       ...newObj,
     };
+    
     setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.send]: { isModified: true, hasError: false },
+      })
+    );
   };
 
   const addSubjectHandler = () => {
     let statement = contentSubject;
     statement = statement + "&" + Subject + "&";
     setcontentSubject(statement);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.send]: { isModified: true, hasError: false },
+      })
+    );
   };
 
   const addMsgHandler = () => {
@@ -520,23 +540,23 @@ function EmailTab(props) {
     let mailInfo =
       localLoadedActivityPropertyData?.ActivityProperty?.sendInfo?.emailInfo
         ?.mailInfo;
-    if (mailInfo.m_bFromConst) {
-      if (!mailInfo.fromConstant || mailInfo.fromConstant?.trim() === "") {
+    if (mailInfo?.m_bFromConst) {
+      if (!mailInfo?.fromConstant || mailInfo?.fromConstant?.trim() === "") {
         return false;
       }
     }
-    if (mailInfo.m_bToConst) {
-      if (!mailInfo.toConstant || mailInfo.toConstant?.trim() === "") {
+    if (mailInfo?.m_bToConst) {
+      if (!mailInfo?.toConstant || mailInfo?.toConstant?.trim() === "") {
         return false;
       }
     }
-    if (mailInfo.m_bCcConst) {
-      if (!mailInfo.ccConstant || mailInfo.ccConstant?.trim() === "") {
+    if (mailInfo?.m_bCcConst) {
+      if (!mailInfo?.ccConstant || mailInfo?.ccConstant?.trim() === "") {
         return false;
       }
     }
-    if (mailInfo.m_bBCcConst) {
-      if (!mailInfo.bccConstant || mailInfo.bccConstant?.trim() === "") {
+    if (mailInfo?.m_bBCcConst) {
+      if (!mailInfo?.bccConstant || mailInfo?.bccConstant?.trim() === "") {
         return false;
       }
     }
@@ -657,6 +677,7 @@ function EmailTab(props) {
               isConstant={fromConstant}
               showEmptyString={false}
               showConstValue={true}
+              disabled={isReadOnly}
               id="from_select_input"
             />
           </div>
@@ -674,6 +695,7 @@ function EmailTab(props) {
               isConstant={toConstant}
               showEmptyString={false}
               showConstValue={true}
+              disabled={isReadOnly}
               id="to_select_input"
             />
           </div>
@@ -688,6 +710,7 @@ function EmailTab(props) {
               isConstant={ccConstant}
               showEmptyString={false}
               showConstValue={true}
+              disabled={isReadOnly}
               id="cc_select_input" //code edited on 21 June 2022 for BugId 110973
             />
           </div>
@@ -702,6 +725,7 @@ function EmailTab(props) {
               isConstant={bccConstant}
               showEmptyString={false}
               showConstValue={true}
+              disabled={isReadOnly}
               id="bcc_select_input" //code edited on 21 June 2022 for BugId 110973
             />
           </div>
@@ -716,6 +740,7 @@ function EmailTab(props) {
                 setIsDefaultVal(false);
               }}
               id="priority_email"
+              disabled={isReadOnly}
               style={{ marginBottom: "1rem" }}
             >
               {priorityDropdown?.map((element) => {
@@ -741,6 +766,7 @@ function EmailTab(props) {
           MenuProps={menuProps}
           id="includeVar_email"
           value={Subject}
+          disabled={isReadOnly}
           onChange={(e) => setSubject(e.target.value)}
         >
           {dropdown?.map((element) => {
@@ -754,7 +780,11 @@ function EmailTab(props) {
             );
           })}
         </Select>
-        <button className="addbtnEmail" onClick={addSubjectHandler}>
+        <button
+          className={isReadOnly ? "disabledbtnEmail" : "addbtnEmail"}
+          disabled={isReadOnly}
+          onClick={addSubjectHandler}
+        >
           {t("add")}
         </button>
       </div>
@@ -763,6 +793,7 @@ function EmailTab(props) {
         style={{ width: "80%", height: "5rem", border: "1px solid #c4c4c4" }}
         id="content_email"
         value={contentSubject}
+        disabled={isReadOnly}
         onChange={(e) => setcontentSubject(e.target.value)}
       />
       <p className="boldText">{t("msg")}</p>
@@ -777,6 +808,7 @@ function EmailTab(props) {
             setMessage(e.target.value);
             setIsDefaultVal(false);
           }}
+          disabled={isReadOnly}
         >
           {dropdown?.map((element) => {
             return (
@@ -789,7 +821,11 @@ function EmailTab(props) {
             );
           })}
         </Select>
-        <button className="addbtnEmail" onClick={addMsgHandler}>
+        <button
+          className={isReadOnly ? "disabledbtnEmail" : "addbtnEmail"}
+          disabled={isReadOnly}
+          onClick={addMsgHandler}
+        >
           {t("add")}
         </button>
       </div>
@@ -798,6 +834,7 @@ function EmailTab(props) {
         style={{ width: "80%", height: "5rem", border: "1px solid #c4c4c4" }}
         id="email_content_msg"
         value={contentMessage}
+        disabled={isReadOnly}
         onChange={(e) => {
           setcontentMessage(e.target.value);
           setIsDefaultVal(false);
@@ -814,6 +851,7 @@ function EmailTab(props) {
             value={varDocSelected}
             onChange={(event) => docTypeHandler(event)}
             style={{ margin: "var(--spacing_v) 0" }}
+            disabled={isReadOnly}
           >
             {DropdownOptions?.map((element) => {
               return (
@@ -829,7 +867,8 @@ function EmailTab(props) {
           </Select>
         </div>
         <button
-          className="addbtnEmail"
+          className={isReadOnly ? "disabledbtnEmail" : "addbtnEmail"}
+          disabled={isReadOnly}
           style={{ margin: "0 !important" }}
           onClick={addHandler}
         >
@@ -864,6 +903,7 @@ function EmailTab(props) {
                   className="emailCheck"
                   checked={allChecked}
                   onChange={(e) => handleAllCheck(e)}
+                  disabled={isReadOnly}
                 />
                 {t("email")}
               </StyledTableCell>
@@ -900,6 +940,7 @@ function EmailTab(props) {
                     name="m_bPrint"
                     checked={checked[el]?.m_bPrint}
                     onChange={(e) => CheckHandler(e, el)}
+                    disabled={isReadOnly}
                   />
                 </StyledTableCell>
                 <StyledTableCell
@@ -910,11 +951,13 @@ function EmailTab(props) {
                     className="emailCheck"
                     name="m_bCreateCheckbox"
                     disabled={
-                      allData[el].DocName !== "Status"
+                      allData[el].DocName !== "Status" || isReadOnly
                         ? true
-                        : isStatusCreated && allData[el].DocName === "Status"
+                        : (isStatusCreated &&
+                            allData[el].DocName === "Status") ||
+                          isReadOnly
                         ? true
-                        : !checked[el]?.m_bPrint
+                        : !checked[el]?.m_bPrint || isReadOnly
                         ? true
                         : false
                     }
@@ -933,4 +976,10 @@ function EmailTab(props) {
   );
 }
 
-export default EmailTab;
+const mapStateToProps = (state) => {
+  return {
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
+  };
+};
+
+export default connect(mapStateToProps, null)(EmailTab);

@@ -1,3 +1,13 @@
+.flexRow {
+  display: flex;
+  flex-direction: row;
+}
+
+.flexColumn {
+  display: flex;
+  flex-direction: column;
+}
+
 .inputbaseLtr {
   background: #f0f0f0 0% 0% no-repeat padding-box;
   border: 1px solid #c4c4c4;
@@ -68,6 +78,10 @@
   text-align: center;
 }
 
+.marginLeftAuto {
+  margin-left: auto !important;
+}
+
 .cancelButton {
   text-align: left;
   letter-spacing: 0px;
@@ -83,4 +97,15 @@
   height: 1rem;
   margin-inline: 2rem !important;
   text-align: center;
+}
+
+.triggerTypeDataDiv {
+  width: 100%;
+}
+
+.stopTriggerIcon {
+  margin: 12px 0px 0rem 2rem;
+  height: 1.75rem;
+  width: 1.75rem;
+  cursor: pointer;
 }

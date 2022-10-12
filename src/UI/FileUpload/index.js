@@ -88,6 +88,9 @@ function Dropzone(props) {
             return prev;
           }
           setError("");
+          if (props.returnFileAsItIs) {
+            return [...prev, acceptedFile];
+          }
           return [
             ...prev,
             {

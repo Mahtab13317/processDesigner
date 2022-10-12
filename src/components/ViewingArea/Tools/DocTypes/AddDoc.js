@@ -5,6 +5,9 @@ import { useTranslation } from "react-i18next";
 import { RTL_DIRECTION } from "../../../../Constants/appConstants";
 import CloseIcon from "@material-ui/icons/Close";
 import arabicStyles from "./arabicStyles.module.css";
+import CheckboxField from "../../../../UI/InputFields/CheckboxFields/CheckboxField";
+import { useRef } from "react";
+import { FieldValidations } from "../../../../utility/FieldValidations/fieldValidations";
 
 function AddDoc(props) {
   let { t } = useTranslation();
@@ -12,6 +15,29 @@ function AddDoc(props) {
   const [nameInput, setNameInput] = useState("");
   const [descInput, setDescInput] = useState("");
   const [docModalHead, setDocModalHead] = useState("");
+  const docNameRef = useRef();
+
+  const handleChange = (e) => {
+    const { name, value, checked } = e.target;
+    switch (name) {
+      case "isMandatory":
+        setIsMandatory({ ...isMandatory, value: checked });
+        break;
+      default:
+        break;
+    }
+  };
+  const makingCheckboxFields = (name, value, label) => {
+    return {
+      name,
+      value,
+      label,
+      onChange: handleChange,
+    };
+  };
+  const [isMandatory, setIsMandatory] = useState(
+    makingCheckboxFields("isMandatory", false, "Is mandatory")
+  );
 
   const setNameFunc = (e) => {
     if (e.target.value !== "" && props.setShowDocNameError) {
@@ -36,7 +62,8 @@ function AddDoc(props) {
     if (props.docNameToModify) {
       document.getElementById("DocDescInput").focus();
       document.getElementById("DocNameInput").disabled = true;
-      setDocModalHead(`Edit: ${props.docNameToModify}`);
+      // setDocModalHead(`${props.docNameToModify}`);
+      setDocModalHead(t("ExceptionDetails"));
     } else {
       setDocModalHead(t("addException"));
     }
@@ -70,7 +97,7 @@ function AddDoc(props) {
               : styles.modalHeading
           }
         >
-          {props.docNameToModify ? docModalHead : t("addDocuments")}
+          {props.docNameToModify ? t("DocumentDetails") : t("addDocuments")}
         </h3>
         <CloseIcon
           onClick={() => props.handleClose()}
@@ -88,6 +115,8 @@ function AddDoc(props) {
             value={nameInput}
             onChange={(e) => setNameFunc(e)}
             className={styles.modalInput}
+            ref={docNameRef}
+            onKeyPress={(e) => FieldValidations(e, 177, docNameRef.current, 50)}
           />
         </form>
         {props.showDocNameError ? (
@@ -107,7 +136,7 @@ function AddDoc(props) {
           <span
             style={{
               color: "red",
-              fontSize: "10px",
+              fontSize: "var(--base_text_font_size)",
               marginTop: "-1.25rem",
               marginBottom: "0.5rem",
               display: "block",
@@ -122,6 +151,11 @@ function AddDoc(props) {
           value={descInput}
           onChange={(e) => setDescFunc(e)}
           className={styles.modalTextArea}
+          disabled={props.docNameToModify ? true : false}
+        />
+        <CheckboxField
+          {...isMandatory}
+          disabled={props.docNameToModify ? true : false}
         />
       </div>
       <div
@@ -131,21 +165,28 @@ function AddDoc(props) {
             : styles.modalFooter
         }
       >
-        <button
-          className={
-            direction === RTL_DIRECTION
-              ? arabicStyles.cancelButton
-              : styles.cancelButton
-          }
-          onClick={() => props.handleClose()}
-        >
-          {t("cancel")}
-        </button>
+        {props.docNameToModify ? null : (
+          <button
+            className={
+              direction === RTL_DIRECTION
+                ? arabicStyles.cancelButton
+                : styles.cancelButton
+            }
+            onClick={() => props.handleClose()}
+          >
+            {t("cancel")}
+          </button>
+        )}
         {props.docNameToModify ? null : (
           <button
             id="addAnotherDocTypes_Button"
             onClick={(e) =>
-              props.addDocToList(nameInput, descInput, "addAnother")
+              props.addDocToList(
+                nameInput,
+                descInput,
+                "addAnother",
+                isMandatory.value
+              )
             }
             className={styles.okButton}
           >
@@ -155,7 +196,9 @@ function AddDoc(props) {
         {props.docNameToModify ? null : (
           <button
             id="addNclose_AddDocModal_Button"
-            onClick={(e) => props.addDocToList(nameInput, descInput, "add")}
+            onClick={(e) =>
+              props.addDocToList(nameInput, descInput, "add", isMandatory.value)
+            }
             className={styles.okButton}
           >
             {t("add&Close")}
@@ -164,16 +207,17 @@ function AddDoc(props) {
 
         {props.docNameToModify ? (
           <button
-            onClick={(e) => {
+            /* onClick={(e) => {
               props.modifyDescription(
                 nameInput,
                 descInput,
                 props.docIdToModify
               );
-            }}
+            }}*/
+            onClick={() => props.handleClose()}
             className={styles.okButton}
           >
-            {"save"}
+            {"Okay"}
           </button>
         ) : null}
       </div>

@@ -13,6 +13,9 @@ import cancelIcon from "../../../assets/abstractView/RedDelete.svg";
 import axios from "axios";
 import { setToastDataFunc } from "../../../redux-store/slices/ToastDataHandlerSlice";
 import { REGEX, validateRegex } from "../../../validators/validator";
+import { useRef } from "react";
+import clsx from "clsx";
+import { FieldValidations } from "../../../utility/FieldValidations/fieldValidations";
 
 function TriggerType(props) {
   let { t } = useTranslation();
@@ -23,6 +26,12 @@ function TriggerType(props) {
   const [data, setdata] = useState({});
   const [originalData, setoriginalData] = useState([]);
   const dispatch = useDispatch();
+
+  const fieldTypeRef = useRef();
+  const propertyPathRef = useRef();
+  const executionPathRef = useRef();
+  const triggerTableNameRef = useRef();
+
   const registerNewLocalHandler = () => {
     setRegisterBtn(true);
   };
@@ -69,7 +78,7 @@ function TriggerType(props) {
     }
 
     let isExist = false;
-    allTrigers.map((el) => {
+    allTrigers?.map((el) => {
       if (el.tableNames == data.tableNames) {
         isExist = true;
       }
@@ -98,27 +107,37 @@ function TriggerType(props) {
         temp.push(jsonBody);
         setallTrigers(temp);
         setoriginalData(temp);
+        setdata({});
         setRegisterBtn(false);
       });
   };
 
   const cancelHandler = () => {
     setRegisterBtn(false);
+    setdata({});
   };
 
   useEffect(() => {
     axios
       .get(SERVER_URL + ENDPOINT_GET_REGISTER_TRIGGER)
       .then((res) => {
-        setallTrigers(res.data);
-        setoriginalData(res.data);
+        if (res.status === 204) {
+          setallTrigers([]);
+          setoriginalData([]);
+        } else {
+          setallTrigers(res.data);
+          setoriginalData(res.data);
+        }
       })
       .catch(() => console.log("error"));
   }, []);
 
+  console.log("666", "TRIGGER LIST", allTrigers);
+
   const onDataChange = (e) => {
     setdata({ ...data, [e.target.name]: e.target.value });
   };
+
   const editDataHandler = (index, e) => {
     let temp = JSON.parse(JSON.stringify(allTrigers));
     temp[index][e.target.name] = e.target.value;
@@ -147,9 +166,9 @@ function TriggerType(props) {
       });
   };
 
-  const deleteHandler = (el) => {
+  const deleteHandler = (deletedTriggerName) => {
     let json = {
-      triggerTypeName: el,
+      triggerTypeName: deletedTriggerName,
     };
     axios
       .delete(SERVER_URL + ENDPOINT_GET_REGISTER_TRIGGER, {
@@ -157,21 +176,28 @@ function TriggerType(props) {
         headers: { "Content-Type": "application/json" },
       })
       .then((res) => {
-        allTrigers.forEach((val, index) => {
-          if (val.triggerTypeName == el) {
-            allTrigers.splice(index, 1);
-          }
-        });
+        if (res.status === 200) {
+          let temp = JSON.parse(JSON.stringify(allTrigers));
+          let deletedIndex = "";
+          temp.forEach((element, index) => {
+            if (element.triggerTypeName === deletedTriggerName) {
+              deletedIndex = index;
+            }
+          });
+          temp.splice(deletedIndex, 1);
+          setallTrigers(temp);
+        }
       });
   };
 
   return (
     <div style={{ marginLeft: "1rem" }}>
-      <h4 style={{ fontSize: "var(--subtitle_text_font_size)" }}>
-        {t("triggerTypes")}
-      </h4>
-      <p className={styles.subheader}>{t("listOfTrigger")}</p>
-
+      <div className={styles.flexColumn}>
+        <h4 style={{ fontSize: "var(--subtitle_text_font_size)" }}>
+          {t("triggerTypes")}
+        </h4>
+        <p className={styles.subheader}>{t("listOfTrigger")}</p>
+      </div>
       <div className={styles.headerDiv}>
         <p
           className={
@@ -217,171 +243,191 @@ function TriggerType(props) {
         </p>
 
         <button
-          className={styles.registerNewButton}
+          className={clsx(styles.registerNewButton, styles.marginLeftAuto)}
           onClick={registerNewLocalHandler}
         >
           {t("registerNew")}
         </button>
       </div>
-      {registerBtn ? (
-        <React.Fragment>
-          <InputBase
-            id="type_field_mapping_alias_name_input"
-            className={
-              direction === RTL_DIRECTION
-                ? arabicStyles.inputbaseRtl
-                : styles.inputbaseLtr1
-            }
-            variant="outlined"
-            value={data.triggerTypeName}
-            name="triggerTypeName"
-            onChange={onDataChange}
-          />
-          <InputBase
-            id="type_field_mapping_alias_name_input"
-            className={
-              direction === RTL_DIRECTION
-                ? arabicStyles.inputbaseRtl
-                : styles.inputbaseLtr1
-            }
-            variant="outlined"
-            value={data.triggerPropertyPath}
-            name="triggerPropertyPath"
-            onChange={onDataChange}
-          />
-          <InputBase
-            id="type_field_mapping_alias_name_input"
-            className={
-              direction === RTL_DIRECTION
-                ? arabicStyles.inputbaseRtl
-                : styles.inputbaseLtr
-            }
-            variant="outlined"
-            value={data.triggerExecutionPath}
-            name="triggerExecutionPath"
-            onChange={onDataChange}
-          />
-          <InputBase
-            id="type_field_mapping_alias_name_input"
-            className={
-              direction === RTL_DIRECTION
-                ? arabicStyles.inputbaseRtl
-                : styles.inputbaseLtr
-            }
-            variant="outlined"
-            value={data.tableNames}
-            name="tableNames"
-            onChange={onDataChange}
-          />
-          <button
-           
-            className={styles.cancelButton}
-           
-            onClick={cancelHandler}
-          >
-            {t("cancel")}
-          </button>
-          <button
-            className={styles.registerNewButton}
-            style={{ marginLeft: "1rem", marginRight: "8rem" }}
-            onClick={registerNew}
-          >
-            {t("register")}
-          </button>
-        </React.Fragment>
-      ) : null}
+      <div className={styles.flexRow}>
+        {registerBtn && (
+          <React.Fragment>
+            <InputBase
+              id="type_field_mapping_alias_name_input"
+              className={
+                direction === RTL_DIRECTION
+                  ? arabicStyles.inputbaseRtl
+                  : styles.inputbaseLtr1
+              }
+              variant="outlined"
+              value={data.triggerTypeName}
+              name="triggerTypeName"
+              onChange={onDataChange}
+              inputRef={fieldTypeRef}
+              onKeyPress={(e) =>
+                FieldValidations(e, 150, fieldTypeRef.current, 50)
+              }
+            />
 
-      {allTrigers &&
-        allTrigers.map((val, index) => {
-          return (
-            <React.Fragment>
-              <InputBase
-                id="type_field_mapping_alias_name_input"
-                className={
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.inputbaseRtl
-                    : styles.inputbaseLtr1
-                }
-                variant="outlined"
-                name="triggerTypeName"
-                value={val.triggerTypeName}
-                onChange={(e) => {
-                  editDataHandler(index, e);
-                  setedited(index);
-                }}
-              />
-              <InputBase
-                id="type_field_mapping_alias_name_input"
-                className={
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.inputbaseRtl
-                    : styles.inputbaseLtr1
-                }
-                variant="outlined"
-                value={val.triggerPropertyPath}
-                name="triggerPropertyPath"
-                onChange={(e) => {
-                  editDataHandler(index, e);
-                  setedited(index);
-                }}
-              />
-              <InputBase
-                id="type_field_mapping_alias_name_input"
-                className={
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.inputbaseRtl
-                    : styles.inputbaseLtr
-                }
-                variant="outlined"
-                value={val.triggerExecutionPath}
-                name="triggerExecutionPath"
-                onChange={(e) => {
-                  editDataHandler(index, e);
-                  setedited(index);
-                }}
-              />
-              <InputBase
-                id="type_field_mapping_alias_name_input"
-                className={
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.inputbaseRtl
-                    : styles.inputbaseLtr
-                }
-                variant="outlined"
-                value={val.tableNames}
-                name="tableNames"
-                onChange={(e) => {
-                  editDataHandler(index, e);
-                  setedited(index);
-                }}
-              />
-              {edited == index ? (
-                <>
-                  <button
-                    style={{ margin: "0rem 2rem !important" }}
-                    className={styles.cancelButton}
-                    onClick={() => cancelChanges(index)}
-                  >
-                    {t("cancel")}
-                  </button>
-                  <button
-                    className={styles.registerNewButton}
-                    style={{ marginLeft: "1rem", marginRight: "10rem" }}
-                    onClick={() => saveChanges(index)}
-                  >
-                    {t("save")}
-                  </button>
-                </>
-              ) : (
-                <img
-                  src={cancelIcon}
-                  onClick={() => deleteHandler(val.triggerTypeName)}
-                  style={{ marginLeft: "6rem", marginRight: "15rem" }}
-                />
-              )}
-            </React.Fragment>
-          );
-        })}
+            <InputBase
+              id="type_field_mapping_alias_name_input"
+              className={
+                direction === RTL_DIRECTION
+                  ? arabicStyles.inputbaseRtl
+                  : styles.inputbaseLtr1
+              }
+              variant="outlined"
+              value={data.triggerPropertyPath}
+              name="triggerPropertyPath"
+              onChange={onDataChange}
+              inputRef={propertyPathRef}
+              onKeyPress={(e) =>
+                FieldValidations(e, 116, propertyPathRef.current, 255)
+              }
+            />
+            <InputBase
+              id="type_field_mapping_alias_name_input"
+              className={
+                direction === RTL_DIRECTION
+                  ? arabicStyles.inputbaseRtl
+                  : styles.inputbaseLtr
+              }
+              variant="outlined"
+              value={data.triggerExecutionPath}
+              name="triggerExecutionPath"
+              onChange={onDataChange}
+              inputRef={executionPathRef}
+              onKeyPress={(e) =>
+                FieldValidations(e, 116, executionPathRef.current, 255)
+              }
+            />
+            <InputBase
+              id="type_field_mapping_alias_name_input"
+              className={
+                direction === RTL_DIRECTION
+                  ? arabicStyles.inputbaseRtl
+                  : styles.inputbaseLtr
+              }
+              variant="outlined"
+              value={data.tableNames}
+              name="tableNames"
+              onChange={onDataChange}
+              inputRef={triggerTableNameRef}
+              onKeyPress={(e) =>
+                FieldValidations(e, 151, triggerTableNameRef.current, 255)
+              }
+            />
+            <button className={styles.cancelButton} onClick={cancelHandler}>
+              {t("cancel")}
+            </button>
+            <button
+              className={styles.registerNewButton}
+              style={{ marginLeft: "1rem", marginRight: "8rem" }}
+              onClick={registerNew}
+            >
+              {t("register")}
+            </button>
+          </React.Fragment>
+        )}
+      </div>
+      <div className={styles.triggerTypeDataDiv}>
+        {allTrigers &&
+          allTrigers.map((val, index) => {
+            return (
+              <React.Fragment>
+                <div className={styles.flexRow}>
+                  <InputBase
+                    id="type_field_mapping_alias_name_input"
+                    className={
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.inputbaseRtl
+                        : styles.inputbaseLtr1
+                    }
+                    variant="outlined"
+                    name="triggerTypeName"
+                    value={val.triggerTypeName}
+                    onChange={(e) => {
+                      editDataHandler(index, e);
+                      setedited(index);
+                    }}
+                  />
+                  <InputBase
+                    id="type_field_mapping_alias_name_input"
+                    className={
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.inputbaseRtl
+                        : styles.inputbaseLtr1
+                    }
+                    variant="outlined"
+                    value={val.triggerPropertyPath}
+                    name="triggerPropertyPath"
+                    onChange={(e) => {
+                      editDataHandler(index, e);
+                      setedited(index);
+                    }}
+                  />
+                  <InputBase
+                    id="type_field_mapping_alias_name_input"
+                    className={
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.inputbaseRtl
+                        : styles.inputbaseLtr
+                    }
+                    variant="outlined"
+                    value={val.triggerExecutionPath}
+                    name="triggerExecutionPath"
+                    onChange={(e) => {
+                      editDataHandler(index, e);
+                      setedited(index);
+                    }}
+                  />
+                  <InputBase
+                    id="type_field_mapping_alias_name_input"
+                    className={
+                      direction === RTL_DIRECTION
+                        ? arabicStyles.inputbaseRtl
+                        : styles.inputbaseLtr
+                    }
+                    variant="outlined"
+                    value={val.tableNames}
+                    name="tableNames"
+                    onChange={(e) => {
+                      editDataHandler(index, e);
+                      setedited(index);
+                    }}
+                  />
+                  {edited == index ? (
+                    <>
+                      <button
+                        style={{ margin: "0rem 2rem !important" }}
+                        className={styles.cancelButton}
+                        onClick={() => cancelChanges(index)}
+                      >
+                        {t("cancel")}
+                      </button>
+                      <button
+                        className={styles.registerNewButton}
+                        style={{
+                          marginLeft: "1rem",
+                          marginRight: "10rem",
+                        }}
+                        onClick={() => saveChanges(index)}
+                      >
+                        {t("save")}
+                      </button>
+                    </>
+                  ) : (
+                    <img
+                      src={cancelIcon}
+                      onClick={() => deleteHandler(val.triggerTypeName)}
+                      className={styles.stopTriggerIcon}
+                    />
+                  )}
+                </div>
+              </React.Fragment>
+            );
+          })}
+      </div>
     </div>
   );
 }

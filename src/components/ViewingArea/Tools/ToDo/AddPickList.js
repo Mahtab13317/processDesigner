@@ -80,6 +80,7 @@ function AddPickList(props) {
                             }
                           }}
                         />
+                       
                         <DeleteForeverOutlinedIcon
                           onClick={() => deletePickList(index)}
                           style={{ color: "red", cursor: "pointer" }}

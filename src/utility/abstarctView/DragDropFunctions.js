@@ -73,12 +73,18 @@ export const handleDragEnd = (result, processData, setProcessData) => {
         prevMilestoneId: prevMile.iMileStoneId,
         laneId: activity.LaneId,
         prevLaneId: activity.LaneId,
-        xLeftLoc: lastAct
-          ? isPreviousActDefault
-            ? +lastAct.xLeftLoc + gridSize + widthForDefaultVertex + mileWidth
-            : +lastAct.xLeftLoc + gridSize + mileWidth
-          : gridSize + mileWidth,
-        yTopLoc: +lastAct.yTopLoc,
+        xLeftLoc:
+          mile.iMileStoneId === prevMile.iMileStoneId
+            ? +activity.xLeftLoc
+            : lastAct
+            ? isPreviousActDefault
+              ? +lastAct.xLeftLoc + gridSize + widthForDefaultVertex + mileWidth
+              : +lastAct.xLeftLoc + gridSize + mileWidth
+            : gridSize + mileWidth,
+        yTopLoc:
+          mile.iMileStoneId === prevMile.iMileStoneId
+            ? +activity.yTopLoc
+            : +lastAct.yTopLoc,
       })
       .then((res) => {
         if (res.data.Status === 0) {
@@ -98,15 +104,25 @@ export const handleDragEnd = (result, processData, setProcessData) => {
             );
             processObjectData.MileStones[milestoneIndex].Activities[
               destination.index
-            ].xLeftLoc = lastAct
-              ? isPreviousActDefault
-                ? +lastAct.xLeftLoc + gridSize + widthForDefaultVertex
-                : +lastAct.xLeftLoc + gridSize
-              : gridSize;
+            ].xLeftLoc =
+              mile.iMileStoneId === prevMile.iMileStoneId
+                ? processObjectData.MileStones[milestoneIndex].Activities[
+                    destination.index
+                  ].xLeftLoc
+                : lastAct
+                ? isPreviousActDefault
+                  ? +lastAct.xLeftLoc + gridSize + widthForDefaultVertex
+                  : +lastAct.xLeftLoc + gridSize
+                : gridSize;
             processObjectData.MileStones[milestoneIndex].Activities[
               destination.index
-            ].yTopLoc = +lastAct.yTopLoc;
-            console.log("cell", processObjectData);
+            ].yTopLoc =
+              mile.iMileStoneId === prevMile.iMileStoneId
+                ? processObjectData.MileStones[milestoneIndex].Activities[
+                    destination.index
+                  ].yTopLoc
+                : +lastAct.yTopLoc;
+
             setProcessData(processObjectData);
           } else if (
             // This condition runs when the activity card is dragged and dropped in a different position in a different milestone.
@@ -130,7 +146,7 @@ export const handleDragEnd = (result, processData, setProcessData) => {
             processObjectData.MileStones[destinationMileStoneIndex].Activities[
               destination.index
             ].yTopLoc = +lastAct.yTopLoc;
-            console.log("cellDiff", processObjectData, lastAct);
+
             setProcessData(processObjectData);
           }
         }

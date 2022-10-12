@@ -41,12 +41,14 @@ import fwdDocMappingIcon from "../../../src/assets/abstractView/Icons/fwdDocMapp
 import fwdDocMappingIcon_EN from "../../../src/assets/abstractView/Icons/fwdDocMapping_Enabled.png";
 import revDocMappingIcon from "../../../src/assets/abstractView/Icons/revDocMapping.png";
 import revDocMappingIcon_EN from "../../../src/assets/abstractView/Icons/revDocMapping_Enabled.png";
+import omsTemplatesIcon from "../../../src/assets/abstractView/Icons/omsTemplates.png";
+import omsTemplatesIcon_EN from "../../../src/assets/abstractView/Icons/omsTemplates_Enabled.png";
 import StreamsIcon from "../../../src/assets/abstractView/Icons/Streams.png";
 import StreamsIcon_EN from "../../../src/assets/abstractView/Icons/Streams_Enabled.png";
 import OptionIcon from "../../../src/assets/abstractView/Icons/Options.svg";
 import Throw from "../../../src/assets/abstractView/Icons/Throw.svg";
 import Catch from "../../../src/assets/abstractView/Icons/Catch.svg";
-import { propertiesLabel,tabsHeading } from "../../Constants/appConstants";
+import { propertiesLabel, tabsHeading } from "../../Constants/appConstants";
 import TaskEscalationRules from "../../components/Properties/PropetiesTab/TaskEscalationRules/TaskEscalationRules";
 import TaskData from "../../components/Properties/PropetiesTab/TaskData/TaskData";
 
@@ -225,7 +227,9 @@ const BusinessRules = React.lazy(() =>
 const SharePointArchives = React.lazy(() =>
   import("../../components/Properties/PropetiesTab/sharePointArchives/index.js")
 );
-
+const Message = React.lazy(() =>
+  import("../../components/Properties/PropetiesTab/Message/index.js")
+);
 
 const tabNames = {
   1: {
@@ -243,15 +247,14 @@ const tabNames = {
     label: propertiesLabel.dataFields,
   },
   3: {
-    name: <InitialRule heading={tabsHeading[3]}  />,
+    name: <InitialRule heading={tabsHeading[3]} />,
     toolTip: "initialRules",
     icon: InitialRulesIcon,
     icon_enabled: InitialRulesIcon_EN,
     label: propertiesLabel.initialRules,
   },
   4: {
-    
-    name: <Requirements heading={tabsHeading[4]} />,
+    name: <Requirements heading={tabsHeading[4]} fromArea='activityLevel'/>,
     toolTip: "requirements",
     icon: RequirementsIcon,
     icon_enabled: RequirementsIcon_EN,
@@ -282,13 +285,23 @@ const tabNames = {
     label: propertiesLabel.eventConfiguration,
   },
   9: {
-    name: <ForwardMapping_Variables tabType="Forward Variable Mapping" heading={tabsHeading[9]} />,
+    name: (
+      <ForwardMapping_Variables
+        tabType="Forward Variable Mapping"
+        heading={tabsHeading[9]}
+      />
+    ),
     toolTip: "ForwardVariableMapping",
     icon: ForwardMapping,
     label: propertiesLabel.fwdVarMapping,
   },
   10: {
-    name: <ReverseMapping_Variables tabType="Reverse Variable Mapping" heading={tabsHeading[10]} />,
+    name: (
+      <ReverseMapping_Variables
+        tabType="Reverse Variable Mapping"
+        heading={tabsHeading[10]}
+      />
+    ),
     toolTip: "ReverseVariableMapping",
     icon: ReverseMapping,
     label: propertiesLabel.revVarMapping,
@@ -377,7 +390,7 @@ const tabNames = {
     toolTip: "businessRule",
     label: propertiesLabel.businessRule,
   },
-  
+
   24: {
     name: <Archieve heading={tabsHeading[24]} />,
     toolTip: "archive",
@@ -388,10 +401,12 @@ const tabNames = {
   25: {
     name: <Templates heading={tabsHeading[25]} />,
     toolTip: "templates",
+    icon: omsTemplatesIcon, //code edited on 26 August 2022 for BugId 111149
+    icon_enabled: omsTemplatesIcon_EN, //code edited on 26 August 2022 for BugId 111149
     label: propertiesLabel.templates,
   },
   26: {
-    name: <div>message to be painted here</div>,
+    name: <Message heading={tabsHeading[26]} />,
     toolTip: "message",
     label: propertiesLabel.message,
   },
@@ -480,14 +495,24 @@ const tabNames = {
     label: propertiesLabel.Restful,
   },
   42: {
-    name: <ForwardMapping_DocTypes tabType="Forward DocType Mapping" heading={tabsHeading[42]} />,
+    name: (
+      <ForwardMapping_DocTypes
+        tabType="Forward DocType Mapping"
+        heading={tabsHeading[42]}
+      />
+    ),
     toolTip: "ForwardDocTypeMapping",
     icon: fwdDocMappingIcon,
     icon_enabled: fwdDocMappingIcon_EN,
     label: propertiesLabel.fwdDocMapping,
   },
   43: {
-    name: <ReverseMDoc tabType="Reverse DocType Mapping" heading={tabsHeading[43]} />,
+    name: (
+      <ReverseMDoc
+        tabType="Reverse DocType Mapping"
+        heading={tabsHeading[43]}
+      />
+    ),
     toolTip: "ReverseDocTypeMapping",
     icon: revDocMappingIcon,
     icon_enabled: revDocMappingIcon_EN,
@@ -529,21 +554,32 @@ const tabNames = {
   },
   50: {
     name: (
-      <ForwardMapping_DocTypes_ProcessTask tabType="Forward DocType Mapping" heading={tabsHeading[42]} />
+      <ForwardMapping_DocTypes_ProcessTask
+        tabType="Forward DocType Mapping"
+        heading={tabsHeading[42]}
+      />
     ),
     toolTip: "ForwardDocTypeMapping",
     icon: ForwardMapping,
     label: propertiesLabel.fwdDocMappingProcessTask,
   },
   51: {
-    name: <ReverseMDoc_ProcessTask tabType="Reverse DocType Mapping" heading={tabsHeading[43]} />,
+    name: (
+      <ReverseMDoc_ProcessTask
+        tabType="Reverse DocType Mapping"
+        heading={tabsHeading[43]}
+      />
+    ),
     toolTip: "ReverseDocTypeMapping",
     icon: ReverseMapping,
     label: propertiesLabel.revDocMappingProcessTask,
   },
   52: {
     name: (
-      <ForwardMapping_Variables_ProcessTask tabType="Forward Variable Mapping" heading={tabsHeading[9]} />
+      <ForwardMapping_Variables_ProcessTask
+        tabType="Forward Variable Mapping"
+        heading={tabsHeading[9]}
+      />
     ),
     toolTip: "ForwardVariableMapping",
     icon: ForwardMapping,
@@ -551,7 +587,10 @@ const tabNames = {
   },
   53: {
     name: (
-      <ReverseMapping_Variables_ProcessTask tabType="Reverse Variable Mapping" heading={tabsHeading[10]} />
+      <ReverseMapping_Variables_ProcessTask
+        tabType="Reverse Variable Mapping"
+        heading={tabsHeading[10]}
+      />
     ),
     toolTip: "ReverseVariableMapping",
     icon: ReverseMapping,

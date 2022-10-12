@@ -1,0 +1,36 @@
+.mainDiv{
+    display: flex;
+    flex-direction: column;
+   
+    width: 100%;
+    height:66vh;
+   
+}
+
+.row{
+display: flex;
+flex-direction: column;
+margin-block: 1rem;
+padding: 1rem;
+width: 58%;
+height: 7rem;
+justify-content: space-between;
+}
+
+.heading{
+    font-size: var(--base_text_font_size);
+    font-weight: 600;
+}
+
+.varRow{
+    display: flex;
+    flex-direction: row;
+    
+  padding-inline: 1rem;
+    width: 30%;
+    justify-content: space-between; 
+}
+.variableContainer{
+    height: 40vh;
+    overflow-y: scroll;
+}

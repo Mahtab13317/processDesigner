@@ -8,6 +8,7 @@ import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import * as actionCreators from "../../redux-store/actions/processView/actions.js";
 import { Draggable } from "react-beautiful-dnd";
+import { PinnedProcessIcon } from "../../utility/AllImages/AllImages";
 
 function PinnedProcessTile(props) {
   let { t } = useTranslation();
@@ -29,6 +30,7 @@ function PinnedProcessTile(props) {
     history.push("/process");
   };
   const direction = `${t("HTML_DIR")}`;
+
   return (
     <div>
       {/* Draggable makes the individual pinned tile draggable. */}
@@ -46,7 +48,17 @@ function PinnedProcessTile(props) {
               <div className="row processNameDiv">
                 <div className="logoDiv">
                   <img src={processIcon} className="fileLogo" />
+                  <PinnedProcessIcon
+                    className="fileLogo"
+                    onClick={props.handleUnpin}
+                    style={{
+                      color: "#0f7ac9",
+                      width: "1.5rem",
+                      height: "1.5rem",
+                    }}
+                  />
                 </div>
+
                 <div className="titleDiv">
                   <p className="titlePinned">
                     <span className="titlePinnedName">{props.name}</span>

@@ -1,3 +1,5 @@
+// #BugID - 109986
+// #BugDescription - validation for Doctype duplicate name length has been added.
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "./todo.module.css";
@@ -12,6 +14,8 @@ import {
   SERVER_URL,
   propertiesLabel,
   ENDPOINT_ADD_DOC,
+  PROCESSTYPE_DEPLOYED,
+  PROCESSTYPE_REGISTERED,
 } from "../../../../Constants/appConstants";
 import axios from "axios";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
@@ -20,6 +24,10 @@ import {
   OpenProcessSliceValue,
   setOpenProcess,
 } from "../../../../redux-store/slices/OpenProcessSlice";
+import {
+  containsText,
+  isReadOnlyFunc,
+} from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function Document(props) {
   let { t } = useTranslation();
@@ -27,6 +35,8 @@ function Document(props) {
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [localState, setLocalState] = useState(null);
   const [docItemData, setDocItemData] = useState({});
   const [addDoc, setAddDoc] = useState(false);
@@ -41,8 +51,10 @@ function Document(props) {
     isModify: false,
   });
   const [addAnotherDoc, setAddAnotherDoc] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const dispatch = useDispatch();
   const openProcessData = useSelector(OpenProcessSliceValue);
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   useEffect(() => {
     let activityIdString = "";
@@ -155,7 +167,7 @@ function Document(props) {
       val = !prev;
       return !prev;
     });
-    let temp = { ...localLoadedActivityPropertyData };
+    let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
     if (temp?.ActivityProperty?.wdeskInfo) {
       if (temp?.ActivityProperty?.wdeskInfo?.objPMWdeskDocuments) {
         let valTemp =
@@ -203,7 +215,7 @@ function Document(props) {
   const addDocToList = (docToAdd, docDesc, button_type) => {
     let exist = false;
     docData?.DocumentTypeList?.forEach((el) => {
-      if (el.DocName.toLowerCase() == docToAdd.toLowerCase()) {
+      if (el.DocName.trim().toLowerCase() == docToAdd.trim().toLowerCase()) {
         exist = true;
       }
     });
@@ -285,7 +297,7 @@ function Document(props) {
     } else if (type === "isModify" && tempCheck[docName]["isModify"] === true) {
       tempCheck[docName]["isView"] = true;
     }
-    let temp = { ...localLoadedActivityPropertyData };
+    let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
     let tempVal = {
       ...temp?.ActivityProperty?.wdeskInfo?.objPMWdeskDocuments?.documentMap,
     };
@@ -365,7 +377,7 @@ function Document(props) {
         };
       }
     });
-    let temp = { ...localLoadedActivityPropertyData };
+    let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
     let docMap = {};
     Object.keys(docItemData)?.forEach((el) => {
       if (
@@ -412,6 +424,11 @@ function Document(props) {
     );
   };
 
+  // code added on 19 Sep 2022 for BugId 111134
+  const displayedOptions = Object.keys(docItemData)?.filter((option) =>
+    containsText(docItemData[option].docTypeName, searchTerm)
+  );
+
   return (
     <React.Fragment>
       <div className={styles.documentRow}>
@@ -420,48 +437,68 @@ function Document(props) {
             checked={checkDoc}
             onChange={() => CheckDocHandler()}
             className={styles.mainCheckbox}
+            disabled={isReadOnly}
             data-testid="CheckDocId"
             type="checkbox"
           />
           {t("document")}
         </div>
-        <div className="row">
+        <div className="row" style={{ gap: "1vw" }}>
           <div className={styles.searchbox}>
             <SearchBox
               width="20vw"
               name="search"
               placeholder={t("Search Here")}
+              onSearchChange={(val) => setSearchTerm(val)} // code added on 19 Sep 2022 for BugId 111134
+              clearSearchResult={() => setSearchTerm("")} // code added on 19 Sep 2022 for BugId 111134
             />
           </div>
           <button
-            disabled={!checkDoc}
-            className={!checkDoc ? styles.disabledBtn : styles.addBtn}
+            disabled={
+              !checkDoc ||
+              props.openProcessType === PROCESSTYPE_DEPLOYED ||
+              props.openProcessType === PROCESSTYPE_REGISTERED
+            }
+            className={
+              !checkDoc ||
+              props.openProcessType === PROCESSTYPE_DEPLOYED ||
+              props.openProcessType === PROCESSTYPE_REGISTERED
+                ? styles.disabledBtn
+                : styles.addBtn
+            }
             onClick={defineHandler}
-            style={{ marginLeft: "1vw" }}
             data-testid="defineBtn_doc"
           >
             {t("Define")}
           </button>
         </div>
-        <div className={styles.todoDocTextarea} style={{ marginTop: "1rem" }}>
+        <div
+          className={styles.todoDocTextarea}
+          style={{
+            marginTop: "1rem",
+            width: props.isDrawerExpanded ? "90%" : "60rem",
+          }}
+        >
           {Object.keys(docItemData)?.length > 0 ? (
             <React.Fragment>
               <div className={`row ${styles.docTableHeader}`}>
-                <div className={styles.docTypes}>{t("docTypes")}</div>
-                <div className={styles.view}>
+                <div className={styles.docTypes} style={{ width: "25%" }}>
+                  {t("docTypes")}
+                </div>
+                {/* <div className={styles.view}>
                   <Checkbox
                     className={styles.mainCheckbox}
                     checked={!checkDoc ? false : allChecked?.isAdd}
-                    disabled={!checkDoc}
+                    disabled={!checkDoc || isReadOnly}
                     onChange={(e) => allCheckHandler("isAdd", e)}
                   />
                   {t("add")}
-                </div>
+                </div> */}
                 <div className={styles.view}>
                   <Checkbox
                     className={styles.mainCheckbox}
                     checked={!checkDoc ? false : allChecked?.isView}
-                    disabled={!checkDoc}
+                    disabled={!checkDoc || isReadOnly}
                     onChange={(e) => allCheckHandler("isView", e)}
                   />
                   {t("view")}
@@ -470,7 +507,7 @@ function Document(props) {
                   <Checkbox
                     className={styles.mainCheckbox}
                     checked={!checkDoc ? false : allChecked?.isModify}
-                    disabled={!checkDoc}
+                    disabled={!checkDoc || isReadOnly}
                     onChange={(e) => allCheckHandler("isModify", e)}
                   />
                   {t("modify")}
@@ -479,7 +516,7 @@ function Document(props) {
                   <Checkbox
                     className={styles.mainCheckbox}
                     checked={!checkDoc ? false : allChecked?.isDelete}
-                    disabled={!checkDoc}
+                    disabled={!checkDoc || isReadOnly}
                     onChange={(e) => allCheckHandler("isDelete", e)}
                   />
                   {t("delete")}
@@ -488,7 +525,7 @@ function Document(props) {
                   <Checkbox
                     className={styles.mainCheckbox}
                     checked={!checkDoc ? false : allChecked?.isDownlaod}
-                    disabled={!checkDoc}
+                    disabled={!checkDoc || isReadOnly}
                     onChange={(e) => allCheckHandler("isDownlaod", e)}
                   />
                   {t("download")}
@@ -497,7 +534,7 @@ function Document(props) {
                   <Checkbox
                     className={styles.mainCheckbox}
                     checked={!checkDoc ? false : allChecked?.isPrint}
-                    disabled={!checkDoc}
+                    disabled={!checkDoc || isReadOnly}
                     onChange={(e) => allCheckHandler("isPrint", e)}
                   />
                   {t("print")}
@@ -505,23 +542,33 @@ function Document(props) {
               </div>
               <div className={styles.docTextarea}>
                 {checkDoc &&
-                  Object.keys(docItemData)?.map((val) => {
+                  displayedOptions?.map((val) => {
                     return (
-                      <div className="row">
+                      <div
+                        className="row"
+                        style={{ height: "var(--line_height)" }}
+                      >
                         <React.Fragment>
-                          <div className={styles.docTypes}>
+                          <div
+                            className={styles.docTypes}
+                            style={{
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
                             {docItemData[val].docTypeName}
                           </div>
-                          <div className={styles.view}>
+                          {/* <div className={styles.view}>
                             <Checkbox
                               className={styles.mainCheckbox}
                               onChange={(e) => CheckHandler(val, "isAdd", e)}
                               checked={
                                 checked[val]?.isAdd ? checked[val].isAdd : false
                               }
+                              disabled={isReadOnly}
                               id="addBox"
                             />
-                          </div>
+                          </div> */}
                           <div className={styles.view}>
                             <Checkbox
                               className={styles.mainCheckbox}
@@ -531,6 +578,7 @@ function Document(props) {
                                   ? checked[val].isView
                                   : false
                               }
+                              disabled={isReadOnly}
                               id="viewBox"
                             />
                           </div>
@@ -543,6 +591,7 @@ function Document(props) {
                                   ? checked[val].isModify
                                   : false
                               }
+                              disabled={isReadOnly}
                             />
                           </div>
                           <div className={styles.checkboxHeader}>
@@ -554,6 +603,7 @@ function Document(props) {
                                   ? checked[val].isDelete
                                   : false
                               }
+                              disabled={isReadOnly}
                             />
                           </div>
                           <div className={styles.checkboxDownload}>
@@ -567,6 +617,7 @@ function Document(props) {
                                   ? checked[val].isDownlaod
                                   : false
                               }
+                              disabled={isReadOnly}
                             />
                           </div>
                           <div className={styles.checkboxHeader}>
@@ -578,6 +629,7 @@ function Document(props) {
                                   ? checked[val].isPrint
                                   : false
                               }
+                              disabled={isReadOnly}
                             />
                           </div>
                         </React.Fragment>
@@ -606,6 +658,8 @@ const mapStateToProps = (state) => {
     openProcessID: state.openProcessClick.selectedId,
     openProcessName: state.openProcessClick.selectedProcessName,
     openProcessType: state.openProcessClick.selectedType,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
+    isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
   };
 };
 

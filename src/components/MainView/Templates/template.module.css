@@ -193,8 +193,10 @@
   font: normal normal normal var(--base_text_font_size) / 17px
     var(--font_family);
   letter-spacing: 0px;
-  color: blue;
+  color: var(--link_color);
   margin-left: 0.25rem;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .categoryHeaderDisplay {
@@ -690,4 +692,102 @@
   color: #383737;
   margin: 0 1rem 0.5rem;
   padding: 0.5rem;
+}
+
+
+.modalHeader {
+  height: 50px;
+  border-bottom: 1px solid #f5f5f5;
+  padding: 5px;
+}
+.modalLabel {
+  float: left;
+}
+.modalClose {
+  float: right;
+}
+.modalFooter {
+  height: 50px;
+  border-top: 1px solid #f5f5f5;
+  background: #f5f5f5;
+}
+.modalFooterInner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  padding: 0.25rem;
+}
+
+.modalHeaderRTL {
+  height: 50px;
+  border-bottom: 1px solid #f5f5f5;
+  padding: 5px;
+}
+.modalLabelRTL {
+  float: right;
+}
+.modalCloseRTL {
+  float: left;
+}
+.modalFooterRTL {
+  height: 50px;
+  border-top: 1px solid #f5f5f5;
+  background: #f5f5f5;
+}
+
+.modalFooterInnerRTL {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row-reverse;
+  justify-content: start;
+  padding: 10px;
+}
+
+.modalFooterInnerRTL {
+  margin-right: 10px;
+}
+.labels {
+  margin-top: 12px;
+}
+
+.modalBody {
+  padding: 15px;
+  clear: both;
+}
+
+.modalControl {
+  margin-top: 15px;
+}
+
+.modalText {
+  width: 100%;
+}
+.cancelMap {
+  margin-right: 10px;
+  border-radius: 1px;
+}
+.btnMapModal {
+  color: #fff;
+  background: #0072c6;
+  border-radius: 1px;
+}
+.btnMapModal:hover {
+  color: #fff;
+  background: #0072c6;
+  border-radius: 1px;
+}
+
+.dataContainer {
+}
+
+.txtField {
+  width: 100%;
+  height: 2.5rem;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  font: normal normal normal var(--base_text_font_size) / 17px
+    var(--font_family) !important;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  opacity: 1;
+  margin-right: 10px;
 }

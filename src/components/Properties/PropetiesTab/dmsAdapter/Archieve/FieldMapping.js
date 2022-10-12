@@ -190,6 +190,7 @@ function FieldMapping(props) {
                     },
                     getContentAnchorEl: null,
                   }}
+                  disabled={props.isReadOnly} //code updated on 26 September 2022 for BugId 115467
                 >
                   {loadedVariables.map((value) => {
                     return (
@@ -221,6 +222,7 @@ function FieldMapping(props) {
           onClick={() => handleMappingSave()}
           variant="contained"
           color="primary"
+          disabled={props.isReadOnly}
         >
           Ok
         </Button>

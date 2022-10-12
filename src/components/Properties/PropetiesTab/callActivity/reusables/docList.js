@@ -3,12 +3,20 @@ import React, { useState, useEffect } from "react";
 import SearchComponent from "../../../../../UI/Search Component/index.js";
 import "../../callActivity/commonCallActivity.css";
 import Button from "@material-ui/core/Button";
-import { VARDOC_LIST, SERVER_URL } from "../../../../../Constants/appConstants";
+import {
+  VARDOC_LIST,
+  SERVER_URL,
+  propertiesLabel,
+} from "../../../../../Constants/appConstants";
 import axios from "axios";
 import { store, useGlobalState } from "state-pool";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
+import { setActivityPropertyChange } from "../../../../../redux-store/slices/ActivityPropertyChangeSlice.js";
 
+/*code edited on 6 Sep 2022 for BugId 115378 */
 function VariableList(props) {
+  const { isReadOnly } = props;
+  const dispatch = useDispatch();
   let [documentsList, setDocumentsList] = useState([]);
   let [searchTerm, setSearchTerm] = useState("");
   const [varDefinition, setVarDefinition] = useState([]);
@@ -16,37 +24,40 @@ function VariableList(props) {
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
-  const [registeredProcessID, setRegisteredProcessID] = useState("2148");
   const [completeDocList, setCompleteDocList] = useState([]);
+
   useEffect(() => {
-    let jsonBody = {
-      processDefId: registeredProcessID,
-      extTableDataFlag: "Y",
-      docReq: "Y",
-      omniService: "Y",
-    };
-    axios.post(SERVER_URL + VARDOC_LIST, jsonBody).then((res) => {
-      if (res.data.Status === 0) {
-        setCompleteDocList([...res.data.DocDefinition]);
-        let tempDocList = [];
-        res.data.DocDefinition.forEach((variable) => {
-          tempDocList.push(variable);
-        });
-        filterData(tempDocList);
-      }
-    });
+    if (
+      localLoadedActivityPropertyData?.ActivityProperty?.SubProcess?.importedProcessDefId?.trim() !==
+      ""
+    ) {
+      let jsonBody = {
+        processDefId:
+          localLoadedActivityPropertyData?.ActivityProperty?.SubProcess
+            ?.importedProcessDefId,
+        extTableDataFlag: "Y",
+        docReq: "Y",
+        omniService: "Y",
+      };
+      axios.post(SERVER_URL + VARDOC_LIST, jsonBody).then((res) => {
+        if (res.data.Status === 0) {
+          let tempDocList = [...res.data.DocDefinition];
+          setCompleteDocList(tempDocList);
+          filterData(tempDocList);
+        }
+      });
+    }
   }, []);
 
   const filterData = (docList) => {
     let tempDocList = [];
-    docList.forEach((list) => {
+    docList?.forEach((list) => {
       let tempVariable = false;
-      props.docList &&
-        props.docList.forEach((variable) => {
-          if (variable.importedFieldName == list.DocName) {
-            tempVariable = true;
-          }
-        });
+      props.docList?.forEach((variable) => {
+        if (variable.DocName === list.DocName) {
+          tempVariable = true;
+        }
+      });
       if (!tempVariable) {
         tempDocList.push(list);
       }
@@ -55,48 +66,48 @@ function VariableList(props) {
   };
 
   useEffect(() => {
-    filterData(completeDocList);
-  }, [props.docList]);
-
-  useEffect(() => {
     setVarDefinition(
-      documentsList &&
-        documentsList.map((x) => {
-          return { ...x, isChecked: false };
-        })
+      documentsList?.map((x) => {
+        return { ...x, isChecked: false };
+      })
     );
   }, [documentsList]);
 
+  useEffect(() => {
+    setSelectedDocuments(props.docList);
+    filterData(completeDocList);
+  }, [props.docList]);
+
   const handleCheckChange = (selectedVariable) => {
     let temp = [...varDefinition];
-    temp &&
-      temp.map((v) => {
-        if (v.DocName === selectedVariable.DocName) {
-          v.isChecked = !v.isChecked;
-        }
-      });
+    temp?.map((v) => {
+      if (v.DocName === selectedVariable.DocName) {
+        v.isChecked = !v.isChecked;
+      }
+    });
     setVarDefinition(temp);
+
     if (selectedVariable.isChecked) {
       setSelectedDocuments((prev) => {
         return [...prev, selectedVariable];
+      });
+    } else {
+      setSelectedDocuments((prev) => {
+        let teList = [...prev];
+        teList.map((el, idx) => {
+          if (el.DocName === selectedVariable.DocName) {
+            teList.splice(idx, 1);
+          }
+        });
+        return teList;
       });
     }
   };
 
   const addDocsToList = () => {
     //Adding document to right panel
-    selectedDocuments &&
-      selectedDocuments.map((document) => {
-        props.setDocList((prev) => {
-          return [
-            ...prev,
-            {
-              importedFieldName: document.DocName,
-              mappedFieldName: null,
-            },
-          ];
-        });
-      });
+    props.setDocList(selectedDocuments);
+
     //Removing document from left Modal panel
     let tempArr = [];
     selectedDocuments.map((v) => {
@@ -107,47 +118,44 @@ function VariableList(props) {
 
     //Adding document to getActivityPropertyCall
     let tempToBeAddedDocsList = [];
-    let tempLocalState = { ...localLoadedActivityPropertyData };
-    let forwardIncomingDocsList =
-      props.tabType == "ForwardDocMapping"
-        ? localLoadedActivityPropertyData.ActivityProperty.SubProcess
-            .fwdDocMapping
-        : localLoadedActivityPropertyData.ActivityProperty.SubProcess
-            .revDocMapping;
-    forwardIncomingDocsList &&
-      forwardIncomingDocsList.map((document) => {
-        tempToBeAddedDocsList.push({
-          importedFieldName: document.importedFieldName,
-          mappedFieldName: document.mappedFieldName,
-        });
-      });
-    selectedDocuments.map((document) => {
+    let tempLocalState = JSON.parse(
+      JSON.stringify(localLoadedActivityPropertyData)
+    );
+    selectedDocuments?.map((document) => {
       tempToBeAddedDocsList.push({
         importedFieldName: document.DocName,
-        mappedFieldName: null,
+        mappedFieldName: document.mappedFieldName
+          ? document.mappedFieldName
+          : null,
+        m_bSelected: true,
       });
     });
 
-    if (props.tabType == "ForwardDocMapping") {
+    if (tempLocalState?.ActivityProperty?.SubProcess?.fwdDocMapping) {
       tempLocalState.ActivityProperty.SubProcess.fwdDocMapping = [
         ...tempToBeAddedDocsList,
       ];
-    } else if (props.tabType == "ReverseDocMapping") {
-      tempLocalState.ActivityProperty.SubProcess.revDocMapping = [
-        ...tempToBeAddedDocsList,
-      ];
+    } else {
+      tempLocalState.ActivityProperty.SubProcess = {
+        ...tempLocalState.ActivityProperty.SubProcess,
+        fwdDocMapping: [...tempToBeAddedDocsList],
+      };
     }
     setlocalLoadedActivityPropertyData(tempLocalState);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.fwdDocMapping]: {
+          isModified: true,
+          hasError: true,
+        },
+      })
+    );
   };
 
   let filteredRows = varDefinition.filter((row) => {
     if (searchTerm == "") {
       return row;
-    } else if (
-      row.DocName
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-    ) {
+    } else if (row.DocName.toLowerCase().includes(searchTerm.toLowerCase())) {
       return row;
     }
   });
@@ -162,7 +170,7 @@ function VariableList(props) {
       }}
     >
       <SearchComponent
-        style={{ width: "237px", height: "20px", margin: "10px 10px 5px 10px" }}
+        style={{ width: "237px", margin: "5px 10px 0" }}
         setSearchTerm={setSearchTerm}
       />
       <div
@@ -177,8 +185,7 @@ function VariableList(props) {
           style={{
             fontSize: "12px",
             paddingBottom: "5px",
-            borderBottom: "3px solid var(--selected_tab_color)"
-
+            borderBottom: "3px solid var(--selected_tab_color)",
           }}
         >
           Documents
@@ -196,9 +203,9 @@ function VariableList(props) {
         <Checkbox
           style={{
             borderRadius: "1px",
-            height: "11px",
-            width: "11px",
+            padding: "0",
           }}
+          disabled={isReadOnly}
         />
         <div
           style={{
@@ -216,92 +223,92 @@ function VariableList(props) {
       <div
         style={{
           overflowY: "scroll",
-          height: "57.5vh",
+          height: "31rem",
         }}
       >
-        {varDefinition && searchTerm==''?
-          varDefinition.map((document) => {
-            return (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  borderBottom: "1px solid #D6D6D6",
-                  padding: "5px 10px 5px 10px",
-                }}
-              >
+        {varDefinition && searchTerm == ""
+          ? varDefinition.map((document) => {
+              return (
                 <div
                   style={{
                     display: "flex",
+                    justifyContent: "space-between",
                     alignItems: "center",
+                    borderBottom: "1px solid #D6D6D6",
+                    padding: "5px 10px 5px 10px",
                   }}
                 >
-                  <Checkbox
-                    style={{
-                      borderRadius: "1px",
-                      height: "11px",
-                      width: "11px",
-                    }}
-                    onChange={() => handleCheckChange(document)}
-                    checked={document.isChecked}
-                  />
                   <div
                     style={{
                       display: "flex",
-                      flexDirection: "column",
-                      marginLeft: "15px",
+                      alignItems: "center",
                     }}
                   >
-                    <p style={{ fontSize: "11px", color: "black" }}>
-                      {document.DocName}
-                    </p>
+                    <Checkbox
+                      style={{
+                        borderRadius: "1px",
+                        padding: "0",
+                      }}
+                      onChange={() => handleCheckChange(document)}
+                      checked={document.isChecked}
+                      disabled={isReadOnly}
+                    />
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        marginLeft: "15px",
+                      }}
+                    >
+                      <p style={{ fontSize: "11px", color: "black" }}>
+                        {document.DocName}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })  
-        :filteredRows.map((document) => {
-          return (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                borderBottom: "1px solid #D6D6D6",
-                padding: "5px 10px 5px 10px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <Checkbox
-                  style={{
-                    borderRadius: "1px",
-                    height: "11px",
-                    width: "11px",
-                  }}
-                  onChange={() => handleCheckChange(document)}
-                  checked={document.isChecked}
-                />
+              );
+            })
+          : filteredRows.map((document) => {
+              return (
                 <div
                   style={{
                     display: "flex",
-                    flexDirection: "column",
-                    marginLeft: "15px",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    borderBottom: "1px solid #D6D6D6",
+                    padding: "5px 10px 5px 10px",
                   }}
                 >
-                  <p style={{ fontSize: "11px", color: "black" }}>
-                    {document.DocName}
-                  </p>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Checkbox
+                      style={{
+                        borderRadius: "1px",
+                        padding: "0",
+                      }}
+                      onChange={() => handleCheckChange(document)}
+                      checked={document.isChecked}
+                      disabled={isReadOnly}
+                    />
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        marginLeft: "15px",
+                      }}
+                    >
+                      <p style={{ fontSize: "11px", color: "black" }}>
+                        {document.DocName}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          );
-        })}
+              );
+            })}
       </div>
       <div
         style={{
@@ -312,7 +319,12 @@ function VariableList(props) {
           backgroundColor: "#F8F8F8",
         }}
       >
-        <Button variant="outlined" id="close_AddVariableModal_CallActivity">
+        <Button
+          variant="outlined"
+          id="close_AddVariableModal_CallActivity"
+          disabled={isReadOnly}
+          onClick={() => props.setShowDocsModal(false)}
+        >
           Cancel
         </Button>
         <Button
@@ -320,6 +332,7 @@ function VariableList(props) {
           variant="contained"
           color="primary"
           onClick={() => addDocsToList()}
+          disabled={isReadOnly}
         >
           Add
         </Button>

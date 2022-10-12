@@ -25,6 +25,8 @@ import DateIcon from "../../assets/DataModalIcons/DM_Date.svg";
 import StringIcon from "../../assets/DataModalIcons/DM_String.svg";
 import LongIcon from "../../assets/DataModalIcons/DM_Long.svg";
 import ComplexIcon from "../../assets/DataModalIcons/VT_Complex.svg";
+import { useRef } from "react";
+import { FieldValidations } from "../../utility/FieldValidations/fieldValidations";
 
 function TypeAndFieldMapping(props) {
   let { t } = useTranslation();
@@ -57,6 +59,9 @@ function TypeAndFieldMapping(props) {
     isEditable,
     // isComplexTypeSelected,
   } = props;
+  const aliasRef = useRef(null);
+  const fieldTypeRef = useRef();
+  const propertyPathRef = useRef();
 
   const menuProps = {
     anchorOrigin: {
@@ -196,8 +201,7 @@ function TypeAndFieldMapping(props) {
     // }
 
     // setmicroProps(temp);
-
-    console.log("vvvvvvvvvvvvvvvvvmode", temp);
+    console.log("nnnnnnnnnnnn", temp);
 
     window.MdmDataModel(temp);
     handleClose();
@@ -309,6 +313,8 @@ function TypeAndFieldMapping(props) {
         variant="outlined"
         onChange={handleAliasName}
         value={aliasName}
+        inputRef={aliasRef}
+        onKeyPress={(e) => FieldValidations(e, 102, aliasRef.current, 50)}
       />
 
       <div

@@ -118,6 +118,7 @@ const DashboardTile = (props) => {
               <div
                 className={classes.root_tile_left}
                 style={{ backgroundColor: res.img_info.background_color }}
+                title="Helo"
               >
                 {res.processTileCode === "EP" ||
                 res.processTileCode === "RP" ? (

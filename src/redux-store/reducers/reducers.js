@@ -25,6 +25,9 @@ import UserRightsDataHandlerReducer from "../slices/UserRightsSlice";
 import WebserviceChangeReducer from "../slices/webserviceChangeSlice";
 import ProjectCreationReducer from "../slices/projectCreationSlice";
 import ProcessTaskTypeReducer from "../slices/ProcessTaskTypeSlice";
+import ActivityCheckoutReducer from "../slices/ActivityCheckoutSlice";
+import activityReducer from "./Properties/activityReducer";
+import userReducer from "./userDetail/reducer";
 
 export default combineReducers({
   processTypesReducer: processTypesReducer,
@@ -53,4 +56,7 @@ export default combineReducers({
   webserviceChange: WebserviceChangeReducer,
   projectCreation: ProjectCreationReducer,
   processTaskTypeSlice: ProcessTaskTypeReducer,
+  activityCheckout: ActivityCheckoutReducer,
+  activityReducer: activityReducer,
+  userDetails: userReducer,
 });

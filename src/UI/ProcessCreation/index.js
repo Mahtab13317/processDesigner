@@ -1,3 +1,6 @@
+// #BugID - 111782
+// #BugDescription - asterisk mark for mandatory fields added.
+
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
@@ -33,6 +36,8 @@ import * as actionCreators_template from "../../redux-store/actions/Template";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import CreateProcessByTemplate from "../../components/MainView/Create/CreateProcessByTemplate";
 import { setToastDataFunc } from "../../redux-store/slices/ToastDataHandlerSlice";
+import { useRef } from "react";
+import { FieldValidations } from "../../utility/FieldValidations/fieldValidations";
 
 function ProcessCreation(props) {
   let { t } = useTranslation();
@@ -49,6 +54,7 @@ function ProcessCreation(props) {
   const [chooseTemplateModal, setChooseTemplateModal] = useState(false);
   const [spinner, setSpinner] = useState(true);
   const history = useHistory();
+  const processNameRef = useRef();
 
   useEffect(() => {
     if (props.selectedTemplate) {
@@ -174,6 +180,7 @@ function ProcessCreation(props) {
               }
             >
               {t("nameOfProject")}
+              <span className={styles.starIcon}>*</span>
             </p>
             {defaultProject ? (
               <input
@@ -222,6 +229,7 @@ function ProcessCreation(props) {
               }
             >
               {t("NameofProcess")}
+              <span className={styles.starIcon}>*</span>
             </p>
             <input
               type="text"
@@ -229,7 +237,12 @@ function ProcessCreation(props) {
               value={processName}
               onChange={(e) => setProcessName(e.target.value)}
               id="processName_processCreation"
+              ref={processNameRef}
+              onKeyPress={(e) =>
+                FieldValidations(e, 169, processNameRef.current, 22)
+              }
             />
+
             <p
               className={
                 direction === RTL_DIRECTION ? arabicStyles.label : styles.label

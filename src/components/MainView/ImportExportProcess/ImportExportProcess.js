@@ -1,3 +1,4 @@
+// Changes made to solve bug with ID Bug 112353 - After Process importing the changes of imported process are reflecting only after the reopening of the process
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@material-ui/core";
@@ -7,7 +8,13 @@ import { Select, MenuItem } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ProjectCreation from "../ProcessesView/Projects/ProjectCreation";
 import Modal from "../../../UI/Modal/Modal";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector, useDispatch, connect } from "react-redux";
+import {
+  SERVER_URL,
+  ENDPOINT_OPENTEMPLATE,
+  ENDPOINT_OPENPROCESS,
+  userRightsMenuNames,
+} from "../../../Constants/appConstants";
 import {
   ImportExportSliceValue,
   setImportExportVal,
@@ -16,34 +23,68 @@ import {
   CONST_BPEL,
   CONST_BPMN,
   CONST_XML,
-  CONST_XPDI,
+  CONST_XPDL,
 } from "../../../Constants/appConstants";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { withStyles } from "@material-ui/core/styles";
 import axios from "axios";
-import { useGlobalState } from "state-pool";
+import { useGlobalState, store } from "state-pool";
 import * as actionCreators from "../../../redux-store/actions/processView/actions.js";
 import { useHistory } from "react-router-dom";
-import { connect } from "react-redux";
 import { setToastDataFunc } from "../../../redux-store/slices/ToastDataHandlerSlice";
 import { base64toBlob } from "../../../utility/Base64Operations/base64Operations";
+import ConfirmationModal from "./ConfirmationModal/ConfirmationModal";
+import { FieldValidations } from "../../../utility/FieldValidations/fieldValidations";
 
 function ImportExportProcess(props) {
   const ProjectValue = useSelector(ImportExportSliceValue);
-
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [openConfirmationModal, setopenConfirmationModal] = useState(false);
   const [selectedProcessName, setselectedProcessName] = useState("");
   const dispatch = useDispatch();
   const { setAction, processName, typeImportorExport } = props;
   const [selectedFile, setselectedFile] = useState();
-  const [localLoadedProcessData] = useGlobalState("loadedProcessData");
+  const [localLoadedProcessData, setlocalLoadedProcessData] =
+    useGlobalState(loadedProcessData);
   const [errorObj, seterrorObj] = useState({
     importType: "",
     processName: "",
     projectName: "",
   });
   const [changeProjectBool, setchangeProjectBool] = useState(true);
+  const errorMessagesArray = [
+    {
+      key: "missingDataObjects",
+      header:
+        "Process definition exported without the below data objects due to some error.",
+      subHeaders: ["Data objects not included in the process"],
+    },
+    {
+      key: "unchangedDataObjects",
+      header:
+        "Below data objects are already being used in the current process, please go to Data Model Designer to include the changes manually.",
+      subHeaders: ["Data objects already being used"],
+    },
+    {
+      key: "renamedDataObjects",
+      header:
+        "Some data objects are already being used in other processes, so we have renamed these objects.",
+      subHeaders: ["Data Objects", "Renamed Data Objects"],
+    },
+
+    {
+      key: "failedDataObjects",
+      header:
+        "Process definition imported without the below data objects due to some error.",
+      subHeaders: ["Data objects not imported in the process"],
+    },
+  ];
+  const [errorMessageObj, seterrorMessageObj] = useState([]);
+  const [errorData, seterrorData] = useState([]);
+  const sectionNameRef = useRef();
+  const sectionDescRef = useRef();
 
   useEffect(() => {
     setchangeProjectBool(props.changeProjectBool);
@@ -71,12 +112,6 @@ function ImportExportProcess(props) {
   };
 
   const uploadFile = (e) => {
-    console.log(
-      "lllllllllllll",
-      checkFormatType(e.target.files[0]),
-      "ssss",
-      importType
-    );
     if (
       checkFormatType(e.target.files[0]) ===
       (importType === "xml" ? "zip" : importType)
@@ -285,6 +320,7 @@ function ImportExportProcess(props) {
       }
       const formData = new FormData();
 
+      console.log(selectedFile);
       formData.append("file", selectedFile);
       formData.append(
         "processInfo",
@@ -303,8 +339,43 @@ function ImportExportProcess(props) {
             // type: "application/json",
           },
         });
-        if (response?.status === 200 && response?.data?.Status === 0) {
-          setAction(null);
+        let confirmationBoolean = false;
+        if (response?.status === 200) {
+          errorMessagesArray.forEach((errorMsg) => {
+            if (
+              response.data.hasOwnProperty(errorMsg.key) &&
+              response.data[errorMsg.key].length > 0
+            ) {
+              confirmationBoolean = true;
+              seterrorMessageObj((prev) => [
+                ...prev,
+                { ...errorMsg, errorData: [...response.data[errorMsg.key]] },
+              ]);
+            }
+          });
+          if (!confirmationBoolean) {
+            setAction(null);
+            if (isOverwrite) {
+              axios
+                .get(
+                  SERVER_URL +
+                    ENDPOINT_OPENPROCESS +
+                    response?.data?.process?.ProcessDefId +
+                    "/" +
+                    props.openProcessName +
+                    "/" +
+                    props.openProcessType
+                )
+                .then((res) => {
+                  if (res?.data?.Status === 0) {
+                    console.log("SUCCESS", res.data);
+                    setlocalLoadedProcessData(res.data.OpenProcess);
+                  }
+                });
+            }
+          } else {
+            setopenConfirmationModal(true);
+          }
           dispatch(
             setToastDataFunc({
               message: t("processImportedSuccessfully"),
@@ -356,6 +427,19 @@ function ImportExportProcess(props) {
       data: payload,
     })
       .then((res) => {
+        let confirmationBoolean = false;
+        errorMessagesArray.forEach((errorMsg) => {
+          if (
+            res.data.hasOwnProperty(errorMsg.key) &&
+            res.data[errorMsg.key].length > 0
+          ) {
+            confirmationBoolean = true;
+            seterrorMessageObj((prev) => [
+              ...prev,
+              { ...errorMsg, errorData: [...res.data[errorMsg.key]] },
+            ]);
+          }
+        });
         const url = window.URL.createObjectURL(
           base64toBlob(res?.data?.fileData, "application/octet-stream")
         );
@@ -368,7 +452,12 @@ function ImportExportProcess(props) {
         ); //or any other extension
         document.body.appendChild(link);
         link.click();
-        setAction(null);
+        if (!confirmationBoolean) {
+          setAction(null);
+        } else {
+          setopenConfirmationModal(true);
+        }
+
         dispatch(
           setToastDataFunc({
             message: t("processExportedSuccessfully"),
@@ -402,6 +491,46 @@ function ImportExportProcess(props) {
         flexDirection: "column",
       }}
     >
+      {openConfirmationModal ? (
+        <Modal
+          show={openConfirmationModal}
+          style={{
+            margin: "auto",
+            width: "450px",
+            height: "550px",
+            position: "fixed",
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+          }}
+          modalClosed={() => {
+            setopenConfirmationModal(false);
+          }}
+          children={
+            <ConfirmationModal
+              setAction={setAction}
+              setopenConfirmationModal={setopenConfirmationModal}
+              title={
+                typeImportorExport === "import" ? (
+                  <p>
+                    {" "}
+                    {t("import")} {t("Process")}
+                  </p>
+                ) : (
+                  <p>
+                    {" "}
+                    {t("export")} {t("Process")}
+                  </p>
+                )
+              }
+              errorMessageObj={errorMessageObj}
+              errorData={errorData}
+            />
+          }
+        />
+      ) : null}
+
       {processCreationModal ? (
         <Modal
           show={processCreationModal}
@@ -628,7 +757,12 @@ function ImportExportProcess(props) {
             readOnly={props.showOverwrite ? true : false}
             value={selectedProcessName}
             onChange={(e) => setselectedProcessName(e.target.value)}
+            ref={sectionNameRef}
+            onKeyPress={(e) =>
+              FieldValidations(e, 163, sectionNameRef.current, 100)
+            }
           />
+
           {errorObj?.processName !== "" && showErrorsBool ? (
             <p style={{ fontSize: "0.65rem", color: "red" }}>
               {" "}
@@ -651,6 +785,10 @@ function ImportExportProcess(props) {
 
                 opacity: "1",
               }}
+              ref={sectionNameRef}
+              onKeyPress={(e) =>
+                FieldValidations(e, 163, sectionNameRef.current, 100)
+              }
             />
           ) : (
             <>
@@ -710,6 +848,7 @@ function ImportExportProcess(props) {
             paddingLeft: "0.9375rem",
             color: "#606060",
           }}
+          className="processExport1"
         >
           <p className="field_label">
             {t("export")} {t("type")}{" "}
@@ -733,7 +872,7 @@ function ImportExportProcess(props) {
             <StyledLabel
               value="xpdl"
               control={<Radio size="small" color="primary" />}
-              label={CONST_XPDI}
+              label={CONST_XPDL}
               labelPlacement="end"
               style={{ fontSize: "var(--base_text_font_size)" }}
             />
@@ -788,7 +927,9 @@ function ImportExportProcess(props) {
                   className={styles.newVersionButton}
                   onClick={(e) => handleSubmit(e, false, true, false)}
                   style={{
-                    background: disableImport() ? "var(--button_color)" : "white",
+                    background: disableImport()
+                      ? "var(--button_color)"
+                      : "white",
                     color: disableImport() ? "white" : "#0072c6",
                     width: "10rem",
                     border: "1px solid var(--button_color)",
@@ -807,7 +948,7 @@ function ImportExportProcess(props) {
                   onClick={(e) => handleSubmit(e, false, false, true)}
                   style={{
                     background: disableImport() ? "grey" : "#0072c6",
-                    width: "6rem",
+                    width: "9rem",
                   }}
                   disabled={disableImport()}
                 >
@@ -864,4 +1005,15 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export default connect(null, mapDispatchToProps)(ImportExportProcess);
+const mapStateToProps = (state) => {
+  return {
+    openProcessName: state.openProcessClick.selectedProcessName,
+    openProcessType: state.openProcessClick.selectedType,
+    openProcessVersion: state.openProcessClick.selectedVersion,
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ImportExportProcess);

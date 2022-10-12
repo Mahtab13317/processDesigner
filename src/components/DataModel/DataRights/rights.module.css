@@ -94,7 +94,7 @@
 
 .actItem {
   width: 100%;
-  padding: 0.5rem 0.5rem 0 0.5rem;
+ /*  padding: 0.5rem 0.5rem 0 0.5rem; */
   font-size: var(--base_text_font_size);
   font-weight: 600;
   border-bottom: 1px solid #c4c4c4;

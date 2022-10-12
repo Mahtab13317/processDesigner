@@ -1,3 +1,4 @@
+// Changes made to solve Bug with ID = 114685 => Project Description is not getting saved
 import React, { useEffect, useState } from "react";
 import "../../Projects/projects.css";
 import { useTranslation } from "react-i18next";
@@ -36,7 +37,7 @@ function ProcessesHeader(props) {
   };
   const [moreOptionsArr, setMoreOptionsArr] = useState([]);
   const arr = [t("Rename"), t("delete")];
-
+  const [selectedProject,setSelectedProject] = useState(null);
   const getActionName = (actionName) => {
     setAction(actionName);
   };
@@ -78,12 +79,17 @@ function ProcessesHeader(props) {
     setMoreOptionsArr(tempArr);
   }, []);
 
+  useEffect(() => {
+   setSelectedProject(props.selectedProject);
+  }, [props.selectedProject])
+  
+
   return (
     <div className="newProcessHeader" style={{ direction: `${t("HTML_DIR")}` }}>
       <div className="processName">
         {props.selectedProject ? (
           <h3 style={{ color: "black", fontWeight: "600" }}>
-            {props.selectedProject}
+            {selectedProject}
           </h3>
         ) : (
           <h3 style={{ color: "black", fontWeight: "600" }}>
@@ -250,6 +256,8 @@ function ProcessesHeader(props) {
                     setProjectList={props.setProjectList}
                     setModalClosed={() => setAction(null)}
                     processToDelete={props.selectedProject}
+                    projectID={props.selectedProjectId}
+                    projectDesc={props.selectedProjectDesc}
                   />
                 }
               />

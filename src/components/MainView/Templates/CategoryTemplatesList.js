@@ -1,3 +1,6 @@
+// #BugID - 112684 
+// #BugDescription - handled checks for error popup message
+
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import SearchBox from "../../../UI/Search Component";
@@ -25,6 +28,9 @@ import * as actionCreators from "../../../redux-store/actions/processView/action
 import * as actionCreators_template from "../../../redux-store/actions/Template";
 import { connect } from "react-redux";
 import DeleteModal from "./DeleteModal";
+import RenameModal from "./RenameModal";
+//import RenameTemplate from "./RenameTemplate";
+//import EditTemplate from "./EditTemplate";
 
 function CategoryTemplatesList(props) {
   let { t } = useTranslation();
@@ -274,9 +280,53 @@ function CategoryTemplatesList(props) {
               category={false}
               elemToBeDeleted={actedTemplate}
               parentElem={props.selectedCategoryDetails}
+              test="mahtab"
             />
           }
         />
+      ) : null}
+
+      {action === t("Rename") ? (
+       {/*  <Modal
+          show={action === t("Rename")}
+          style={{
+            width: "30vw",
+            height: "11.5rem",
+            left: "37%",
+            top: "25%",
+            padding: "0",
+          }}
+          modalClosed={() => setAction(null)}
+          children={
+            <RenameTemplate
+            actedTemplate={actedTemplate}
+            setModalClosed={() => setAction(null)}
+            catList={props.selectedCategoryDetails}
+             />
+          }
+        /> */}
+      ) : null}
+
+      {action === t("Edit") ? (
+       {/*  <Modal
+          show={action === t("Edit")}
+          style={{
+            width: "30vw",
+            height: "11.5rem",
+            left: "37%",
+            top: "25%",
+            padding: "0",
+          }}
+          modalClosed={() => setAction(null)}
+          children={
+           
+             <EditTemplate
+              actedTemplate={actedTemplate}
+            setModalClosed={() => setAction(null)}
+            catList={props.selectedCategoryDetails}
+              />
+          }
+        /> */}
       ) : null}
     </div>
   );

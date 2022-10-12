@@ -78,47 +78,47 @@ export const activityType = {
 
 //labels for each type of activity
 export const activityType_label = {
-  startEvent_label: "toolbox.startEvents.startEvent",
-  conditionalStart_label: "toolbox.startEvents.conditionalStart",
-  messageStart_label: "toolbox.startEvents.messageStart",
-  timerStart_label: "toolbox.startEvents.timerStart",
-  subProcess_label: "toolbox.activities.subProcess",
-  callActivity_label: "toolbox.activities.callActivity",
-  workdesk_label: "toolbox.activities.workdesk",
-  robotWorkdesk_label: "toolbox.activities.robotWorkdesk",
-  caseWorkdesk_label: "toolbox.activities.caseWorkdesk",
-  email_label: "toolbox.activities.email",
-  export_label: "toolbox.activities.export",
-  query_label: "toolbox.activities.query",
-  sapAdapter_label: "toolbox.activities.sapAdapter",
-  webService_label: "toolbox.activities.webService",
-  responseConsumerJMS_label: "toolbox.activities.responseJMS",
-  responseConsumerSOAP_label: "toolbox.activities.responseSOAP",
-  requestConsumerSOAP_label: "toolbox.activities.requestSOAP",
-  restful_label: "toolbox.activities.restful",
-  businessRule_label: "toolbox.activities.businessRule",
-  dmsAdapter_label: "toolbox.activities.dmsAdapter",
-  sharePoint_label: "toolbox.activities.sharePoint",
-  ccm_label: "toolbox.activities.ccm",
-  receive_label: "toolbox.activities.receive",
-  reply_label: "toolbox.activities.reply",
-  event_label: "toolbox.intermediateEvents.event",
-  jmsProducer_label: "toolbox.intermediateEvents.jmsProducer",
-  jmsConsumer_label: "toolbox.intermediateEvents.jmsConsumer",
-  timerEvents_label: "toolbox.intermediateEvents.timerEvents",
-  inclusiveDistribute_label: "toolbox.gateway.inclusiveDistribute",
-  inclusiveCollect_label: "toolbox.gateway.inclusiveCollect",
-  parallelDistribute_label: "toolbox.gateway.parallelDistribute",
-  parallelCollect_label: "toolbox.gateway.parallelCollect",
-  dataBasedExclusive_label: "toolbox.gateway.dataBasedExclusive",
-  endEvent_label: "toolbox.endEvents.endEvent",
-  terminate_label: "toolbox.endEvents.terminate",
-  messageEnd_label: "toolbox.endEvents.messageEnd",
-  dataExchange_label: "toolbox.integrationPoints.dataExchange",
-  textAnnotations_label: "toolbox.artefacts.textAnnotations",
-  groupBox_label: "toolbox.artefacts.groupBox",
-  dataObject_label: "toolbox.artefacts.dataObject",
-  message_label: "toolbox.artefacts.message",
+  startEvent: "toolbox.startEvents.startEvent",
+  conditionalStart: "toolbox.startEvents.conditionalStart",
+  messageStart: "toolbox.startEvents.messageStart",
+  timerStart: "toolbox.startEvents.timerStart",
+  subProcess: "toolbox.activities.subProcess",
+  callActivity: "toolbox.activities.callActivity",
+  workdesk: "toolbox.activities.workdesk",
+  robotWorkdesk: "toolbox.activities.robotWorkdesk",
+  caseWorkdesk: "toolbox.activities.caseWorkdesk",
+  email: "toolbox.activities.email",
+  export: "toolbox.activities.export",
+  query: "toolbox.activities.query",
+  sapAdapter: "toolbox.activities.sapAdapter",
+  webService: "toolbox.activities.webService",
+  responseConsumerJMS: "toolbox.activities.responseJMS",
+  responseConsumerSOAP: "toolbox.activities.responseSOAP",
+  requestConsumerSOAP: "toolbox.activities.requestSOAP",
+  restful: "toolbox.activities.restful",
+  businessRule: "toolbox.activities.businessRule",
+  dmsAdapter: "toolbox.activities.dmsAdapter",
+  sharePoint: "toolbox.activities.sharePoint",
+  ccm: "toolbox.activities.ccm",
+  receive: "toolbox.activities.receive",
+  reply: "toolbox.activities.reply",
+  event: "toolbox.intermediateEvents.event",
+  jmsProducer: "toolbox.intermediateEvents.jmsProducer",
+  jmsConsumer: "toolbox.intermediateEvents.jmsConsumer",
+  timerEvents: "toolbox.intermediateEvents.timerEvents",
+  inclusiveDistribute: "toolbox.gateway.inclusiveDistribute",
+  inclusiveCollect: "toolbox.gateway.inclusiveCollect",
+  parallelDistribute: "toolbox.gateway.parallelDistribute",
+  parallelCollect: "toolbox.gateway.parallelCollect",
+  dataBasedExclusive: "toolbox.gateway.dataBasedExclusive",
+  endEvent: "toolbox.endEvents.endEvent",
+  terminate: "toolbox.endEvents.terminate",
+  messageEnd: "toolbox.endEvents.messageEnd",
+  dataExchange: "toolbox.integrationPoints.dataExchange",
+  textAnnotations: "toolbox.artefacts.textAnnotations",
+  groupBox: "toolbox.artefacts.groupBox",
+  dataObject: "toolbox.artefacts.dataObject",
+  message: "toolbox.artefacts.message",
 };
 
 // Steps value added for steps in queue variable table mapping.
@@ -148,6 +148,7 @@ export const WORD_LIMIT_DESC = 25;
 export const APP_HEADER_HEIGHT = "48px";
 
 export const PMWEB = "PMWEB";
+
 export const BASE_URL = window.ConfigsLocal.backend_base_URL_FormBuilder;
 export const SERVER_URL = window.ConfigsLocal.backend_base_URL_PMWEB;
 export const SERVER_URL_LAUNCHPAD =
@@ -245,6 +246,10 @@ export const ENDPOINT_GET_GLOBALTASKTEMPLATES = "/globalTemplate";
 export const ENDPOINT_GET_EXPORTTEMPLATES = "/exportTaskTemplate";
 export const ENDPOINT_SAVE_MINOR = "/saveMinor";
 export const ENDPOINT_CHECKOUT = "/checkOutProcess";
+export const ENDPOINT_CHECKOUT_ACT = "/checkOutActivity";
+export const ENDPOINT_UNDO_CHECKOUT_ACT = "/undoCheckOutActivity";
+export const ENDPOINT_UNDO_CHECKIN_ACT = "/checkInActivity";
+export const ENDPOINT_CHECKOUT_LANE = "/checkOutLane";
 export const ENDPOINT_ENABLE = "/enableProcess";
 export const ENDPOINT_DISABLE = "/disableProcess";
 export const ENDPOINT_CHECKIN = "/checkInProcess";
@@ -262,7 +267,7 @@ export const ENDPOINT_DELETEPROCESSREQUIREMENTS = "/removeProcessRequirement";
 export const ENDPOINT_EDITSYSTEMREQUIREMENTS = "/modifySystemRequirement";
 export const ENDPOINT_EDITPROCESSREQUIREMENTS = "/modifyProcessRequirement";
 export const ENDPOINT_EDITPROJECTREQUIREMENTS = "/modifyProjectRequirement";
-export const ENDPOINT_REGISTER_PROCESS = "/requirement/";
+export const ENDPOINT_REGISTER_PROCESS = "/requirement";
 export const ENDPOINT_READXML = "/readXML";
 export const ENDPOINT_MODIFY_CONNECTION = "/modifyConnection";
 export const ENDPOINT_GET_COMPLEX = "/complexTypeData";
@@ -333,9 +338,10 @@ export const ENDPOINT_GET_EXISTING_TABLES = "/tableList";
 export const ENDPOINT_GET_COLUMNS = "/columnList";
 export const ENDPOINT_TEST_CONNECTION = "/testConnection";
 export const ENDPOINT_GET_CURRENT_CABINETNAME = "/currentCabinetName";
-
+export const ENDPOINT_GET_ARCHIEVE_PROCESS_REPORTLIST =
+  "/archievedProcessReportList";
+export const ENDPOINT_DOWNLOAD_ARCHIEVE_REPORT = "/downloadArchievedReport";
 export const ENDPOINT_GET_USER_RIGHTS = "/assignableRights";
-
 export const ENDPOINT_UPLOAD_ATTACHMENT = "/attachDoc";
 export const ENDPOINT_DOWNLOAD_ATTACHMENT = "/downloadDoc";
 export const ENDPOINT_SAVE_ATTACHMENT = "/attachment";
@@ -411,6 +417,14 @@ export const MENUOPTION_UNPIN = 12;
 export const MENUOPTION_IMPORT = 13;
 export const MENUOPTION_EXPORT = 14;
 
+export const MENUOPTION_CHECKOUT_ACT = 15;
+export const MENUOPTION_UNDO_CHECKOUT_ACT = 16;
+export const MENUOPTION_CHECKIN_ACT = 17;
+
+export const MENUOPTION_CHECKOUT_LANE = 18;
+export const MENUOPTION_UNDO_CHECKOUT_LANE = 19;
+export const MENUOPTION_CHECKIN_LANE = 20;
+
 export const VERSION_TYPE_MINOR = "minor";
 export const VERSION_TYPE_MAJOR = "major";
 
@@ -427,6 +441,8 @@ export const RECENT_TABLE_CATEGORY = [
 ];
 
 export const BATCH_COUNT = 6;
+export const EXP_BATCH_COUNT = 7;
+export const TODO_BATCH_COUNT = 8;
 
 export const ADD = "ADD";
 export const EDIT = "EDIT";
@@ -551,6 +567,14 @@ export const ROLLBACK_OPERATION_TYPE = "17";
 export const AUDIT_OPERATION_TYPE = "25";
 export const DISTRIBUTE_TO_OPERATION_TYPE = "21";
 export const REMINDER_OPERATION_TYPE = "39";
+export const SET_READY_OPERATION_TYPE = "101";
+export const MANDATORY_OPERATION_TYPE = "102";
+export const OPTIONAL_OPERATION_TYPE = "103";
+export const AUTO_INITIATE_OPERATION_TYPE = "104";
+
+export const DATA_TYPE_RULE_COND = "V";
+export const DOC_TYPE_RULE_COND = "D";
+export const TASK_TYPE_RULE_COND = "T";
 
 export const STRING_VARIABLE_TYPE = 10;
 export const BOOLEAN_VARIABLE_TYPE = 12;
@@ -578,7 +602,7 @@ export const ENDPOINT_SAP_DETAIL = "/sapDetail";
 export const ENDPOINT_ADD_METHOD = "/methods/ADDREMPAU";
 
 export const CONST_XML = "XML";
-export const CONST_XPDI = "XPDI 2.2";
+export const CONST_XPDL = "XPDL 2.2";
 export const CONST_BPMN = "BPMN 2.0";
 export const CONST_BPEL = "BPEL";
 
@@ -685,33 +709,32 @@ export const tabsHeading = {
   23: "Business Rule",
   24: "Archive",
   25: "Templates",
-  26: "",
+  26: "Message",
   27: 11,
   28: "JMS Producer",
   29: "JMS Consumer",
   30: "Timer",
   31: "Reminder",
   32: 11,
-  33:"Collect",
-  34:11,
-  35:"Initiate Workstep",
-  36:"Data Exchange",
-  37:"SAP",
-  38:"Response Consumer JMS",
-  39:13,
-  40:"Request consumer SOAP",
-  41:"Restful",
-  42:"Forward DocType Mapping",
-  43:"Reverse DocType Mapping",
-  44:"Send",
-  45:"Task Details",
-  46:"Escalation Rule(s)",
-  47:13,
-  48:"Data",
-  49:24,
-  50:42,
-  51:43,
-  
+  33: "Collect",
+  34: 11,
+  35: "Initiate Workstep",
+  36: "Data Exchange",
+  37: "SAP",
+  38: "Response Consumer JMS",
+  39: 13,
+  40: "Request consumer SOAP",
+  41: "Restful",
+  42: "Forward DocType Mapping",
+  43: "Reverse DocType Mapping",
+  44: "Send",
+  45: "Task Details",
+  46: "Escalation Rule(s)",
+  47: 13,
+  48: "Data",
+  49: 24,
+  50: 42,
+  51: 43,
 };
 
 export const WEBSERVICE_SOAP = "0";
@@ -830,3 +853,10 @@ export const userRightsMenuNames = {
   importApplication: "IMPORTAPPLICATION",
   createSurvey: "CREATESURVEY",
 };
+
+//Regex
+export const ALPHANUMERIC_REGEX_UNIVERSAL =
+  /^([a-zA-Z0-9\u0600-\u06FF\u0660-\u0669\u06F0-\u06F9 _.-]+)$/;
+
+export const ENDPOINT_IMPORT_SECTION = "/importSection";
+export const ENDPOINT_LOGOUT = "/user/logout";

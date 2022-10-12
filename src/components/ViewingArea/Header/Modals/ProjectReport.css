@@ -1,3 +1,4 @@
+/* Changes made to solve Bug 113657 - Process Report: Not able to download archived reports in Process report */
 .footerProjectReport {
   width: 100%;
   display: flex;
@@ -8,15 +9,25 @@
   position: absolute;
   bottom: 0;
   padding: 0 1rem;
+  justify-content: end;
+  left: 0;
 }
 
 .processReport {
-  font: normal normal 600 14px/17px Open Sans;
+  font-size: var(--subtitle_text_font_size);
+  font-weight: 600;
   text-align: left;
   letter-spacing: 0px;
   color: #000000;
   opacity: 1;
   margin: 2% 0 2% 3%;
+}
+
+.processViewTabs{
+  font-family: var(--font_family);
+  font-size: 12px;
+  letter-spacing: 0.12px;
+  font-weight: bolder;
 }
 
 .formatProcess {
@@ -51,6 +62,7 @@
   opacity: 1;
   width: 10rem;
   margin-top: 2%;
+  margin-left: 4%;
 }
 
 .statementReport {
@@ -61,4 +73,21 @@
   opacity: 1;
   margin-top: 5.5rem;
   margin-left: 3%;
+}
+.processSubTabBarStyleReport {
+  padding:'0px 14px !important'
+}
+
+.processViewTabsReport{
+  font-family: var(--font_family);
+  font-size: 12px;
+  letter-spacing: 0.12px;
+  font-weight: bolder;
+  background-color: white !important;
+}
+
+.processViewSubTabsReport{
+  height: 30px !important;
+    background-color: white;
+    padding: 0px 12px;
 }

@@ -1,7 +1,6 @@
+// Made changes to solve bug with ID 113917
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import Switch from "@material-ui/core/Switch";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
 import SearchProject from "../../../UI/Search Component/index";
 import Modal from "@material-ui/core/Modal";
 import AddGroup from "./Exception/AddGroup";
@@ -69,8 +68,9 @@ function CommonInterface(props) {
             <p
               onClick={(e) => tabChangeHandler(e, "screenHeading")}
               style={{
-                margin: direction !== RTL_DIRECTION ? "0 1vw 0 0" : "0 0 0 1vw",
-                padding: "1px 1vw",
+                margin:
+                  direction !== RTL_DIRECTION ? "0 0.5vw 0 0" : "0 0 0 0.5vw",
+                padding: "1px 0.5vw",
               }}
               className={
                 selectedTab === "screenHeading"
@@ -97,11 +97,8 @@ function CommonInterface(props) {
               <div
                 className="docSearchDiv"
                 style={{
-                  marginBottom:
-                    props.screenType == SCREENTYPE_EXCEPTION
-                      ? "0.8rem"
-                      : "0.75rem",
-                  marginTop:"2.1rem",
+                  marginBottom: "0.65rem",
+                  marginTop: "0.75rem",
                 }}
               >
                 <div className="searchBarNFilterInterface">
@@ -122,7 +119,6 @@ function CommonInterface(props) {
                   )}
                   <Modal
                     open={props.addGroupModal}
-                    onClose={props.handleClose}
                     aria-labelledby="simple-modal-title"
                     aria-describedby="simple-modal-description"
                   >
@@ -157,17 +153,6 @@ function CommonInterface(props) {
                   placeholder={t("search")}
                   width="240px"
                   id="activitySearch"
-                />
-                <FormControlLabel
-                  style={{ marginLeft: "20px" }}
-                  control={
-                    <Switch
-                      checked={props.compact}
-                      name="checkedB"
-                      color="primary"
-                    />
-                  }
-                  label={<span style={{ marginBottom: "auto" }}>Compact</span>}
                 />
               </div>
             </div>

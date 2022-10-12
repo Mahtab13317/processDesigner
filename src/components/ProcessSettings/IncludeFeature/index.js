@@ -330,23 +330,29 @@ function IncludeFeature(props) {
                           </div>
                           {isDisable ? (
                             <React.Fragment>
-                              <img
-                                className="add-feature-icon"
-                                style={{
-                                  height: "1rem",
-                                  width: "1rem",
-                                  margin: "1.2rem .5rem 1.031rem auto",
-                                }}
-                                src={cancelIcon}
-                                onClick={() =>
-                                  //code added on 22 July 2022 for BugId 110821
-                                  handleDeleteFeature(
-                                    d,
-                                    availableFeatures,
-                                    setAvailableFeatures
-                                  )
-                                }
-                              />
+                              {/*****************************************************************************************
+                               * @author asloob_ali BUG ID : 115860 Features || Mobile on services is not appearing
+                               *  Resolution : restricted user to not delete default features.
+                               *  Date : 19/09/2022             ****************/}
+                              {d.InterfaceId > 12 && (
+                                <img
+                                  className="add-feature-icon"
+                                  style={{
+                                    height: "1rem",
+                                    width: "1rem",
+                                    margin: "1.2rem .5rem 1.031rem auto",
+                                  }}
+                                  src={cancelIcon}
+                                  onClick={() =>
+                                    //code added on 22 July 2022 for BugId 110821
+                                    handleDeleteFeature(
+                                      d,
+                                      availableFeatures,
+                                      setAvailableFeatures
+                                    )
+                                  }
+                                />
+                              )}
                               <AddOutlinedIcon
                                 id="PF_add_feature_button"
                                 className="add-feature-icon"

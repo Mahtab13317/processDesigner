@@ -140,6 +140,12 @@
   width: 20%;
 }
 
+.collapsedWidth {
+  width: 100%;
+  height: 100%;
+  margin-bottom: 10px;
+}
+
 .operationsWidth {
   width: 22%;
 }

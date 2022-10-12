@@ -15,6 +15,7 @@ function Todo(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const dispatch = useDispatch();
+  const { isReadOnly } = props;
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
@@ -132,6 +133,7 @@ function Todo(props) {
                   : styles.mainCheckbox
               }
               checked={allChecked}
+              disabled={isReadOnly}
               onChange={() => allCheckHandler()}
               style={{ flex: "0.125", justifyContent: "left" }}
             />
@@ -148,6 +150,7 @@ function Todo(props) {
                         : styles.mainCheckbox
                     }
                     checked={checked[val]}
+                    disabled={isReadOnly}
                     onChange={() => CheckTodoHandler(val)}
                     style={{ flex: "0.125", justifyContent: "left" }}
                   />

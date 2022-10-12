@@ -49,7 +49,9 @@ function ReusableOneMap(props) {
           overflow: "hidden",
           textOverflow: "ellipsis",
         }}
-        disabled={props.invocationType == "F" ? true : false}
+        disabled={
+          props.invocationType == "F" || props.isReadOnly ? true : false
+        }
         value={selectedMappingField}
         MenuProps={{
           anchorOrigin: {
@@ -68,6 +70,19 @@ function ReusableOneMap(props) {
           },
         }}
       >
+        {/* code added on 30 August 2022 for BugId 113882 */}
+        <MenuItem
+          className="InputPairDiv_CommonList"
+          value={""}
+          style={{
+            fontSize: "var(--base_text_font_size)",
+            width: "100%",
+            padding: "4px 7px",
+            height: "20px",
+          }}
+        >
+          {" "}
+        </MenuItem>
         {props.dropDownOptions.map((loadedVar) => {
           return (
             <MenuItem

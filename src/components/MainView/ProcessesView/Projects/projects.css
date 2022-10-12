@@ -1,4 +1,6 @@
 /* CSS FOR PROCESSES SECTION (RIGHT SIDE) */
+/* // Changes made to solve Bug 112929 - If search list has no data then it should have some error message appearing */
+/* Changes made to solve Bug 112897 - Enabled process doesn't have scroller and the last item UI is distorted  */
 * {
   padding: 0px;
   box-sizing: border-box;
@@ -113,9 +115,6 @@
   padding-right: 2px;
   overflow-y: auto;
   height: 70vh;
-}
-.pinnedAtTop_Table::-webkit-scrollbar {
-  display: none;
 }
 
 .pinnedAtTop_Table h4 {
@@ -537,7 +536,7 @@
   height: 30px !important;
 }
 
-.processViewTabs .FloatButton .MuiTabs-root .MuiTab-wrapper{
+.processViewTabs .FloatButton .MuiTabs-root .MuiTab-wrapper {
   font-size: var(--base_text_font_size) !important;
 }
 
@@ -617,4 +616,16 @@
 .groupProjectCheck svg {
   width: 1.5rem;
   height: 1.5rem;
+}
+
+.noSearchResultImage {
+  height: 70%;
+  width: 100%;
+  position: absolute;
+}
+
+.noSearchResultImageN{
+  height: 60%;
+  width: 100%;
+  position: absolute;
 }

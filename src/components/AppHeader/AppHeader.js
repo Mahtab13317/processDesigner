@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./AppHeader.css";
 import src from "../../assets/Header/NewgenWithIbps.svg";
 import { useTranslation } from "react-i18next";
@@ -7,7 +7,7 @@ import SearchBox from "../../UI/Search Component/index";
 import { store, useGlobalState } from "state-pool";
 import { useHistory } from "react-router-dom";
 import CloseIcon from "@material-ui/icons/Close";
-import { connect } from "react-redux";
+import { connect, useDispatch, useSelector } from "react-redux";
 import * as actionCreators from "../../redux-store/actions/processView/actions.js";
 import processIcon from "../../../src/assets/HomePage/HS_Process.svg";
 import QuestionMarkIcon from "../../../src/assets/HomePage/HS_Question Mark.svg";
@@ -20,9 +20,22 @@ import {
   TEMPLATE_VARIANT_TYPE,
 } from "../../Constants/appConstants";
 import axios from "axios";
+import {
+  CabinetIcon,
+  LogoutIcon,
+  UserProfileImage,
+} from "../../utility/AllImages/AllImages";
+import moment from "moment";
+import { userLogout } from "../../redux-store/reducers/userDetail/actions";
+import { CircularProgress, ClickAwayListener } from "@material-ui/core";
+import DialogBox from "./DialogBox";
+import Modal from "../../UI/Modal/Modal";
 
 const AppHeader = (props) => {
   let { t } = useTranslation();
+  const history = useHistory();
+  moment.locale("en");
+  const dispatch = useDispatch();
   const direction = `${t("HTML_DIR")}`;
   const arrProcessesData = store.getState("arrProcessesData"); //array of processdata stored
   const loadedProcessData = store.getState("loadedProcessData"); //current processdata clicked
@@ -36,77 +49,111 @@ const AppHeader = (props) => {
   const [isProcessDesignerTabActive, setisProcessDesignerTabActive] =
     React.useState(true);
 
-  const [tabInfoAtTop, settabInfoAtTop] = React.useState([]);
+  const [tabInfoAtTop, settabInfoAtTop] = useState([]);
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [isLogout, setIsLogout] = useState(false);
 
+  const cabinet = localStorage.getItem("cabinet");
+  const isLogoutLoading = useSelector(
+    (state) => state.userDetails.isLogoutLoading
+  );
+  const username = localStorage.getItem("username");
+  const lastLoginTime = sessionStorage.getItem("lastLoginTime");
+  const logoutHandler = () => {
+    setIsLogout(false);
+    dispatch(userLogout({ history }));
+  };
+
+  /*code updated on 08 October 2022 for BugId 116325*/
+  const logoutAlert = () => {
+    setIsLogout(true);
+  };
+
+  const closeAlert = () => {
+    setIsLogout(false);
+  };
+
+  // code edited on 10 Oct 2022 for BugId 112343 and BugId 112684
   useEffect(() => {
-    if (props.openProcessID !== "") {
-      let temp = {
-        ProcessDefId: props.openProcessID.toString(),
-        ProcessName: props.openProcessName,
-        ProcessType: props.openProcessType,
-        ProcessVariantType: "", //data will be filled after setOtherData method is called
-        ProjectName: "",
-        VersionNo: props.openProcessVersion.toString(),
-        isActive: true,
-      };
+    const setTabInfoFunc = (temp) => {
       if (tabInfoAtTop.length > 0 && temp.ProcessDefId !== "") {
         let temp2 = JSON.parse(JSON.stringify(tabInfoAtTop));
-
         if (!temp2.some((el) => el.ProcessDefId === temp.ProcessDefId)) {
           temp2.map((item) => (item.isActive = false));
           temp2.push(temp);
           settabInfoAtTop(temp2);
         } else return;
       } else settabInfoAtTop((prev) => [...prev, temp]);
+    };
 
-      temp = {
-        ProcessDefId: "",
-        ProcessName: "",
-        ProcessType: "",
-        ProcessVariantType: "",
-        ProjectName: "",
-        VersionNo: "",
-        isActive: false,
-      };
+    if (props.openTemplateFlag) {
+      if (props.templateId !== "") {
+        let temp = {
+          ProcessDefId: props.templateId.toString(),
+          ProcessName: props.templateName,
+          ProcessType: "",
+          ProcessVariantType: "", //data will be filled after setOtherData method is called
+          ProjectName: "",
+          VersionNo: "",
+          isActive: true,
+        };
+        setTabInfoFunc(temp);
+      }
+    } else {
+      if (props.openProcessID !== "") {
+        let temp = {
+          ProcessDefId: props.openProcessID.toString(),
+          ProcessName: props.openProcessName,
+          ProcessType: props.openProcessType,
+          ProcessVariantType: "", //data will be filled after setOtherData method is called
+          ProjectName: "",
+          VersionNo: props.openProcessVersion.toString(),
+          isActive: true,
+        };
+        setTabInfoFunc(temp);
+      }
     }
   }, [
     props.openProcessID,
     props.openProcessName,
     props.openProcessType,
     props.openProcessVersion,
+    props.templateId,
+    props.templateName,
   ]);
 
   useEffect(() => {
     if (tabInfoAtTop.length > 0) {
       setisProcessDesignerTabActive(false);
     }
-  }, [tabInfoAtTop, localLoadedProcessData]);
-
-  const history = useHistory();
+  }, [tabInfoAtTop.length]);
 
   useEffect(() => {
     if (tabInfoAtTop.length === 0) {
-      setisProcessDesignerTabActive(true);
+      backToProcessDesignerHome();
     }
   }, [tabInfoAtTop]);
 
   //click handler for process data tabs
   const clickHandler = (data) => {
     ActiveClickedTab(data);
-    //setlocalLoadedProcessData(null);
+    setisProcessDesignerTabActive(false);
+    // code edited on 10 Oct 2022 for BugId 112343 and BugId 112684
     if (data.ProcessVariantType === TEMPLATE_VARIANT_TYPE) {
       axios
         .get(
           SERVER_URL +
             ENDPOINT_OPENTEMPLATE +
             "/" +
-            data.TemplateId +
+            data.ProcessDefId +
             "/" +
-            data.TemplateName
+            data.ProcessName
         )
         .then((res) => {
           if (res.data.Status === 0) {
             setlocalLoadedProcessData(res.data.OpenProcess);
+            props.openProcessClick("", "", "", "", "");
+            props.openTemplate(data.ProcessDefId, data.ProcessName, true);
           }
         })
         .catch((err) => {
@@ -126,19 +173,20 @@ const AppHeader = (props) => {
         .then((res) => {
           if (res.data.Status === 0) {
             setlocalLoadedProcessData(res.data.OpenProcess);
+            props.openProcessClick(
+              data.ProcessDefId,
+              data.ProjectName,
+              data.ProcessType,
+              data.VersionNo,
+              data.ProcessName
+            );
+            props.openTemplate("", "", false);
           }
         })
         .catch((err) => {
           console.log(err);
         });
     }
-    props.openProcessClick(
-      data.ProcessDefId,
-      data.ProjectName,
-      data.ProcessType,
-      data.VersionNo,
-      data.ProcessName
-    );
     history.push("/process");
   };
 
@@ -150,6 +198,8 @@ const AppHeader = (props) => {
           if (item.ProcessDefId == processData.ProcessDefId) {
             item.ProcessVariantType = processData.ProcessVariantType;
             item.ProjectName = processData.ProjectName;
+            item.ProcessType = processData.ProcessType;
+            item.VersionNo = processData.VersionNo;
           }
         });
         settabInfoAtTop(temp);
@@ -190,9 +240,7 @@ const AppHeader = (props) => {
         indexNo = index;
       }
     });
-
     temp2.splice(indexNo, 1);
-
     props.openProcessClick("", "", "", "", "");
     setLocalOpenProcessesArr(temp);
     setLocalArrProcessesData([...localArrProcessesData]);
@@ -212,13 +260,13 @@ const AppHeader = (props) => {
   };
 
   //setting process designer tab not active when current data is loaded
-  useEffect(() => {
-    if (localLoadedProcessData !== null) {
-      setisProcessDesignerTabActive(false);
-    } else {
-      setisProcessDesignerTabActive(true);
-    }
-  }, [localLoadedProcessData]);
+  // useEffect(() => {
+  //   if (localLoadedProcessData !== null) {
+  //     setisProcessDesignerTabActive(false);
+  //   } else {
+  //     setisProcessDesignerTabActive(true);
+  //   }
+  // }, [localLoadedProcessData]);
 
   return (
     <div
@@ -267,7 +315,12 @@ const AppHeader = (props) => {
                   onClick={() => clickHandler(data)}
                   className="titleTextTabs"
                 >
-                  {data.ProcessName}
+                  {data.ProcessName}{" "}
+                  {/*code updated on 30 September 2022 for BugId 116201 */}
+                  {localArrProcessesData?.length > 0 &&
+                  localArrProcessesData[0]?.ProcessDefId != data.ProcessDefId
+                    ? data.VersionNo
+                    : null}
                 </span>
                 <span style={{ marginTop: "0.75rem" }}>
                   <CloseIcon
@@ -305,10 +358,114 @@ const AppHeader = (props) => {
           className="AppHeaderIcon"
           alt="Question Mark"
         />
-        <div className="collabTypeLogo_Home" style={{ background: "#F4A43C" }}>
+        {/*<div className="collabTypeLogo_Home" style={{ background: "#F4A43C" }}>
           <span className="collabName_Home">SD</span>
+    </div>*/}
+        <div style={{ marginLeft: "auto", display: "flex" }}>
+          {/* <img src={ActivityStream} alt="" className="headerIcons" />
+        <img src={Chat} alt="" className="headerIcons1" />
+        <img src={Notifications} alt="" className="headerIcons1" /> */}
+
+          <div className="relative">
+            <img
+              src={UserProfileImage}
+              alt=""
+              onClick={() => {
+                setShowUserProfile(true);
+              }}
+              className="userIcons"
+            />
+            {showUserProfile && (
+              <ClickAwayListener onClickAway={() => setShowUserProfile(false)}>
+                <div className="userProfileDiv">
+                  <div className="userProfileDetailsMainDiv">
+                    <p className="userProfileContainer">
+                      <span>
+                        <img
+                          src={UserProfileImage}
+                          alt=""
+                          className="userProfileImage"
+                        />
+                      </span>
+                      <span className="userName">{username}</span>
+                    </p>
+                  </div>
+                  <div className="userProfileSubDiv">
+                    <p className="userProfileHeading">{t("cabinetDetails")}</p>
+                    <p className="iconContainer">
+                      <span>
+                        <CabinetIcon className="profileIcons" />
+                      </span>
+                      <span>{cabinet}</span>
+                    </p>
+                  </div>
+                  {/**
+                 *  <Typography className={classes.info}>
+                Last login time:{" "}
+                {userArr &&
+                  userArr[0]?.authUser?.lastLoginTime &&
+                  moment(
+                    userArr[0]?.authUser?.lastLoginTime,
+                    "DD-MM-yyyy HH:mm:ss"
+                  ).format("DD MMM YYYY, hh:mm A")}
+              </Typography>
+                 */}
+                  <div className="userProfileOptDiv">
+                    <p className="timeInfo">
+                      Last login time:{" "}
+                      {lastLoginTime &&
+                        moment(lastLoginTime, "yyyy-MM-DD HH:mm:ss").format(
+                          "DD MMM YYYY, hh:mm A"
+                        )}
+                    </p>
+                  </div>
+                  <div className="userProfileOptDiv">
+                    <p
+                      className="iconContainer"
+                      // onClick={() => logoutHandler()}
+                      onClick={logoutAlert}
+                    >
+                      <span>
+                        <LogoutIcon className="profileIcons" />
+                      </span>
+                      {isLogoutLoading && (
+                        <span>
+                          <CircularProgress
+                            color="#606060"
+                            style={{
+                              height: "1.5rem",
+                              width: "1.5rem",
+                              marginRight: ".5rem",
+                            }}
+                          ></CircularProgress>
+                        </span>
+                      )}
+                      <span>{t("Logout")}</span>
+                    </p>
+                  </div>
+                </div>
+              </ClickAwayListener>
+            )}
+          </div>
         </div>
       </div>
+
+      {isLogout ? (
+        <Modal
+          show={isLogout}
+          style={{
+            top: "30%",
+            left: "32.5%",
+            width: "35%",
+            boxShadow: "0px 3px 6px #00000029",
+            padding: "0",
+          }}
+          modalClosed={() => setIsLogout(false)}
+          children={
+            <DialogBox closeAlert={closeAlert} logoutHandler={logoutHandler} />
+          }
+        />
+      ) : null}
     </div>
   );
 };
@@ -330,6 +487,7 @@ const mapStateToProps = (state) => {
     openProcessName: state.openProcessClick.selectedProcessName,
     openProcessType: state.openProcessClick.selectedType,
     openProcessVersion: state.openProcessClick.selectedVersion,
+    templateId: state.openTemplateReducer.templateId,
     templateName: state.openTemplateReducer.templateName,
     openTemplateFlag: state.openTemplateReducer.openFlag,
   };

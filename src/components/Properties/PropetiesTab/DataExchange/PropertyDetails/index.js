@@ -1,3 +1,5 @@
+// #BugID - 112526
+// #BugDescription - Added condition in useEffect so that complexes show in list.
 import React, { useEffect, useState } from "react";
 import styles from "./index.module.css";
 import clsx from "clsx";
@@ -27,7 +29,7 @@ function PropertyDetails(props) {
     operationType,
     openProcessType,
     openProcessID,
-    isProcessReadOnly,
+    isReadOnly,
     getFilteredVariableList,
     existingTableData,
     filteredVariables,
@@ -333,6 +335,7 @@ function PropertyDetails(props) {
           }
         }
       });
+
     setNestedComplexVars(nestedComplexVariables);
     setSimpleComplexVars(notNestedComplexVariables);
   }, [filteredVariables]);
@@ -348,7 +351,7 @@ function PropertyDetails(props) {
       setSelectedComplexName("");
       setMultiSelectedTableNames([]);
     }
-  }, [isNested]);
+  }, [isNested, isComplex]);
 
   // Function that gets called when the selectedTableName value changes.
   useEffect(async () => {
@@ -616,13 +619,15 @@ function PropertyDetails(props) {
 
   // Common function call to get the columns of any table whose name is sent as arguments.
   const getColumnListAPICall = async (tableName) => {
-    return await axios.get(
-      SERVER_URL +
-        ENDPOINT_GET_COLUMNS +
-        `/${openProcessID}` +
-        `/${openProcessType}` +
-        `/${tableName}`
-    );
+    if (tableName !== "") {
+      return await axios.get(
+        SERVER_URL +
+          ENDPOINT_GET_COLUMNS +
+          `/${openProcessID}` +
+          `/${openProcessType}` +
+          `/${tableName}`
+      );
+    }
   };
 
   // Function that gets called when the user clicks on cancel button for mapping values data.
@@ -1006,7 +1011,7 @@ function PropertyDetails(props) {
           <div className={styles.flexColumn}>
             <p className={styles.fieldTitle}>{t("rowCountOutput")}</p>
             <CustomizedDropdown
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               id="DE_Row_Count_Output_Dropdown"
               className={styles.dropdown}
               value={rowCountOutput}
@@ -1028,7 +1033,7 @@ function PropertyDetails(props) {
           </div>
           <div className={clsx(styles.flexRow, styles.checkBoxTextMargin)}>
             <Checkbox
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               id="DE_Is_Complex_Checkbox"
               checked={isComplex}
               size="small"
@@ -1038,7 +1043,7 @@ function PropertyDetails(props) {
               {t("isComplex")}
             </p>
             <Checkbox
-              disabled={!isComplex || isProcessReadOnly}
+              disabled={!isComplex || isReadOnly}
               id="DE_Is_Nested_Checkbox"
               checked={isNested}
               size="small"
@@ -1048,7 +1053,7 @@ function PropertyDetails(props) {
               {t("isNested")}
             </p>
             <Checkbox
-              disabled={operationType === "1" || isProcessReadOnly}
+              disabled={operationType === "1" || isReadOnly}
               id="DE_Update_If_Exist_Checkbox"
               checked={updateIfExistFlag}
               size="small"
@@ -1062,7 +1067,7 @@ function PropertyDetails(props) {
             <div className={clsx(styles.flexColumn, styles.complexTableMargin)}>
               <p className={styles.fieldTitle}>{t("selectComplex")}</p>
               <CustomizedDropdown
-                disabled={isProcessReadOnly}
+                disabled={isReadOnly}
                 id="DE_Row_Count_Output_Dropdown"
                 className={styles.dropdown}
                 value={selectedComplexName}
@@ -1087,7 +1092,7 @@ function PropertyDetails(props) {
             <p className={styles.fieldTitle}>{t("selectTables")}</p>
             {!isNested ? (
               <CustomizedDropdown
-                disabled={isProcessReadOnly}
+                disabled={isReadOnly}
                 id="DE_Select_Tables_Dropdown"
                 className={styles.dropdown}
                 value={selectedTableName}
@@ -1118,7 +1123,7 @@ function PropertyDetails(props) {
               </CustomizedDropdown>
             ) : (
               <MultiSelect
-                disabled={isProcessReadOnly}
+                disabled={isReadOnly}
                 completeList={existingTableData}
                 labelKey="TableName"
                 indexKey="id"
@@ -1147,7 +1152,7 @@ function PropertyDetails(props) {
             )}
           </div>
           <MappingValues
-            isProcessReadOnly={isProcessReadOnly}
+            isReadOnly={isReadOnly}
             operationType={operationType}
             isComplex={isComplex}
             filteredVariables={filteredVariables}
@@ -1170,7 +1175,7 @@ function PropertyDetails(props) {
             multiSelectedTableNames={multiSelectedTableNames}
           />
           <TableRelation
-            isProcessReadOnly={isProcessReadOnly}
+            isReadOnly={isReadOnly}
             operationType={operationType}
             processTableList={processTableList}
             selectedProcessTable={selectedProcessTable}
@@ -1194,7 +1199,7 @@ function PropertyDetails(props) {
             filteredProcessTableExptList={filteredProcessTableExptList}
           />
           <FilterString
-            isProcessReadOnly={isProcessReadOnly}
+            isReadOnly={isReadOnly}
             isNested={isNested}
             operationType={operationType}
             filterStrDataExchgTable={filterStrDataExchgTable}
@@ -1211,7 +1216,7 @@ function PropertyDetails(props) {
           />
           {isNested && operationType === "1" && (
             <DataExchangeTableSection
-              isProcessReadOnly={isProcessReadOnly}
+              isReadOnly={isReadOnly}
               dataExchgTableSectnData={dataExchgTableSectnData}
               deleteDataExchgTableSecHandler={deleteDataExchgTableSecHandler}
               parentDataExchgTable={parentDataExchgTable}

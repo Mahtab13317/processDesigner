@@ -51,8 +51,9 @@ export const addTaskAPI = (
               Repeatable: "N",
               TaskId: obj.taskId,
               TaskName: obj.taskName,
-              TaskType:
-                taskType === 1 ? TaskType.globalTask : TaskType.processTask,
+              TaskType: taskType, // code edited on 3 Oct 2022 for BugId 116511
+              StrTaskType:
+                taskType === 1 ? TaskType.globalTask : TaskType.processTask, // code edited on 3 Oct 2022 for BugId 116511
               TemplateId: -1,
               isActive: "true",
               xLeftLoc: obj.xLeftLoc,

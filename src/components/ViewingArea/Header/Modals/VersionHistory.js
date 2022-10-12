@@ -1,3 +1,4 @@
+// Changes made to solve Bug 113392 - Version history: while opening the previous version from the version history the screen loads forever
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "./versionHistory.module.css";
@@ -13,6 +14,7 @@ import Paper from "@material-ui/core/Paper";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import * as actionCreators from "../../../../redux-store/actions/processView/actions.js";
+import { store, useGlobalState } from "state-pool";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({}));
 
@@ -33,7 +35,8 @@ function createData(VersionName, processDefId, LastModifiedOn, LastModifiedBy) {
 function VersionHistory(props) {
   let { t } = useTranslation();
   const history = useHistory();
-
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData, setlocalLoadedProcessData] = useGlobalState(loadedProcessData);
   const rows =
     props.versionList &&
     props.versionList.map((val) => {
@@ -46,12 +49,13 @@ function VersionHistory(props) {
     });
 
   const openSelectProcess = (ProcessDefId, versionNo) => {
+    setlocalLoadedProcessData(null);
     props.openProcessClick(
       ProcessDefId,
       props.projectName,
       props.processType,
       versionNo,
-      props.ProcessName
+      props.ProcessName,
     );
     props.openTemplate(null, null, false);
     history.push("/process");

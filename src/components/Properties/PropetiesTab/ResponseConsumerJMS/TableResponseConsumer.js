@@ -44,8 +44,8 @@ export default function StickyHeadTable(props) {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [variablesList, setVariablesList] = useState([]);
+
   const searchCheckHandler = (e, variable) => {
-    console.log('PAGAL',variable );
     let variableName = variable.messageData;
     let temp = {...localLoadedActivityPropertyData}
     temp.ActivityProperty.consumerInfo.messageDataList.filter(el=>el.messageData == variableName)[0].Search = e.target.checked;

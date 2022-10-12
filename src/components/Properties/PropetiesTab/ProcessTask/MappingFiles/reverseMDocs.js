@@ -114,83 +114,83 @@ function ReverseForVariables(props) {
   const oneLineForMap = () => {
     return reverseDocsList?.map((el) => {
       return (
-       <>
-       <TabsHeading heading={props?.heading} />
-         <div
-          id="processTaskId1"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            padding: "0.5rem 0.5vw 0",
-            width: props.isDrawerExpanded ? "60%" : "100%",
-          }}
-        >
+        <>
           <div
+            id="processTaskId1"
             style={{
-              flex: "1",
-              height: "36px",
-              backgroundColor: "#F4F4F4",
-              borderRadius: "1px",
-              opacity: "1",
-              fontSize: "12px",
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "0.5rem 0.5vw 0",
+              width: props.isDrawerExpanded ? "60%" : "100%",
             }}
           >
-            <span style={{ padding: "5px" }}>{el.importedFieldName}</span>
-          </div>
-          <p style={{ marginTop: "5px", flex: "0.2", textAlign: "center" }}>
-            =
-          </p>
-          <div
-            style={{
-              flex: "1",
-              overflow: "hidden",
-            }}
-          >
-            <Select
-              inputProps={{ "aria-label": "Without label" }}
-              value={el.mappedFieldName}
+            <div
               style={{
-                width: "100%",
-                height: "34px",
-                border: "1px solid #CECECE",
+                flex: "1",
+                height: "36px",
+                backgroundColor: "#F4F4F4",
                 borderRadius: "1px",
                 opacity: "1",
-              }}
-              onChange={(e) => handleMappingChange(el, e)}
-              className="selectDateTime_options"
-              MenuProps={{
-                anchorOrigin: {
-                  vertical: "bottom",
-                  horizontal: "left",
-                },
-                transformOrigin: {
-                  vertical: "top",
-                  horizontal: "left",
-                },
-                getContentAnchorEl: null,
+                fontSize: "12px",
               }}
             >
-              {externalVariablesList?.map((document) => {
-                return (
-                  <MenuItem value={document.DocName}>
-                    <em style={{ fontSize: "12px", fontStyle: "normal" }}>
-                      {document.DocName}
-                    </em>
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </div>
-          <div style={{ marginTop: "5px", flex: "0.2", textAlign: "center" }}>
-            <DeleteIcon
+              <span style={{ padding: "5px" }}>{el.importedFieldName}</span>
+            </div>
+            <p style={{ marginTop: "5px", flex: "0.2", textAlign: "center" }}>
+              =
+            </p>
+            <div
               style={{
-                cursor: "pointer",
+                flex: "1",
+                overflow: "hidden",
               }}
-              onClick={() => deleteVariablesFromList(el)}
-            />
+            >
+              <Select
+                inputProps={{ "aria-label": "Without label" }}
+                value={el.mappedFieldName}
+                style={{
+                  width: "100%",
+                  height: "34px",
+                  border: "1px solid #CECECE",
+                  borderRadius: "1px",
+                  opacity: "1",
+                }}
+                onChange={(e) => handleMappingChange(el, e)}
+                className="selectDateTime_options"
+                MenuProps={{
+                  anchorOrigin: {
+                    vertical: "bottom",
+                    horizontal: "left",
+                  },
+                  transformOrigin: {
+                    vertical: "top",
+                    horizontal: "left",
+                  },
+                  getContentAnchorEl: null,
+                }}
+              >
+                {externalVariablesList?.map((document) => {
+                  return (
+                    <MenuItem value={document.DocName}>
+                      <em style={{ fontSize: "12px", fontStyle: "normal" }}>
+                        {document.DocName}
+                      </em>
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </div>
+            <div style={{ marginTop: "5px", flex: "0.2", textAlign: "center" }}>
+              <DeleteIcon
+                className="deleteIconProcessTask"
+                style={{
+                  cursor: "pointer",
+                }}
+                onClick={() => deleteVariablesFromList(el)}
+              />
+            </div>
           </div>
-        </div>
-       </>
+        </>
       );
     });
   };
@@ -213,6 +213,7 @@ function ReverseForVariables(props) {
           margin: props.isDrawerExpanded ? "0.25rem 0" : "0",
         }}
       >
+        <TabsHeading heading={props?.heading} />
         <CommonTabHeader
           tabType="ReverseForDocuments"
           setShowVariablesModal={setShowVariablesModal}

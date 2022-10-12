@@ -35,6 +35,7 @@ function InputFieldsStrip(props) {
     secondInputBase,
     secondInputBaseHandler,
     checkDisabled,
+    isReadOnly,
   } = props;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConstraintsEnabled, setIsConstraintsEnabled] = useState(false);
@@ -129,7 +130,7 @@ function InputFieldsStrip(props) {
     <div className={styles.inputFieldsMainDiv}>
       <TextInput
         inlineErrorStyles={styles.inlineErrorStyle}
-        // readOnlyCondition={isProcessReadOnly}
+        readOnlyCondition={isReadOnly}
         inputValue={inputBaseValue}
         classTag={styles.inputBase}
         onChangeEvent={(event) => inputBaseHandler(event.target.value)}
@@ -145,6 +146,7 @@ function InputFieldsStrip(props) {
         className={styles.typeInput}
         value={dropdownValue}
         onChange={(event) => onSelectType(event.target.value)}
+        disabled={isReadOnly}
       >
         {dropdownOptions?.map((d) => {
           return (
@@ -158,6 +160,7 @@ function InputFieldsStrip(props) {
         <Checkbox
           size="small"
           checked={isConstraintsEnabled}
+          disabled={isReadOnly}
           onChange={() =>
             setIsConstraintsEnabled((prevData) => {
               if (prevData) {
@@ -176,12 +179,12 @@ function InputFieldsStrip(props) {
           onChange={(event) => radioTypeHandler(event.target.value)}
           value={EXPORT_PRIMARY_CONSTRAINT_TYPE}
           size="small"
-          disabled={!isConstraintsEnabled}
+          disabled={!isConstraintsEnabled || isReadOnly}
         />
         <p
           className={clsx(
             styles.constraintsText,
-            !isConstraintsEnabled && styles.disabledTextColor
+            (!isConstraintsEnabled || isReadOnly) && styles.disabledTextColor
           )}
         >
           {t("primaryKey")}
@@ -192,12 +195,12 @@ function InputFieldsStrip(props) {
           onChange={(event) => radioTypeHandler(event.target.value)}
           value={EXPORT_UNIQUE_CONSTRAINT_TYPE}
           size="small"
-          disabled={!isConstraintsEnabled}
+          disabled={!isConstraintsEnabled || isReadOnly}
         />
         <p
           className={clsx(
             styles.constraintsText,
-            !isConstraintsEnabled && styles.disabledTextColor
+            (!isConstraintsEnabled || isReadOnly) && styles.disabledTextColor
           )}
         >
           {t("uniqueKey")}
@@ -215,7 +218,7 @@ function InputFieldsStrip(props) {
             })
           }
           value={secondInputBase.length}
-          disabled={checkDisabled(dropdownValue)}
+          disabled={checkDisabled(dropdownValue) || isReadOnly}
         />
         {dropdownValue === "6" ? (
           <div className={styles.flexRow}>
@@ -231,6 +234,7 @@ function InputFieldsStrip(props) {
                 })
               }
               value={secondInputBase.precision}
+              disabled={isReadOnly}
             />
           </div>
         ) : null}
@@ -259,22 +263,25 @@ function InputFieldsStrip(props) {
             documentList={documentList}
             variablesList={filteredVariables}
             mappingDetails={mappingDetails}
+            isReadOnly={isReadOnly}
             // variableTypeValue={dropdownValue}
           />
         </Modal>
         <button
           id="export_input_strip_add_button"
-          // disabled={inputBaseValue === "" || dropdownValue === ""}
+          disabled={isReadOnly}
           onClick={() => addHandlerFunc(isConstraintsEnabled)}
           className={styles.addButton}
         >
           <span className={styles.addButtonText}>{t("add")}</span>
         </button>
-        <ClearOutlinedIcon
-          id="export_input_strip_close_strip"
-          onClick={closeInputStrip}
-          className={styles.closeInputStrip}
-        />
+        {!isReadOnly && (
+          <ClearOutlinedIcon
+            id="export_input_strip_close_strip"
+            onClick={closeInputStrip}
+            className={styles.closeInputStrip}
+          />
+        )}
       </div>
     </div>
   );

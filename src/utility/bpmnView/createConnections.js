@@ -3,6 +3,7 @@ import {
   ENDPOINT_ADD_CONNECTION,
   SERVER_URL,
 } from "../../Constants/appConstants";
+import { setToastDataFunc } from "../../redux-store/slices/ToastDataHandlerSlice";
 import { validateConnections } from "./validateConnections";
 
 const mxgraphobj = require("mxgraph")({
@@ -17,7 +18,8 @@ export const createConnections = (
   graph,
   setProcessData,
   setNewId,
-  displayMessage
+  dispatch,
+  translation
 ) => {
   //overwrite the addEdge function in mxGraph
   //this function is called when a new edge is added to the graph
@@ -31,10 +33,10 @@ export const createConnections = (
     } else {
       //this means it is a new edge
       //validateConnections will validate the edge
-      let valid = validateConnections(source, target, displayMessage);
+      let { isValid, msg } = validateConnections(source, target, translation);
 
       //setProcessData will update state, to show new edge is added
-      if (valid) {
+      if (isValid && target.getId()) {
         let newEdgeId = 0;
         let processDefId, processMode;
         setNewId((oldIds) => {
@@ -86,6 +88,14 @@ export const createConnections = (
           .catch((err) => {
             console.log(err);
           });
+      } else {
+        dispatch(
+          setToastDataFunc({
+            message: msg,
+            severity: "error",
+            open: true,
+          })
+        );
       }
     }
   };

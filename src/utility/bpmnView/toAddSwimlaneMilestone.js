@@ -11,8 +11,10 @@ var addButton = (graph, horizontal, x, y, t, processType) => {
   let button = document.createElement("div");
   if (horizontal) {
     button.title = t("addMilestone");
+    button.id = "addMilestone";
   } else {
     button.title = t("addSwimlane");
+    button.id = "addSwimlane";
   }
   button.className = "swimlaneMilestoneAddBtn";
   let span = document.createElement("span");

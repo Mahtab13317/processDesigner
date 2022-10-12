@@ -196,7 +196,12 @@ function CreateChildWorkitemProperties(props) {
       if (selectedWorkstepField?.length > 0) {
         selectedWorkstepField.forEach((workstep) => {
           if (workstep !== DEFAULT) {
-            m_strAssociatedWS = m_strAssociatedWS + workstep.ActivityName + ",";
+            if (m_strAssociatedWS.length === 0) {
+              m_strAssociatedWS = workstep.ActivityName;
+            } else {
+              m_strAssociatedWS =
+                m_strAssociatedWS + "," + workstep.ActivityName;
+            }
           }
         });
       }

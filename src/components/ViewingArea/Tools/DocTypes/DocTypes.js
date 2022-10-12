@@ -1,5 +1,10 @@
 // Bug solved for: No validation when documents with same name is added - 109986
-
+// Changes made to solve Todo Screen distorts when the count increases  ID 112558
+// Changes made to solve Bug = 114551 =>Add Document not working once you add document, log out , login and again create document is not working
+// #BugID - 109986
+// #BugDescription - validation for Doctype duplicate name length has been added.
+// #BugID - 114022
+// #BugDescription - Document Type is being added now when lengthy name is entered and text validate also.
 import React, { useEffect, useState } from "react";
 import "../Interfaces.css";
 import Button from "@material-ui/core/Button";
@@ -11,8 +16,6 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import AddDocType from "./AddDoc";
 import Modal from "@material-ui/core/Modal";
-import IconsInCompact from "./IconsInCompact";
-import Switch from "@material-ui/core/Switch";
 import { store, useGlobalState } from "state-pool";
 import {
   SERVER_URL,
@@ -30,10 +33,14 @@ import {
   syncViewWithModifyForActivity,
 } from "../../../../utility/Tools/alignModifyView_DocTypes";
 import { giveCompleteRights } from "../../../../utility/Tools/giveCompleteRights_docType";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import DeleteDocModal from "../../../../UI/ActivityModal/Modal";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Rules from "../Rules/Rules";
+import DeletePopup from "../DeletePopup";
+import DefaultModal from "../../../../UI/Modal/Modal";
+import ObjectDependencies from "../../../../UI/ObjectDependencyModal";
+import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 
 function DocType(props) {
   const loadedProcessData = store.getState("loadedProcessData");
@@ -66,6 +73,14 @@ function DocType(props) {
   const [processType, setProcessType] = useState(null);
   const [addAnotherDoc, setAddAnotherDoc] = useState(false);
   //code added on 8 June 2022 for BugId 110212
+
+  //added by mahtab
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [showDependencyModal, setShowDependencyModal] = useState(false);
+  const [taskAssociation, setTaskAssociation] = useState([]);
+  const dispatch = useDispatch();
+
   const handleScreen = (screenType) => {
     setSelectedTab(screenType);
     setRulesLength(true);
@@ -191,7 +206,9 @@ function DocType(props) {
           !(activity.ActivityType === 5 && activity.ActivitySubType === 2) &&
           !(activity.ActivityType === 6 && activity.ActivitySubType === 2) &&
           !(activity.ActivityType === 7 && activity.ActivitySubType === 1) &&
-          !(activity.ActivityType === 34 && activity.ActivitySubType === 1)
+          !(activity.ActivityType === 34 && activity.ActivitySubType === 1) &&
+          // code added on 11 Oct 2022 for BugId 116576
+          !(activity.ActivityType === 30 && activity.ActivitySubType === 1)
         ) {
           arr.push(activity);
         }
@@ -216,12 +233,16 @@ function DocType(props) {
       };
     }
   });
-
-  const addDocToList = (DocToAdd, DocDesc, button_type) => {
+  {
+    /*code updated on 10 October 2022 for BugId 114022	*/
+  }
+  const addDocToList = (DocToAdd, DocDesc, button_type, mandatorydoc) => {
     let exist = false;
     docData &&
       docData.DocumentTypeList.forEach((type) => {
-        if (type.DocName.toLowerCase() == DocToAdd.toLowerCase()) {
+        if (
+          type.DocName.trim().toLowerCase() == DocToAdd.trim().toLowerCase()
+        ) {
           setbDocExists(true);
           exist = true;
         }
@@ -231,71 +252,90 @@ function DocType(props) {
     }
 
     if (DocToAdd?.trim() !== "") {
-      let maxId = docData.DocumentTypeList.reduce(
-        (acc, doc) => (acc = acc > doc.DocTypeId ? acc : doc.DocTypeId),
-        0
-      );
-      axios
-        .post(SERVER_URL + "/addDocType", {
-          processDefId: props.openProcessID,
-          docTypeName: DocToAdd,
-          docTypeId: +maxId + 1,
-          docTypeDesc: DocDesc,
-          sDocType: "D",
-        })
-        .then((res) => {
-          if (res.data.Status == 0) {
-            let temp = JSON.parse(JSON.stringify(localLoadedProcessData));
-            temp.DocumentTypeList.push({
-              DocName: DocToAdd,
-              DocTypeId: +maxId + 1,
-            });
-            setlocalLoadedProcessData(temp);
-            let addedActivity = [];
-            let tempData = { ...docData };
-            if (subColumns.length > 0) {
-              subColumns?.forEach((activity) => {
-                addedActivity.push({
-                  ActivityId: activity.ActivityId,
-                  Add: false,
-                  View: false,
-                  Modify: false,
-                  Delete: false,
-                  Download: false,
-                  Print: false,
-                });
-              });
-            }
-            tempData &&
-              tempData.DocumentTypeList.push({
-                DocName: DocToAdd,
-                DocTypeId: maxId + 1,
-                SetAllChecks: {
-                  Add: false,
-                  View: false,
-                  Modify: false,
-                  Delete: false,
-                  Download: false,
-                  Print: false,
-                },
-
-                Activities: [...addedActivity],
-              });
-            setDocData(tempData);
-            // code added on 2 August 2022 for BugId 112251
-            if (button_type !== "addAnother") {
-              handleClose();
-              setAddAnotherDoc(false);
-            } else if (button_type === "addAnother") {
-              setAddAnotherDoc(true);
-              document.getElementById("DocNameInput").focus();
-            }
+      if (DocToAdd.length <= 50) {
+        let maxToDoId = 0;
+        docData.DocumentTypeList?.map((doc) => {
+          if (+doc.DocTypeId > +maxToDoId) {
+            maxToDoId = doc.DocTypeId;
           }
         });
+        axios
+          .post(SERVER_URL + "/addDocType", {
+            processDefId: props.openProcessID,
+            docTypeName: DocToAdd,
+            docTypeId: `${+maxToDoId + 1}`,
+            docTypeDesc: DocDesc,
+            sDocType: "D",
+            mandatorydoc: mandatorydoc ? "Y" : "N",
+          })
+          .then((res) => {
+            if (res.data.Status == 0) {
+              let temp = JSON.parse(JSON.stringify(localLoadedProcessData));
+              temp.DocumentTypeList.push({
+                DocName: DocToAdd,
+                DocTypeId: `${+maxToDoId + 1}`,
+                Description: DocDesc,
+              });
+              setlocalLoadedProcessData(temp);
+              let addedActivity = [];
+              let tempData = { ...docData };
+              if (subColumns.length > 0) {
+                subColumns?.forEach((activity) => {
+                  addedActivity.push({
+                    ActivityId: activity.ActivityId,
+                    Add: false,
+                    View: false,
+                    Modify: false,
+                    Delete: false,
+                    Download: false,
+                    Print: false,
+                  });
+                });
+              }
+              tempData &&
+                tempData.DocumentTypeList.push({
+                  DocName: DocToAdd,
+                  DocTypeId: `${+maxToDoId + 1}`,
+                  SetAllChecks: {
+                    Add: false,
+                    View: false,
+                    Modify: false,
+                    Delete: false,
+                    Download: false,
+                    Print: false,
+                  },
+
+                  Activities: [...addedActivity],
+                });
+              setDocData(tempData);
+              // code added on 2 August 2022 for BugId 112251
+              if (button_type !== "addAnother") {
+                handleClose();
+                setAddAnotherDoc(false);
+              } else if (button_type === "addAnother") {
+                setAddAnotherDoc(true);
+                document.getElementById("DocNameInput").focus();
+              }
+            }
+          });
+      } else {
+        dispatch(
+          setToastDataFunc({
+            message: "Doc Type length should not exceed 50 characters",
+            severity: "error",
+            open: true,
+          })
+        );
+        return false;
+      }
     } else {
       setShowDocNameError(true);
       document.getElementById("DocNameInput").focus();
     }
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
   };
 
   const deleteDocType = (docName, docId) => {
@@ -308,15 +348,21 @@ function DocType(props) {
       })
       .then((res) => {
         if (res.data.Status == 0) {
-          let tempData = { ...docData };
-          tempData.DocumentTypeList.map((docType, docIndex) => {
-            if (docType.DocTypeId == docId) {
-              let docToDeleteIndex = docIndex;
-              tempData.DocumentTypeList.splice(docToDeleteIndex, 1);
-            }
-          });
-          setDocData(tempData);
-          handleClose();
+          setTaskAssociation(res?.data?.Validations);
+          if (res?.data?.Validations?.length > 0) {
+            //setIsDeleteModalOpen(true);
+            setShowDependencyModal(true);
+          } else {
+            let tempData = { ...docData };
+            tempData.DocumentTypeList.map((docType, docIndex) => {
+              if (docType.DocTypeId == docId) {
+                let docToDeleteIndex = docIndex;
+                tempData.DocumentTypeList.splice(docToDeleteIndex, 1);
+              }
+            });
+            setDocData(tempData);
+            handleClose();
+          }
         }
       });
   };
@@ -898,8 +944,9 @@ function DocType(props) {
               width: "100%",
               borderBottom: "1px solid rgb(218, 208, 194)",
               display: "flex",
-              fontSize: "1rem",
+              fontSize: "var(--base_text_font_size)",
               padding: "0px 10px",
+              justifyContent: "center",
               alignItems: "center",
             }}
           >
@@ -954,7 +1001,7 @@ function DocType(props) {
                   style={{
                     backgroundColor: index % 2 == 0 ? "#F2F2F2" : "white",
                     padding:
-                      "1.3rem 1.5vw" /*code changes on 3 August 2022 for BugId 112560*/,
+                      "1.3rem 0.5vw" /*code changes on 3 August 2022 for BugId 112560*/,
                     borderBottom: "1px solid #C2B8A3",
                     // width: compact ? "12rem" : "12.51875rem",
                   }}
@@ -978,322 +1025,387 @@ function DocType(props) {
     return display;
   };
 
+  //mahtab code addedd
+  /* function checkDocRight(docData) {
+    let tempArr = [];
+
+    docData?.DocumentTypeList?.forEach((item, j) => {
+      item?.Activities?.forEach((data, x) => {
+        if (
+          data.Add == true ||
+          data.View == true ||
+          data.Download == true ||
+          data.Modify == true ||
+          data.Print == true ||
+          data.Delete == true
+        ) {
+          tempArr.push(data);
+        }
+      });
+    });
+
+    return tempArr;
+  }
+
+  const showRight = checkDocRight(docData);
+ */
+
   if (isLoading) {
     return <CircularProgress className="circular-progress" />;
   } else
     return docData.DocumentTypeList && docData.DocumentTypeList.length > 0 ? (
-      <div className="DocTypes" style={{ overflow: "scroll" }}>
-        <div className="oneDocDiv">
-          <div className="docNameDiv">
-            <p
-              className={
-                selectedTab === "screenHeading"
-                  ? "selectedBottomBorder screenHeading"
-                  : "screenHeading"
-              }
-              style={{
-                margin: direction !== RTL_DIRECTION ? "0 1vw 0 0" : "0 0 0 1vw",
-                padding: "1px 1vw",
-              }}
-              onClick={(e) => tabChangeHandler(e, "screenHeading")}
-            >
-              {t("docTypes")}
-            </p>
-            <p
-              className={
-                selectedTab === "rules" ? "selectedBottomBorder Rules" : "Rules"
-              }
-              style={{
-                padding: "1px 1vw",
-              }}
-              onClick={(e) => tabChangeHandler(e, "rules")}
-            >
-              {t("rules")}
-            </p>
-          </div>
-          {selectedTab == "screenHeading" ? (
-            <React.Fragment>
-              <div className="docSearchDiv" style={{
-                margin: "1.4rem 0rem"
-              }}>
-                <div className="searchBarNFilterInterface">
-                  <div className="docSearchBar">
-                    <SearchProject
-                      setSearchTerm={setDocSearchTerm}
-                      placeholder={t("search")}
-                      width="240px"
-                    />
-                  </div>
-                  {processType !== "L" ? null : (
-                    <p
-                      id="addDocButton"
-                      onClick={() => {
-                        setDocNameToModify(null);
-                        setDocDescToModify(null);
-                        setDocIdToModify(null);
-                        handleOpen();
-                      }}
-                    >
-                      {t("addDataObject")}
-                    </p>
-                  )}
-                  <Modal
-                    open={addDocModal}
-                    onClose={handleClose}
-                    aria-labelledby="simple-modal-title"
-                    aria-describedby="simple-modal-description"
-                  >
-                    <AddDocType
-                      addDocToList={addDocToList}
-                      handleClose={handleClose}
-                      bDocExists={bDocExists}
-                      setbDocExists={setbDocExists}
-                      showDocNameError={showDocNameError}
-                      setShowDocNameError={setShowDocNameError}
-                      docData={docData}
-                      modifyDescription={modifyDescription}
-                      docDescToModify={docDescToModify}
-                      docNameToModify={docNameToModify}
-                      docIdToModify={docIdToModify}
-                      addAnotherDoc={addAnotherDoc}
-                      setAddAnotherDoc={setAddAnotherDoc}
-                    />
-                  </Modal>
-                </div>
-              </div>
-              {filteredDocTypes &&
-                filteredDocTypes.map((type, index) => {
-                  return (
-                    <div
-                      style={{
-                        backgroundColor: index % 2 == 0 ? "#F2F2F2" : "white",
-                        padding: "0.6rem 1.5vw",
-                        borderBottom: "1px solid #C2B8A3",
-                      }}
-                    >
-                      <div
-                        className="activityNameDivDocs"
-                        style={{
-                          justifyContent: "space-between",
-                          display: "flex",
+      <>
+        <div className="DocTypes" style={{ overflow: "scroll" }}>
+          <div className="oneDocDiv">
+            <div className="docNameDiv">
+              <p
+                className={
+                  selectedTab === "screenHeading"
+                    ? "selectedBottomBorder screenHeading"
+                    : "screenHeading"
+                }
+                style={{
+                  margin:
+                    direction !== RTL_DIRECTION ? "0 0.5vw 0 0" : "0 0 0 0.5vw",
+                  padding: "1px 0.5vw",
+                }}
+                onClick={(e) => tabChangeHandler(e, "screenHeading")}
+              >
+                {t("docTypes")}
+              </p>
+              <p
+                className={
+                  selectedTab === "rules"
+                    ? "selectedBottomBorder Rules"
+                    : "Rules"
+                }
+                style={{
+                  padding: "1px 1vw",
+                }}
+                onClick={(e) => tabChangeHandler(e, "rules")}
+              >
+                {t("rules")}
+              </p>
+            </div>
+            {selectedTab == "screenHeading" ? (
+              <React.Fragment>
+                <div
+                  className="docSearchDiv"
+                  style={{
+                    margin: "0.45rem 0rem",
+                  }}
+                >
+                  <div className="searchBarNFilterInterface">
+                    <div className="docSearchBar">
+                      <SearchProject
+                        setSearchTerm={setDocSearchTerm}
+                        placeholder={t("search")}
+                        width="240px"
+                      />
+                    </div>
+                    {processType !== "L" ? null : (
+                      <p
+                        id="addDocButton"
+                        onClick={() => {
+                          setDocNameToModify(null);
+                          setDocDescToModify(null);
+                          setDocIdToModify(null);
+                          handleOpen();
                         }}
                       >
-                        <p className="docName">
-                          <span
-                            style={{
-                              flex: "0.9",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                            }}
-                          >
-                            {type.DocName}
-                          </span>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                id="masterCheck_oneDoc_docTypes"
-                                name="checkedF"
-                                style={{
-                                  marginTop: "-0.125rem",
-                                  marginLeft: "0.4rem",
-                                }}
-                                checked={
-                                  fullRightCheckOneDocArr[index] ? true : false
-                                }
-                                disabled={processType !== "L" ? true : false}
-                                onChange={() => GiveCompleteRights(index)}
-                              />
-                            }
-                            style={{ flex: "1" }}
-                          />
-                        </p>
-                        {compact && processType === "L" ? (
-                          <div className="relative">
-                            <ArrowUpwardIcon
-                              style={{ cursor: "pointer", flex: "1" }}
-                              type="button"
-                              onClick={() =>
-                                handleActivityModalOpen(type.DocTypeId)
+                        {t("addDataObject")}
+                      </p>
+                    )}
+                    <Modal
+                      open={addDocModal}
+                      onClose={handleClose}
+                      aria-labelledby="simple-modal-title"
+                      aria-describedby="simple-modal-description"
+                    >
+                      <AddDocType
+                        addDocToList={addDocToList}
+                        handleClose={handleClose}
+                        bDocExists={bDocExists}
+                        setbDocExists={setbDocExists}
+                        showDocNameError={showDocNameError}
+                        setShowDocNameError={setShowDocNameError}
+                        docData={docData}
+                        modifyDescription={modifyDescription}
+                        docDescToModify={docDescToModify}
+                        docNameToModify={docNameToModify}
+                        docIdToModify={docIdToModify}
+                        addAnotherDoc={addAnotherDoc}
+                        setAddAnotherDoc={setAddAnotherDoc}
+                      />
+                    </Modal>
+                  </div>
+                </div>
+                {filteredDocTypes &&
+                  filteredDocTypes.map((type, index) => {
+                    return (
+                      <div
+                        style={{
+                          backgroundColor: index % 2 == 0 ? "#F2F2F2" : "white",
+                          padding: "0.6rem 0.5vw",
+                          borderBottom: "1px solid #C2B8A3",
+                        }}
+                      >
+                        <div
+                          className="activityNameDivDocs"
+                          style={{
+                            justifyContent: "space-between",
+                            display: "flex",
+                          }}
+                        >
+                          <div className="docName">
+                            <span
+                              style={{
+                                flex: "0.9",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {type.DocName}
+                            </span>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  id="masterCheck_oneDoc_docTypes"
+                                  name="checkedF"
+                                  style={{
+                                    marginTop: "-0.125rem",
+                                    marginLeft: "0.4rem",
+                                  }}
+                                  checked={
+                                    fullRightCheckOneDocArr[index]
+                                      ? true
+                                      : false
+                                  }
+                                  disabled={processType !== "L" ? true : false}
+                                  onChange={() => GiveCompleteRights(index)}
+                                />
                               }
+                              style={{ flex: "1" }}
                             />
-                            {openActivityModal === type.DocTypeId && (
-                              <React.Fragment>
-                                <Backdrop
-                                  show={openActivityModal === type.DocTypeId}
-                                  clicked={handleActivityModalClose}
-                                />
-                                <div
-                                  style={{
-                                    position: "absolute",
-                                    backgroundColor: "white",
-                                    top: "0px",
-                                    left: "50%",
-                                    zIndex: "700",
-                                    padding: "5px",
-                                    height: "36px",
-                                    width: "256px",
-                                  }}
-                                >
-                                  <CheckBoxes //setAll CheckBoxes
-                                    processType={processType}
-                                    docIdx={index}
-                                    docData={docData}
-                                    id={type.ActivityId}
-                                    type={"set-all"}
-                                    compact={compact}
-                                    updateSetAllChecks={updateSetAllChecks}
-                                  />
-                                </div>
-                              </React.Fragment>
-                            )}
                           </div>
-                        ) : null}
-                        {/*code edited on 29 July 2022 for BugId 112401 and BugId 112404*/}
-                        {processType === "L" ? (
-                          <DeleteDocModal
-                            backDrop={false}
-                            modalPaper="modalPaperActivity"
-                            sortByDiv="sortByDivActivity"
-                            oneSortOption="oneSortOptionActivity"
-                            docIndex={index}
-                            buttonToOpenModal={
-                              <button
-                                className="threeDotsButton"
+                          {compact && processType === "L" ? (
+                            <div className="relative">
+                              <ArrowUpwardIcon
+                                style={{ cursor: "pointer", flex: "1" }}
                                 type="button"
-                                style={{ marginTop: "0.25rem" }}
-                              >
-                                <MoreVertIcon
-                                  style={{
-                                    color: "#606060",
-                                    height: "16px",
-                                    width: "16px",
-                                  }}
-                                />
-                              </button>
-                            }
-                            modalWidth="180"
-                            sortSectionOne={[
-                              <p
-                                id="deleteDocOption"
                                 onClick={() =>
-                                  deleteDocType(type.DocName, type.DocTypeId)
+                                  handleActivityModalOpen(type.DocTypeId)
                                 }
-                              >
-                                {t("delete")}
-                              </p>,
-                              <p
-                                id="modifyDocOption"
-                                onClick={() =>
-                                  editDescription(
-                                    type.DocTypeId,
-                                    type.DocName,
-                                    type.Description
-                                  )
-                                }
-                              >
-                                {t("modify")}
-                              </p>,
-                            ]}
-                          />
-                        ) : null}
+                              />
+                              {openActivityModal === type.DocTypeId && (
+                                <React.Fragment>
+                                  <Backdrop
+                                    show={openActivityModal === type.DocTypeId}
+                                    clicked={handleActivityModalClose}
+                                  />
+                                  <div
+                                    style={{
+                                      position: "absolute",
+                                      backgroundColor: "white",
+                                      top: "0px",
+                                      left: "50%",
+                                      zIndex: "700",
+                                      padding: "5px",
+                                      height: "36px",
+                                      width: "256px",
+                                    }}
+                                  >
+                                    <CheckBoxes //setAll CheckBoxes
+                                      processType={processType}
+                                      docIdx={index}
+                                      docData={docData}
+                                      id={type.ActivityId}
+                                      type={"set-all"}
+                                      compact={compact}
+                                      updateSetAllChecks={updateSetAllChecks}
+                                    />
+                                  </div>
+                                </React.Fragment>
+                              )}
+                            </div>
+                          ) : null}
+                          {/*code edited on 29 July 2022 for BugId 112401 and BugId 112404*/}
+                          {processType === "L" ? (
+                            <DeleteDocModal
+                              backDrop={false}
+                              modalPaper="modalPaperActivity"
+                              sortByDiv="sortByDivActivity"
+                              oneSortOption="oneSortOptionActivity"
+                              docIndex={index}
+                              buttonToOpenModal={
+                                <button
+                                  className="threeDotsButton"
+                                  type="button"
+                                  style={{ marginTop: "0.25rem" }}
+                                >
+                                  <MoreVertIcon
+                                    style={{
+                                      color: "#606060",
+                                      height: "16px",
+                                      width: "16px",
+                                    }}
+                                  />
+                                </button>
+                              }
+                              modalWidth="180"
+                              sortSectionOne={[
+                                <p
+                                  id="deleteDocOption"
+                                  onClick={() =>
+                                    deleteDocType(type.DocName, type.DocTypeId)
+                                  }
+                                >
+                                  {t("delete")}
+                                </p>,
+                                <p
+                                  id="modifyDocOption"
+                                  onClick={() =>
+                                    editDescription(
+                                      type.DocTypeId,
+                                      type.DocName,
+                                      type.Description
+                                    )
+                                  }
+                                >
+                                  {t("view")}
+                                </p>,
+                              ]}
+                            />
+                          ) : null}
+                        </div>
+                        <div style={{ display: "flex" }}>
+                          <div className="docDescription">
+                            {type.Description}
+                          </div>
+                          {compact ? null : (
+                            <CheckBoxes //setAll CheckBoxes
+                              processType={processType}
+                              compact={compact}
+                              docIdx={index}
+                              docData={docData}
+                              id={type.ActivityId}
+                              type={"set-all"}
+                              updateSetAllChecks={updateSetAllChecks}
+                            />
+                          )}
+                        </div>
                       </div>
-                      <div style={{ display: "flex" }}>
-                        <p className="docDescription">{type.Description}</p>
-                        {compact ? null : (
-                          <CheckBoxes //setAll CheckBoxes
-                            processType={processType}
-                            compact={compact}
-                            docIdx={index}
-                            docData={docData}
-                            id={type.ActivityId}
-                            type={"set-all"}
-                            updateSetAllChecks={updateSetAllChecks}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-            </React.Fragment>
-          ) : null}
-        </div>
-        {/*code added on 8 June 2022 for BugId 110212*/}
-        {selectedTab == "screenHeading" ? (
-          <div className="activitySideDiv">
-            <div className="activityHeadingDiv">
-              <p className="activitySideHeading">{t("rightsOnActivities")}</p>
-              <div className="actvitySearchDiv">
-                <SearchProject
-                  setSearchTerm={setActivitySearchTerm}
-                  placeholder={t("search")}
-                  width="240px"
-                />
-                <FormControlLabel
-                  style={{ marginLeft: "20px" }}
-                  control={
-                    <Switch
-                      checked={compact}
-                      onChange={() => handleSwitchChange()}
-                      name="checkedB"
-                      color="primary"
-                    />
-                  }
-                  labelPlacement="start"
-                  label="Compact"
-                />
-              </div>
-            </div>
-            {/* ----------------------------------------------------------- */}
-            <div>
-              <div className="oneBox" id="oneBoxMatrix">
-                <div style={{ display: "flex" }}>{GetActivities()}</div>
-              </div>
-            </div>
-            {/* ------------------------------------------------------------------- */}
+                    );
+                  })}
+              </React.Fragment>
+            ) : null}
           </div>
-        ) : (
-          <Rules
-            ruleDataType={docArray}
-            interfaceRules={docAllRules}
-            ruleType="D"
-            ruleDataTableStatement={t("doctypeRemoveRecords")}
-            addRuleDataTableStatement={t("doctypeAddRecords")}
-            ruleDataTableHeading={t("docList")}
-            addRuleDataTableHeading={t("availableDoc")}
-            bShowRuleData={true}
-            hideGroup={true}
-            listName={t("docList")}
-            availableList={t("availableDoc")}
-            openProcessType={processType}
+          {/*code added on 8 June 2022 for BugId 110212*/}
+          {selectedTab == "screenHeading" ? (
+            <div className="activitySideDiv">
+              <div className="activityHeadingDiv">
+                <p className="activitySideHeading">{t("rightsOnActivities")}</p>
+                <div className="actvitySearchDiv">
+                  <SearchProject
+                    setSearchTerm={setActivitySearchTerm}
+                    placeholder={t("search")}
+                    width="240px"
+                  />
+                </div>
+              </div>
+              {/* ----------------------------------------------------------- */}
+              <div>
+                <div className="oneBox" id="oneBoxMatrix">
+                  <div style={{ display: "flex" }}>{GetActivities()}</div>
+                </div>
+              </div>
+              {/* ------------------------------------------------------------------- */}
+            </div>
+          ) : (
+            <Rules
+              ruleDataType={docArray}
+              interfaceRules={docAllRules}
+              ruleType="D"
+              ruleDataTableStatement={t("doctypeRemoveRecords")}
+              addRuleDataTableStatement={t("doctypeAddRecords")}
+              ruleDataTableHeading={t("docList")}
+              addRuleDataTableHeading={t("availableDoc")}
+              bShowRuleData={true}
+              hideGroup={true}
+              listName={t("docList")}
+              availableList={t("availableDoc")}
+              openProcessType={processType}
+            />
+          )}
+        </div>
+        {showDependencyModal ? (
+          <DefaultModal
+            show={showDependencyModal}
+            style={{
+              width: "45vw",
+              left: "28%",
+              top: "21.5%",
+              padding: "0",
+            }}
+            modalClosed={() => setShowDependencyModal(false)}
+            children={
+              <ObjectDependencies
+                {...props}
+                processAssociation={taskAssociation}
+                cancelFunc={() => setShowDependencyModal(false)}
+              />
+            }
           />
-        )}
-      </div>
+        ) : null}
+      </>
     ) : (
-      <div className="noDocTypesScreen">
-        <p style={{ fontSize: "12px", marginBottom: "5px" }}>
-          {t("noDocMessage")}
-        </p>
-        <Button
-          style={{ padding: "4px", minWidth: "39px", textTransform: "none" }}
-          variant="contained"
-          onClick={handleOpen}
-          color="primary"
-        >
-          {t("createDocTypes")}
-        </Button>
-        <Modal
-          open={addDocModal}
-          onClose={handleClose}
-          aria-labelledby="simple-modal-title"
-          aria-describedby="simple-modal-description"
-        >
-          <AddDocType
-            addDocToList={addDocToList}
-            handleClose={handleClose}
-            bDocExists={bDocExists}
+      <>
+        <div className="noDocTypesScreen">
+          <p style={{ fontSize: "12px", marginBottom: "5px" }}>
+            {t("noDocMessage")}
+          </p>
+          <Button
+            style={{ padding: "4px", minWidth: "39px", textTransform: "none" }}
+            variant="contained"
+            onClick={handleOpen}
+            color="primary"
+          >
+            {t("createDocTypes")}
+          </Button>
+          <Modal
+            open={addDocModal}
+            onClose={handleClose}
+            aria-labelledby="simple-modal-title"
+            aria-describedby="simple-modal-description"
+          >
+            <AddDocType
+              addDocToList={addDocToList}
+              handleClose={handleClose}
+              bDocExists={bDocExists}
+            />
+          </Modal>
+        </div>
+
+        {showDependencyModal ? (
+          <DefaultModal
+            show={showDependencyModal}
+            style={{
+              width: "45vw",
+              left: "28%",
+              top: "21.5%",
+              padding: "0",
+            }}
+            modalClosed={() => setShowDependencyModal(false)}
+            children={
+              <ObjectDependencies
+                {...props}
+                processAssociation={taskAssociation}
+                cancelFunc={() => setShowDependencyModal(false)}
+              />
+            }
           />
-        </Modal>
-      </div>
+        ) : null}
+      </>
     );
 }
 

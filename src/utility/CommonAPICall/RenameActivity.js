@@ -3,6 +3,15 @@ import {
   ENDPOINT_RENAMEACTIVITY,
 } from "../../Constants/appConstants";
 import axios from "axios";
+import { setToastDataFunc } from "../../redux-store/slices/ToastDataHandlerSlice";
+import {
+  setActivityDependencies,
+  setDependencyErrorMsg,
+  setQueueRenameModalOpen,
+  setRenameActivityData,
+  setShowDependencyModal,
+  setWorkitemFlag,
+} from "./../../redux-store/actions/Properties/activityAction";
 
 export const renameActivity = (
   actId,
@@ -13,7 +22,9 @@ export const renameActivity = (
   processName,
   queueId,
   queueInfo,
-  isBpmn
+  isBpmn,
+  queueRename,
+  dispatch
 ) => {
   let obj = {
     actName: newActivityName,
@@ -25,11 +36,23 @@ export const renameActivity = (
     // code added on 22 July 2022 for BugId 113305
     queueInfo: queueInfo,
     queueExist: queueInfo.queueExist,
+    queueRename,
   };
+
   axios
     .post(SERVER_URL + ENDPOINT_RENAMEACTIVITY, obj)
     .then((response) => {
       if (response.data.Status == 0) {
+        dispatch(setQueueRenameModalOpen(false));
+        dispatch(setRenameActivityData(null));
+        dispatch &&
+          dispatch(
+            setToastDataFunc({
+              message: response.data.Message || "Renamed Successfully.",
+              severity: "success",
+              open: true,
+            })
+          );
         if (!isBpmn) {
           //value already set in bpmn view
           setProcessData((prevProcessData) => {
@@ -83,10 +106,26 @@ export const renameActivity = (
             }
             return newProcessData;
           });
+          dispatch(setQueueRenameModalOpen(false));
+          dispatch(setRenameActivityData(null));
         }
       }
     })
     .catch((err) => {
-      console.log(err);
+      if (dispatch) {
+        dispatch(
+          setToastDataFunc({
+            message: err?.response?.data?.Message || "operation failed.",
+            severity: "error",
+            open: true,
+          })
+        );
+        dispatch(setShowDependencyModal(false));
+        dispatch(setActivityDependencies([]));
+        dispatch(setDependencyErrorMsg(""));
+        dispatch(setWorkitemFlag(false));
+        dispatch(setQueueRenameModalOpen(false));
+        dispatch(setRenameActivityData(null));
+      }
     });
 };

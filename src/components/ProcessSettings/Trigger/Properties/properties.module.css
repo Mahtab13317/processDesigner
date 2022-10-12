@@ -51,7 +51,7 @@
 .starIcon {
   color: red;
   margin-left: 0.25vw;
-  font-size: 0.75rem;
+  font-size: 1rem;
 }
 
 .triggerSelectVariableInput {
@@ -130,7 +130,6 @@
   font: normal normal normal 12px/17px Open Sans;
   letter-spacing: 0px;
   color: #000000;
-  margin-top: 0.25rem;
 }
 
 .propertiesSetTriggerLabel {
@@ -190,7 +189,7 @@
   border: 1px solid #dadada;
   background: #fff;
   width: 24vw;
-  height: 3rem;
+  height: 4rem;
 }
 
 .triggerSelectDropdown span {
@@ -211,7 +210,6 @@
 }
 
 .triggerSelectDropdownList {
-  height: 3rem !important;
   border-bottom: 1px solid #d6d6d6;
 }
 
@@ -219,8 +217,8 @@
   display: flex;
   justify-content: space-between;
   flex: 1;
-  padding: 0.5rem 1.5rem 0.5rem 0.5rem;
-  border-bottom: 1px solid #d6d6d6;
+  /* padding: 0.5rem 1.5rem 0.5rem 0.5rem;
+  border-bottom: 1px solid #d6d6d6; */
 }
 
 .filterSetTrigger {
@@ -263,7 +261,6 @@
   font: normal normal normal 12px/17px Open Sans;
   font-size: var(--base_text_font_size);
   letter-spacing: 0px;
-  color: #000000;
   opacity: 1;
 }
 
@@ -276,16 +273,15 @@
   font: normal normal normal 10px/14px Open Sans;
   font-size: var(--sub_text_font_size);
   letter-spacing: 0px;
-  color: #000000;
   opacity: 0.48;
 }
 
 .triggerEqualTo {
-  margin: 0.5rem 1vw 0;
+  margin: 1.25rem 1vw 0;
 }
 
 .triggerDeleteIcon {
-  margin: 0.75rem 1vw 0;
+  margin: 1.25rem 1vw 0;
 }
 
 .setTriggerList {
@@ -402,19 +398,22 @@
 .dataDropdownConstantIcon {
   font: normal normal 600 14px/16px Open Sans !important;
   position: absolute;
-  top: 0.25rem;
-  margin: 0.5rem 0.5rem;
+  top: 0.8rem;
+  margin: 0 0.5vw;
   width: 2vw;
-  padding: 0.25rem 0.5rem;
+  height: var(--line_height);
+  padding: 0;
+  display: flex;
   z-index: 1000;
-  text-align: center;
+  justify-content: center;
+  align-items: center;
   background: #e5e5e5;
 }
 
 .dataDropdownConstInput {
   position: absolute;
-  width: 17vw;
-  height: 1.5rem;
+  width: 18vw;
+  height: var(--line_height);
   top: 0.75rem;
   left: 3vw;
   z-index: 100;
@@ -494,4 +493,37 @@
 }
 .triggerNameTypeDiv #selectWithInput_TF {
   width: 60% !important;
+}
+
+.searchTextField input::placeholder {
+  font-size: 12px;
+  text-overflow: ellipsis;
+}
+
+.dataDropdownListHeader {
+  background: white !important;
+  line-height: var(--line_height) !important;
+  margin-bottom: 0.5rem !important;
+  padding: 0 0.5rem !important;
+}
+
+.searchBox {
+  cursor: text;
+  position: relative;
+  margin-left: 0;
+  display: flex;
+  background: #ffffff;
+  border: 1px solid #d7d7d7;
+  border-radius: 2px;
+  height: var(--line_height);
+  width: 100%;
+}
+
+.searchIcon {
+  position: absolute;
+  right: 0.5rem;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
 }

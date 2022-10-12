@@ -1,6 +1,11 @@
 .formLabel {
   font-size: var(--subtitle_text_font_size);
   font-weight: bold;
+  margin-block-end: 2rem;
+}
+.desc {
+  font-size: var(--base_text_font_size);
+ 
 }
 .box {
   width: 47%;
@@ -8,6 +13,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
+
 }
 
 .mainDiv {

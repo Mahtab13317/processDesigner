@@ -16,7 +16,6 @@ import TabList from "@material-ui/lab/TabList";
 import TabPanel from "@material-ui/lab/TabPanel";
 import { useTranslation } from "react-i18next";
 import {
-  activityType_label,
   ENDPOINT_GET_RULE_MEMBER_LIST,
   ENDPOINT_REST_PACKAGE,
   RTL_DIRECTION,
@@ -41,7 +40,10 @@ import { store, useGlobalState } from "state-pool";
 import axios from "axios";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import Toast from "../../../../UI/ErrorToast";
-import { getVarTypeAndIsArray } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
+import {
+  getVarTypeAndIsArray,
+  isReadOnlyFunc,
+} from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 import TabsHeading from "../../../../UI/TabsHeading";
 
 function BusinessRules(props) {
@@ -76,6 +78,7 @@ function BusinessRules(props) {
   const [revInputs, setRevInputs] = useState([]);
   const [brtRevInputs, setBrtRevInputs] = useState([]);
   const [value, setValue] = React.useState("1");
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   for (let i = 0; i < 100; i++) {
     timeslot.push(i);
@@ -141,13 +144,23 @@ function BusinessRules(props) {
 
   //function for data association
   function associateData(type) {
-    let data;
+    /*code updated on 21 September 2022 for BugId 113883*/
 
+    let data;
     if (type == "ruleflow") {
       if (ruleFlow.id == "" && ruleFlow.name == "") {
         setIsError(true);
         setErrorMsg({
           msg: t("toolbox.businessRules.errormsg1"),
+          severity: "error",
+        });
+        return false;
+      }
+
+      if (!ruleVersion || ruleVersion == "") {
+        setIsError(true);
+        setErrorMsg({
+          msg: t("toolbox.businessRules.selectVerRF"),
           severity: "error",
         });
         return false;
@@ -166,6 +179,15 @@ function BusinessRules(props) {
         setIsError(true);
         setErrorMsg({
           msg: t("toolbox.businessRules.errormsg2"),
+          severity: "error",
+        });
+        return false;
+      }
+
+      if (!packageVersion || packageVersion == "") {
+        setIsError(true);
+        setErrorMsg({
+          msg: t("toolbox.businessRules.selectVerRP"),
           severity: "error",
         });
         return false;
@@ -260,6 +282,7 @@ function BusinessRules(props) {
         });
       }
     });
+
     return varList;
   };
 
@@ -822,15 +845,7 @@ function BusinessRules(props) {
           props.isDrawerExpanded ? "brtContainerExpand" : "brtContainer"
         }
       >
-        {/* <Box
-          className={
-            props.isDrawerExpanded ? "label-heading-expand" : "label-heading"
-          }
-        >
-          {props?.heading}
-        </Box> */}
         <TabsHeading heading={props?.heading} />
-
         <div style={mapping ? { display: "flex" } : {}}>
           <div style={mapping ? { width: "100%" } : {}}>
             <div className="radio-group">
@@ -852,11 +867,13 @@ function BusinessRules(props) {
                   >
                     <FormControlLabel
                       value="false"
+                      disabled={isReadOnly}
                       control={<Radio size="small" />}
                       label={t("toolbox.businessRules.soapServiceLabel")}
                     />
                     <FormControlLabel
                       value="true"
+                      disabled={isReadOnly}
                       control={<Radio size="small" />}
                       label={t("toolbox.businessRules.restServiceLabel")}
                     />
@@ -882,6 +899,7 @@ function BusinessRules(props) {
                     onChange={changeRuleFlow}
                     id="ruleflow-selectbox"
                     isNotMandatory={true}
+                    disabled={isReadOnly}
                   >
                     {ruleFlowItems?.map((item, i) => (
                       <MenuItem value={item.id}>{item.value}</MenuItem>
@@ -911,6 +929,7 @@ function BusinessRules(props) {
                     displayEmpty
                     id="ruleversion-selectbox"
                     isNotMandatory={true}
+                    disabled={isReadOnly}
                   >
                     {flowVersionItems?.map((item, i) => (
                       <MenuItem value={item.value}>{item.label}</MenuItem>
@@ -921,9 +940,8 @@ function BusinessRules(props) {
               <div className="flex-item">
                 <p style={{ position: "relative" }}>
                   <Button
-                    color="primary"
-                    variant="outlined"
                     size="small"
+                    disabled={isReadOnly}
                     onClick={() => {
                       associateData("ruleflow");
                     }}
@@ -952,6 +970,7 @@ function BusinessRules(props) {
                     displayEmpty
                     id="rulepackage-selectbox"
                     isNotMandatory={true}
+                    disabled={isReadOnly}
                   >
                     {rulePackageItems?.map((item, i) => (
                       <MenuItem value={item.id} selected>
@@ -982,6 +1001,7 @@ function BusinessRules(props) {
                     }}
                     id="ruleversion-selectbox"
                     isNotMandatory={true}
+                    disabled={isReadOnly}
                   >
                     {packageVersionItems?.map((item, i) => (
                       <MenuItem value={item.value}>{item.label}</MenuItem>
@@ -992,8 +1012,7 @@ function BusinessRules(props) {
               <div className="flex-item">
                 <p style={{ position: "relative" }}>
                   <Button
-                    color="primary"
-                    variant="outlined"
+                    disabled={isReadOnly}
                     size="small"
                     onClick={() => {
                       associateData("rulepackage");
@@ -1075,16 +1094,18 @@ function BusinessRules(props) {
                               height: "24px !important",
                             }}
                           />
-                          <DeleteIcon
-                            onClick={() => {
-                              deleteData(item.id, i);
-                            }}
-                            style={{
-                              color: "#D53D3D",
-                              width: "24px !important",
-                              height: "24px !important",
-                            }}
-                          />
+                          {!isReadOnly && (
+                            <DeleteIcon
+                              onClick={() => {
+                                deleteData(item.id, i);
+                              }}
+                              style={{
+                                color: "#D53D3D",
+                                width: "24px !important",
+                                height: "24px !important",
+                              }}
+                            />
+                          )}
                         </div>
                       </td>
                     ) : (
@@ -1095,7 +1116,7 @@ function BusinessRules(props) {
               </table>
             </Box>
           </div>
-          {mapping == true ? (
+          {mapping ? (
             <div className="mappingContainer">
               <Box className="mapping-tbl-container">
                 <table className="mapping-tbl">
@@ -1118,6 +1139,7 @@ function BusinessRules(props) {
                               setTime(e.target.value, mappedSelectedRule);
                             }}
                             isNotMandatory={true}
+                            disabled={isReadOnly}
                           >
                             {timeslot?.map((item, i) => (
                               <MenuItem value={item}>
@@ -1139,9 +1161,7 @@ function BusinessRules(props) {
                         label={
                           <React.Fragment>
                             {t("toolbox.businessRules.forwardMapping")}
-                            <span
-                              style={{ fontSize: "smaller", color: "#D53D3D" }}
-                            >
+                            <span style={{ fontSize: "1rem", color: "red" }}>
                               *
                             </span>
                           </React.Fragment>
@@ -1153,9 +1173,7 @@ function BusinessRules(props) {
                         label={
                           <React.Fragment>
                             {t("toolbox.businessRules.reverseMapping")}
-                            <span
-                              style={{ fontSize: "smaller", color: "#D53D3D" }}
-                            >
+                            <span style={{ fontSize: "1rem", color: "red" }}>
                               *
                             </span>
                           </React.Fragment>
@@ -1166,66 +1184,62 @@ function BusinessRules(props) {
                     </TabList>
                   </Box>
                   <TabPanel value="1">
-                    {
-                      <TableContainer
-                        component={Paper}
-                        className="mapped-tbl-container"
-                      >
-                        <Table
-                          aria-label="simple table"
-                          className="mapped-table"
-                        >
-                          <TableHead>
+                    <TableContainer
+                      component={Paper}
+                      className="mapped-tbl-container"
+                    >
+                      <Table aria-label="simple table" className="mapped-table">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell className="mapped-table-header">
+                              {t("toolbox.businessRules.BRInput")}
+                            </TableCell>
+                            <TableCell></TableCell>
+                            <TableCell className="mapped-table-header">
+                              {t("toolbox.businessRules.curProcessVar")}
+                            </TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {brtFwdInputs?.map((item, i) => (
                             <TableRow>
-                              <TableCell className="mapped-table-header">
-                                {t("toolbox.businessRules.BRInput")}
+                              <TableCell>
+                                <p className="brtInputRules">{item.input}</p>
                               </TableCell>
-                              <TableCell></TableCell>
-                              <TableCell className="mapped-table-header">
-                                {t("toolbox.businessRules.curProcessVar")}
+                              <TableCell>=</TableCell>
+                              <TableCell>
+                                <CustomizedDropdown
+                                  value={getSelectedMappingData(item)}
+                                  id="mapping-list"
+                                  onChange={(e) => {
+                                    selectedOutputVal(
+                                      e.target.value,
+                                      item,
+                                      "F"
+                                    );
+                                  }}
+                                  isNotMandatory={true}
+                                  disabled={isReadOnly}
+                                >
+                                  {
+                                    <MenuItem value="0">
+                                      {t("toolbox.businessRules.selVar")}
+                                    </MenuItem>
+                                  }
+                                  {getFilteredVarList(item)?.map(
+                                    (process, j) => (
+                                      <MenuItem value={process.VariableName}>
+                                        {process.VariableName}
+                                      </MenuItem>
+                                    )
+                                  )}
+                                </CustomizedDropdown>
                               </TableCell>
                             </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {brtFwdInputs?.map((item, i) => (
-                              <TableRow>
-                                <TableCell>
-                                  <p className="brtInputRules">{item.input}</p>
-                                </TableCell>
-                                <TableCell>=</TableCell>
-                                <TableCell>
-                                  <CustomizedDropdown
-                                    value={getSelectedMappingData(item)}
-                                    id="mapping-list"
-                                    onChange={(e) => {
-                                      selectedOutputVal(
-                                        e.target.value,
-                                        item,
-                                        "F"
-                                      );
-                                    }}
-                                    isNotMandatory={true}
-                                  >
-                                    {
-                                      <MenuItem value="0">
-                                        {t("toolbox.businessRules.selVar")}
-                                      </MenuItem>
-                                    }
-                                    {getFilteredVarList(item)?.map(
-                                      (process, j) => (
-                                        <MenuItem value={process.VariableName}>
-                                          {process.VariableName}
-                                        </MenuItem>
-                                      )
-                                    )}
-                                  </CustomizedDropdown>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    }
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
                   </TabPanel>
                   <TabPanel value="2">
                     <TableContainer
@@ -1271,6 +1285,7 @@ function BusinessRules(props) {
                                   }}
                                   labelId="demo-select-small"
                                   isNotMandatory={true}
+                                  disabled={isReadOnly}
                                 >
                                   {
                                     <MenuItem value="0">
@@ -1308,6 +1323,7 @@ function BusinessRules(props) {
 const mapStateToProps = (state) => {
   return {
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

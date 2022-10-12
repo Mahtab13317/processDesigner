@@ -44,10 +44,19 @@ function deleteCellOnClick(
   setProcessData,
   setTaskAssociation,
   setShowDependencyModal,
-  cell
+  cell,
+  dispatch,
+  translation
 ) {
   graph.setSelectionCell(cell);
-  deleteCell(graph, setProcessData, setTaskAssociation, setShowDependencyModal);
+  deleteCell(
+    graph,
+    setProcessData,
+    setTaskAssociation,
+    setShowDependencyModal,
+    dispatch,
+    translation
+  );
   removeToolDivCell();
   removeContextMenu();
   hideIcons();
@@ -60,10 +69,14 @@ function editCellOnClick(
   translation,
   showDrawer,
   caseEnabled,
-  setOpenDeployedProcess
+  processType,
+  setOpenDeployedProcess,
+  setActionModal
 ) {
   graph.setSelectionCell(cell);
-  removeToolDivCell();
+  if (processType === PROCESSTYPE_LOCAL) {
+    removeToolDivCell();
+  }
   getContextMenu(
     graph,
     setProcessData,
@@ -71,7 +84,9 @@ function editCellOnClick(
     translation,
     showDrawer,
     caseEnabled,
-    setOpenDeployedProcess
+    processType,
+    setOpenDeployedProcess,
+    setActionModal
   );
 }
 
@@ -83,9 +98,12 @@ function mxIconSet(
   showDrawer,
   setNewId,
   caseEnabled,
+  processType,
   setOpenDeployedProcess,
   setTaskAssociation,
-  setShowDependencyModal
+  setShowDependencyModal,
+  setActionModal,
+  dispatch
 ) {
   this.destroy();
   removeContextMenu();
@@ -121,7 +139,9 @@ function mxIconSet(
         translation,
         showDrawer,
         caseEnabled,
-        setOpenDeployedProcess
+        processType,
+        setOpenDeployedProcess,
+        setActionModal
       )
     );
     mxEvent.addGestureListeners(
@@ -133,32 +153,35 @@ function mxIconSet(
     );
     images.push(img1);
     div.appendChild(img1);
+    if (processType === PROCESSTYPE_LOCAL) {
+      var img = mxUtils.createImage(deleteIcon);
+      img.setAttribute("title", "Delete");
+      img.addEventListener("click", () =>
+        deleteCellOnClick(
+          graph,
+          setProcessData,
+          setTaskAssociation,
+          setShowDependencyModal,
+          cell,
+          dispatch,
+          translation
+        )
+      );
+      img.style.width = smallIconSize.w + "px";
+      img.style.height = smallIconSize.h + "px";
 
-    var img = mxUtils.createImage(deleteIcon);
-    img.setAttribute("title", "Delete");
-    img.addEventListener("click", () =>
-      deleteCellOnClick(
-        graph,
-        setProcessData,
-        setTaskAssociation,
-        setShowDependencyModal,
-        cell
-      )
-    );
-    img.style.width = smallIconSize.w + "px";
-    img.style.height = smallIconSize.h + "px";
-
-    mxEvent.addGestureListeners(
-      img,
-      mxUtils.bind(this, function (evt) {
-        // Disables dragging the image
-        mxEvent.consume(evt);
-      })
-    );
-    images.push(img);
-    div.appendChild(img);
+      mxEvent.addGestureListeners(
+        img,
+        mxUtils.bind(this, function (evt) {
+          // Disables dragging the image
+          mxEvent.consume(evt);
+        })
+      );
+      images.push(img);
+      div.appendChild(img);
+    }
     graph.view.graph.container.appendChild(div);
-    if (!endVertex.includes(cell.style)) {
+    if (!endVertex.includes(cell.style) && processType === PROCESSTYPE_LOCAL) {
       getToolDivCell(
         graph,
         cell,
@@ -199,33 +222,34 @@ export function cellOnMouseClick(
   processType,
   setOpenDeployedProcess,
   setTaskAssociation,
-  setShowDependencyModal
+  setShowDependencyModal,
+  setActionModal,
+  dispatch
 ) {
   // code edited on 7 July 2022 for BugId 111719
   //Shows icons if the cell is clicked
   graph.addListener(mxEvent.CLICK, function (sender, evt) {
-    if (processType !== PROCESSTYPE_LOCAL) {
-      return;
-    } else {
-      var cell_click = evt.getProperty("cell"); // cell may be null
-      new mxIconSet(
-        graph,
-        cell_click,
-        translation,
-        setProcessData,
-        showDrawer,
-        setNewId,
-        caseEnabled,
-        setOpenDeployedProcess,
-        setTaskAssociation,
-        setShowDependencyModal
-      );
-      if (!cell_click) {
-        //hide popup menu when clicked anywhere on the graph
-        graph.popupMenuHandler?.hideMenu();
-      }
-      evt.consume();
+    var cell_click = evt.getProperty("cell"); // cell may be null
+    new mxIconSet(
+      graph,
+      cell_click,
+      translation,
+      setProcessData,
+      showDrawer,
+      setNewId,
+      caseEnabled,
+      processType,
+      setOpenDeployedProcess,
+      setTaskAssociation,
+      setShowDependencyModal,
+      setActionModal,
+      dispatch
+    );
+    if (!cell_click) {
+      //hide popup menu when clicked anywhere on the graph
+      graph.popupMenuHandler?.hideMenu();
     }
+    evt.consume();
   });
   graph.addListener("cellsInserted", function (sender, evt) {
     if (processType !== PROCESSTYPE_LOCAL) {
@@ -241,9 +265,12 @@ export function cellOnMouseClick(
         showDrawer,
         setNewId,
         caseEnabled,
+        processType,
         setOpenDeployedProcess,
         setTaskAssociation,
-        setShowDependencyModal
+        setShowDependencyModal,
+        setActionModal,
+        dispatch
       );
       evt.consume();
     }

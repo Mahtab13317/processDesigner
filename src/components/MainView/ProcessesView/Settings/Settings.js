@@ -68,7 +68,7 @@ function Settings() {
           <TabPanel
             style={{
               backgroundColor: "#F8F8F8",
-              padding: "0.625rem 1vw",
+              padding: "0 1vw",
               width: "78vw",
               height: "100%",
             }}

@@ -1,3 +1,4 @@
+// Changes made to solve Bug 105828 - IBPS 6.0 - > ToDo list bugs
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "../../../ProcessSettings/Trigger/Properties/properties.module.css";
@@ -153,7 +154,7 @@ function RuleDataList(props) {
             : `${styles.triggerNameTypeDiv} flex1`
         }
       >
-        <div className={`${styles.mb025} flex`}>
+        <div className={`${styles.mb025} flex`} style={{marginBottom:'0.85rem'}}>
           <div className="flex flex2">
             <p className={`${styles.dataEntryHeading} ${styles.mr05} flex4`}>
               {props.ruleDataTableHeading}
@@ -165,9 +166,12 @@ function RuleDataList(props) {
                 setSearchTerm={setSearchRule}
               />
             </div>
-            <button className={`${styles.filterTriggerButton} flex05`}>
+            {
+              /*code updated on 20 September 2022 for BugId 111160*/
+            }
+            {/* <button className={`${styles.filterTriggerButton} flex05`}>
               <img src={filter} alt="" />
-            </button>
+            </button> */}
           </div>
         </div>
         <RuleDataTable
@@ -193,9 +197,13 @@ function RuleDataList(props) {
               setSearchTerm={setSearchTerm}
             />
           </div>
-          <button className={`${styles.filterTriggerButton} flex05`}>
+          {
+              /*code updated on 20 September 2022 for BugId 111160*/
+            }
+          {/* <button className={`${styles.filterTriggerButton} flex05`}>
             <img src={filter} alt="" />
-          </button>
+          </button> */}
+          
         </div>
 
         <RuleDataTable

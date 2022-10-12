@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "var(--subtitle_text_font_size)",
   },
   input: {
-    height: 28,
+    height: "var(--line_height)",
     backgroundColor: "white",
     fontSize: "var(--base_text_font_size)",
     "& .Mui-focused": {
@@ -313,6 +313,8 @@ const Field = (props) => {
                         },
                       },
                     }}
+                    inputRef={props?.inputRef}
+                    onKeyPress={props?.onKeyPress}
                   >
                     {props.options &&
                       props.options.map((option, index) => {

@@ -41,6 +41,8 @@ import ExportImport from "./ExportImport";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { useTranslation } from "react-i18next";
 import StarRateSharpIcon from "@material-ui/icons/StarRateSharp";
+import { useRef } from "react";
+import { FieldValidations } from "../../../../../utility/FieldValidations/fieldValidations";
 
 function AddNewSectionBox(props) {
   let { t } = useTranslation();
@@ -51,7 +53,8 @@ function AddNewSectionBox(props) {
   const [newSection, setnewSection] = useState({});
   const [sectionName, setsectionName] = useState("");
   const [desc, setdesc] = useState("");
-
+  const sectionNameRef = useRef();
+  const sectionDescRef = useRef();
   const addHandler = () => {
     if (sectionName !== "") {
       props.mapNewSection(newSection);
@@ -151,6 +154,10 @@ function AddNewSectionBox(props) {
               paddingLeft: "5px",
               opacity: "1",
             }}
+            ref={sectionNameRef}
+            onKeyPress={(e) =>
+              FieldValidations(e, 163, sectionNameRef.current, 100)
+            }
           />
 
           <label style={{ fontSize: "14px", marginBottom: "10px" }}>
@@ -177,6 +184,10 @@ function AddNewSectionBox(props) {
               resize: "none",
               fontFamily: "Open Sans",
             }}
+            ref={sectionDescRef}
+            onKeyPress={(e) =>
+              FieldValidations(e, 163, sectionDescRef.current, 150)
+            }
           />
         </div>
 
@@ -226,6 +237,8 @@ function EditSectionBox(props) {
   const [newSection, setnewSection] = useState({});
   const [sectionName, setsectionName] = useState("");
   const [desc, setdesc] = useState(null);
+  const sectionNameRef = useRef();
+  const sectionDescRef = useRef();
   const cancelButtonClick = () => {
     props.cancelCallBack();
   };
@@ -317,6 +330,10 @@ function EditSectionBox(props) {
               paddingLeft: "5px",
               opacity: "1",
             }}
+            ref={sectionNameRef}
+            onKeyPress={(e) =>
+              FieldValidations(e, 163, sectionNameRef.current, 100)
+            }
           />
 
           <label style={{ fontSize: "14px", marginBottom: "10px" }}>
@@ -342,6 +359,10 @@ function EditSectionBox(props) {
               resize: "none",
               fontFamily: "Open Sans",
             }}
+            ref={sectionDescRef}
+            onKeyPress={(e) =>
+              FieldValidations(e, 163, sectionDescRef.current, 150)
+            }
           />
         </div>
 
@@ -398,35 +419,34 @@ function GlobalRequirementSections(props) {
       return x < y ? -1 : x > y ? 1 : 0;
     });
   }
-
-  useEffect(() => {
-    async function getSections() {
-      const res = await axios.get(
-        SERVER_URL +
-          `${
-            props.callLocation == "ProcessLevel"
-              ? ENDPOINT_FETCHPROCESSREQUIREMENTS +
-                `/${props.openProcessID}/${props.openProcessType}`
-              : ENDPOINT_FETCHSYSTEMREQUIREMENTS
-          }`
-      );
-      if (res.status === 200) {
-        const data = await res.data.Section;
-        setspinner(false);
-        data.forEach((item) => {
-          if (item.hasOwnProperty("SectionInner")) {
-            item.SectionInner = sortByKey(item.SectionInner, "OrderId");
-            if (item.SectionInner.hasOwnProperty("SectionInner2")) {
-              item.SectionInner.SectionInner2 = sortByKey(
-                item.SectionInner.SectionInner2,
-                "OrderId"
-              );
-            }
+  async function getSections() {
+    const res = await axios.get(
+      SERVER_URL +
+        `${
+          props.callLocation == "ProcessLevel"
+            ? ENDPOINT_FETCHPROCESSREQUIREMENTS +
+              `/${props.openProcessID}/${props.openProcessType}`
+            : ENDPOINT_FETCHSYSTEMREQUIREMENTS
+        }`
+    );
+    if (res.status === 200) {
+      const data = await res.data.Section;
+      setspinner(false);
+      data.forEach((item) => {
+        if (item.hasOwnProperty("SectionInner")) {
+          item.SectionInner = sortByKey(item.SectionInner, "OrderId");
+          if (item.SectionInner.hasOwnProperty("SectionInner2")) {
+            item.SectionInner.SectionInner2 = sortByKey(
+              item.SectionInner.SectionInner2,
+              "OrderId"
+            );
           }
-        });
-        setreqData(sortByKey(data, "OrderId"));
-      }
+        }
+      });
+      setreqData(sortByKey(data, "OrderId"));
     }
+  }
+  useEffect(() => {
     getSections();
   }, []);
 
@@ -1612,6 +1632,7 @@ function GlobalRequirementSections(props) {
                       exportOrImportToShow={exportOrImportToShow}
                       closeExportImportModal={closeExportImportModal}
                       sections={reqData}
+                      getSectionsDataAgain={getSections}
                     />
                   </Modal>
                 ) : null}

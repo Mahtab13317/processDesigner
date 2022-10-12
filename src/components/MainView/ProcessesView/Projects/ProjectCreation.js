@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// Changes made to solve Bug with ID = 114685 => Project Description is not getting saved
+import React, { useRef, useState } from "react";
 import "./ProjectCreation.css";
 import { useTranslation } from "react-i18next";
 import StarRateIcon from "@material-ui/icons/StarRate";
@@ -13,6 +14,8 @@ import "./ProjectCreationArabic.css";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 import { useDispatch } from "react-redux";
 import { setProjectCreation } from "../../../../redux-store/slices/projectCreationSlice";
+import { FieldValidations } from "../../../../utility/FieldValidations/fieldValidations";
+import { InputBase } from "@material-ui/core";
 
 function ProjectCreation(props) {
   let { t } = useTranslation();
@@ -22,6 +25,7 @@ function ProjectCreation(props) {
   const [projectInput, setprojectInput] = useState("");
   const [descriptionInput, setDescriptionInput] = useState("");
   const [showDesc, setshowDesc] = useState(false);
+  const projectRef = useRef();
 
   // Function that is used to close the modal.
   const cancelHandler = () => {
@@ -77,8 +81,8 @@ function ProjectCreation(props) {
   };
 
   // Function that handles description changes.
-  const descriptionInputHandler = (description) => {
-    setDescriptionInput(description);
+  const descriptionInputHandler = (e) => {
+    setDescriptionInput(e.target.innerText);
   };
 
   return (
@@ -118,7 +122,12 @@ function ProjectCreation(props) {
         value={projectInput}
         onChange={(event) => projectInputHandler(event)}
         id="projectName_projectCreation"
+        ref={projectRef}
+        onKeyPress={(e) => {
+          FieldValidations(e, 150, projectRef.current, 60);
+        }}
       />
+
       {!showDesc ? (
         <p
           className={c_Names({
@@ -151,9 +160,10 @@ function ProjectCreation(props) {
           <SunTextEditor
             autoFocus={false}
             placeholder={null}
-            descriptionInputcallBack={descriptionInputHandler}
+            // descriptionInputcallBack={descriptionInputHandler}
             width={props.width}
             customHeight={props.height}
+            getValue={(e) => descriptionInputHandler(e)}
           />
         </div>
       ) : null}

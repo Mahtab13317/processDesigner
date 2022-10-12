@@ -16,7 +16,7 @@ function OperationStrip(props) {
     opType,
     deleteOpHandler,
     tableDetails,
-    isProcessReadOnly,
+    isReadOnly,
   } = props;
   const [operationName, setOperationName] = useState("");
   const [selectedTableString, setSelectedTableString] =
@@ -82,7 +82,7 @@ function OperationStrip(props) {
             <p className={styles.selectedTable}>{selectedTableString}</p>
           </div>
         ) : null}
-        {!isProcessReadOnly && (
+        {!isReadOnly && (
           <DeleteOutlinedIcon
             id="OS_Delete_Operation_Btn"
             className={styles.deleteOpIcon}

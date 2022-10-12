@@ -16,7 +16,7 @@ function TableDataStrip(props) {
   let { t } = useTranslation();
   const {
     dataFields,
-    isProcessReadOnly,
+    isReadOnly,
     fieldName,
     fieldType,
     attribute,
@@ -80,7 +80,7 @@ function TableDataStrip(props) {
     <div>
       <div className={styles.fieldDataDiv}>
         <InputBase
-          disabled={isProcessReadOnly}
+          disabled={isReadOnly}
           id="table_details_field_name_input"
           variant="outlined"
           className={styles.inputBaseData}
@@ -103,7 +103,7 @@ function TableDataStrip(props) {
           value={fieldName}
         />
         <CustomizedDropdown
-          disabled={isProcessReadOnly}
+          disabled={isReadOnly}
           id="table_details_field_type_dropdown"
           className={styles.typeInputData}
           value={fieldType}
@@ -207,11 +207,11 @@ function TableDataStrip(props) {
           fieldName={fieldName}
           dataFields={dataFields}
           setDataFields={setDataFields}
-          isProcessReadOnly={isProcessReadOnly}
+          isReadOnly={isReadOnly}
           documentList={documentList}
           variablesList={variablesList}
         />
-        {!isProcessReadOnly ? (
+        {!isReadOnly ? (
           <DeleteOutlinedIcon
             id="table_details_delete_field_button"
             onClick={() => handleDeleteField(fieldName, index)}

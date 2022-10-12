@@ -1,3 +1,10 @@
+// #BugID - 110097
+// #BugDescription - validation for exception name length has been added.
+// #BugID - 109977
+// #BugDescription - validation for exception duplicate name has been added.
+// #BugID - 110089
+// #BugDescription - 	Data not clearing to add new Exception after clicking on Add another button has been fixed
+// Changes made to solve Bug 115524 - Exception: blank screen with not found message appears while pressing enter button in the exception field
 import React, { useState, useEffect } from "react";
 import "../Interfaces.css";
 import { useTranslation } from "react-i18next";
@@ -9,42 +16,45 @@ import {
   ENDPOINT_ADD_GROUP,
   SERVER_URL,
 } from "../../../../Constants/appConstants";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import "./Exception.css";
 import styles from "../DocTypes/index.module.css";
 import CloseIcon from "@material-ui/icons/Close";
 import arabicStyles from "../DocTypes/arabicStyles.module.css";
+import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
+import { useRef } from "react";
+import { FieldValidations } from "../../../../utility/FieldValidations/fieldValidations";
 
 function AddException(props) {
+  const dispatch = useDispatch();
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const [nameInput, setNameInput] = useState("");
   const [descriptionInput, setDescriptionInput] = useState("");
   const [expModalHead, setExpModalHead] = useState("");
-  const [expData, setExpData] = useState({
-    ExceptionGroups: [],
-  });
   const [selectedGroup, setselectedGroup] = useState([]);
   const [showGroupDropdown, setShowGroupDropdown] = useState(false);
   const [grpList, setgrpList] = useState([]);
+  const expNameRef = useRef();
 
   useEffect(() => {
-    let tempGrpList =
-      props.groups &&
-      props.groups.map((val) => {
-        return { ...val, id: val.GroupId };
-      });
+    let tempGrpList = props.groups?.map((val) => {
+      return { ...val, id: val.GroupId };
+    });
     setgrpList(tempGrpList);
-  }, [props]);
+  }, [props.groups]);
 
   const setNameFunc = (e) => {
     setNameInput(e.target.value);
     if (e.target.value !== "") {
-      props.setShowNameError(false);
+      setNameInput(e.target.value);
+      if (props.setShowNameError) {
+        props.setShowNameError(false);
+      }
       // Changes made to solve bug ID 109977
-      props.expData.ExceptionGroups.map((group) => {
+      props.expData?.ExceptionGroups?.map((group) => {
         group.ExceptionList.map((exception) => {
-          if (exception.ExceptionName.toLowerCase() == e.target.value) {
+          if (exception.ExceptionName.toLowerCase() === e.target.value.trim()) {
             props.setbExpExists(true);
           } else {
             props.setbExpExists(false);
@@ -56,7 +66,7 @@ function AddException(props) {
 
   const setDescriptionFunc = (e) => {
     setDescriptionInput(e.target.value);
-    if (e.target.value !== "") {
+    if (e.target.value !== "" && props.setShowDescError) {
       props.setShowDescError(false);
     }
   };
@@ -72,7 +82,7 @@ function AddException(props) {
     if (props.expNameToModify) {
       document.getElementById("ExceptionDescInput").focus();
       document.getElementById("ExceptionNameInput").disabled = true;
-      setExpModalHead(`Edit: ${props.expNameToModify}`);
+      setExpModalHead(`${t("ExceptionDetails")}`);
     } else {
       setExpModalHead(t("addException"));
     }
@@ -87,41 +97,46 @@ function AddException(props) {
     }
   }, [props.expDescToModify, props.expNameToModify]);
 
+  useEffect(() => {
+    if (props.addAnotherExp) {
+      setNameInput("");
+      setDescriptionInput("");
+      setselectedGroup([]);
+      props.setAddAnotherExp(false);
+    }
+  }, [props.addAnotherExp]);
+
   const onSelectGroup = (grp) => {
     setselectedGroup([grp.id]);
   };
 
   const handleCloseFunc = () => {
     props.handleClose();
-    props.setShowNameError(false);
-    props.setShowDescError(false);
-    props.setbExpExists(false);
+    if (props.setShowNameError) {
+      props.setShowNameError(false);
+    }
+    if (props.setShowDescError) {
+      props.setShowDescError(false);
+    }
+    if (props.setbExpExists) {
+      props.setbExpExists(false);
+    }
   };
 
-  const addnewGroup = (GroupToAdd, button_type, newGroupToMoveExp) => {
-    let maxId = 0;
-    grpList &&
-      grpList.map((el) => {
-        if (el.id > maxId) {
-          maxId = +el.id + 1;
-        }
-      });
-    setselectedGroup([maxId]);
-
+  // code edited on 7 Sep 2022 for BugId 114224
+  const addnewGroup = (GroupToAdd) => {
     let exist = false;
-    expData &&
-      expData.ExceptionGroups.map((group, groupIndex) => {
-        if (group.GroupName.toLowerCase() == GroupToAdd.toLowerCase()) {
-          // setbGroupExists(true);
-          exist = true;
-        }
-      });
+    grpList?.map((group) => {
+      if (group.GroupName.toLowerCase() === GroupToAdd.toLowerCase()) {
+        exist = true;
+      }
+    });
     if (exist) {
       return;
     }
-    if (GroupToAdd != "") {
-      let maxGroupId = expData.ExceptionGroups.reduce(
-        (acc, group) => (acc > group.GroupId ? acc : group.GroupId),
+    if (GroupToAdd?.trim() !== "") {
+      let maxGroupId = grpList.reduce(
+        (acc, group) => (+acc > +group.GroupId ? acc : group.GroupId),
         0
       );
       axios
@@ -133,8 +148,8 @@ function AddException(props) {
         })
         .then((res) => {
           if (res.data.Status == 0) {
-            let tempData = { ...expData };
-            tempData.ExceptionGroups.push({
+            let tempData = [...grpList];
+            tempData.push({
               GroupName: GroupToAdd,
               AllGroupRights: {
                 Respond: true,
@@ -144,18 +159,15 @@ function AddException(props) {
               },
               GroupId: +maxGroupId + 1,
               ExceptionList: [],
+              id: +maxGroupId + 1,
             });
-            setExpData(tempData);
+            setgrpList(tempData);
+            setselectedGroup([+maxGroupId + 1]);
+            setShowGroupDropdown(false);
           }
         });
-    } else if (GroupToAdd.trim() == "") {
+    } else if (GroupToAdd?.trim() === "") {
       alert("Please enter Group Name");
-      document.getElementById("groupNameInput_exception").focus();
-    }
-    if (button_type != "addAnother") {
-    }
-    if (button_type == "addAnother") {
-      document.getElementById("groupNameInput_exception").value = "";
       document.getElementById("groupNameInput_exception").focus();
     }
   };
@@ -185,6 +197,7 @@ function AddException(props) {
               width: "75%",
               justifyContent: "space-between",
               marginBottom: "1rem",
+              alignItems: "center",
             }}
           >
             <label className={styles.modalLabel} style={{ flex: "1" }}>
@@ -204,7 +217,7 @@ function AddException(props) {
                   })}
                 </span>
                 <span
-                  style={{ position: "absolute", right: "0.5vw", top: "10%" }}
+                  style={{ position: "absolute", right: "0.5vw", top: "-8%" }}
                 >
                   <img
                     src={dropdown}
@@ -237,11 +250,20 @@ function AddException(props) {
           <span className={styles.starIcon}>*</span>
         </label>
         <form>
+          {/*code added on 8 August 2022 for BugId 112903*/}
           <input
             id="ExceptionNameInput"
             value={nameInput}
             onChange={(e) => setNameFunc(e)}
             className={styles.modalInput}
+            ref={expNameRef}
+            onKeyPress={(e) => {
+              if (e.charCode == "13") {
+                e.preventDefault();
+              } else {
+                FieldValidations(e, 150, expNameRef.current, 50);
+              }
+            }}
           />
         </form>
         {props.showNameError ? (
@@ -249,7 +271,7 @@ function AddException(props) {
             style={{
               color: "red",
               fontSize: "var(--sub_text_font_size)",
-              marginTop: "-0.25rem",
+              marginTop: "-1rem",
               marginBottom: "0.5rem",
               display: "block",
             }}
@@ -262,7 +284,7 @@ function AddException(props) {
             style={{
               color: "red",
               fontSize: "var(--sub_text_font_size)",
-              marginTop: "-0.25rem",
+              marginTop: "-1rem",
               marginBottom: "0.5rem",
               display: "block",
             }}
@@ -300,6 +322,7 @@ function AddException(props) {
             ? arabicStyles.modalFooter
             : styles.modalFooter
         }
+        style={{ padding: "0.5rem 0" }}
       >
         <button
           className={
@@ -314,14 +337,14 @@ function AddException(props) {
         {props.expNameToModify ? null : (
           <button
             id="addAnotherDocTypes_Button"
-            onClick={(e) =>
+            onClick={(e) => {
               props.addExceptionToList(
                 nameInput,
                 "addAnother",
                 props.groupId ? props.groupId : selectedGroup[0],
                 descriptionInput
-              )
-            }
+              );
+            }}
             className={styles.okButton}
           >
             {t("addAnother")}
@@ -330,14 +353,14 @@ function AddException(props) {
         {props.expNameToModify ? null : (
           <button
             id="addNclose_AddDocModal_Button"
-            onClick={(e) =>
+            onClick={(e) => {
               props.addExceptionToList(
                 nameInput,
                 "add",
                 props.groupId ? props.groupId : selectedGroup[0],
                 descriptionInput
-              )
-            }
+              );
+            }}
             className={styles.okButton}
           >
             {t("add&Close")}
@@ -355,7 +378,7 @@ function AddException(props) {
             }}
             className={styles.okButton}
           >
-            {"save"}
+            {t("modify")}
           </button>
         ) : null}
       </div>

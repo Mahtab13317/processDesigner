@@ -1,5 +1,7 @@
 import hoverIcon from "../../assets/bpmnView/workstepOnHover/New workstep.png";
 import editIcon from "../../assets/bpmnViewIcons/EditIcon.svg";
+import moreIcon from "../../assets/ProcessView/MoreIcon.svg";
+import { PROCESSTYPE_LOCAL } from "../../Constants/appConstants";
 import {
   cellSize,
   defaultShapeVertex,
@@ -10,10 +12,17 @@ import {
   smallIconSize,
   swimlaneTitleWidth,
   widthForDefaultVertex,
+  style,
+  graphGridSize,
 } from "../../Constants/bpmnView";
-import { style } from "../../Constants/bpmnView";
+import { validateActivityObject } from "../CommonAPICall/validateActivityObject";
 import { dimensionInMultipleOfGridSize } from "./drawOnGraph";
 import { getActivityById } from "./getActivity";
+import {
+  getMileContextMenu,
+  removeMileContextMenu,
+} from "./getMileContextMenu";
+import { getMilestoneAt } from "./getMilestoneAt";
 
 const mxgraphobj = require("mxgraph")({
   mxImageBasePath: "mxgraph/javascript/src/images",
@@ -25,9 +34,17 @@ const mxEvent = mxgraphobj.mxEvent;
 const mxRectangle = mxgraphobj.mxRectangle;
 const mxCell = mxgraphobj.mxCell;
 const mxGeometry = mxgraphobj.mxGeometry;
+const mxCellState = mxgraphobj.mxCellState;
 
-function doNotHoverForTheseCell(graph, cell) {
+function doNotHoverForTheseCell(graph, cell, evt) {
   if (graph.isSwimlane(cell)) {
+    if (
+      cell.style === style.milestone ||
+      (getMilestoneAt(evt.layerX - 2 * gridSize, evt.layerY, null, graph) !==
+        null &&
+        cell.style !== style.tasklane)
+    )
+      return false;
     return true;
   }
   return false;
@@ -150,8 +167,8 @@ export function expandEmbeddedProcess(graph, cell1, setProcessData) {
             xLeftLocAct = +activity.xLeftLoc;
             yTopLocAct = +activity.yTopLoc;
             vertex.setId(cell1.id);
-            activity.EmbeddedActivity[0] &&
-              activity.EmbeddedActivity[0].forEach((act) => {
+            activity.EmbeddedActivity &&
+              activity.EmbeddedActivity[0]?.forEach((act) => {
                 let x = dimensionInMultipleOfGridSize(+act.xLeftLoc);
                 let y = dimensionInMultipleOfGridSize(+act.yTopLoc);
                 let activityObj = getActivityById(
@@ -247,60 +264,37 @@ export function expandEmbeddedProcess(graph, cell1, setProcessData) {
   graph.refresh();
 }
 
-function mxIconSet(state, graph, setProcessData, t) {
+function mxIconSet(
+  evt,
+  state,
+  graph,
+  setProcessData,
+  t,
+  processType,
+  dispatch
+) {
   this.images = [];
   var graph = state.view.graph;
-  if (doNotHoverForTheseCell(graph, state.cell)) {
+  if (doNotHoverForTheseCell(graph, state.cell, evt)) {
     this.destroy();
     return;
   }
-  var img = mxUtils.createImage(editIcon);
-  img.setAttribute("title", `${t("edit")}`);
-  img.style.position = "absolute";
-  img.style.cursor = "pointer";
-  img.style.width = cellSize.w / 2 + "px";
-  img.style.height = cellSize.h / 2 + "px";
-  img.style.left =
-    state.text.boundingBox.x +
-    state.text.boundingBox.width / 2 -
-    cellSize.w / 4 +
-    "px";
-  img.style.top =
-    state.text.boundingBox.y + state.text.boundingBox.height + "px";
-  img.style.zIndex = 100;
-  mxEvent.addGestureListeners(
-    img,
-    mxUtils.bind(this, function (evt) {
-      // Disables dragging the image
-      mxEvent.consume(evt);
-    })
-  );
-  mxEvent.addListener(
-    img,
-    "click",
-    mxUtils.bind(this, function (evt) {
-      graph.startEditingAtCell(state.cell);
-      mxEvent.consume(evt);
-      this.destroy();
-    })
-  );
-  state.view.graph.container.appendChild(img);
-  this.images.push(img);
-  if (
-    state.cell.style === style.subProcess ||
-    state.cell.style === style.callActivity
-  ) {
-    var img = mxUtils.createImage(hoverIcon);
-    img.setAttribute("title", "Expand");
-    img.style.opacity = 0;
+
+  if (state.cell.style !== style.milestone) {
+    var img = mxUtils.createImage(editIcon);
+    img.setAttribute("title", `${t("edit")}`);
     img.style.position = "absolute";
     img.style.cursor = "pointer";
     img.style.width = cellSize.w / 2 + "px";
     img.style.height = cellSize.h / 2 + "px";
-    img.style.left = state.x + state.width / 2 - cellSize.w / 4 + "px";
+    img.style.left =
+      state.text.boundingBox.x +
+      state.text.boundingBox.width / 2 -
+      cellSize.w / 4 +
+      "px";
     img.style.top =
-      state.y + state.height - smallIconSize.h - cellSize.h / 4 + "px";
-    img.style.zIndex = 100;
+      state.text.boundingBox.y + state.text.boundingBox.height + "px";
+    img.style.zIndex = 90;
     mxEvent.addGestureListeners(
       img,
       mxUtils.bind(this, function (evt) {
@@ -312,13 +306,133 @@ function mxIconSet(state, graph, setProcessData, t) {
       img,
       "click",
       mxUtils.bind(this, function (evt) {
-        expandEmbeddedProcess(graph, state.cell, setProcessData);
-        mxEvent.consume(evt);
-        this.destroy();
+        let id = state?.cell?.id;
+        let processDefId, activityName, processType;
+        setProcessData((prevProcessData) => {
+          prevProcessData.MileStones.forEach((milestone) => {
+            milestone.Activities.forEach((activity) => {
+              if (activity.ActivityId === Number(id)) {
+                activityName = activity.ActivityName;
+              }
+            });
+          });
+          processDefId = prevProcessData.ProcessDefId;
+          processType = prevProcessData.ProcessType;
+
+          return prevProcessData;
+        });
+
+        validateActivityObject({
+          processDefId,
+          processType,
+          activityName,
+          activityId: id,
+          errorMsg: `${t("renameValidationErrorMsg")}`,
+          onSuccess: (workitemValidationFlag) => {
+            if (!workitemValidationFlag) {
+              graph.startEditingAtCell(state.cell);
+              mxEvent.consume(evt);
+              this.destroy();
+            }
+          },
+        });
       })
     );
     state.view.graph.container.appendChild(img);
     this.images.push(img);
+    if (
+      state.cell.style === style.subProcess ||
+      state.cell.style === style.callActivity
+    ) {
+      var img = mxUtils.createImage(hoverIcon);
+      img.setAttribute("title", "Expand");
+      img.style.opacity = 0;
+      img.style.position = "absolute";
+      img.style.cursor = "pointer";
+      img.style.width = cellSize.w / 2 + "px";
+      img.style.height = cellSize.h / 2 + "px";
+      img.style.left = state.x + state.width / 2 - cellSize.w / 4 + "px";
+      img.style.top =
+        state.y + state.height - smallIconSize.h - cellSize.h / 4 + "px";
+      img.style.zIndex = 100;
+      mxEvent.addGestureListeners(
+        img,
+        mxUtils.bind(this, function (evt) {
+          // Disables dragging the image
+          mxEvent.consume(evt);
+        })
+      );
+      mxEvent.addListener(
+        img,
+        "click",
+        mxUtils.bind(this, function (evt) {
+          expandEmbeddedProcess(graph, state.cell, setProcessData);
+          mxEvent.consume(evt);
+          this.destroy();
+        })
+      );
+      state.view.graph.container.appendChild(img);
+      this.images.push(img);
+    }
+  }
+  if (
+    state.cell.style === style.milestone ||
+    (getMilestoneAt(evt.layerX - 2 * gridSize, evt.layerY, null, graph) !==
+      null &&
+      state.cell.style !== style.tasklane)
+  ) {
+    if (processType === PROCESSTYPE_LOCAL) {
+      let newState = graph.view.getState(state.cell);
+      var img = mxUtils.createImage(moreIcon);
+      // img.setAttribute("title", `${t("edit")}`);
+      img.style.position = "absolute";
+      img.style.cursor = "pointer";
+      img.style.width = (cellSize.w / 5) * 2 + "px";
+      img.style.height = (cellSize.h / 5) * 2 + "px";
+      img.style.zIndex = 90;
+      if (
+        newState.cell.style !== style.milestone &&
+        getMilestoneAt(evt.layerX - 2 * gridSize, evt.layerY, null, graph) !==
+          null
+      ) {
+        newState = graph.view.getState(
+          getMilestoneAt(evt.layerX - 2 * gridSize, evt.layerY, null, graph)
+        );
+      }
+      img.style.left =
+        newState.text.boundingBox.x +
+        newState.text.boundingBox.width +
+        graphGridSize +
+        "px";
+      img.style.top =
+        newState.text.boundingBox.y +
+        newState.text.boundingBox.height / 2 -
+        cellSize.h / 4 +
+        "px";
+      mxEvent.addGestureListeners(
+        img,
+        mxUtils.bind(this, function (evt) {
+          // Disables dragging the image
+          mxEvent.consume(evt);
+        })
+      );
+      mxEvent.addListener(
+        img,
+        "click",
+        mxUtils.bind(this, function (evt) {
+          getMileContextMenu(
+            graph,
+            setProcessData,
+            newState.cell,
+            t,
+            newState,
+            dispatch
+          );
+        })
+      );
+      state.view.graph.container.appendChild(img);
+      this.images.push(img);
+    }
   }
 }
 
@@ -332,7 +446,13 @@ mxIconSet.prototype.destroy = function () {
   this.images = null;
 };
 
-export function cellOnMouseHover(graph, setProcessData, translation) {
+export function cellOnMouseHover(
+  graph,
+  setProcessData,
+  translation,
+  processType,
+  dispatch
+) {
   // Defines the tolerance before removing the icons
   var iconTolerance = 20;
 
@@ -385,10 +505,13 @@ export function cellOnMouseHover(graph, setProcessData, translation) {
     dragEnter: function (evt, state) {
       if (this.currentIconSet === null) {
         this.currentIconSet = new mxIconSet(
+          evt,
           state,
           graph,
           setProcessData,
-          translation
+          translation,
+          processType,
+          dispatch
         );
       }
     },
@@ -396,6 +519,7 @@ export function cellOnMouseHover(graph, setProcessData, translation) {
       if (this.currentIconSet != null) {
         this.currentIconSet.destroy();
         this.currentIconSet = null;
+        removeMileContextMenu();
       }
     },
   });

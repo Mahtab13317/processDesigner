@@ -2,32 +2,21 @@ import React, { useState, useEffect, useRef } from "react";
 import { Button, Grid, Typography } from "@material-ui/core";
 import "../../Properties.css";
 import { useTranslation } from "react-i18next";
-
 import { connect, useDispatch, useSelector } from "react-redux";
-
 import { makeStyles } from "@material-ui/core/styles";
-
 import { store, useGlobalState } from "state-pool";
-import * as actionCreators from "../../../../redux-store/actions/selectedCellActions";
 import * as actionCreatorsDrawer from "../../../../redux-store/actions/Properties/showDrawerAction.js";
-
 import CircularProgress from "@material-ui/core/CircularProgress";
 import {
   BASE_URL,
-  PROCESSTYPE_LOCAL,
   propertiesLabel,
-  SERVER_URL_LAUNCHPAD,
 } from "../../../../Constants/appConstants.js";
-import {
-  setActivityPropertyChange,
-  ActivityPropertyChangeValue,
-} from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
+import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import {
   ActivityPropertySaveCancelValue,
   setSave,
 } from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked.js";
 import Field from "../../../../UI/InputFields/TextField/Field.js";
-
 import {
   DeleteIcon,
   HorizontalMoreIcon,
@@ -37,26 +26,18 @@ import FormBuilderModal from "./FormBuilderModal.js";
 import PreviewHtmlModal from "./PreviewHtmlModal.js";
 import { validateRegex, REGEX } from "../../../../validators/validator";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
-import {
-  createInstance,
-  createInstanceWithoutBearer,
-} from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 import { getSelectedCellType } from "../../../../utility/abstarctView/getSelectedCellType";
 import axios from "axios";
 import TabsHeading from "../../../../UI/TabsHeading";
-const makeFieldInputs = (value) => {
-  return {
-    value: value,
-    error: false,
-    helperText: "",
-  };
-};
+import { isProcessDeployedFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
+import { FieldValidations } from "../../../../utility/FieldValidations/fieldValidations";
+
 const useStyles = makeStyles((props) => ({
   input: {
-    height: "2.0625rem",
+    height: "var(--line_height)",
   },
   inputWithError: {
-    height: "2.0625rem",
+    height: "var(--line_height)",
     width: "4.875rem",
   },
   errorStatement: {
@@ -158,54 +139,42 @@ const useStyles = makeStyles((props) => ({
     padding: ".5rem",
   },
 }));
+
 function TaskData(props) {
   let { t } = useTranslation();
   const dispatch = useDispatch();
   const direction = `${t("HTML_DIR")}`;
   const fileRef = useRef();
-
   const classes = useStyles({ ...props, direction });
-
-  const tabStatus = useSelector(ActivityPropertyChangeValue);
-
   const loadedProcessData = store.getState("loadedProcessData"); //current processdata clicked
   const localActivityPropertyData = store.getState("activityPropertyData");
-  const [
-    localLoadedActivityPropertyData,
-    setlocalLoadedActivityPropertyData,
-    updatelocalLoadedActivityPropertyData,
-  ] = useGlobalState(localActivityPropertyData);
-
-  const [localLoadedProcessData, setlocalLoadedProcessData] =
-    useGlobalState(loadedProcessData);
+  const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
+    useGlobalState(localActivityPropertyData);
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
-
   const [spinner, setspinner] = useState(true);
-
   const [formType, setFormType] = useState("htmlForm");
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
-
   const [isComboModalOpen, setIsComboModalOpen] = useState(false);
   const [selectedComboVar, setSelectedComboVar] = useState(null);
   const [importedFile, setImportedFile] = useState(null);
-
   const [taskVariablesList, setTaskVariablesList] = useState([]);
-
-  const [isDisableTab, setisDisableTab] = useState(false);
-  const [formHasError, setFormHasError] = useState(false);
+  let isReadOnly = isProcessDeployedFunc(localLoadedProcessData);
   const radioButtonsArrayFormType = [
     { label: `${t("html")} ${t("Form")}`, value: "htmlForm" },
     { label: t("Form"), value: "form" },
   ];
 
+  const variableRef=useRef();
+  const displayNameRef=useRef();
+
   /*****************************************************************************************
-     * @author asloob_ali BUG ID : 111500 Description : 111500 -  Task: Created variables are not saved in data tab
-     *  Reason:there was some mismatch in keys while saving the data.
-     * Resolution : now adding data in proper key in task property object.
-  
-     *  Date : 04/07/2022             ****************/
+   * @author asloob_ali BUG ID: 111500 Description: Task: Created variables are not saved in data tab
+   * Reason:there was some mismatch in keys while saving the data.
+   * Resolution : now adding data in proper key in task property object.
+   * Date : 04/07/2022
+   ****************/
   useEffect(() => {
     if (localLoadedActivityPropertyData) {
       const formView =
@@ -225,11 +194,6 @@ function TaskData(props) {
       setspinner(false);
     }
   }, [localLoadedActivityPropertyData]);
-  useEffect(() => {
-    if (localLoadedProcessData.ProcessType !== PROCESSTYPE_LOCAL) {
-      setisDisableTab(true);
-    }
-  }, [localLoadedProcessData.ProcessType]);
 
   const updateTaskTemplateVar = (taskVarList) => {
     const tempTaskProp = { ...localLoadedActivityPropertyData };
@@ -277,14 +241,13 @@ function TaskData(props) {
     );
     setlocalLoadedActivityPropertyData(tempTaskProp);
   };
+
   const importTaskForm = async (file) => {
     const formData = new FormData();
 
     formData.append("file", file);
     formData.append("statusFlag", "P");
-
     formData.append("processDefId", localLoadedProcessData?.ProcessDefId);
-
     formData.append("taskId", props.cellID);
     const config = {
       headers: {
@@ -309,9 +272,9 @@ function TaskData(props) {
       }
     } catch (err) {}
   };
+
   const importTaskTemplateForm = async (file) => {
     const formData = new FormData();
-
     formData.append("file", file);
     formData.append("statusflag", "P");
     formData.append("templatename", props.cellName);
@@ -342,7 +305,6 @@ function TaskData(props) {
 
   const handleImportForm = async (e) => {
     const file = e.target.files[0];
-
     setImportedFile(file);
     if (file) {
       if (props.cellType === getSelectedCellType("TASK")) {
@@ -396,15 +358,29 @@ function TaskData(props) {
       })
     );
   };
+
   const handlePreviewHtml = () => {
-    setIsPreviewModalOpen(true);
+    if (taskVariablesList.length > 0) {
+      setIsPreviewModalOpen(true);
+    } else {
+      dispatch(
+        setToastDataFunc({
+          message: `${t("NoVarError")}`,
+          severity: "error",
+          open: true,
+        })
+      );
+    }
   };
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
+
   const handleClosePreviewModal = () => {
     setIsPreviewModalOpen(false);
   };
+
   const handleCloseComboModal = () => {
     setIsComboModalOpen(false);
     setSelectedComboVar(null);
@@ -416,6 +392,7 @@ function TaskData(props) {
     setTaskVariablesList(newVars);
     updateTaskTemplateVar(newVars);
   };
+
   const addVariable = () => {
     props.expandDrawer(true);
     dispatch(
@@ -426,14 +403,12 @@ function TaskData(props) {
         },
       })
     );
-
     const newVars = [...taskVariablesList];
     const ids = newVars.map((variable) => +variable.m_iOrderId);
     let maxId = Math.max(...ids);
     if (ids.length === 0) {
       maxId = 0;
     }
-
     const newVar = {
       m_bSelectVariable: false,
       m_strVariableName: "",
@@ -465,13 +440,14 @@ function TaskData(props) {
   const handleFormLauncher = () => {
     setIsModalOpen(true);
   };
+
   const handleComboValues = (index) => {
     setSelectedComboVar(taskVariablesList[index]);
     setIsComboModalOpen(true);
   };
+
   const handleSaveComboVal = (newComboVar) => {
     const newTaskVars = [...taskVariablesList];
-
     const comboIndex = taskVariablesList.findIndex(
       (variable) => variable.m_iOrderId === newComboVar.m_iOrderId
     );
@@ -571,7 +547,7 @@ function TaskData(props) {
 
   return (
     <div style={{ width: "100%", height: "100%" }}>
-    <TabsHeading heading={props?.heading} />
+      <TabsHeading heading={props?.heading} />
       {spinner ? (
         <CircularProgress style={{ marginTop: "30vh", marginLeft: "40%" }} />
       ) : (
@@ -586,18 +562,12 @@ function TaskData(props) {
               marginLeft: "0.8rem",
               marginRight: "0.8rem",
               height: "100%",
-
               marginBottom: "0.9rem",
               width: props.isDrawerExpanded ? "75%" : null,
               paddingTop: props.isDrawerExpanded ? "0.6rem" : "0.2rem",
             }}
           >
             <Grid container direction="column" spacing={2}>
-              <Grid item>
-                <Typography component="h5" className={classes.GroupTitleMain}>
-                  {`${t("data")}`.toUpperCase()}
-                </Typography>
-              </Grid>
               <Grid item>
                 <Grid container alignItems="center">
                   <Grid item>
@@ -608,6 +578,7 @@ function TaskData(props) {
                       label={`${t("Form")} ${t("type")}`}
                       value={formType}
                       onChange={handleChange}
+                      disabled={isReadOnly}
                     />
                   </Grid>
 
@@ -690,15 +661,11 @@ function TaskData(props) {
                     paddingRight: props.isDrawerExpanded ? "0.2rem" : "1.2rem",
                   }}
                 >
-                  <Button
-                    // variant="outlined"
-                    // color="primary"
-                    // size="small"
-                    className="secondary"
-                    onClick={() => addVariable()}
-                  >
-                    {`+ ${t("add")} ${t("variable")}`}
-                  </Button>
+                  {!isReadOnly && (
+                    <Button className="secondary" onClick={() => addVariable()}>
+                      {`+ ${t("add")} ${t("variable")}`}
+                    </Button>
+                  )}
                 </Grid>
               </Grid>
             </Grid>
@@ -723,7 +690,18 @@ function TaskData(props) {
                             }
                             error={taskVar.error?.VariableName ? true : false}
                             helperText={taskVar.error?.VariableName || ""}
+                            disabled={isReadOnly}
+                            inputRef={variableRef}
+                          onKeyPress={(e) =>
+                            FieldValidations(
+                              e,
+                              171,
+                              variableRef.current,
+                              50
+                            )
+                          }
                           />
+                          
                         </td>
                         <td className={classes.tdPadding}>
                           <Field
@@ -745,13 +723,14 @@ function TaskData(props) {
                               { name: "Long", value: 4 },
                               { name: "Date", value: 8 },
                             ]}
+                            disabled={isReadOnly}
                           />
                         </td>
 
                         <td className={classes.tdPadding}>
                           <Field
                             name="m_strDisplayName"
-                            disabled={formType === "form"}
+                            disabled={formType === "form" || isReadOnly}
                             label={`${t("display")} ${t("name")}`}
                             value={taskVar.m_strDisplayName}
                             onChange={(e) =>
@@ -767,13 +746,23 @@ function TaskData(props) {
                                 taskVar.error?.DisplayName) ||
                               ""
                             }
+
+                            inputRef={displayNameRef}
+                          onKeyPress={(e) =>
+                            FieldValidations(
+                              e,
+                              164,
+                              displayNameRef.current,
+                              50
+                            )
+                          }
                           />
                         </td>
 
                         <td className={classes.tdPadding}>
                           <Field
                             name="m_iControlType"
-                            disabled={formType === "form"}
+                            disabled={formType === "form" || isReadOnly}
                             label={`${t("ControlType")}`}
                             dropdown={true}
                             value={taskVar.m_iControlType}
@@ -792,7 +781,7 @@ function TaskData(props) {
                           />
                         </td>
 
-                        {taskVar.m_iControlType === 3 && (
+                        {taskVar.m_iControlType === 3 && !isReadOnly && (
                           <td
                             className={classes.tdPadding}
                             onClick={() => handleComboValues(index)}
@@ -805,17 +794,19 @@ function TaskData(props) {
                             />
                           </td>
                         )}
-                        <td
-                          className={classes.tdPadding}
-                          onClick={() => handleDelete(index)}
-                        >
-                          <DeleteIcon
-                            className={classes.deleteBtn}
-                            style={{
-                              cursor: "pointer",
-                            }}
-                          />
-                        </td>
+                        {!isReadOnly && (
+                          <td
+                            className={classes.tdPadding}
+                            onClick={() => handleDelete(index)}
+                          >
+                            <DeleteIcon
+                              className={classes.deleteBtn}
+                              style={{
+                                cursor: "pointer",
+                              }}
+                            />
+                          </td>
+                        )}
                       </tr>
                     );
                   })}
@@ -842,6 +833,7 @@ function TaskData(props) {
                               }
                               error={taskVar.error?.VariableName ? true : false}
                               helperText={taskVar.error?.VariableName || ""}
+                              disabled={isReadOnly}
                             />
                           </Grid>
                           <Grid item xs={2}>
@@ -864,12 +856,13 @@ function TaskData(props) {
                                 { name: "Long", value: 4 },
                                 { name: "Date", value: 8 },
                               ]}
+                              disabled={isReadOnly}
                             />
                           </Grid>
                           <Grid item xs={3}>
                             <Field
                               name="m_strDisplayName"
-                              disabled={formType === "form"}
+                              disabled={formType === "form" || isReadOnly}
                               label={`${t("display")} ${t("name")}`}
                               value={taskVar.m_strDisplayName}
                               onChange={(e) =>
@@ -891,7 +884,7 @@ function TaskData(props) {
                           <Grid item xs={2}>
                             <Field
                               name="m_iControlType"
-                              disabled={formType === "form"}
+                              disabled={formType === "form" || isReadOnly}
                               label={`${t("ControlType")}`}
                               dropdown={true}
                               value={taskVar.m_iControlType}
@@ -909,7 +902,7 @@ function TaskData(props) {
                               ]}
                             />
                           </Grid>
-                          {taskVar.m_iControlType === 3 && (
+                          {taskVar.m_iControlType === 3 && !isReadOnly && (
                             <Grid item onClick={() => handleComboValues(index)}>
                               <HorizontalMoreIcon
                                 className={classes.deleteBtn}
@@ -919,14 +912,16 @@ function TaskData(props) {
                               />
                             </Grid>
                           )}
-                          <Grid item onClick={() => handleDelete(index)}>
-                            <DeleteIcon
-                              className={classes.deleteBtn}
-                              style={{
-                                cursor: "pointer",
-                              }}
-                            />
-                          </Grid>
+                          {!isReadOnly && (
+                            <Grid item onClick={() => handleDelete(index)}>
+                              <DeleteIcon
+                                className={classes.deleteBtn}
+                                style={{
+                                  cursor: "pointer",
+                                }}
+                              />
+                            </Grid>
+                          )}
                         </Grid>
                       );
                     })}
@@ -943,6 +938,7 @@ function TaskData(props) {
               cellID={props.cellID}
               cellType={props.cellType}
               handleClose={handleCloseModal}
+              isReadOnly={isReadOnly}
             />
           )}
           {isPreviewModalOpen && (
@@ -950,6 +946,7 @@ function TaskData(props) {
               isOpen={isPreviewModalOpen}
               taskVariablesList={taskVariablesList}
               handleClose={handleClosePreviewModal}
+              isReadOnly={isReadOnly}
             />
           )}
           {isComboModalOpen && (
@@ -958,6 +955,7 @@ function TaskData(props) {
               editedComboVar={selectedComboVar}
               handleClose={handleCloseComboModal}
               saveComboVal={handleSaveComboVal}
+              isReadOnly={isReadOnly}
             />
           )}
         </div>
@@ -968,26 +966,6 @@ function TaskData(props) {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    selectedCell: (
-      id,
-      name,
-      activityType,
-      activitySubType,
-      seqId,
-      queueId,
-      type
-    ) =>
-      dispatch(
-        actionCreators.selectedCell(
-          id,
-          name,
-          activityType,
-          activitySubType,
-          seqId,
-          queueId,
-          type
-        )
-      ),
     expandDrawer: (flag) => dispatch(actionCreatorsDrawer.expandDrawer(flag)),
   };
 };

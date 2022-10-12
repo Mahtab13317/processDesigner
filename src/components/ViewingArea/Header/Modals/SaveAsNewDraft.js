@@ -1,5 +1,6 @@
 // #BugID - 110938
 // #BugDescription - payload changed for save the process
+
 import React, { useState, useEffect } from "react";
 import StarRateIcon from "@material-ui/icons/StarRate";
 import Button from "@material-ui/core/Button";
@@ -112,9 +113,16 @@ function SaveAsNewDraft(props) {
             id="saveAsLocal_project"
           />
         </p>
+        {/*****************************************************************************************
+         * @author asloob_ali BUG ID: 115854  More options: process name field should be marked as mandatory as validatrion appearing for it
+         * Reason:new process name was not marked mandatory.
+         * Resolution : added asterist to show its mandatory.
+         * Date : 20/09/2022
+         ****************/}
         <p className="flex">
           <span className={styles.saveDraftLabel}>
             {t("New")} {t("processC")} {t("name")}
+            <span className={styles.starIcon}>*</span>
           </span>
           <input
             id="saveAsLocal_process"

@@ -14,7 +14,7 @@ import { RTL_DIRECTION } from "../../../../../Constants/appConstants";
 function MappingModal(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
-  const { schemaList, template, cancelFunc, okFunc } = props;
+  const { schemaList, template, cancelFunc, okFunc, isReadOnly } = props;
   const [value, setValue] = useState(0);
   const [timeout, setTimeout] = useState(0);
   const [updatedTemplate, setUpdatedTemplate] = useState(null);
@@ -173,6 +173,7 @@ function MappingModal(props) {
               });
             }}
             className={styles.modalInput}
+            disabled={isReadOnly}
           />
           <span className={styles.labelIntervals}>{t("seconds")}</span>
         </div>
@@ -196,12 +197,14 @@ function MappingModal(props) {
             setUpdatedTemplate={setUpdatedTemplate}
             checked={checked}
             setChecked={setChecked}
+            isReadOnly={isReadOnly}
           />
         </TabPanel>
         <TabPanel className="oms_templateTabPanel" value={value} index={1}>
           <DocumentTemplateMapping
             template={template}
             setUpdatedTemplate={setUpdatedTemplate}
+            isReadOnly={isReadOnly}
           />
         </TabPanel>
       </div>
@@ -219,10 +222,15 @@ function MappingModal(props) {
               : styles.cancelButton
           }
           onClick={cancelFunc}
+          disabled={isReadOnly}
         >
           {t("cancel")}
         </button>
-        <button className={styles.okButton} onClick={saveMappingCalled}>
+        <button
+          className={styles.okButton}
+          onClick={saveMappingCalled}
+          disabled={isReadOnly}
+        >
           {t("ok")}
         </button>
       </div>

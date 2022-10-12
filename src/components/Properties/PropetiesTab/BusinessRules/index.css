@@ -8,12 +8,12 @@
 
 .label-heading {
   margin: 8px;
-  font-family: "Open Sans, Semibold";
+  font-family: var(--font_family);
   font-size: var(--subtitle_text_font_size);
 }
 .label-heading-expand {
   margin: 8px;
-  font-family: "Open Sans, Semibold";
+  font-family: var(--font_family);
   font-size: var(--subtitle_text_font_size);
 }
 
@@ -30,7 +30,7 @@
 }
 #brtRadio .MuiFormControlLabel-label {
   font-size: var(--base_text_font_size);
-  font-family: "Open Sans";
+  font-family: var(--font_family);
 }
 
 #brtRadioExpand {
@@ -42,28 +42,30 @@
 }
 #brtRadioExpand .MuiFormControlLabel-label {
   font-size: var(--base_text_font_size);
-
-  font-family: "Open Sans";
+  font-family: var(--font_family);
 }
 
 .flex-container {
   display: flex;
-  margin-top: 15px;
-  font-family: "Open Sans, Regular";
+  margin-top: 0.5rem;
+  font-family: var(--font_family);
 }
 
 .flex-item {
   margin-left: 10px;
-
   font-size: var(--base_text_font_size);
 }
 
 .flex-item p .MuiSelect-select {
   font-size: var(--base_text_font_size);
   border: 1px solid #cecece;
-  height: 15px;
   border-radius: 2px;
-  font-family: "Open Sans";
+  font-family: var(--font_family);
+}
+
+.flex-item p .MuiInput-root {
+  height: var(--line_height);
+  width: 100%;
 }
 
 .flex-item p .MuiButton-root {
@@ -72,12 +74,17 @@
   top: 16px;
   text-transform: capitalize;
   color: var(--button_color) !important;
-  color: var(--button_color);
   background: #ffffff 0% 0% no-repeat padding-box;
   border: 1px solid var(--button_color) !important;
   border-radius: 2px;
+  font-family: var(--font_family);
+  margin: 0.5rem 0 0 !important;
+}
 
-  font-family: "Open Sans, Semibold";
+.flex-item p .MuiButton-root.Mui-disabled {
+  background: rgba(0, 0, 0, 0.12) !important;
+  border: none !important;
+  color: rgba(0, 0, 0, 0.7) !important;
 }
 
 .MuiMenu-list li {
@@ -103,14 +110,14 @@
   text-align: left;
   padding: 5px;
   font-size: var(--base_text_font_size);
-  font-family: "Open Sans, Semibold";
+  font-family: var(--font_family);
 }
 
 .associate-tbl td {
   text-align: left;
   padding: 5px;
   font-size: var(--sub_text_font_size);
-  font-family: "Open Sans, Regular";
+  font-family: var(--font_family);
 }
 
 .associate-tbl-rtl th {
@@ -154,13 +161,13 @@
 .associate-tbl-expand-rtl th,
 .associate-tbl-rtl th {
   background-color: #f8f8f8;
-  font-family: "Open Sans, Semibold";
+  font-family: var(--font_family);
 }
 .associate-tbl td,
 .associate-tbl-expand td,
 .associate-tbl-expand-rtl td,
 .associate-tbl-rtl td {
-  font-family: "Open Sans, Regular";
+  font-family: var(--font_family);
 }
 
 .associate-tbl tr:nth-child(odd) {
@@ -177,7 +184,9 @@
 }
 
 .required {
-  color: #d53d3d;
+  color: red;
+  margin-left: 0.125vw;
+  font-size: 1rem;
 }
 
 .flexExpanded {
@@ -192,7 +201,7 @@
   height: 15px;
   width: 220px;
   border-radius: 2px;
-  font-family: "Open Sans";
+  font-family: var(--font_family);
 }
 
 .versionExpanded {
@@ -207,7 +216,7 @@
   height: 15px;
   width: 60px;
   border-radius: 2px;
-  font-family: "Open Sans";
+  font-family: var(--font_family);
 }
 
 .mappingContainer {
@@ -237,11 +246,10 @@
 
 .mapping-tbl .MuiSelect-select {
   font-size: var(--base_text_font_size);
-
   border: 1px solid #cecece;
   height: 15px;
   border-radius: 2px;
-  font-family: "Open Sans";
+  font-family: var(--font_family);
 }
 
 .mappingTab .MuiTabs-root {
@@ -272,7 +280,7 @@
   border-bottom: none;
   padding: 10px;
   font-size: var(--base_text_font_size);
-  font-family: "Open Sans, Regular";
+  font-family: var(--font_family);
 }
 
 .outlined-basic .MuiOutlinedInput-input {
@@ -292,19 +300,17 @@
   min-width: 200px;
   height: 15px;
   font-size: var(--base_text_font_size);
-  font-family: "Open Sans, Regular";
+  font-family: var(--font_family);
 }
 
 .mapped-table .MuiSelect-select {
   font-size: var(--base_text_font_size);
-
   min-width: 200px;
   border: 1px solid #cecece;
   border-radius: 2px;
   text-align: left;
   height: 15px;
-
-  font-family: "Open Sans";
+  font-family: var(--font_family);
 }
 
 .tab .MuiTab-wrapper {
@@ -315,10 +321,7 @@
 
 .Mui-selected .MuiTab-wrapper {
   color: var(--selected_tab_color) !important;
-  font-family: "Open Sans, Semibold";
-}
-
-.icon {
+  font-family: var(--font_family);
 }
 
 .tabList .MuiTabs-indicator {
@@ -330,7 +333,6 @@
   width: 1.5rem !important;
   height: 1.5rem !important;
   display: inline-block;
-
   transition: fill 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
   flex-shrink: 0;
   user-select: none;

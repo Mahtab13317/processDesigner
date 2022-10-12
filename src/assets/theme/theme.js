@@ -57,11 +57,14 @@ export default createMuiTheme({
       },
 
       "& focus": {
-        border: `0px solid #CECECE`,
+        border: `0px solid #CECECE !important`,
       },
       /*   marginDense: {
         padding: "6.5px 6px",
       },*/
+      "& Mui-focused": {
+        border: `0px solid #CECECE !important`,
+      },
     },
     MuiSelect: {
       select: {

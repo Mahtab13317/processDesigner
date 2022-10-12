@@ -1,3 +1,4 @@
+// Changes made to solve Bug with ID = 114685 => Project Description is not getting saved
 import React, { useEffect, useState } from "react";
 import Tab from "../../../../../UI/Tab/Tab";
 import { useTranslation } from "react-i18next";
@@ -30,6 +31,7 @@ function ProcessListByProjectMainTab(props) {
         <ProjectProperties
           projectId={props.selectedProjectId}
           projectName={props.selectedProject}
+          projectList={props.projectList}
         />
       ),
     },

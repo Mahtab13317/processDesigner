@@ -28,7 +28,7 @@ import clsx from "clsx";
 function FileDetails(props) {
   let { t } = useTranslation();
   const dispatch = useDispatch();
-  const { data, fields, isProcessReadOnly, setActivityData } = props;
+  const { data, fields, isReadOnly, setActivityData } = props;
   const [firstFieldName, setFirstFieldName] = useState("");
   const [secondFieldName, setSecondFieldName] = useState("");
   const [csvFileName, setCsvFileName] = useState("");
@@ -208,7 +208,7 @@ function FileDetails(props) {
             {t("fieldName")}
           </p>
           <CustomizedDropdown
-            disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="file_details_first_field_name_input"
             className={styles.dropdownInput}
             value={firstFieldName}
@@ -226,7 +226,7 @@ function FileDetails(props) {
           </CustomizedDropdown>
         </div>
         <div className={styles.flexColumn}>
-          {!isProcessReadOnly ? (
+          {!isReadOnly ? (
             <button
               id="file_details_add_csv_name_button"
               onClick={handleAddCsvFileName}
@@ -263,7 +263,7 @@ function FileDetails(props) {
             {t("fieldName")}
           </p>
           <CustomizedDropdown
-            disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="file_details_second_field_name_input"
             className={styles.dropdownInput}
             value={secondFieldName}
@@ -281,7 +281,7 @@ function FileDetails(props) {
           </CustomizedDropdown>
         </div>
         <div className={styles.flexColumn}>
-          {!isProcessReadOnly ? (
+          {!isReadOnly ? (
             <button
               id="file_details_add_file_path_button"
               onClick={handleAddFilePath}
@@ -317,7 +317,7 @@ function FileDetails(props) {
             {t("orderBy")}
           </p>
           <CustomizedDropdown
-            disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="file_details_order_by_dropdown"
             className={styles.dropdownInput}
             value={orderBy}
@@ -339,7 +339,7 @@ function FileDetails(props) {
             {t("fileType")}
           </p>
           <CustomizedDropdown
-            disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="file_details_file_type_dropdown"
             className={styles.dropdownInput}
             value={fileType}
@@ -361,7 +361,7 @@ function FileDetails(props) {
             {t("maskedValue")}
           </p>
           <InputBase
-            disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="file_details_masked_value_input"
             variant="outlined"
             className={styles.inputBaseData}
@@ -392,7 +392,7 @@ function FileDetails(props) {
             {t("fieldType")}
           </p>
           <CustomizedDropdown
-            disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="file_details_field_type_dropdown"
             className={styles.dropdownInput}
             value={fieldType}
@@ -437,7 +437,7 @@ function FileDetails(props) {
             {t("fileMove")}
           </p>
           <CustomizedDropdown
-            disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="file_details_file_move_dropdown"
             className={styles.dropdownInput}
             value={fileMoveInterval}
@@ -464,7 +464,7 @@ function FileDetails(props) {
           </div>
 
           {/* <InputBase
-            disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="file_details_record_number_input"
             variant="outlined"
             className={styles.inputBaseData}
@@ -489,7 +489,7 @@ function FileDetails(props) {
             {t("sleepTime")}
           </p>
           <InputBase
-            disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="file_details_sleep_time_input"
             type="number"
             variant="outlined"
@@ -502,7 +502,7 @@ function FileDetails(props) {
         <div className={clsx(styles.subDiv, styles.flexColumn)}>
           <div className={styles.flexRow}>
             <Checkbox
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               id="file_details_header_checkbox"
               className={styles.orderByCheckBox}
               checked={isHeaderEnabled}
@@ -522,7 +522,7 @@ function FileDetails(props) {
             {t("headerString")}
           </p>
           <InputBase
-            disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="file_details_header_string_input"
             variant="outlined"
             className={styles.inputBaseData}
@@ -535,7 +535,7 @@ function FileDetails(props) {
             {t("footerString")}
           </p>
           <InputBase
-            disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="file_details_footer_string_input"
             variant="outlined"
             className={styles.inputBaseData}

@@ -60,6 +60,7 @@ const milestones = (props) => {
                   Mile={mileObject}
                   addInBetweenNewMile={props.addInBetweenNewMile}
                   processType={processType}
+                  selectedMile={props.selectedMile}
                 >
                   {props.text}
                 </Mile>

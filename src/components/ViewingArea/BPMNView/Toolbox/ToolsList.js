@@ -97,12 +97,10 @@ function ToolsList(props) {
             style={{
               border: "1px solid #C4C4C4",
               width: "95%",
-              height: "28px",
+              height: "var(--line_height)", // code edited on 29 August 2022 for BugId 114896
               display: "flex",
               alignItems: "center",
-              paddingLeft: "7px",
-              marginBottom: "10px",
-              marginLeft: "2%",
+              margin: "0 2.5% 0.5rem", // code edited on 29 August 2022 for BugId 114896
             }}
           >
             {/*code edited on 3 June 2022 for BugId 110210 */}
@@ -122,14 +120,17 @@ function ToolsList(props) {
                 width: "100%",
               }}
             />
-            <SearchIcon style={{ height: "17px", width: "17px" }} />
+            <SearchIcon
+              // code edited on 29 August 2022 for BugId 114896
+              style={{ height: "1.25rem", width: "1.25rem", margin: "0 0.5vw" }}
+            />
           </div>
         ) : null}
         <div className={props.innerList}>
           {toolTypeList &&
             toolTypeList.map((element, index) =>
               !element.show || element.show != "0" ? (
-                <div>
+                <div id={t(element.title)}>
                   <ListItem
                     button
                     id={index}

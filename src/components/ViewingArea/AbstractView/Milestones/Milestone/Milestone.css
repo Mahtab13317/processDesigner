@@ -55,7 +55,7 @@
   color: black;
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 1;
   margin-right: 5%;
 }
 .milestoneArrow:after,
@@ -136,7 +136,7 @@
 input:focus {
   outline: none;
 }
-::placeholder {
+.milestoneInput::placeholder {
   color: white;
   opacity: 1;
   font-size: small;
@@ -180,7 +180,8 @@ input:focus {
 .addIcon {
   position: absolute;
   top: 10%;
-  right: 0;
+  z-index: 2;
+  right: -2px;
   font-size: 20px;
   font-weight: 500;
   color: black;
@@ -244,4 +245,21 @@ input:focus {
   input:not([type="button"]):not([type="submit"]):not([readonly="readonly"]):not([type="checkbox"]):focus {
   border: none !important;
   box-shadow: none !important;
+}
+
+#activityInputId input[disabled] {
+  border: none !important;
+  color: #000 !important;
+  background-color: inherit !important;
+}
+
+.modalPaperMile {
+  margin-top: 4px;
+  margin-left: 4px;
+  position: absolute;
+  width: 165px !important;
+  z-index: 500;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000029;
+  border: 1px solid #c4c4c4;
 }

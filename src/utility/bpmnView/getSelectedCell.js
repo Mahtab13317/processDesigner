@@ -33,7 +33,7 @@ export function getSelectedCell(graph, processData) {
               selectedCellValue = {
                 id: selectedTask.TaskId,
                 name: selectedTask.TaskName,
-                taskType: selectedTask.TaskType,
+                taskType: selectedTask.StrTaskType, // code edited on 3 Oct 2022 for BugId 116511
                 type: getSelectedCellType("TASK"),
               };
             }
@@ -69,6 +69,7 @@ export function getSelectedCell(graph, processData) {
                 seqId: null,
                 queueId: selectedActivity.QueueId,
                 type: getSelectedCellType("ACTIVITY"),
+                checkedOut: selectedActivity.CheckedOut
               };
             }
           }
@@ -95,6 +96,7 @@ export function getSelectedCell(graph, processData) {
                 seqId: selectedMile[0].SequenceId,
                 queueId: null,
                 type: getSelectedCellType("MILE"),
+                checkedOut: false
               };
             }
           } else {

@@ -6,7 +6,7 @@ const Activities = (props) => {
   const { embeddedActivities, setEmbeddedActivities, caseEnabled } = props;
 
   // Draggable makes a single activity card draggable.
-  return props.ActivitiesData?.map((activity, index) => {
+  return props.ActivitiesData.map((activity, index) => {
     return (
       <div>
         <Draggable

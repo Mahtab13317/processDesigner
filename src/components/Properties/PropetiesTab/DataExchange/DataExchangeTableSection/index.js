@@ -25,6 +25,7 @@ function DataExchangeTableSection(props) {
     multiSelectedTableNames,
     addDataExchgTableSecHandler,
     cancelHandler,
+    isReadOnly,
   } = props;
   const disabled =
     parentDataExchgTable === "" ||
@@ -52,7 +53,7 @@ function DataExchangeTableSection(props) {
             </span>
           </div>
           <CustomizedDropdown
-            //   disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="TS_Parent_Data_Exchg_Dropdown"
             className={styles.dropdown}
             value={parentDataExchgTable}
@@ -80,7 +81,7 @@ function DataExchangeTableSection(props) {
             </span>
           </div>
           <CustomizedDropdown
-            //   disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="TS_Parent_Data_Exchg_Column_Dropdown"
             className={styles.dropdown}
             value={parentTableColumn}
@@ -109,7 +110,7 @@ function DataExchangeTableSection(props) {
             {t("dataExchangeTable")}
           </p>
           <CustomizedDropdown
-            //   disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="TS_Child_Data_Exchg_Table_Dropdown"
             className={styles.dropdown}
             value={childDataExchgTable}
@@ -135,7 +136,7 @@ function DataExchangeTableSection(props) {
             <span className={styles.asterisk}>*</span>
           </div>
           <CustomizedDropdown
-            //   disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="TS_Child_Data_Exchg_Table_Column_Dropdown"
             className={styles.dropdown}
             value={childTableColumn}
@@ -158,15 +159,22 @@ function DataExchangeTableSection(props) {
         <button
           id="TS_Cancel_Table_Section_Data"
           onClick={cancelHandler}
-          className={styles.cancelBtn}
+          className={clsx(
+            styles.cancelBtn,
+            isReadOnly && styles.disabledBtnStyles
+          )}
+          disabled={isReadOnly}
         >
           {t("cancel")}
         </button>
         <button
           id="TS_Add_Table_Section_Data"
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
           onClick={addDataExchgTableSecHandler}
-          className={clsx(styles.addBtn, disabled && styles.disabledBtnStyles)}
+          className={clsx(
+            styles.addBtn,
+            (disabled || isReadOnly) && styles.disabledBtnStyles
+          )}
         >
           {t("add")}
         </button>
@@ -237,11 +245,13 @@ function DataExchangeTableSection(props) {
                     >
                       {element.m_sSelecteddataExCol2}
                     </p>
-                    <DeleteOutlinedIcon
-                      id="TS_Delete_Table_Section_Data"
-                      onClick={() => deleteDataExchgTableSecHandler(index)}
-                      className={styles.deleteIcon}
-                    />
+                    {!isReadOnly && (
+                      <DeleteOutlinedIcon
+                        id="TS_Delete_Table_Section_Data"
+                        onClick={() => deleteDataExchgTableSecHandler(index)}
+                        className={styles.deleteIcon}
+                      />
+                    )}
                   </div>
                 </div>
               );

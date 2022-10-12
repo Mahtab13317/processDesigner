@@ -1,5 +1,7 @@
 // #BugID - 112055
 // #BugDescription - Made changes,added validations and made changes for set and get for bug.
+// #BugID - 112988
+// #BugDescription - already handled this bug with bug id 112055.
 import React, { useState, useEffect } from "react";
 import {
   Radio,
@@ -14,11 +16,11 @@ import Checkbox from "@material-ui/core/Checkbox";
 import { useTranslation } from "react-i18next";
 import { store, useGlobalState } from "state-pool";
 import SelectWithInput from "../../../../UI/SelectWithInput";
-import { getActivityProps } from "../../../../utility/abstarctView/getActivityProps";
 import { connect } from "react-redux";
 import "./index.css";
 import {
-  PROCESSTYPE_LOCAL,
+  PROCESSTYPE_DEPLOYED,
+  PROCESSTYPE_REGISTERED,
   propertiesLabel,
   RTL_DIRECTION,
 } from "../../../../Constants/appConstants";
@@ -31,10 +33,12 @@ import AddIcon from "@material-ui/icons/Add";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 import DeleteIcon from "@material-ui/icons/Delete";
 import TabsHeading from "../../../../UI/TabsHeading";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
+import { useReducer } from "react";
+import { useRef } from "react";
+import { FieldValidations } from "../../../../utility/FieldValidations/fieldValidations";
 
 function Options(props) {
-  // error flags
-  const [daysErrorFlag, setDaysErrorFlag] = useState(false);
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const tabStatus = useSelector(ActivityPropertyChangeValue);
@@ -51,7 +55,9 @@ function Options(props) {
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
-  const isProcessReadOnly = props.openProcessType !== PROCESSTYPE_LOCAL;
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
   const [expireStatus, setExpireStatus] = useState(
     localLoadedActivityPropertyData?.ActivityProperty?.optionInfo?.expiryInfo
       ?.expFlag
@@ -121,10 +127,6 @@ function Options(props) {
   const [turnAroundCheckValue, setTurnAroundCheckValue] = useState(
     tatInfo?.tatFlag
   );
-  const [variableDefinition] = useGlobalState("variableDefinition");
-  const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
-  const [isFromConstant, setIsFromConstant] = useState(true);
   const [anyError, setAnyError] = useState(false);
   const [filteredVarList, setFilteredVarList] = useState([]);
   const [holdUntilList, setHoldUntilList] = useState([]);
@@ -163,8 +165,9 @@ function Options(props) {
       ?.m_arrEventList
   );
 
-  //mahtab code ends here
+  const eventNameRef = useRef();
 
+  //mahtab code ends here
   useEffect(() => {
     const tempObj = {
       days: "",
@@ -177,9 +180,9 @@ function Options(props) {
   }, []);
 
   useEffect(() => {
-    if (variableDefinition) {
+    if (localLoadedProcessData?.Variable) {
       setFilteredVarList(
-        variableDefinition.filter(
+        localLoadedProcessData?.Variable?.filter(
           (element) =>
             (element.VariableScope === "U" || element.VariableScope === "I") &&
             element.VariableType !== "11" &&
@@ -188,7 +191,7 @@ function Options(props) {
         )
       );
       setHoldUntilList(
-        variableDefinition.filter(
+        localLoadedProcessData?.Variable?.filter(
           (element) =>
             element.VariableType !== "11" &&
             element.VariableType === "8" &&
@@ -196,7 +199,7 @@ function Options(props) {
         )
       );
     }
-  }, [variableDefinition]);
+  }, [localLoadedProcessData?.Variable]);
 
   const clearLocalObj = () => {
     let tempData = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
@@ -360,7 +363,7 @@ function Options(props) {
       variableId: "",
       varFieldId: "",
     };
-    variableDefinition?.forEach((element) => {
+    localLoadedProcessData?.Variable?.forEach((element) => {
       if (element.VariableName === variableName) {
         tempObj.varFieldId = element.VarFieldId;
         tempObj.variableId = element.VariableId;
@@ -647,9 +650,11 @@ function Options(props) {
     setEventName(e.target.value);
   };
 
+  /* code updated on 23 September 2022 for BugId 115914 */
   const associateData = () => {
     let data;
     let isStack = false;
+    let tempEventName = eventName;
     if (eventName === "") {
       dispatch(
         setToastDataFunc({
@@ -658,13 +663,24 @@ function Options(props) {
           open: true,
         })
       );
+
+      return false;
+    } else if (eventName.length > 50) {
+      dispatch(
+        setToastDataFunc({
+          message: "Event name length should not exceed larger than 50",
+          severity: "error",
+          open: true,
+        })
+      );
+
       return false;
     } else {
       data = {
         m_strEventTrigName: selectedTriggerEvent,
         m_strEventTrgAct: targetActEvent,
         m_iEventActSelectIndex: 0,
-        m_strEventName: eventName,
+        m_strEventName: tempEventName,
         m_iEventTrigSelectIndex: 0,
       };
 
@@ -685,8 +701,10 @@ function Options(props) {
         return false;
       } else {
         setMappedEvents([...mappedEvents, data]);
+        setEventName(""); //code updated on 28 September 2022 for BugId 116207
         const tempLocalState = { ...localLoadedActivityPropertyData };
         tempLocalState.ActivityProperty.optionInfo.m_arrEventList.push(data);
+
         setlocalLoadedActivityPropertyData(tempLocalState);
 
         dispatch(
@@ -694,14 +712,6 @@ function Options(props) {
             [propertiesLabel.options]: { isModified: true, hasError: false },
           })
         );
-
-        /*  setActivityPropertyData(
-          data,
-      "eventInfo",
-      "m_arrEventList",
-      "",
-      ""
-    );   */
       }
     }
   };
@@ -741,1066 +751,1069 @@ function Options(props) {
     <>
       <TabsHeading heading={props?.heading} />
       <div id="OptionsTab">
-      
-      <div>
-        <RadioGroup
-          defaultValue={t("neverExpires")}
-          onChange={(e) => expireStatusHandler(e)}
-          row={true}
-          value={expireStatus}
-          name="row-radio-buttons-group"
-        >
-          <FormControlLabel
-            value={t("neverExpires")}
-            control={<Radio />}
-            label={t("neverExpires")}
-          />
-          <div>
-            <FormControlLabel
-              value={t("expiresAfter")}
-              control={<Radio />}
-              label={t("expiresAfter")}
-            />
-          </div>
-        </RadioGroup>
-      </div>
-      <div className="option_selectionBoxes">
-        <div className="holdUntilDiv">
-          <p
-            className="holdUntilLabel"
-            style={{
-              marginRight: direction == RTL_DIRECTION ? "0px" : "16px",
-            }}
+        <div>
+          <RadioGroup
+            defaultValue={t("neverExpires")}
+            onChange={(e) => expireStatusHandler(e)}
+            row={true}
+            value={expireStatus}
+            name="row-radio-buttons-group"
           >
-            {t("holdUntil")}
-          </p>
-          <FormControl>
-            <Select
-              disabled={expireStatus == t("neverExpires") || isProcessReadOnly}
-              inputProps={{ "aria-label": "Without label" }}
-              value={dateTime}
-              onChange={(e) => setDateTimeHandler(e)}
-              className="selectDateTime_options"
-              MenuProps={{
-                anchorOrigin: {
-                  vertical: "bottom",
-                  horizontal: "left",
-                },
-                transformOrigin: {
-                  vertical: "top",
-                  horizontal: "left",
-                },
-                getContentAnchorEl: null,
-              }}
-            >
-              {holdUntilList?.map((variable) => {
-                return (
-                  <MenuItem value={variable.VariableName}>
-                    <em style={{ fontSize: "12px", fontStyle: "normal" }}>
-                      {variable.VariableName}
-                    </em>
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-          <FormControl>
-            <Select
-              disabled={expireStatus == t("neverExpires") || isProcessReadOnly}
-              inputProps={{ "aria-label": "Without label" }}
-              value={operatorType}
-              onChange={(e) => operatorTypeHandler(e)}
-              className="selectPlusMinus_options"
-              MenuProps={{
-                anchorOrigin: {
-                  vertical: "bottom",
-                  horizontal: "left",
-                },
-                transformOrigin: {
-                  vertical: "top",
-                  horizontal: "left",
-                },
-                getContentAnchorEl: null,
-              }}
-            >
-              <MenuItem style={{ fontSize: "12px" }} value="11">
-                +
-              </MenuItem>
-              <MenuItem style={{ fontSize: "12px" }} value="12">
-                -
-              </MenuItem>
-            </Select>
-          </FormControl>
-        </div>
-        <div className="optionsTab_timeMapping">
-          <div>
-            <div className="options_time">
-              <span
-                className="options_days"
-                style={{
-                  marginRight: direction == RTL_DIRECTION ? "0px" : "14px",
-                  marginLeft: direction == RTL_DIRECTION ? "14px" : "0px",
-                }}
-              >
-                {t("days")}
-              </span>
-              <SelectWithInput
-                dropdownOptions={filteredVarList}
-                showError={true}
-                optionKey="VariableName"
-                setValue={(val) => {
-                  setDays(val);
-                  setActivityPropertyData(
-                    !isNaN(val) ? val : val?.VariableName,
-                    "expiryInfo",
-                    "wfDays",
-                    "varFieldId_Days",
-                    "variableId_Days"
-                  );
-                }}
-                value={days}
-                isConstant={!isNaN(days)}
-                inputClass="selectWithInputTextField_WS"
-                constantInputClass="multiSelectConstInput_WS"
-                selectWithInput="selectWithInput_WS"
-                showEmptyString={false}
-                showConstValue={true}
-                disabled={
-                  expireStatus === t("neverExpires") || isProcessReadOnly
-                }
-                id="days_select_input"
+            <FormControlLabel
+              value={t("neverExpires")}
+              control={<Radio disabled={isReadOnly} />}
+              label={t("neverExpires")}
+            />
+            <div>
+              <FormControlLabel
+                value={t("expiresAfter")}
+                control={<Radio disabled={isReadOnly} />}
+                label={t("expiresAfter")}
               />
             </div>
-            <div className="options_time">
-              <span
-                className="options_hours"
-                style={{
-                  marginRight: direction == RTL_DIRECTION ? "0px" : "8px",
-                  marginLeft: direction == RTL_DIRECTION ? "8px" : "0px",
+          </RadioGroup>
+        </div>
+        <div className="option_selectionBoxes">
+          <div className="holdUntilDiv">
+            <p
+              className="holdUntilLabel"
+              style={{
+                marginRight: direction == RTL_DIRECTION ? "0px" : "16px",
+              }}
+            >
+              {t("holdUntil")}
+            </p>
+            <FormControl>
+              <Select
+                disabled={expireStatus == t("neverExpires") || isReadOnly}
+                inputProps={{ "aria-label": "Without label" }}
+                value={dateTime}
+                onChange={(e) => setDateTimeHandler(e)}
+                className="selectDateTime_options"
+                MenuProps={{
+                  anchorOrigin: {
+                    vertical: "bottom",
+                    horizontal: "left",
+                  },
+                  transformOrigin: {
+                    vertical: "top",
+                    horizontal: "left",
+                  },
+                  getContentAnchorEl: null,
                 }}
               >
-                {t("Hour(s)")}
-              </span>
-              <SelectWithInput
-                dropdownOptions={filteredVarList}
-                optionKey="VariableName"
-                setValue={(val) => {
-                  setHours(val);
-                  let tempObj = { ...errorsObj };
-                  if (!isNaN(val)) {
-                    if (val > 24) {
-                      tempObj.hours = true;
+                {holdUntilList?.map((variable) => {
+                  return (
+                    <MenuItem value={variable.VariableName}>
+                      <em style={{ fontSize: "12px", fontStyle: "normal" }}>
+                        {variable.VariableName}
+                      </em>
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+            <FormControl>
+              <Select
+                disabled={expireStatus == t("neverExpires") || isReadOnly}
+                inputProps={{ "aria-label": "Without label" }}
+                value={operatorType}
+                onChange={(e) => operatorTypeHandler(e)}
+                className="selectPlusMinus_options"
+                MenuProps={{
+                  anchorOrigin: {
+                    vertical: "bottom",
+                    horizontal: "left",
+                  },
+                  transformOrigin: {
+                    vertical: "top",
+                    horizontal: "left",
+                  },
+                  getContentAnchorEl: null,
+                }}
+              >
+                <MenuItem style={{ fontSize: "12px" }} value="11">
+                  +
+                </MenuItem>
+                <MenuItem style={{ fontSize: "12px" }} value="12">
+                  -
+                </MenuItem>
+              </Select>
+            </FormControl>
+          </div>
+          <div className="optionsTab_timeMapping">
+            <div>
+              <div className="options_time">
+                <span
+                  className="options_days"
+                  style={{
+                    marginRight: direction == RTL_DIRECTION ? "0px" : "14px",
+                    marginLeft: direction == RTL_DIRECTION ? "14px" : "0px",
+                  }}
+                >
+                  {t("days")}
+                </span>
+                <SelectWithInput
+                  dropdownOptions={filteredVarList}
+                  showError={true}
+                  optionKey="VariableName"
+                  setValue={(val) => {
+                    setDays(val);
+                    setActivityPropertyData(
+                      !isNaN(val) ? val : val?.VariableName,
+                      "expiryInfo",
+                      "wfDays",
+                      "varFieldId_Days",
+                      "variableId_Days"
+                    );
+                  }}
+                  value={days}
+                  isConstant={!isNaN(days)}
+                  inputClass="selectWithInputTextField_WS"
+                  constantInputClass="multiSelectConstInput_WS"
+                  selectWithInput="selectWithInput_WS"
+                  showEmptyString={false}
+                  showConstValue={true}
+                  disabled={expireStatus === t("neverExpires") || isReadOnly}
+                  id="days_select_input"
+                  type="number" //code updated on 26 September 2022 for BugId 115919
+                />
+              </div>
+              <div className="options_time">
+                <span
+                  className="options_hours"
+                  style={{
+                    marginRight: direction == RTL_DIRECTION ? "0px" : "8px",
+                    marginLeft: direction == RTL_DIRECTION ? "8px" : "0px",
+                  }}
+                >
+                  {t("Hour(s)")}
+                </span>
+                <SelectWithInput
+                  dropdownOptions={filteredVarList}
+                  optionKey="VariableName"
+                  setValue={(val) => {
+                    setHours(val);
+                    let tempObj = { ...errorsObj };
+                    if (!isNaN(val)) {
+                      if (val > 24) {
+                        tempObj.hours = true;
+                      } else {
+                        tempObj.hours = false;
+                      }
                     } else {
                       tempObj.hours = false;
                     }
-                  } else {
-                    tempObj.hours = false;
-                  }
-                  setErrorsObj(tempObj);
-                  if (!tempObj.hours) {
-                    setActivityPropertyData(
-                      !isNaN(val) ? val : val?.VariableName,
-                      "expiryInfo",
-                      "wfHours",
-                      "varFieldId_Hours",
-                      "variableId_Hours"
-                    );
-                  }
-                }}
-                showError={true}
-                value={hours}
-                isConstant={!isNaN(hours)}
-                inputClass="selectWithInputTextField_WS"
-                constantInputClass="multiSelectConstInput_WS"
-                selectWithInput="selectWithInput_WS"
-                showEmptyString={false}
-                showConstValue={true}
-                disabled={
-                  expireStatus == t("neverExpires") || isProcessReadOnly
-                }
-                id="hours_select_input"
-              />
-            </div>
-            {hours > 24 ? (
-              <p
-                style={{
-                  fontSize: "10px",
-                  color: "red",
-                  margin: "-7px 0px 5px 110px",
-                }}
-              >
-                Value must lie in the range of 0-24
-              </p>
-            ) : null}
-            <div className="options_time">
-              <span
-                className="options_minutes"
-                style={{
-                  marginRight: direction == RTL_DIRECTION ? "0px" : "16px",
-                  marginLeft: direction == RTL_DIRECTION ? "16px" : "0px",
-                }}
-              >
-                {t("minutes")}
-              </span>
-              <SelectWithInput
-                dropdownOptions={filteredVarList}
-                showError={true}
-                optionKey="VariableName"
-                setValue={(val) => {
-                  setMinutes(val);
-                  let tempObj = { ...errorsObj };
-                  if (!isNaN(val)) {
-                    if (val > 60) {
-                      tempObj.minutes = true;
-                    } else {
-                      tempObj.minutes = false;
+                    setErrorsObj(tempObj);
+                    if (!tempObj.hours) {
+                      setActivityPropertyData(
+                        !isNaN(val) ? val : val?.VariableName,
+                        "expiryInfo",
+                        "wfHours",
+                        "varFieldId_Hours",
+                        "variableId_Hours"
+                      );
                     }
-                  } else {
-                    tempObj.minutes = false;
-                  }
-                  setErrorsObj(tempObj);
-                  if (!tempObj.minutes) {
-                    setActivityPropertyData(
-                      !isNaN(val) ? val : val?.VariableName,
-                      "expiryInfo",
-                      "wfMinutes",
-                      "varFieldId_Minutes",
-                      "variableId_Minutes"
-                    );
-                  }
-                }}
-                value={minutes}
-                isConstant={!isNaN(minutes)}
-                inputClass="selectWithInputTextField_WS"
-                constantInputClass="multiSelectConstInput_WS"
-                selectWithInput="selectWithInput_WS"
-                showEmptyString={false}
-                showConstValue={true}
-                disabled={
-                  expireStatus == t("neverExpires") || isProcessReadOnly
-                }
-                id="mins_select_input"
-              />
-            </div>
-            {minutes > 60 ? (
-              <p
-                style={{
-                  fontSize: "10px",
-                  color: "red",
-                  margin: "-7px 0px 5px 110px",
-                }}
-              >
-                Value must lie in the range of 0-60
-              </p>
-            ) : null}
-
-            <div className="options_time">
-              <span
-                className="options_seconds"
-                style={{
-                  marginRight: direction == RTL_DIRECTION ? "0px" : "14px",
-                  marginLeft: direction == RTL_DIRECTION ? "14px" : "0px",
-                }}
-              >
-                {t("seconds")}
-              </span>
-              <SelectWithInput
-                dropdownOptions={filteredVarList}
-                showError={true}
-                optionKey="VariableName"
-                setValue={(val) => {
-                  setSeconds(val);
-                  let tempObj = { ...errorsObj };
-                  if (!isNaN(val)) {
-                    if (val > 60) {
-                      tempObj.seconds = true;
-                    } else {
-                      tempObj.seconds = false;
-                    }
-                  } else {
-                    tempObj.seconds = false;
-                  }
-                  setErrorsObj(tempObj);
-                  if (!tempObj.seconds) {
-                    setActivityPropertyData(
-                      !isNaN(val) ? val : val?.VariableName,
-                      "expiryInfo",
-                      "wfSeconds",
-                      "varFieldId_Seconds",
-                      "variableId_Seconds"
-                    );
-                  }
-                }}
-                value={seconds}
-                isConstant={!isNaN(seconds)}
-                inputClass="selectWithInputTextField_WS"
-                constantInputClass="multiSelectConstInput_WS"
-                selectWithInput="selectWithInput_WS"
-                showEmptyString={false}
-                showConstValue={true}
-                disabled={
-                  expireStatus == t("neverExpires") || isProcessReadOnly
-                }
-                id="seconds_select_input"
-              />
-            </div>
-            {seconds > 60 ? (
-              <p
-                style={{
-                  fontSize: "10px",
-                  color: "red",
-                  margin: "-7px 0px 5px 110px",
-                }}
-              >
-                Value must lie in the range of 0-60
-              </p>
-            ) : null}
-          </div>
-          <Select
-            disabled={expireStatus == t("neverExpires") || isProcessReadOnly}
-            inputProps={{ "aria-label": "Without label" }}
-            value={daysType}
-            onChange={(e) => daysTypeHandler(e)}
-            displayEmpty
-            style={{
-              marginLeft: direction == RTL_DIRECTION ? "0px" : "50px",
-              marginRight: direction == RTL_DIRECTION ? "50px" : "0px",
-            }}
-            className="time_Options"
-            MenuProps={{
-              anchorOrigin: {
-                vertical: "bottom",
-                horizontal: "left",
-              },
-              transformOrigin: {
-                vertical: "top",
-                horizontal: "left",
-              },
-              getContentAnchorEl: null,
-            }}
-          >
-            <MenuItem value={"Y"}>
-              <em style={{ fontSize: "12px", fontStyle: "normal" }}>
-                {t("workingDays")}
-              </em>
-            </MenuItem>
-            <MenuItem value={"N"} style={{ fontSize: "12px" }}>
-              <em style={{ fontSize: "12px", fontStyle: "normal" }}>
-                {t("calenderDays")}
-              </em>
-            </MenuItem>
-          </Select>
-        </div>
-        <div className="onExpiryDivSection">
-          <p
-            className="onExpiryLabel"
-            style={{
-              marginRight: direction == RTL_DIRECTION ? "0px" : "16px",
-              marginLeft: direction == RTL_DIRECTION ? "16px" : "0px",
-            }}
-          >
-            {t("onExpiry")}
-          </p>
-          <FormControl>
-            <Select
-              disabled={expireStatus == t("neverExpires") || isProcessReadOnly}
-              inputProps={{ "aria-label": "Without label" }}
-              value={routeTo}
-              onChange={(e) => routeToHandler(e)}
-              displayEmpty
-              className="time_Options"
-              style={{ marginLeft: "16px" }}
-              MenuProps={{
-                anchorOrigin: {
-                  vertical: "bottom",
-                  horizontal: "left",
-                },
-                transformOrigin: {
-                  vertical: "top",
-                  horizontal: "left",
-                },
-                getContentAnchorEl: null,
-              }}
-            >
-              <MenuItem value={t("previousStage")}>
-                <em style={{ fontSize: "12px", fontStyle: "normal" }}>
-                  {t("previousStage")}
-                </em>
-              </MenuItem>
-              {loadedProcessData.value.MileStones.map((mile) => {
-                return mile.Activities.map((activity) => {
-                  if (activity.ActivityName !== props.cellName)
-                    return (
-                      <MenuItem
-                        style={{ fontSize: "12px" }}
-                        value={activity.ActivityName}
-                      >
-                        {activity.ActivityName}
-                      </MenuItem>
-                    );
-                });
-              })}
-            </Select>
-          </FormControl>
-        </div>
-        <div className="triggerDivSection">
-          <p className="triggerLabel">{t("trigger")}</p>
-          <FormControlLabel
-            control={
-              <Checkbox
-                disabled={
-                  expireStatus == t("neverExpires") || isProcessReadOnly
-                }
-                checked={triggerCheckValue}
-                onChange={() => {
-                  setTriggerCheckValue(!triggerCheckValue);
-                  clearTriggerValues();
-                }}
-                size="small"
-                style={{
-                  fontSize: "10px",
-                  marginLeft: "8px",
-                  marginTop: "8px",
-                }}
-              />
-            }
-          />
-          <FormControl>
-            <Select
-              disabled={
-                expireStatus == t("neverExpires") ||
-                !triggerCheckValue ||
-                isProcessReadOnly
-              }
-              inputProps={{ "aria-label": "Without label" }}
-              value={selectedTrigger}
-              onChange={(e) => {
-                setSelectedTrigger(e.target.value);
-                setActivityPropertyData(
-                  e.target.value,
-                  "expiryInfo",
-                  "triggerName",
-                  "",
-                  ""
-                );
-              }}
-              displayEmpty
-              className="time_Options"
-              MenuProps={{
-                anchorOrigin: {
-                  vertical: "bottom",
-                  horizontal: "left",
-                },
-                transformOrigin: {
-                  vertical: "top",
-                  horizontal: "left",
-                },
-                getContentAnchorEl: null,
-              }}
-            >
-              {loadedProcessData.value.TriggerList.map((trigger) => {
-                return (
-                  <MenuItem
-                    style={{ fontSize: "12px" }}
-                    value={trigger.TriggerName}
-                  >
-                    {trigger.TriggerName}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-        </div>
-        {props.tabName && props.tabName === "Timer" ? (
-          <>
-            {
-              //added by mahtab for timer
-            }
-            <div id="manualUnhold">
-              <h3 className="timerHeading title_text">Manual Unhold</h3>
-              <div className="onExpiryDivSection">
+                  }}
+                  showError={true}
+                  value={hours}
+                  isConstant={!isNaN(hours)}
+                  inputClass="selectWithInputTextField_WS"
+                  constantInputClass="multiSelectConstInput_WS"
+                  selectWithInput="selectWithInput_WS"
+                  showEmptyString={false}
+                  showConstValue={true}
+                  disabled={expireStatus == t("neverExpires") || isReadOnly}
+                  id="hours_select_input"
+                  type="number" //code updated on 26 September 2022 for BugId 115919
+                />
+              </div>
+              {hours > 24 ? (
                 <p
-                  className="targetAct subtitle_text"
+                  style={{
+                    fontSize: "10px",
+                    color: "red",
+                    margin: "-7px 0px 5px 110px",
+                  }}
+                >
+                  Value must lie in the range of 0-24
+                </p>
+              ) : null}
+              <div className="options_time">
+                <span
+                  className="options_minutes"
                   style={{
                     marginRight: direction == RTL_DIRECTION ? "0px" : "16px",
                     marginLeft: direction == RTL_DIRECTION ? "16px" : "0px",
                   }}
                 >
-                  {t("targetAct")}
-                </p>
-                <FormControl>
-                  <Select
-                    disabled={!triggerCheckValueMU}
-                    inputProps={{ "aria-label": "Without label" }}
-                    value={targetActVal}
-                    onChange={(e) => changeTargetAct(e)}
-                    displayEmpty
-                    className="time_Options"
-                    style={{ marginLeft: "16px" }}
-                    MenuProps={{
-                      anchorOrigin: {
-                        vertical: "bottom",
-                        horizontal: "left",
-                      },
-                      transformOrigin: {
-                        vertical: "top",
-                        horizontal: "left",
-                      },
-                      getContentAnchorEl: null,
-                    }}
-                  >
-                    <MenuItem value={t("previousStage")}>
-                      <em style={{ fontSize: "12px", fontStyle: "normal" }}>
-                        {t("previousStage")}
-                      </em>
-                    </MenuItem>
-                    {loadedProcessData.value.MileStones.map((mile) => {
-                      return mile.Activities.map((activity) => {
-                        if (activity.ActivityName !== props.cellName)
-                          return (
-                            <MenuItem
-                              style={{ fontSize: "12px" }}
-                              value={activity.ActivityName}
-                            >
-                              {activity.ActivityName}
-                            </MenuItem>
-                          );
-                      });
-                    })}
-                  </Select>
-                </FormControl>
-              </div>
-              <div className="triggerDivSection">
-                <p className="triggerLabel">{t("trigger")}</p>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      disabled={
-                        expireStatus == t("neverExpires") || isProcessReadOnly
+                  {t("minutes")}
+                </span>
+                <SelectWithInput
+                  dropdownOptions={filteredVarList}
+                  showError={true}
+                  optionKey="VariableName"
+                  setValue={(val) => {
+                    setMinutes(val);
+                    let tempObj = { ...errorsObj };
+                    if (!isNaN(val)) {
+                      if (val > 60) {
+                        tempObj.minutes = true;
+                      } else {
+                        tempObj.minutes = false;
                       }
-                      checked={triggerCheckValueMU}
-                      onChange={(e) => {
-                        triggerCheckedMU(e);
-                      }}
-                      size="small"
-                      style={{
-                        fontSize: "10px",
-                        marginLeft: "8px",
-                        marginTop: "8px",
-                      }}
-                    />
-                  }
+                    } else {
+                      tempObj.minutes = false;
+                    }
+                    setErrorsObj(tempObj);
+                    if (!tempObj.minutes) {
+                      setActivityPropertyData(
+                        !isNaN(val) ? val : val?.VariableName,
+                        "expiryInfo",
+                        "wfMinutes",
+                        "varFieldId_Minutes",
+                        "variableId_Minutes"
+                      );
+                    }
+                  }}
+                  value={minutes}
+                  isConstant={!isNaN(minutes)}
+                  inputClass="selectWithInputTextField_WS"
+                  constantInputClass="multiSelectConstInput_WS"
+                  selectWithInput="selectWithInput_WS"
+                  showEmptyString={false}
+                  showConstValue={true}
+                  disabled={expireStatus == t("neverExpires") || isReadOnly}
+                  id="mins_select_input"
+                  type="number" //code updated on 26 September 2022 for BugId 115919
                 />
-                <FormControl>
-                  <Select
-                    disabled={!triggerCheckValueMU}
-                    inputProps={{ "aria-label": "Without label" }}
-                    value={selectedTriggerMU}
-                    onChange={(e) => {
-                      changeTrigerMU(e.target.value);
-                    }}
-                    displayEmpty
-                    className="time_Options"
-                    MenuProps={{
-                      anchorOrigin: {
-                        vertical: "bottom",
-                        horizontal: "left",
-                      },
-                      transformOrigin: {
-                        vertical: "top",
-                        horizontal: "left",
-                      },
-                      getContentAnchorEl: null,
-                    }}
-                  >
-                    {loadedProcessData.value.TriggerList.map((trigger) => {
+              </div>
+              {minutes > 60 ? (
+                <p
+                  style={{
+                    fontSize: "10px",
+                    color: "red",
+                    margin: "-7px 0px 5px 110px",
+                  }}
+                >
+                  Value must lie in the range of 0-60
+                </p>
+              ) : null}
+
+              <div className="options_time">
+                <span
+                  className="options_seconds"
+                  style={{
+                    marginRight: direction == RTL_DIRECTION ? "0px" : "14px",
+                    marginLeft: direction == RTL_DIRECTION ? "14px" : "0px",
+                  }}
+                >
+                  {t("seconds")}
+                </span>
+                <SelectWithInput
+                  dropdownOptions={filteredVarList}
+                  showError={true}
+                  optionKey="VariableName"
+                  setValue={(val) => {
+                    setSeconds(val);
+                    let tempObj = { ...errorsObj };
+                    if (!isNaN(val)) {
+                      if (val > 60) {
+                        tempObj.seconds = true;
+                      } else {
+                        tempObj.seconds = false;
+                      }
+                    } else {
+                      tempObj.seconds = false;
+                    }
+                    setErrorsObj(tempObj);
+                    if (!tempObj.seconds) {
+                      setActivityPropertyData(
+                        !isNaN(val) ? val : val?.VariableName,
+                        "expiryInfo",
+                        "wfSeconds",
+                        "varFieldId_Seconds",
+                        "variableId_Seconds"
+                      );
+                    }
+                  }}
+                  value={seconds}
+                  isConstant={!isNaN(seconds)}
+                  inputClass="selectWithInputTextField_WS"
+                  constantInputClass="multiSelectConstInput_WS"
+                  selectWithInput="selectWithInput_WS"
+                  showEmptyString={false}
+                  showConstValue={true}
+                  disabled={expireStatus == t("neverExpires") || isReadOnly}
+                  id="seconds_select_input"
+                  type="number" //code updated on 26 September 2022 for BugId 115919
+                />
+              </div>
+              {seconds > 60 ? (
+                <p
+                  style={{
+                    fontSize: "10px",
+                    color: "red",
+                    margin: "-7px 0px 5px 110px",
+                  }}
+                >
+                  Value must lie in the range of 0-60
+                </p>
+              ) : null}
+            </div>
+            <Select
+              disabled={expireStatus == t("neverExpires") || isReadOnly}
+              inputProps={{ "aria-label": "Without label" }}
+              value={daysType}
+              onChange={(e) => daysTypeHandler(e)}
+              displayEmpty
+              style={{
+                marginLeft: direction == RTL_DIRECTION ? "0px" : "50px",
+                marginRight: direction == RTL_DIRECTION ? "50px" : "0px",
+              }}
+              className="time_Options"
+              MenuProps={{
+                anchorOrigin: {
+                  vertical: "bottom",
+                  horizontal: "left",
+                },
+                transformOrigin: {
+                  vertical: "top",
+                  horizontal: "left",
+                },
+                getContentAnchorEl: null,
+              }}
+            >
+              <MenuItem value={"Y"}>
+                <em style={{ fontSize: "12px", fontStyle: "normal" }}>
+                  {t("workingDays")}
+                </em>
+              </MenuItem>
+              <MenuItem value={"N"} style={{ fontSize: "12px" }}>
+                <em style={{ fontSize: "12px", fontStyle: "normal" }}>
+                  {t("calenderDays")}
+                </em>
+              </MenuItem>
+            </Select>
+          </div>
+          <div className="onExpiryDivSection">
+            <p
+              className="onExpiryLabel"
+              style={{
+                marginRight: direction == RTL_DIRECTION ? "0px" : "16px",
+                marginLeft: direction == RTL_DIRECTION ? "16px" : "0px",
+              }}
+            >
+              {t("onExpiry")}
+            </p>
+            <FormControl>
+              <Select
+                disabled={expireStatus == t("neverExpires") || isReadOnly}
+                inputProps={{ "aria-label": "Without label" }}
+                value={routeTo}
+                onChange={(e) => routeToHandler(e)}
+                displayEmpty
+                className="time_Options"
+                style={{ marginLeft: "16px" }}
+                MenuProps={{
+                  anchorOrigin: {
+                    vertical: "bottom",
+                    horizontal: "left",
+                  },
+                  transformOrigin: {
+                    vertical: "top",
+                    horizontal: "left",
+                  },
+                  getContentAnchorEl: null,
+                }}
+              >
+                <MenuItem value={t("previousStage")}>
+                  <em style={{ fontSize: "12px", fontStyle: "normal" }}>
+                    {t("previousStage")}
+                  </em>
+                </MenuItem>
+                {loadedProcessData.value.MileStones.map((mile) => {
+                  return mile.Activities.map((activity) => {
+                    if (activity.ActivityName !== props.cellName)
                       return (
                         <MenuItem
                           style={{ fontSize: "12px" }}
-                          value={trigger.TriggerName}
+                          value={activity.ActivityName}
                         >
-                          {trigger.TriggerName}
+                          {activity.ActivityName}
                         </MenuItem>
                       );
-                    })}
-                  </Select>
-                </FormControl>
-              </div>
-            </div>
-            <div id="events">
-              <h3 className="timerHeading title_text">Events</h3>
-              <div className="eventsField">
-                <div className="evtFldName">
-                  <div className="elementLabel">{t("eventName")}</div>
-                  <div className="elementTxt">
-                    <TextField
-                      onChange={changeEventHandler}
+                  });
+                })}
+              </Select>
+            </FormControl>
+          </div>
+          <div className="triggerDivSection">
+            <p className="triggerLabel">{t("trigger")}</p>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  disabled={expireStatus == t("neverExpires") || isReadOnly}
+                  checked={triggerCheckValue}
+                  onChange={() => {
+                    setTriggerCheckValue(!triggerCheckValue);
+                    clearTriggerValues();
+                  }}
+                  size="small"
+                  style={{
+                    fontSize: "10px",
+                    marginLeft: "8px",
+                    marginTop: "8px",
+                  }}
+                />
+              }
+            />
+            <FormControl>
+              <Select
+                disabled={
+                  expireStatus == t("neverExpires") ||
+                  !triggerCheckValue ||
+                  isReadOnly
+                }
+                inputProps={{ "aria-label": "Without label" }}
+                value={selectedTrigger}
+                onChange={(e) => {
+                  setSelectedTrigger(e.target.value);
+                  setActivityPropertyData(
+                    e.target.value,
+                    "expiryInfo",
+                    "triggerName",
+                    "",
+                    ""
+                  );
+                }}
+                displayEmpty
+                className="time_Options"
+                MenuProps={{
+                  anchorOrigin: {
+                    vertical: "bottom",
+                    horizontal: "left",
+                  },
+                  transformOrigin: {
+                    vertical: "top",
+                    horizontal: "left",
+                  },
+                  getContentAnchorEl: null,
+                }}
+              >
+                {loadedProcessData.value.TriggerList.map((trigger) => {
+                  return (
+                    <MenuItem
+                      style={{ fontSize: "12px" }}
+                      value={trigger.TriggerName}
+                    >
+                      {trigger.TriggerName}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+          </div>
+          {props.tabName && props.tabName === "Timer" ? (
+            <>
+              {
+                //added by mahtab for timer
+              }
+              <div id="manualUnhold">
+                <h3 className="timerHeading title_text">Manual Unhold</h3>
+                <div className="onExpiryDivSection">
+                  <p
+                    className="targetAct subtitle_text"
+                    style={{
+                      marginRight: direction == RTL_DIRECTION ? "0px" : "16px",
+                      marginLeft: direction == RTL_DIRECTION ? "16px" : "0px",
+                    }}
+                  >
+                    {t("targetAct")}
+                  </p>
+                  <FormControl>
+                    {/*code updated on 10 October 2022 for BugId 116897*/}
+                    <Select
+                      // disabled={!triggerCheckValueMU}
+                      disabled={expireStatus == t("neverExpires") || isReadOnly}
+                      inputProps={{ "aria-label": "Without label" }}
+                      value={targetActVal}
+                      onChange={(e) => changeTargetAct(e)}
+                      displayEmpty
                       className="time_Options"
-                      variant="outlined"
-                      disabled={
-                        expireStatus == t("neverExpires") || isProcessReadOnly
-                      }
-                      
-                    />
-                  </div>
+                      style={{ marginLeft: "16px" }}
+                      MenuProps={{
+                        anchorOrigin: {
+                          vertical: "bottom",
+                          horizontal: "left",
+                        },
+                        transformOrigin: {
+                          vertical: "top",
+                          horizontal: "left",
+                        },
+                        getContentAnchorEl: null,
+                      }}
+                    >
+                      <MenuItem value={t("previousStage")}>
+                        <em style={{ fontSize: "12px", fontStyle: "normal" }}>
+                          {t("previousStage")}
+                        </em>
+                      </MenuItem>
+                      {loadedProcessData.value.MileStones.map((mile) => {
+                        return mile.Activities.map((activity) => {
+                          if (activity.ActivityName !== props.cellName)
+                            return (
+                              <MenuItem
+                                style={{ fontSize: "12px" }}
+                                value={activity.ActivityName}
+                              >
+                                {activity.ActivityName}
+                              </MenuItem>
+                            );
+                        });
+                      })}
+                    </Select>
+                  </FormControl>
                 </div>
-                <div className="evtFldName">
-                  <div className="elementLabel">{t("triggerName")}</div>
-                  <div className="elementSelect">
-                    <FormControl>
-                      <Select
+                <div className="triggerDivSection">
+                  <p className="triggerLabel">{t("trigger")}</p>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
                         disabled={
-                          expireStatus == t("neverExpires") || isProcessReadOnly
+                          expireStatus == t("neverExpires") || isReadOnly
                         }
-                        inputProps={{ "aria-label": "Without label" }}
-                        value={selectedTriggerEvent}
+                        checked={triggerCheckValueMU}
                         onChange={(e) => {
-                          triggerEventHandler(e);
+                          triggerCheckedMU(e);
                         }}
-                        displayEmpty
-                        className="time_Options"
-                        MenuProps={{
-                          anchorOrigin: {
-                            vertical: "bottom",
-                            horizontal: "left",
-                          },
-                          transformOrigin: {
-                            vertical: "top",
-                            horizontal: "left",
-                          },
-                          getContentAnchorEl: null,
+                        size="small"
+                        style={{
+                          fontSize: "10px",
+                          marginLeft: "8px",
+                          marginTop: "8px",
                         }}
-                      >
-                        {loadedProcessData.value.TriggerList.map((trigger) => {
-                          return (
-                            <MenuItem
-                              style={{ fontSize: "12px" }}
-                              value={trigger.TriggerName}
-                            >
-                              {trigger.TriggerName}
-                            </MenuItem>
-                          );
-                        })}
-                      </Select>
-                    </FormControl>
-                  </div>
+                      />
+                    }
+                  />
+                  <FormControl>
+                    <Select
+                      disabled={!triggerCheckValueMU}
+                      inputProps={{ "aria-label": "Without label" }}
+                      value={selectedTriggerMU}
+                      onChange={(e) => {
+                        changeTrigerMU(e.target.value);
+                      }}
+                      displayEmpty
+                      className="time_Options"
+                      MenuProps={{
+                        anchorOrigin: {
+                          vertical: "bottom",
+                          horizontal: "left",
+                        },
+                        transformOrigin: {
+                          vertical: "top",
+                          horizontal: "left",
+                        },
+                        getContentAnchorEl: null,
+                      }}
+                    >
+                      {loadedProcessData.value.TriggerList.map((trigger) => {
+                        return (
+                          <MenuItem
+                            style={{ fontSize: "12px" }}
+                            value={trigger.TriggerName}
+                          >
+                            {trigger.TriggerName}
+                          </MenuItem>
+                        );
+                      })}
+                    </Select>
+                  </FormControl>
                 </div>
-
-                <div className="evtFldName">
-                  <div className="elementLabel">{t("targetAct")}</div>
-                  <div className="elementSelect">
-                    <FormControl>
-                      <Select
-                        disabled={
-                          expireStatus == t("neverExpires") || isProcessReadOnly
-                        }
-                        inputProps={{ "aria-label": "Without label" }}
-                        value={targetActEvent}
-                        onChange={(e) => {
-                          targetActEventHandler(e);
-                        }}
-                        displayEmpty
+              </div>
+              <div id="events">
+                <h3 className="timerHeading title_text">Events</h3>
+                <div className="eventsField">
+                  <div className="evtFldName">
+                    <div className="elementLabel">{t("eventName")}</div>
+                    <div className="elementTxt">
+                      <TextField
+                        onChange={changeEventHandler}
                         className="time_Options"
-                        MenuProps={{
-                          anchorOrigin: {
-                            vertical: "bottom",
-                            horizontal: "left",
-                          },
-                          transformOrigin: {
-                            vertical: "top",
-                            horizontal: "left",
-                          },
-                          getContentAnchorEl: null,
+                        variant="outlined"
+                        disabled={
+                          expireStatus == t("neverExpires") || isReadOnly
+                        }
+                        inputRef={eventNameRef}
+                        onKeyPress={(e) => {
+                          FieldValidations(e, 150, eventNameRef.current, 50);
                         }}
-                      >
-                        <MenuItem value={t("previousStage")}>
-                          <em style={{ fontSize: "12px", fontStyle: "normal" }}>
-                            {t("previousStage")}
-                          </em>
-                        </MenuItem>
-                        {loadedProcessData.value.MileStones.map((mile) => {
-                          return mile.Activities.map((activity) => {
-                            if (activity.ActivityName !== props.cellName)
+                        value={eventName} //code updated on 28 September 2022 for BugId 116207
+                      />
+                    </div>
+                  </div>
+                  <div className="evtFldName">
+                    <div className="elementLabel">{t("triggerName")}</div>
+                    <div className="elementSelect">
+                      <FormControl>
+                        <Select
+                          disabled={
+                            expireStatus == t("neverExpires") || isReadOnly
+                          }
+                          inputProps={{ "aria-label": "Without label" }}
+                          value={selectedTriggerEvent}
+                          onChange={(e) => {
+                            triggerEventHandler(e);
+                          }}
+                          displayEmpty
+                          className="time_Options"
+                          MenuProps={{
+                            anchorOrigin: {
+                              vertical: "bottom",
+                              horizontal: "left",
+                            },
+                            transformOrigin: {
+                              vertical: "top",
+                              horizontal: "left",
+                            },
+                            getContentAnchorEl: null,
+                          }}
+                        >
+                          {loadedProcessData.value.TriggerList.map(
+                            (trigger) => {
                               return (
                                 <MenuItem
                                   style={{ fontSize: "12px" }}
-                                  value={activity.ActivityName}
+                                  value={trigger.TriggerName}
                                 >
-                                  {activity.ActivityName}
+                                  {trigger.TriggerName}
                                 </MenuItem>
                               );
-                          });
-                        })}
-                      </Select>
-                    </FormControl>
+                            }
+                          )}
+                        </Select>
+                      </FormControl>
+                    </div>
+                  </div>
+
+                  <div className="evtFldName">
+                    <div className="elementLabel">{t("targetAct")}</div>
+                    <div className="elementSelect">
+                      <FormControl>
+                        <Select
+                          disabled={
+                            expireStatus == t("neverExpires") || isReadOnly
+                          }
+                          inputProps={{ "aria-label": "Without label" }}
+                          value={targetActEvent}
+                          onChange={(e) => {
+                            targetActEventHandler(e);
+                          }}
+                          displayEmpty
+                          className="time_Options"
+                          MenuProps={{
+                            anchorOrigin: {
+                              vertical: "bottom",
+                              horizontal: "left",
+                            },
+                            transformOrigin: {
+                              vertical: "top",
+                              horizontal: "left",
+                            },
+                            getContentAnchorEl: null,
+                          }}
+                        >
+                          <MenuItem value={t("previousStage")}>
+                            <em
+                              style={{ fontSize: "12px", fontStyle: "normal" }}
+                            >
+                              {t("previousStage")}
+                            </em>
+                          </MenuItem>
+                          {loadedProcessData.value.MileStones.map((mile) => {
+                            return mile.Activities.map((activity) => {
+                              if (activity.ActivityName !== props.cellName)
+                                return (
+                                  <MenuItem
+                                    style={{ fontSize: "12px" }}
+                                    value={activity.ActivityName}
+                                  >
+                                    {activity.ActivityName}
+                                  </MenuItem>
+                                );
+                            });
+                          })}
+                        </Select>
+                      </FormControl>
+                    </div>
+                  </div>
+                  <div className="evtFldName">
+                    <Button
+                      variant="contained"
+                      size="small"
+                      className="primary btnEvent"
+                      onClick={associateData}
+                      disabled={expireStatus == t("neverExpires") || isReadOnly}
+                    >
+                      <AddIcon />
+                    </Button>
                   </div>
                 </div>
-                <div className="evtFldName">
-                  <Button
-                    variant="contained"
-                    size="small"
-                    className="primary btnEvent"
-                    onClick={associateData}
-                    disabled={
-                      expireStatus == t("neverExpires") || isProcessReadOnly
-                    }
-                  >
-                    <AddIcon />
-                  </Button>
-                </div>
-              </div>
-              {props.isDrawerExpanded ? (
-                <div
-                  className={
-                    props.isDrawerExpanded
-                      ? "associate-list-expand"
-                      : "associate-list"
-                  }
-                >
-                  <table
+                {props.isDrawerExpanded ? (
+                  <div
                     className={
                       props.isDrawerExpanded
-                        ? direction == RTL_DIRECTION
-                          ? "associate-tbl-expand-rtl"
-                          : "associate-tbl-expand"
-                        : direction == RTL_DIRECTION
-                        ? "associate-tbl-rtl"
-                        : "associate-tbl"
+                        ? "associate-list-expand"
+                        : "associate-list"
                     }
-                    direction
                   >
-                    <tr>
-                      <th>{t("eventName")}</th>
-                      <th>{t("triggerName")}</th>
-                      <th>{t("targetAct")}</th>
-                      <th></th>
-                    </tr>
+                    <table
+                      className={
+                        props.isDrawerExpanded
+                          ? direction == RTL_DIRECTION
+                            ? "associate-tbl-expand-rtl"
+                            : "associate-tbl-expand"
+                          : direction == RTL_DIRECTION
+                          ? "associate-tbl-rtl"
+                          : "associate-tbl"
+                      }
+                      direction
+                    >
+                      <tr>
+                        <th>{t("eventName")}</th>
+                        <th>{t("triggerName")}</th>
+                        <th>{t("targetAct")}</th>
+                        <th></th>
+                      </tr>
 
-                    {mappedEvents && mappedEvents.length > 0
-                      ? mappedEvents?.map((item, i) => (
-                          <tr key={i}>
-                            <td className="" align="center">{item.m_strEventName}</td>
-                            <td align="center">{item.m_strEventTrigName}</td>
-                            <td align="center">{item.m_strEventTrgAct}</td>
-                            {props.isDrawerExpanded ? (
-                              <td>
-                                <DeleteIcon
-                                  onClick={() => {
-                                    deleteData(item.m_strEventName, i);
-                                  }}
-                                  className="icon-button"
-                                />
+                      {mappedEvents && mappedEvents.length > 0
+                        ? mappedEvents?.map((item, i) => (
+                            <tr key={i}>
+                              <td className="" align="center">
+                                {item.m_strEventName}
                               </td>
-                            ) : (
-                              ""
-                            )}
-                          </tr>
-                        ))
-                      : null}
-                  </table>
-                </div>
-              ) : (
-                ""
-              )}
-            </div>
-          </>
-        ) : (
-          <>
-            <div>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={turnAroundCheckValue}
-                    onChange={() => {
-                      setTurnAroundCheckValue(!turnAroundCheckValue);
-                      clearTurnAroundTimeValues();
-                    }}
-                    disabled={
-                      expireStatus == t("neverExpires") || isProcessReadOnly
-                    }
-                    size="small"
-                    style={{ fontSize: "10px", marginLeft: "8px" }}
-                  />
-                }
-              />
-              <span className="turnAroundTimeLabel">{t("turnAroundTime")}</span>
-              <div className="optionsTab_timeMapping">
-                <div>
-                  <div className="options_time">
-                    <span
-                      className="options_days"
-                      style={{
-                        marginRight:
-                          direction == RTL_DIRECTION ? "0px" : "14px",
-                        marginLeft: direction == RTL_DIRECTION ? "14px" : "0px",
-                      }}
-                    >
-                      {t("days")}
-                    </span>
-                    <SelectWithInput
-                      dropdownOptions={filteredVarList}
-                      showError={true}
-                      optionKey="VariableName"
-                      setValue={(val) => {
-                        setTurnAroundDays(val);
-                        setActivityPropertyData(
-                          !isNaN(val) ? val : val?.VariableName,
-                          "tatInfo",
-                          "wfDays",
-                          "varFieldId_Days",
-                          "variableId_Days"
-                        );
-                      }}
-                      value={turnAroundDays}
-                      isConstant={!isNaN(turnAroundDays)}
-                      inputClass="selectWithInputTextField_WS"
-                      constantInputClass="multiSelectConstInput_WS"
-                      selectWithInput="selectWithInput_WS"
-                      showEmptyString={false}
-                      showConstValue={true}
-                      disabled={!turnAroundCheckValue || isProcessReadOnly}
-                      id="turnDays_select_input"
-                    />
+                              <td align="center">{item.m_strEventTrigName}</td>
+                              <td align="center">{item.m_strEventTrgAct}</td>
+                              {props.isDrawerExpanded ? (
+                                <td>
+                                  <DeleteIcon
+                                    onClick={() => {
+                                      deleteData(item.m_strEventName, i);
+                                    }}
+                                    className="icon-button"
+                                  />
+                                </td>
+                              ) : (
+                                ""
+                              )}
+                            </tr>
+                          ))
+                        : null}
+                    </table>
                   </div>
-                  <div className="options_time">
-                    <span
-                      className="options_hours"
-                      style={{
-                        marginRight: direction == RTL_DIRECTION ? "0px" : "8px",
-                        marginLeft: direction == RTL_DIRECTION ? "8px" : "0px",
+                ) : (
+                  ""
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={turnAroundCheckValue}
+                      onChange={() => {
+                        setTurnAroundCheckValue(!turnAroundCheckValue);
+                        clearTurnAroundTimeValues();
                       }}
-                    >
-                      {t("Hour(s)")}
-                    </span>
-                    <SelectWithInput
-                      dropdownOptions={filteredVarList}
-                      showError={true}
-                      optionKey="VariableName"
-                      setValue={(val) => {
-                        setTurnAroundHours(val);
-                        let tempObj = { ...tatErrorObj };
-                        if (!isNaN(val)) {
-                          if (val > 24) {
-                            tempObj.hours = true;
+                      disabled={expireStatus == t("neverExpires") || isReadOnly}
+                      size="small"
+                      style={{ fontSize: "10px", marginLeft: "8px" }}
+                    />
+                  }
+                />
+                <span className="turnAroundTimeLabel">
+                  {t("turnAroundTime")}
+                </span>
+                <div className="optionsTab_timeMapping">
+                  <div>
+                    <div className="options_time">
+                      <span
+                        className="options_days"
+                        style={{
+                          marginRight:
+                            direction == RTL_DIRECTION ? "0px" : "14px",
+                          marginLeft:
+                            direction == RTL_DIRECTION ? "14px" : "0px",
+                        }}
+                      >
+                        {t("days")}
+                      </span>
+                      <SelectWithInput
+                        dropdownOptions={filteredVarList}
+                        showError={true}
+                        optionKey="VariableName"
+                        setValue={(val) => {
+                          setTurnAroundDays(val);
+                          setActivityPropertyData(
+                            !isNaN(val) ? val : val?.VariableName,
+                            "tatInfo",
+                            "wfDays",
+                            "varFieldId_Days",
+                            "variableId_Days"
+                          );
+                        }}
+                        value={turnAroundDays}
+                        isConstant={!isNaN(turnAroundDays)}
+                        inputClass="selectWithInputTextField_WS"
+                        constantInputClass="multiSelectConstInput_WS"
+                        selectWithInput="selectWithInput_WS"
+                        showEmptyString={false}
+                        showConstValue={true}
+                        disabled={!turnAroundCheckValue || isReadOnly}
+                        id="turnDays_select_input"
+                      />
+                    </div>
+                    <div className="options_time">
+                      <span
+                        className="options_hours"
+                        style={{
+                          marginRight:
+                            direction == RTL_DIRECTION ? "0px" : "8px",
+                          marginLeft:
+                            direction == RTL_DIRECTION ? "8px" : "0px",
+                        }}
+                      >
+                        {t("Hour(s)")}
+                      </span>
+                      <SelectWithInput
+                        dropdownOptions={filteredVarList}
+                        showError={true}
+                        optionKey="VariableName"
+                        setValue={(val) => {
+                          setTurnAroundHours(val);
+                          let tempObj = { ...tatErrorObj };
+                          if (!isNaN(val)) {
+                            if (val > 24) {
+                              tempObj.hours = true;
+                            } else {
+                              tempObj.hours = false;
+                            }
                           } else {
                             tempObj.hours = false;
                           }
-                        } else {
-                          tempObj.hours = false;
-                        }
-                        setTatErrorObj(tempObj);
-                        if (!tempObj.hours) {
-                          setActivityPropertyData(
-                            !isNaN(val) ? val : val?.VariableName,
-                            "tatInfo",
-                            "wfHours",
-                            "varFieldId_Hours",
-                            "variableId_Hours"
-                          );
-                        }
-                      }}
-                      value={turnAroundHours}
-                      isConstant={!isNaN(turnAroundHours)}
-                      inputClass="selectWithInputTextField_WS"
-                      constantInputClass="multiSelectConstInput_WS"
-                      selectWithInput="selectWithInput_WS"
-                      showEmptyString={false}
-                      showConstValue={true}
-                      disabled={!turnAroundCheckValue || isProcessReadOnly}
-                      id="turnHours_select_input"
-                    />
-                  </div>
-                  {turnAroundHours > 24 ? (
-                    <p
-                      style={{
-                        fontSize: "10px",
-                        color: "red",
-                        margin: "-7px 0px 5px 110px",
-                      }}
-                    >
-                      Value must lie in the range of 0-24
-                    </p>
-                  ) : null}
-                  <div className="options_time">
-                    <span
-                      className="options_minutes"
-                      style={{
-                        marginRight:
-                          direction == RTL_DIRECTION ? "0px" : "16px",
-                        marginLeft: direction == RTL_DIRECTION ? "16px" : "0px",
-                      }}
-                    >
-                      {t("minutes")}
-                    </span>
-                    <SelectWithInput
-                      dropdownOptions={filteredVarList}
-                      showError={true}
-                      optionKey="VariableName"
-                      setValue={(val) => {
-                        setTurnAroundMinutes(val);
-                        let tempObj = { ...tatErrorObj };
-                        if (!isNaN(val)) {
-                          if (val > 60) {
-                            tempObj.minutes = true;
+                          setTatErrorObj(tempObj);
+                          if (!tempObj.hours) {
+                            setActivityPropertyData(
+                              !isNaN(val) ? val : val?.VariableName,
+                              "tatInfo",
+                              "wfHours",
+                              "varFieldId_Hours",
+                              "variableId_Hours"
+                            );
+                          }
+                        }}
+                        value={turnAroundHours}
+                        isConstant={!isNaN(turnAroundHours)}
+                        inputClass="selectWithInputTextField_WS"
+                        constantInputClass="multiSelectConstInput_WS"
+                        selectWithInput="selectWithInput_WS"
+                        showEmptyString={false}
+                        showConstValue={true}
+                        disabled={!turnAroundCheckValue || isReadOnly}
+                        id="turnHours_select_input"
+                      />
+                    </div>
+                    {turnAroundHours > 24 ? (
+                      <p
+                        style={{
+                          fontSize: "10px",
+                          color: "red",
+                          margin: "-7px 0px 5px 110px",
+                        }}
+                      >
+                        Value must lie in the range of 0-24
+                      </p>
+                    ) : null}
+                    <div className="options_time">
+                      <span
+                        className="options_minutes"
+                        style={{
+                          marginRight:
+                            direction == RTL_DIRECTION ? "0px" : "16px",
+                          marginLeft:
+                            direction == RTL_DIRECTION ? "16px" : "0px",
+                        }}
+                      >
+                        {t("minutes")}
+                      </span>
+                      <SelectWithInput
+                        dropdownOptions={filteredVarList}
+                        showError={true}
+                        optionKey="VariableName"
+                        setValue={(val) => {
+                          setTurnAroundMinutes(val);
+                          let tempObj = { ...tatErrorObj };
+                          if (!isNaN(val)) {
+                            if (val > 60) {
+                              tempObj.minutes = true;
+                            } else {
+                              tempObj.minutes = false;
+                            }
                           } else {
                             tempObj.minutes = false;
                           }
-                        } else {
-                          tempObj.minutes = false;
-                        }
-                        setTatErrorObj(tempObj);
-                        if (!tempObj.minutes) {
-                          setActivityPropertyData(
-                            !isNaN(val) ? val : val?.VariableName,
-                            "tatInfo",
-                            "wfMinutes",
-                            "varFieldId_Minutes",
-                            "variableId_Minutes"
-                          );
-                        }
-                      }}
-                      value={turnAroundMinutes}
-                      isConstant={!isNaN(turnAroundMinutes)}
-                      inputClass="selectWithInputTextField_WS"
-                      constantInputClass="multiSelectConstInput_WS"
-                      selectWithInput="selectWithInput_WS"
-                      showEmptyString={false}
-                      showConstValue={true}
-                      disabled={!turnAroundCheckValue || isProcessReadOnly}
-                      id="turnMins_select_input"
-                    />
-                  </div>
-                  {turnAroundMinutes > 60 ? (
-                    <p
-                      style={{
-                        fontSize: "10px",
-                        color: "red",
-                        margin: "-7px 0px 5px 110px",
-                      }}
-                    >
-                      Value must lie in the range of 0-60
-                    </p>
-                  ) : null}
-                  <div className="options_time">
-                    <span
-                      className="options_seconds"
-                      style={{
-                        marginRight:
-                          direction == RTL_DIRECTION ? "0px" : "14px",
-                        marginLeft: direction == RTL_DIRECTION ? "14px" : "0px",
-                      }}
-                    >
-                      {t("seconds")}
-                    </span>
-                    <SelectWithInput
-                      dropdownOptions={filteredVarList}
-                      showError={true}
-                      optionKey="VariableName"
-                      setValue={(val) => {
-                        setTurnAroundSeconds(val);
-                        let tempObj = { ...tatErrorObj };
-                        if (!isNaN(val)) {
-                          if (val > 60) {
-                            tempObj.seconds = true;
+                          setTatErrorObj(tempObj);
+                          if (!tempObj.minutes) {
+                            setActivityPropertyData(
+                              !isNaN(val) ? val : val?.VariableName,
+                              "tatInfo",
+                              "wfMinutes",
+                              "varFieldId_Minutes",
+                              "variableId_Minutes"
+                            );
+                          }
+                        }}
+                        value={turnAroundMinutes}
+                        isConstant={!isNaN(turnAroundMinutes)}
+                        inputClass="selectWithInputTextField_WS"
+                        constantInputClass="multiSelectConstInput_WS"
+                        selectWithInput="selectWithInput_WS"
+                        showEmptyString={false}
+                        showConstValue={true}
+                        disabled={!turnAroundCheckValue || isReadOnly}
+                        id="turnMins_select_input"
+                      />
+                    </div>
+                    {turnAroundMinutes > 60 ? (
+                      <p
+                        style={{
+                          fontSize: "10px",
+                          color: "red",
+                          margin: "-7px 0px 5px 110px",
+                        }}
+                      >
+                        Value must lie in the range of 0-60
+                      </p>
+                    ) : null}
+                    <div className="options_time">
+                      <span
+                        className="options_seconds"
+                        style={{
+                          marginRight:
+                            direction == RTL_DIRECTION ? "0px" : "14px",
+                          marginLeft:
+                            direction == RTL_DIRECTION ? "14px" : "0px",
+                        }}
+                      >
+                        {t("seconds")}
+                      </span>
+                      <SelectWithInput
+                        dropdownOptions={filteredVarList}
+                        showError={true}
+                        optionKey="VariableName"
+                        setValue={(val) => {
+                          setTurnAroundSeconds(val);
+                          let tempObj = { ...tatErrorObj };
+                          if (!isNaN(val)) {
+                            if (val > 60) {
+                              tempObj.seconds = true;
+                            } else {
+                              tempObj.seconds = false;
+                            }
                           } else {
                             tempObj.seconds = false;
                           }
-                        } else {
-                          tempObj.seconds = false;
-                        }
-                        setTatErrorObj(tempObj);
-                        if (!tempObj.seconds) {
-                          setActivityPropertyData(
-                            !isNaN(val) ? val : val?.VariableName,
-                            "tatInfo",
-                            "wfSeconds",
-                            "varFieldId_Seconds",
-                            "variableId_Seconds"
-                          );
-                        }
-                      }}
-                      value={turnAroundSeconds}
-                      isConstant={!isNaN(turnAroundSeconds)}
-                      inputClass="selectWithInputTextField_WS"
-                      constantInputClass="multiSelectConstInput_WS"
-                      selectWithInput="selectWithInput_WS"
-                      showEmptyString={false}
-                      showConstValue={true}
-                      disabled={!turnAroundCheckValue || isProcessReadOnly}
-                      id="turnSecs_select_input"
-                    />
+                          setTatErrorObj(tempObj);
+                          if (!tempObj.seconds) {
+                            setActivityPropertyData(
+                              !isNaN(val) ? val : val?.VariableName,
+                              "tatInfo",
+                              "wfSeconds",
+                              "varFieldId_Seconds",
+                              "variableId_Seconds"
+                            );
+                          }
+                        }}
+                        value={turnAroundSeconds}
+                        isConstant={!isNaN(turnAroundSeconds)}
+                        inputClass="selectWithInputTextField_WS"
+                        constantInputClass="multiSelectConstInput_WS"
+                        selectWithInput="selectWithInput_WS"
+                        showEmptyString={false}
+                        showConstValue={true}
+                        disabled={!turnAroundCheckValue || isReadOnly}
+                        id="turnSecs_select_input"
+                      />
+                    </div>
+                    {turnAroundSeconds > 60 ? (
+                      <p
+                        style={{
+                          fontSize: "10px",
+                          color: "red",
+                          margin: "-7px 0px 5px 110px",
+                        }}
+                      >
+                        Value must lie in the range of 0-60
+                      </p>
+                    ) : null}
                   </div>
-                  {turnAroundSeconds > 60 ? (
-                    <p
-                      style={{
-                        fontSize: "10px",
-                        color: "red",
-                        margin: "-7px 0px 5px 110px",
-                      }}
-                    >
-                      Value must lie in the range of 0-60
-                    </p>
-                  ) : null}
+                  <Select
+                    disabled={
+                      expireStatus == t("neverExpires") ||
+                      !turnAroundCheckValue ||
+                      isReadOnly
+                    }
+                    inputProps={{ "aria-label": "Without label" }}
+                    value={tatInfoDaysType}
+                    onChange={(e) => tatInfoDaysTypeHandler(e)}
+                    displayEmpty
+                    style={{
+                      marginLeft: direction == RTL_DIRECTION ? "0px" : "50px",
+                      marginRight: direction == RTL_DIRECTION ? "50px" : "0px",
+                    }}
+                    className="time_Options"
+                    MenuProps={{
+                      anchorOrigin: {
+                        vertical: "bottom",
+                        horizontal: "left",
+                      },
+                      transformOrigin: {
+                        vertical: "top",
+                        horizontal: "left",
+                      },
+                      getContentAnchorEl: null,
+                    }}
+                  >
+                    <MenuItem value={"Y"}>
+                      <em style={{ fontSize: "12px", fontStyle: "normal" }}>
+                        {t("workingDays")}
+                      </em>
+                    </MenuItem>
+                    <MenuItem value={"N"} style={{ fontSize: "12px" }}>
+                      <em style={{ fontSize: "12px", fontStyle: "normal" }}>
+                        {t("calenderDays")}
+                      </em>
+                    </MenuItem>
+                  </Select>
                 </div>
-                <Select
-                  disabled={
-                    expireStatus == t("neverExpires") ||
-                    !turnAroundCheckValue ||
-                    isProcessReadOnly
-                  }
-                  inputProps={{ "aria-label": "Without label" }}
-                  value={tatInfoDaysType}
-                  onChange={(e) => tatInfoDaysTypeHandler(e)}
-                  displayEmpty
-                  style={{
-                    marginLeft: direction == RTL_DIRECTION ? "0px" : "50px",
-                    marginRight: direction == RTL_DIRECTION ? "50px" : "0px",
-                  }}
-                  className="time_Options"
-                  MenuProps={{
-                    anchorOrigin: {
-                      vertical: "bottom",
-                      horizontal: "left",
-                    },
-                    transformOrigin: {
-                      vertical: "top",
-                      horizontal: "left",
-                    },
-                    getContentAnchorEl: null,
-                  }}
-                >
-                  <MenuItem value={"Y"}>
-                    <em style={{ fontSize: "12px", fontStyle: "normal" }}>
-                      {t("workingDays")}
-                    </em>
-                  </MenuItem>
-                  <MenuItem value={"N"} style={{ fontSize: "12px" }}>
-                    <em style={{ fontSize: "12px", fontStyle: "normal" }}>
-                      {t("calenderDays")}
-                    </em>
-                  </MenuItem>
-                </Select>
               </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
     </>
-    
   );
 }
 
 const mapStateToProps = (state) => {
   return {
-    showDrawer: state.showDrawerReducer.showDrawer,
-    cellID: state.selectedCellReducer.selectedId,
     cellName: state.selectedCellReducer.selectedName,
-    cellType: state.selectedCellReducer.selectedType,
-    cellActivityType: state.selectedCellReducer.selectedActivityType,
-    cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
     openProcessType: state.openProcessClick.selectedType,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

@@ -1,3 +1,4 @@
+// Changes made to solve Bug 113657 - Process Report: Not able to download archived reports in Process report
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./ProjectReport.css";
@@ -37,13 +38,9 @@ function GenrateReport(props) {
       saveInOD: archiveInOmnidoc ? "Y" : "N",
       processVariantReport: props.openProcessType,
       reportFormat: "2",
+      imageContent: "N",
+      variantId: "",
     };
-    // axios.post(SERVER_URL + ENDPOINT_PROCESS_REPORT, jsonBody).then((res) => {
-    //   console.log("222222save", res);
-    //   if (res.data.Status === 0) {
-    //   }
-    // });
-
     axios({
       url: "/pmweb" + ENDPOINT_PROCESS_REPORT, //your url
       method: "POST",
@@ -51,12 +48,12 @@ function GenrateReport(props) {
       data: jsonBody,
     }).then((res) => {
       const url = window.URL.createObjectURL(
-        new Blob([res.data], {
-          type: res.headers["content-type"],
+        new Blob([res?.data], {
+          type: res?.headers["content-type"],
         })
       );
       var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-      var matches = filenameRegex.exec(res.headers["content-disposition"]);
+      var matches = filenameRegex.exec(res?.headers["content-disposition"]);
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", matches[1].replace(/['"]/g, "")); //or any other extension
@@ -138,5 +135,4 @@ function GenrateReport(props) {
     </div>
   );
 }
-
 export default GenrateReport;

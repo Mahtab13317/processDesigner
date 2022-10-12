@@ -23,6 +23,7 @@ function CategoryHeader(props) {
   const direction = `${t("HTML_DIR")}`;
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [action, setAction] = useState(null);
+  const [showMoreDesc, setShowMoreDesc] = useState(false);
 
   const TemplateTooltip = withStyles(() => ({
     tooltip: {
@@ -91,10 +92,12 @@ function CategoryHeader(props) {
                   <div>{props.selectedCategoryDetails?.Description}</div>
                 ) : (
                   <div>
-                    {props.selectedCategoryDetails?.Description?.split(" ")
-                      .splice(0, WORD_LIMIT_DESC)
-                      .join(" ")}
-                    <TemplateTooltip
+                    {showMoreDesc
+                      ? props.selectedCategoryDetails?.Description
+                      : props.selectedCategoryDetails?.Description?.split(" ")
+                          .splice(0, WORD_LIMIT_DESC)
+                          .join(" ")}
+                    {/* <TemplateTooltip
                       arrow
                       enterDelay={100}
                       placement={
@@ -103,11 +106,14 @@ function CategoryHeader(props) {
                           : "bottom-start"
                       }
                       title={props.selectedCategoryDetails?.Description}
+                    >*/}
+                    <span
+                      className={styles.showMore}
+                      onClick={() => setShowMoreDesc(!showMoreDesc)}
                     >
-                      <span className={styles.showMore}>
-                        {`...${t("showMore")}`}
-                      </span>
-                    </TemplateTooltip>
+                      {showMoreDesc ? t("showLess") : `...${t("showMore")}`}
+                    </span>
+                    {/*</TemplateTooltip>*/}
                   </div>
                 )}
               </p>
@@ -133,7 +139,7 @@ function CategoryHeader(props) {
             sortByDiv_arabic="sortByDiv_arabicActivity"
             oneSortOption={styles.moreVertModalOption}
             showTickIcon={false}
-            sortSectionOne={[t("edit"), t("Rename"), t("delete")]}
+            sortSectionOne={[t("edit"), t("delete")]}
             buttonToOpenModal={
               <MoreVertOutlined className={styles.moreVertIcon} />
             }

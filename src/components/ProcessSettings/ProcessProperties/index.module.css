@@ -155,9 +155,17 @@
 .addIcon {
   color: white;
   background: #0072c6;
-  height: 1.8rem;
-  width: 1.8rem;
-  margin-left: -22px;
+  height: 1.8rem !important;
+  width: 1.8rem !important;
+  margin-inline: 5px;
+  margin-top: 4px;
+  cursor: pointer;
+}
+.editIcon{
+ color: grey;
+  height: 1.8rem !important;
+  width: 1.8rem !important;
+ 
   margin-top: 4px;
   cursor: pointer;
 }

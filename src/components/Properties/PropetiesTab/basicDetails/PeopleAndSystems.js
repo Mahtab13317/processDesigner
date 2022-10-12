@@ -5,26 +5,23 @@ import AddIcon from "@material-ui/icons/Add";
 import CloseIcon from "@material-ui/icons/Close";
 import DeleteOutlinedIcon from "@material-ui/icons/DeleteOutlined";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
-import SearchComponent from "../../../../UI/Search Component";
 import { store, useGlobalState } from "state-pool";
-import { Popover } from "@material-ui/core";
 import Modal from "../../../../UI/Modal/Modal";
 import { useDispatch } from "react-redux";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import { propertiesLabel } from "../../../../Constants/appConstants";
 
 const PeopleAndSystems = (props) => {
-  const [open, setopen] = useState(false);
+  let { t } = useTranslation();
   const dispatch = useDispatch();
+  const ref = React.useRef(null);
+  const [open, setopen] = useState(false);
   const loadedActivityPropertyData = store.getState("activityPropertyData"); //current processdata clicked
   const localProcessData = store.getState("loadedProcessData");
   const [userGroupListData, setuserGroupListData] = useState({});
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
-  const [localLoadedProcessData, setlocalLoadedProcessData] =
-    useGlobalState(localProcessData);
-  const [peopleName, setpeopleName] = useState("");
-  const [anchorElMF, setAnchorElMF] = React.useState(null);
+  const [localLoadedProcessData] = useGlobalState(localProcessData);
   const [peopleAndSystemsArray, setpeopleAndSystemsArray] = useState([
     {
       type: "Owner",
@@ -47,10 +44,26 @@ const PeopleAndSystems = (props) => {
       names: [{ id: "", name: "" }],
     },
   ]);
+  const [typeToOpen, settypeToOpen] = useState(); //which type of field to open picklist in
+  const [openUserGroupMF, setopenUserGroupMF] = useState(false);
 
   useEffect(() => {
     updatePeopleAndSystems(localLoadedActivityPropertyData);
   }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setopen(false);
+      }
+    }
+    // Bind the event listener
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      // Unbind the event listener on clean up
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [ref]);
 
   const updatePeopleAndSystems = (actData) => {
     let temp = [
@@ -72,7 +85,7 @@ const PeopleAndSystems = (props) => {
       {
         type: "Consultant",
         names:
-          actData.ActivityProperty.actGenPropInfo.genPropInfo.consumerList
+          actData.ActivityProperty.actGenPropInfo.genPropInfo.consultantList
             .length !== 0
             ? actData.ActivityProperty.actGenPropInfo.genPropInfo.consultantList.map(
                 (item) => {
@@ -134,21 +147,6 @@ const PeopleAndSystems = (props) => {
     setpeopleAndSystemsArray(temp);
   };
 
-  const [usersArray, setusersArray] = useState([
-    { id: "1", userName: "Sunny", peopleName: "Sun" },
-    { id: "2", userName: "Sovan", peopleName: "Sov" },
-    { id: "2", userName: "Sovan", peopleName: "Sov" },
-    { id: "2", userName: "Sovan", peopleName: "Sov" },
-    { id: "2", userName: "Sovan", peopleName: "Sov" },
-    { id: "2", userName: "Sovan", peopleName: "Sov" },
-    { id: "2", userName: "Sovan", peopleName: "Sov" },
-    { id: "2", userName: "Sovan", peopleName: "Sov" },
-    { id: "2", userName: "Sovan", peopleName: "Sov" },
-    { id: "2", userName: "Sovan", peopleName: "Sov" },
-  ]);
-
-  let { t } = useTranslation();
-
   const addField = (data) => {
     let temp = [...peopleAndSystemsArray];
     temp.forEach((item) => {
@@ -176,34 +174,16 @@ const PeopleAndSystems = (props) => {
         item.names[index].name = "";
       }
     });
-
     setpeopleAndSystemsArray(temp);
   };
-  const [typeToOpen, settypeToOpen] = useState(); //which type of field to open picklist in
-  const [fieldToOpen, setfieldToOpen] = useState(); //which field to open a picklist in a type of people and systems
-
-  const ref = React.useRef(null);
-  const [openUserGroupMF, setopenUserGroupMF] = useState(false);
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (ref.current && !ref.current.contains(event.target)) {
-        setopen(false);
-      }
-    }
-
-    // Bind the event listener
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      // Unbind the event listener on clean up
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [ref]);
 
   const getUserGroupList = (data, type) => {
-    console.log("bbbbbbbbbbbbdata", data);
     setuserGroupListData(data);
-    let temp = structuredClone(localLoadedActivityPropertyData);
+    let temp = global.structuredClone(localLoadedActivityPropertyData);
     if (type === "Owner" || type === "Consultant") {
+      temp.ActivityProperty.actGenPropInfo.genPropInfo[
+        `${type.charAt(0).toLowerCase() + type.slice(1) + "List"}`
+      ] = [];
       data.selectedUsers.forEach((user) => {
         temp.ActivityProperty.actGenPropInfo.genPropInfo[
           `${type.charAt(0).toLowerCase() + type.slice(1) + "List"}`
@@ -213,6 +193,19 @@ const PeopleAndSystems = (props) => {
           [`${type.charAt(0).toLowerCase() + type.slice(1) + "Id"}`]: user.id,
           bRenderPlus: false,
         });
+        const unique = [
+          ...new Map(
+            temp.ActivityProperty.actGenPropInfo.genPropInfo[
+              `${type.charAt(0).toLowerCase() + type.slice(1) + "List"}`
+            ].map((item) => [
+              item[`${type.charAt(0).toLowerCase() + type.slice(1) + "Id"}`],
+              item,
+            ])
+          ).values(),
+        ];
+        temp.ActivityProperty.actGenPropInfo.genPropInfo[
+          `${type.charAt(0).toLowerCase() + type.slice(1) + "List"}`
+        ].names = unique;
       });
     } else if (type === "System") {
       data.selectedUsers.forEach((user) => {
@@ -234,7 +227,32 @@ const PeopleAndSystems = (props) => {
         });
       });
     }
+    let temp2 = global.structuredClone(peopleAndSystemsArray);
 
+    temp2.forEach((_var) => {
+      if (_var.type === type) {
+        _var.names = [];
+        temp.ActivityProperty.actGenPropInfo.genPropInfo[
+          `${type.charAt(0).toLowerCase() + type.slice(1) + "List"}`
+        ].forEach((people) => {
+          _var.names = _var.names.filter((name) => name.id !== "");
+          _var.names.push({
+            id: people[
+              `${type.charAt(0).toLowerCase() + type.slice(1) + "Id"}`
+            ],
+            name: people[
+              `${type.charAt(0).toLowerCase() + type.slice(1) + "Name"}`
+            ],
+          });
+          const unique = [
+            ...new Map(_var.names.map((item) => [item.id, item])).values(),
+          ];
+          _var.names = unique;
+        });
+      }
+    });
+
+    setpeopleAndSystemsArray(temp2);
     setlocalLoadedActivityPropertyData(temp);
     dispatch(
       setActivityPropertyChange({
@@ -246,32 +264,44 @@ const PeopleAndSystems = (props) => {
     );
   };
 
-  console.log("bbbbbbbbbbblocal", localLoadedActivityPropertyData);
+  const getSelectedUsers = (type) => {
+    let selectedUsers = [];
+    let temp = global.structuredClone(localLoadedActivityPropertyData);
+    temp.ActivityProperty.actGenPropInfo.genPropInfo[
+      `${type.charAt(0).toLowerCase() + type.slice(1) + "List"}`
+    ].forEach((people) => {
+      selectedUsers.push({
+        id: people[`${type.charAt(0).toLowerCase() + type.slice(1) + "Id"}`],
+        name: people[
+          `${type.charAt(0).toLowerCase() + type.slice(1) + "Name"}`
+        ],
+      });
+    });
+    return { selectedUsers: selectedUsers };
+  };
 
   const pickListHandler = (event, data, itemName) => {
-    // setfieldToOpen(itemName.id);
     settypeToOpen(data.type);
-    // setopen(true);
-
     setopenUserGroupMF(true);
 
     let microProps = {
       data: {
+        initialSelected: getSelectedUsers(data.type),
         onSelection: (list) => getUserGroupList(list, data.type),
         token: JSON.parse(localStorage.getItem("launchpadKey"))?.token,
         ext: true,
         customStyle: {
-          selectedTableMinWidth: "35vw", // selected user and group listing width
+          selectedTableMinWidth: "50%", // selected user and group listing width
 
-          listTableMinWidth: "35vw", // user/ group listing width
+          listTableMinWidth: "50%", // user/ group listing width
 
-          listHeight: "60vh", // custom height common for selected listing and user/group listing
+          listHeight: "16rem", // custom height common for selected listing and user/group listing
 
           showUserFilter: true, // true for showing user filter, false for hiding
 
           showExpertiseDropDown: true, // true for showing expertise dropdown, false for hiding
 
-          showGroupFilter: true, // true for showing group filter, false for hiding
+          showGroupFilter: false, // true for showing group filter, false for hiding
         },
       },
       locale: "en_US",
@@ -285,7 +315,7 @@ const PeopleAndSystems = (props) => {
       Renderer: "renderUserGroupPicklistMF",
     };
     window.loadUserGroupMF(microProps);
-    console.log("picklisttttttttttt,", data, itemName);
+    console.log("picklisttttttttttt,", microProps);
   };
 
   const setOwnerConsultantField = (obj, index, data) => {
@@ -319,28 +349,25 @@ const PeopleAndSystems = (props) => {
 
   const setOtherFields = (e, data, index) => {
     let temp = [...peopleAndSystemsArray];
-    let tempActData = structuredClone(localLoadedActivityPropertyData);
-
-    // let isAdd = true,
-    //   payload;
-    // let c = 0;
+    let tempActData = global.structuredClone(localLoadedActivityPropertyData);
 
     temp.forEach((item) => {
       if (item.type === data.type) {
-        // if (item.names[index].name !== "") {
-        //   // isAdd = false;
-        // }
         item.names[index].name = e.target.value;
+        item.names[index].id = index + 1;
       }
     });
 
-    temp.forEach((iData) => {
-      if (iData.type === data.type) {
-        iData.names.forEach((eachName, index) => {
-          tempActData.ActivityProperty.actGenPropInfo.genPropInfo[
-            `${data.type.charAt(0).toLowerCase() + data.type.slice(1) + "List"}`
-          ].push({
-            orderId: index,
+    temp.forEach((item) => {
+      if (item.type === data.type) {
+        tempActData.ActivityProperty.actGenPropInfo.genPropInfo[
+          `${data.type.charAt(0).toLowerCase() + data.type.slice(1) + "List"}`
+        ] = [];
+        tempActData.ActivityProperty.actGenPropInfo.genPropInfo[
+          `${data.type.charAt(0).toLowerCase() + data.type.slice(1) + "List"}`
+        ] = item.names.map((people, index) => {
+          return {
+            orderId: people.id,
             bRenderPlus: false,
             [`${
               data.type.charAt(0).toLowerCase() + data.type.slice(1) ===
@@ -349,14 +376,15 @@ const PeopleAndSystems = (props) => {
                 : data.type.charAt(0).toLowerCase() +
                   data.type.slice(1) +
                   "Name"
-            }`]: eachName.name,
-          });
+            }`]: item.names[index].name,
+          };
         });
       }
     });
 
+    setpeopleAndSystemsArray(temp);
+
     setlocalLoadedActivityPropertyData(tempActData);
-    updatePeopleAndSystems(tempActData);
     dispatch(
       setActivityPropertyChange({
         [propertiesLabel.basicDetails]: {
@@ -378,13 +406,19 @@ const PeopleAndSystems = (props) => {
     else return ++id + "";
   };
 
+  const closeModalUserGroup = () => {
+    setopenUserGroupMF(false);
+    var elem = document.getElementById("oapweb_assetManifest");
+
+    elem.parentNode.removeChild(elem);
+  };
+
   return (
-    <div style={{ marginBlock: "1rem", paddingBottom: "1rem" }}>
+    <div style={{ paddingBottom: "1rem" }}>
       <p
         style={{
-          color: "#727272",
           fontSize: "var(--subtitle_text_font_size)",
-          fontWeight: "bolder",
+          fontWeight: "600",
           marginBottom: "0.5rem",
         }}
       >
@@ -403,7 +437,9 @@ const PeopleAndSystems = (props) => {
             transform: "translate(-50%,-50%)",
             background: "white",
           }}
-          modalClosed={() => setopenUserGroupMF(false)}
+          modalClosed={() => {
+            closeModalUserGroup();
+          }}
           children={<div id="usergroupDiv"></div>}
         ></Modal>
       ) : null}
@@ -413,9 +449,8 @@ const PeopleAndSystems = (props) => {
           <div>
             <p
               style={{
-                color: "#727272",
-
-                fontSize: "var(--subtitle_text_font_size)",
+                fontSize: "var(--base_text_font_size)",
+                marginBottom: "0.25rem",
               }}
             >
               {item.type}
@@ -426,13 +461,13 @@ const PeopleAndSystems = (props) => {
                   style={{
                     display: "flex",
                     flexDirection: "row",
-                    marginBottom: "0.6rem",
+                    marginBottom: "0.5rem",
                   }}
                 >
                   {item.type === "Owner" || item.type === "Consultant" ? (
                     <div
                       style={{
-                        height: "2.5rem",
+                        height: "var(--line_height)",
                         display: "flex",
                         flexDirection: "row",
                         width: item.names.length > 1 ? "76%" : "87%",
@@ -451,7 +486,12 @@ const PeopleAndSystems = (props) => {
                           height: "100%",
                         }}
                       >
-                        <p style={{ color: "#000000", fontSize: "1rem" }}>
+                        <p
+                          style={{
+                            color: "#000000",
+                            fontSize: "var(--base_text_font_size)",
+                          }}
+                        >
                           {name.name}
                         </p>
                       </div>
@@ -602,7 +642,7 @@ const PeopleAndSystems = (props) => {
                   item.type === "Provider" ? (
                     <div
                       style={{
-                        height: "2.5rem",
+                        height: "var(--line_height)",
                         display: "flex",
                         flexDirection: "row",
                         width: item.names.length > 1 ? "76%" : "87%",
@@ -613,9 +653,9 @@ const PeopleAndSystems = (props) => {
                       // onClick={(e) => pickListHandler(e, item)}
                     >
                       <TextField
-                        // InputProps={{
-                        //   readOnly: props.disabled,
-                        // }}
+                        InputProps={{
+                          readOnly: props.disabled,
+                        }}
                         key={name.id}
                         value={name.name}
                         onChange={(e) => {
@@ -642,19 +682,17 @@ const PeopleAndSystems = (props) => {
                     />
                   ) : null}
                   {item.names.length === index + 1 ? (
-                    <AddIcon
+                    <div
+                      className="basicDetails-addIcon"
                       style={{
-                        color: "white",
-
-                        backgroundColor: "var(--brand_color1)",
-                        height: "2.5rem",
-                        width: "2.5rem",
-                        // marginTop: "0.125rem",
-
                         display: props.disabled ? "none" : "",
                       }}
-                      onClick={() => (props.disabled ? null : addField(item))}
-                    />
+                    >
+                      <AddIcon
+                        onClick={() => (props.disabled ? null : addField(item))}
+                        className="basicDetails-addIconSvg"
+                      />
+                    </div>
                   ) : null}
                 </div>
               );

@@ -5,9 +5,21 @@ import { hideIcons } from "../bpmnView/cellOnMouseClick";
 import { removeContextMenu } from "../bpmnView/getContextMenu";
 import { removeToolDivCell } from "../bpmnView/getToolDivCell";
 import { getSelectedCellType } from "../abstarctView/getSelectedCellType";
+import { useDispatch } from "react-redux";
 
 export const deleteFunctionality = (props) => {
-  let { id, name, processDefId, type, setProcessData, processData } = props;
+  let {
+    id,
+    name,
+    processDefId,
+    type,
+    setProcessData,
+    processData,
+    dispatch,
+    translation,
+    isPrimaryAct,
+  } = props;
+
   hideIcons();
   removeContextMenu();
   removeToolDivCell();
@@ -26,6 +38,15 @@ export const deleteFunctionality = (props) => {
       alert("last milestone cannot be deleted");
     }
   } else if (type === getSelectedCellType("ACTIVITY")) {
-    deleteActivity(id, name, processDefId, setProcessData);
+    deleteActivity(
+      id,
+      name,
+      processDefId,
+      setProcessData,
+      processData?.CheckedOut,
+      dispatch,
+      translation,
+      isPrimaryAct
+    );
   }
 };

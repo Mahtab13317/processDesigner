@@ -30,6 +30,8 @@ import {
   ENDPOINT_DOWNLOAD_ATTACHMENT,
   RTL_DIRECTION,
   ENDPOINT_REGISTER_PROCESS,
+  PROCESSTYPE_DEPLOYED,
+  PROCESSTYPE_REGISTERED,
 } from "../../../../Constants/appConstants";
 import { connect } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -41,6 +43,10 @@ import {
   ActivityPropertySaveCancelValue,
   setSave,
 } from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked";
+import {
+  isProcessDeployedFunc,
+  isReadOnlyFunc,
+} from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 // --------------
 
 const StyledTableCell = withStyles((theme) => ({
@@ -99,31 +105,45 @@ function RequireRightSection(props) {
     useGlobalState(localActivityPropertyData);
   const [attachList, setAttachList] = useState([]);
   const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
+  const [subSectionDesc, setSubSectionDesc] = useState("");
+  const [implementationDesc, setImplementationDesc] = useState("");
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData, setLocalLoadedProcessData] =
+    useGlobalState(loadedProcessData);
+  let isReadOnly =
+    props.openProcessType === PROCESSTYPE_DEPLOYED ||
+    props.openProcessType === PROCESSTYPE_REGISTERED;
 
   useEffect(() => {
     props?.completeSections?.map((section) => {
       if (
         props?.selectedOrder?.SectionLevel == 0 &&
-        section?.RequirementId == props?.selectedOrder?.SectionId
+        section?.RequirementId == props?.selectedOrder?.RequirementId
       ) {
         setAttachList(section?.Attachment);
       } else if (props?.selectedOrder?.SectionLevel == 1) {
         section?.InnerRequirement?.map((inner) => {
-          if (inner?.RequirementId == props?.selectedOrder?.SectionId) {
+          if (inner?.RequirementId == props?.selectedOrder?.RequirementId) {
             setAttachList(inner.Attachment);
           }
         });
       } else if (props?.selectedOrder?.SectionLevel == 2) {
         section?.InnerRequirement?.map((inner) => {
           inner.InnerRequirement2?.map((pl) => {
-            if (pl.RequirementId == props?.selectedOrder?.SectionId) {
+            if (pl.RequirementId == props?.selectedOrder?.RequirementId) {
               setAttachList(pl.Attachment);
             }
           });
         });
       }
     });
+    console.log("KHAAS", props?.selectedOrder);
   }, [props?.selectedOrder, props?.completeSections]);
+
+  useEffect(() => {
+    setImplementationDesc(props?.selectedOrder?.ReqImpl);
+    setSubSectionDesc(props?.selectedOrder?.ReqDesc);
+  }, [props?.selectedOrder]);
 
   const handleOpen = () => {
     setShowAttach(true);
@@ -200,7 +220,6 @@ function RequireRightSection(props) {
     selectedDocumentName,
     description
   ) => {
-    console.log("ATTACHMENT", selectedFile, selectedDocumentName, description);
     var n = selectedFile.value.name.lastIndexOf(".");
     var result = selectedFile.value.name.substring(n + 1);
 
@@ -272,69 +291,51 @@ function RequireRightSection(props) {
   };
 
   useEffect(() => {
-    let attachmentsList = attachList.map((attach) => {
+    let attachmentsList = attachList?.map((attach) => {
       return {
-        docName: attach.DocName,
-        docId: attach.DocId,
-        status: attach.status,
-        sAttachType: attach.sAttachType,
-        sAttachName: attach.AttachmentName,
-        requirementId: attach.requirementId,
+        docName: attach?.DocName,
+        docId: attach?.DocId,
+        status: attach?.status,
+        sAttachType: attach?.sAttachType,
+        sAttachName: attach?.AttachmentName,
+        requirementId: attach?.requirementId,
       };
     });
 
     let jsonBody = {
-      processDefId: props.openProcessID,
-      processState: props.openProcessType,
+      processDefId: props?.openProcessID,
+      processState: props?.openProcessType,
       reqList: [
         {
-          reqName: props?.selectedOrder?.SectionName,
-          reqId: props?.selectedOrder?.SectionId,
-          reqDesc: "",
-          reqImpl: "",
+          reqName: props?.selectedOrder?.RequirementName,
+          reqId: props?.selectedOrder?.RequirementId,
+          reqDesc: subSectionDesc,
+          reqImpl: implementationDesc,
           priority: 1,
-          attachmentList: [...attachmentsList],
+          attachmentList: attachmentsList,
         },
       ],
     };
-
     if (saveCancelStatus.SaveClicked === true) {
-      //code commented on 21 June 2022 for BugId 110964
-      // alert('HEEEELLOOO');
       axios
         .post(SERVER_URL + ENDPOINT_REGISTER_PROCESS, jsonBody)
         .then((res) => {
-          // setMapList(
-          //   res?.data?.map((elem) => ({
-          //     assocExtObjId: elem.assocExtObjId,
-          //     assocVarFieldId: elem.assocVarFieldId,
-          //     assocVarId: elem.assocVarId,
-          //     assocVarName: elem.assocVarName,
-          //     dataFieldId: elem.dataFieldId,
-          //     dataFieldLength: elem.dataFieldLength,
-          //     dataFieldType: elem.dataFieldType,
-          //     fieldName: elem.fieldName,
-          //     m_arrProcessVarList: elem.m_arrProcessVarList,
-          //     m_bShowConstantTextBox: elem.m_bShowConstantTextBox,
-          //     m_bchkFieldName: elem.m_bchkFieldName,
-          //     m_chkbxSelectAll: elem.m_chkbxSelectAll,
-          //     m_strLocalConstant: elem.m_strLocalConstant,
-          //     m_strSelectedProcessVar: elem.m_strSelectedProcessVar,
-          //   }))
-          // );
-          // res?.data?.forEach((elem, i) => {
-          //   const selData =
-          //     localLoadedActivityPropertyData?.ActivityProperty
-          //       ?.sharePointArchiveInfo?.folderInfo?.fieldMappingInfoList[i]
-          //       .assoFieldMapList[0].assocVarName;
-          //   setMapProcessVar((mapProcessVar) => [...mapProcessVar, selData]);
-          // });
+          console.log("data", res.data);
+          dispatch(setSave({ SaveClicked: false, CancelClicked: false }));
         })
         .catch((err) => {
           console.log("AXIOS ERROR: ", err);
         });
     }
-  }, [saveCancelStatus]);
+  }, [saveCancelStatus.SaveClicked]);
+
+  const changeFieldDetails = (e, name) => {
+    if (name === "textOne") {
+      setSubSectionDesc(e.target.innerText);
+    } else if (name === "textTwo") {
+      setImplementationDesc(e.target.innerText);
+    }
+  };
 
   return (
     <div>
@@ -351,7 +352,7 @@ function RequireRightSection(props) {
               marginBottom: "10px",
             }}
           >
-            {props?.selectedOrder?.SectionName}
+            {props?.selectedOrder?.RequirementName}
           </p>
           <p style={{ fontSize: "var(--title_text_font_size)" }}>
             <span
@@ -361,19 +362,17 @@ function RequireRightSection(props) {
                 marginRight: "10px",
               }}
             >{`Subsection Level ${props?.selectedOrder?.SectionLevel}:`}</span>
-            {props?.selectedOrder?.SectionName}
+            {props?.selectedOrder?.RequirementName}
           </p>
+          {console.log("EDITOR shivani", props?.selectedOrder?.ReqDesc)}
           <SunEditor
-            id="add_description_sunEditor"
+            id="textOne_description_sunEditor"
             width="100%"
             customHeight="6rem"
             placeholder="Write Here"
             callLocation="processProperties"
-            // value={
-            //   localLoadedActivityPropertyData?.ActivityProperty?.actGenPropInfo
-            //     ?.genPropInfo?.description
-            // }
-            // getValue={(e) => changeBasicDetails(e, "descBasicDetails")}
+            value={subSectionDesc}
+            getValue={(e) => changeFieldDetails(e, "textOne")}
           />
           <p
             style={{
@@ -385,16 +384,13 @@ function RequireRightSection(props) {
             Implementation Summary
           </p>
           <SunEditor
-            id="add_description_sunEditor"
+            id="textTwo_description_sunEditor"
             width="100%"
             customHeight="6rem"
             placeholder="Write Here"
             callLocation="processProperties"
-            // value={
-            //   localLoadedActivityPropertyData?.ActivityProperty?.actGenPropInfo
-            //     ?.genPropInfo?.description
-            // }
-            // getValue={(e) => changeBasicDetails(e, "descBasicDetails")}
+            value={implementationDesc}
+            getValue={(e) => changeFieldDetails(e, "textTwo")}
           />
         </div>
         {/* ----------------------------Attachments Table------------------------------- */}
@@ -415,6 +411,7 @@ function RequireRightSection(props) {
                     ? arabicStyles.addAttachBtn
                     : styles.addAttachBtn
                 }
+                disabled={isReadOnly}
               >
                 {t("addAttachment")}
               </button>
@@ -554,13 +551,14 @@ function RequireRightSection(props) {
         <button
           id="propertiesSaveButton"
           // disabled={saveCancelDisabled}
-          // onClick={handleSaveChanges}
+          onClick={() => dispatch(setSave({ SaveClicked: true }))}
           className={
             // saveCancelDisabled
             //   ? "properties_disabledButton"
             //   :
             "properties_saveButton"
           }
+          disabled={isReadOnly}
         >
           {t("saveChanges")}
         </button>

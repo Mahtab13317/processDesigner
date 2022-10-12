@@ -4,18 +4,19 @@
 // #BugDescription - Added check so that cost field should only take numeric values.
 // #BugID - 112369
 // #BugDescription - Added provision to add constants in list with constants already made.
+// #BugID - 115601
+// #BugDescription - Added constants functionality for fields Date, days, mins, hours, secs and handled multipe checks.
+// #BugID - 115604
+// #BugDescription - Added constants functionality for email popup for reminder and handled multipe checks.
+// #BugID - 115634
+// #BugDescription - Added checks and made changes for secondary DB flag.
+// #BugID - 114867
+// #BugDescription - Added checks and made changes for secondary DB flag.
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "./index.module.css";
 import arabicStyles from "./ArabicStyles.module.css";
-import {
-  MenuItem,
-  Radio,
-  Checkbox,
-  InputBase,
-  Box,
-  Button,
-} from "@material-ui/core";
+import { MenuItem, Radio, Checkbox, InputBase } from "@material-ui/core";
 import DeleteOutlinedIcon from "@material-ui/icons/DeleteOutlined";
 import {
   operationTypeOptions,
@@ -86,7 +87,7 @@ function AddOperations(props) {
     deleteOperation,
     isRuleBeingCreated,
     setIsRuleBeingModified,
-    isProcessReadOnly,
+    isReadOnly,
     registeredFunctions,
     operationsAllowed,
     workstepList,
@@ -96,6 +97,7 @@ function AddOperations(props) {
     showDelIcon,
     variablesWithRights,
   } = props;
+
   const dispatch = useDispatch();
   const loadedProcessDataObj = store.getState("loadedProcessData"); //current processdata clicked
   const [loadedProcessData] = useGlobalState("loadedProcessData");
@@ -112,7 +114,7 @@ function AddOperations(props) {
   const [value1, setValue1] = useState(""); // State to store the value of value 1 dropdown.
   const [operator, setOperator] = useState(""); // State to store the value of operator dropdown.
   const [value2, setValue2] = useState(""); // State to store the value of value 2 dropdown.
-  const [calendarType, setCalendarType] = useState(""); // State to store the value of calendar type dropdown.
+  const [calendarType, setCalendarType] = useState(Y_FLAG); // State to store the value of calendar type dropdown.
   const [triggerValue, setTriggerValue] = useState(""); // State to save value of the trigger selected.
   const [isModalOpen, setIsModalOpen] = useState(false); // State that manages modal.
   const [operandSelected, setOperandSelected] = useState(""); // State to save the value of operand selected in set and execute.
@@ -177,8 +179,17 @@ function AddOperations(props) {
     priority: "",
     subject: "",
     body: "",
+    type1: "",
+    type2: "",
+    type3: "",
+    type4: "",
   });
   const [repeatAfterStatus, setRepeatAfterStatus] = useState(false);
+  const [isDateConst, setIsDateConst] = useState(false);
+  const [isDaysConst, setIsDaysConst] = useState(false);
+  const [isHourConst, setIsHourConst] = useState(false);
+  const [isMinConst, setIsMinConst] = useState(false);
+  const [isSecConst, setIsSecConst] = useState(false);
 
   //mahtab code ends here
 
@@ -224,6 +235,11 @@ function AddOperations(props) {
     AUDIT_OPERATION_TYPE,
     CALL_OPERATION_TYPE,
   ];
+
+  useEffect(() => {
+    setIsField1Const(false);
+    setIsField2Const(false);
+  }, [isRuleBeingCreated]);
 
   // Function that gets called when variableData prop changes.
   useEffect(() => {
@@ -275,7 +291,7 @@ function AddOperations(props) {
       setTriggerListData(triggerList);
     }
     setOperator("0");
-  }, []);
+  }, [loadedProcessData.TriggerList]);
 
   // Function that runs and selects the first available option in a route to operation dropdown.
   const setFirstRouteOption = () => {
@@ -476,23 +492,9 @@ function AddOperations(props) {
         );
       }
     }
+
     return fieldArray;
   };
-
-  // const filterOtherMScopeVariables = (variables) => {
-  //   const filteredArray =
-  //     variables &&
-  //     variables.filter((element) => {
-  //       if (element.VariableScope === "M") {
-  //         return (
-  //           element.VariableId === "32" ||
-  //           element.VariableId === "42" ||
-  //           element.VariableId === "10022"
-  //         );
-  //       }
-  //     });
-  //   return filteredArray;
-  // };
 
   // Function to show field according to operation type.
   const setFieldValues = (element) => {
@@ -564,6 +566,10 @@ function AddOperations(props) {
           priority: element?.mailTrigInfo?.mailInfo?.priority,
           subject: element?.mailTrigInfo?.mailInfo?.subject,
           body: element?.mailTrigInfo?.mailInfo?.message,
+          type1: element?.mailTrigInfo?.mailInfo?.variableIdFrom,
+          type2: element?.mailTrigInfo?.mailInfo?.variableIdTo,
+          type3: element?.mailTrigInfo?.mailInfo?.variableIdCC,
+          type4: element?.mailTrigInfo?.mailInfo?.variableIdBCC,
         });
         break;
       case DISTRIBUTE_TO_OPERATION_TYPE:
@@ -587,13 +593,9 @@ function AddOperations(props) {
           paramType = OPTION_VALUE_1;
         }
       });
-
-    getFieldListing() &&
-      getFieldListing().forEach((element) => {
-        if (element.VariableName === paramName) {
-          paramType = OPTION_VALUE_2;
-        }
-      });
+    if (paramType === "") {
+      paramType = OPTION_VALUE_2;
+    }
     return paramType;
   };
 
@@ -648,7 +650,15 @@ function AddOperations(props) {
     } else if (value === OPTION_VALUE_2) {
       firstOption = getFieldListing() && getFieldListing()[0].VariableName;
     }
+    setLocalRuleData((prevData) => {
+      let temp = { ...prevData };
+      temp.ruleOpList[index].param1 = firstOption;
+      return temp;
+    });
     setSelectedRouteToValue(firstOption);
+    if (isRuleBeingCreated === false) {
+      setIsRuleBeingModified(true);
+    }
   };
 
   // Function that handles the change in route to value.
@@ -659,6 +669,9 @@ function AddOperations(props) {
       temp.ruleOpList[index].param1 = event.target.value;
       return temp;
     });
+    if (isRuleBeingCreated === false) {
+      setIsRuleBeingModified(true);
+    }
   };
 
   // Function that handles the change in audit percentage.
@@ -760,14 +773,27 @@ function AddOperations(props) {
     if (!checkDuplicateValues(event, "param2")) {
       const { value } = event.target;
       setDateValue(value);
+
       setLocalRuleData((prevData) => {
         let temp = { ...prevData };
+
         temp.ruleOpList[index].param2 = value;
-        temp.ruleOpList[index].variableId_2 = getVarDetails(value).VariableId;
-        temp.ruleOpList[index].varFieldId_2 = getVarDetails(value).VarFieldId;
-        temp.ruleOpList[index].extObjID2 = getVarDetails(value).ExtObjectId;
+
+        if (localStorage.getItem("dateConst") === "true") {
+          temp.ruleOpList[index].variableId_2 = "0";
+          temp.ruleOpList[index].varFieldId_2 = "0";
+          temp.ruleOpList[index].extObjID2 = "0";
+          temp.ruleOpList[index].type2 = "C";
+        } else {
+          temp.ruleOpList[index].variableId_2 = getVarDetails(value).VariableId;
+          temp.ruleOpList[index].varFieldId_2 = getVarDetails(value).VarFieldId;
+          temp.ruleOpList[index].extObjID2 = getVarDetails(value).ExtObjectId;
+          temp.ruleOpList[index].type2 = "";
+        }
+
         return temp;
       });
+
       if (isRuleBeingCreated === false) {
         setIsRuleBeingModified(true);
       }
@@ -775,7 +801,6 @@ function AddOperations(props) {
   };
 
   //added by mahtab to get all variable details
-
   const getVarDetails = (name) => {
     let temp = {};
     variableData?.forEach((item) => {
@@ -795,15 +820,32 @@ function AddOperations(props) {
       setLocalRuleData((prevData) => {
         let temp = { ...prevData };
         temp.ruleOpList[index].durationInfo.paramDays = value;
-        getVarDetails(value);
-        temp.ruleOpList[index].durationInfo.variableIdDays =
-          getVarDetails(value).VariableId;
-        temp.ruleOpList[index].durationInfo.varFieldIdDays =
-          getVarDetails(value).VarFieldId;
+
+        let tempConst = false;
+        if (isConstList(value)) {
+          tempConst = true;
+        } else {
+          tempConst = false;
+        }
+
+        if (localStorage.getItem("daysConst") === "true" || tempConst) {
+          temp.ruleOpList[index].durationInfo.variableIdDays = "0";
+          temp.ruleOpList[index].durationInfo.varFieldIdDays = "0";
+          temp.ruleOpList[index].durationInfo.m_strExtObjID_Days = "0";
+          temp.ruleOpList[index].durationInfo.m_strDataType_Days = "C";
+        } else {
+          temp.ruleOpList[index].durationInfo.variableIdDays =
+            getVarDetails(value).VariableId;
+          temp.ruleOpList[index].durationInfo.varFieldIdDays =
+            getVarDetails(value).VarFieldId;
+          temp.ruleOpList[index].durationInfo.m_strExtObjID_Days =
+            getVarDetails(value).ExtObjectId;
+          temp.ruleOpList[index].durationInfo.m_strDataType_Days = "";
+        }
+
         return temp;
       });
     }
-
     if (isRuleBeingCreated === false) {
       setIsRuleBeingModified(true);
     }
@@ -817,10 +859,21 @@ function AddOperations(props) {
       setLocalRuleData((prevData) => {
         let temp = { ...prevData };
         temp.ruleOpList[index].durationInfo.paramHours = value;
-        temp.ruleOpList[index].durationInfo.variableIdHours =
-          getVarDetails(value).VariableId;
-        temp.ruleOpList[index].durationInfo.varFieldIdHours =
-          getVarDetails(value).VarFieldId;
+        if (localStorage.getItem("hourConst") === "true") {
+          temp.ruleOpList[index].durationInfo.variableIdHours = "0";
+          temp.ruleOpList[index].durationInfo.varFieldIdHours = "0";
+          temp.ruleOpList[index].durationInfo.m_strExtObjID_Hours = "0";
+          temp.ruleOpList[index].durationInfo.m_strType_Hours = "C";
+        } else {
+          temp.ruleOpList[index].durationInfo.variableIdHours =
+            getVarDetails(value).VariableId;
+          temp.ruleOpList[index].durationInfo.varFieldIdHours =
+            getVarDetails(value).VarFieldId;
+          temp.ruleOpList[index].durationInfo.m_strExtObjID_Hours =
+            getVarDetails(value).ExtObjectId;
+          temp.ruleOpList[index].durationInfo.m_strType_Hours = "";
+        }
+
         return temp;
       });
     }
@@ -837,10 +890,22 @@ function AddOperations(props) {
       setLocalRuleData((prevData) => {
         let temp = { ...prevData };
         temp.ruleOpList[index].durationInfo.paramMinutes = value;
-        temp.ruleOpList[index].durationInfo.variableIdMinutes =
-          getVarDetails(value).VariableId;
-        temp.ruleOpList[index].durationInfo.varFieldIdMinutes =
-          getVarDetails(value).VarFieldId;
+
+        if (localStorage.getItem("minConst") === "true") {
+          temp.ruleOpList[index].durationInfo.variableIdMinutes = "0";
+          temp.ruleOpList[index].durationInfo.varFieldIdMinutes = "0";
+          temp.ruleOpList[index].durationInfo.m_strExtObjID_Minutes = "0";
+          temp.ruleOpList[index].durationInfo.m_strType_Minutes = "C";
+        } else {
+          temp.ruleOpList[index].durationInfo.variableIdMinutes =
+            getVarDetails(value).VariableId;
+          temp.ruleOpList[index].durationInfo.varFieldIdMinutes =
+            getVarDetails(value).VarFieldId;
+          temp.ruleOpList[index].durationInfo.m_strExtObjID_Minutes =
+            getVarDetails(value).ExtObjectId;
+          temp.ruleOpList[index].durationInfo.m_strType_Minutes = "";
+        }
+
         return temp;
       });
     }
@@ -857,10 +922,21 @@ function AddOperations(props) {
       setLocalRuleData((prevData) => {
         let temp = { ...prevData };
         temp.ruleOpList[index].durationInfo.paramSeconds = value;
-        temp.ruleOpList[index].durationInfo.variableIdSeconds =
-          getVarDetails(value).VariableId;
-        temp.ruleOpList[index].durationInfo.varFieldIdSeconds =
-          getVarDetails(value).VarFieldId;
+        if (localStorage.getItem("secConst") === "true") {
+          temp.ruleOpList[index].durationInfo.variableIdSeconds = "0";
+          temp.ruleOpList[index].durationInfo.varFieldIdSeconds = "0";
+          temp.ruleOpList[index].durationInfo.m_strExtObjID_Seconds = "0";
+          temp.ruleOpList[index].durationInfo.m_strDataType_Seconds = "C";
+        } else {
+          temp.ruleOpList[index].durationInfo.variableIdSeconds =
+            getVarDetails(value).VariableId;
+          temp.ruleOpList[index].durationInfo.varFieldIdSeconds =
+            getVarDetails(value).VarFieldId;
+          temp.ruleOpList[index].durationInfo.m_strExtObjID_Seconds =
+            getVarDetails(value).ExtObjectId;
+          temp.ruleOpList[index].durationInfo.m_strDataType_Seconds = "";
+        }
+
         return temp;
       });
     }
@@ -897,15 +973,36 @@ function AddOperations(props) {
     checkOperationType(localRuleData.ruleOpList[index].opType);
     setField(localRuleData.ruleOpList[index].param1);
     setOperator(localRuleData.ruleOpList[index].operator);
-    if (isValueDateType(localRuleData.ruleOpList[index].param2).isValDateType) {
-      if (localRuleData.ruleOpList[index].type2 === "C") {
-        setValue1(
-          isValueDateType(localRuleData.ruleOpList[index].param2).convertedDate
-        );
+
+    if (props.currentTab === "Reminder") {
+      if (
+        isValueDateType(localRuleData.ruleOpList[index].param2).isValDateType
+      ) {
+        if (localRuleData.ruleOpList[index].type2 === "C") {
+          setDateValue(
+            isValueDateType(localRuleData.ruleOpList[index].param2)
+              .convertedDate
+          );
+          setIsDateConst(true);
+        }
+      } else {
+        setDateValue(localRuleData.ruleOpList[index].param2);
       }
     } else {
-      setValue1(localRuleData.ruleOpList[index].param2);
+      if (
+        isValueDateType(localRuleData.ruleOpList[index].param2).isValDateType
+      ) {
+        if (localRuleData.ruleOpList[index].type2 === "C") {
+          setValue1(
+            isValueDateType(localRuleData.ruleOpList[index].param2)
+              .convertedDate
+          );
+        }
+      } else {
+        setValue1(localRuleData.ruleOpList[index].param2);
+      }
     }
+
     if (isValueDateType(localRuleData.ruleOpList[index].param3).isValDateType) {
       if (localRuleData.ruleOpList[index].type3 === "C") {
         setValue2(
@@ -950,6 +1047,68 @@ function AddOperations(props) {
       }
     }
 
+    if (
+      localRuleData.ruleOpList[index]?.durationInfo?.variableIdDays === "0" &&
+      localRuleData.ruleOpList[index]?.durationInfo?.varFieldIdDays === "0"
+    ) {
+      if (
+        isConstList(localRuleData.ruleOpList[index]?.durationInfo?.paramDays)
+      ) {
+        setIsDaysConst(false);
+      } else {
+        setIsDaysConst(true);
+      }
+    } else {
+      setIsDaysConst(false);
+    }
+
+    if (
+      localRuleData.ruleOpList[index]?.durationInfo?.variableIdHours === "0" &&
+      localRuleData.ruleOpList[index]?.durationInfo?.varFieldIdHours === "0"
+    ) {
+      if (
+        isConstList(localRuleData.ruleOpList[index]?.durationInfo?.paramHours)
+      ) {
+        setIsHourConst(false);
+      } else {
+        setIsHourConst(true);
+      }
+    } else {
+      setIsHourConst(false);
+    }
+
+    if (
+      localRuleData.ruleOpList[index]?.durationInfo?.variableIdMinutes ===
+        "0" &&
+      localRuleData.ruleOpList[index]?.durationInfo?.varFieldIdMinutes === "0"
+    ) {
+      if (
+        isConstList(localRuleData.ruleOpList[index]?.durationInfo?.paramMinutes)
+      ) {
+        setIsMinConst(false);
+      } else {
+        setIsMinConst(true);
+      }
+    } else {
+      setIsMinConst(false);
+    }
+
+    if (
+      localRuleData.ruleOpList[index]?.durationInfo?.variableIdSeconds ===
+        "0" &&
+      localRuleData.ruleOpList[index]?.durationInfo?.varFieldIdSeconds === "0"
+    ) {
+      if (
+        isConstList(localRuleData.ruleOpList[index]?.durationInfo?.paramSeconds)
+      ) {
+        setIsSecConst(false);
+      } else {
+        setIsSecConst(true);
+      }
+    } else {
+      setIsSecConst(false);
+    }
+
     setCalendarType(localRuleData.ruleOpList[index].ruleCalFlag);
     setFieldValues(localRuleData.ruleOpList[index]);
     if (
@@ -968,16 +1127,21 @@ function AddOperations(props) {
       setValue1DropdownOptions([...secondaryDBFlagOptions]);
     } else {
       setIsDBFlagSelected(false);
+      getDropdownOptions(localRuleData.ruleOpList[index].param1);
     }
   }, [localRuleData?.ruleOpList]);
 
   // Function that runs when the component mounts.
   useEffect(() => {
-    getDropdownOptions(localRuleData.ruleOpList[index].param1);
-    const variableType = findVariableType(
-      localRuleData.ruleOpList[index].param2
-    );
-    getFieldValues(variableType);
+    if (
+      !localRuleData.ruleOpList[index].param1 === ADD_OPERATION_SECONDARY_DBFLAG
+    ) {
+      getDropdownOptions(localRuleData.ruleOpList[index].param1);
+      const variableType = findVariableType(
+        localRuleData.ruleOpList[index].param2
+      );
+      getFieldValues(variableType);
+    }
   }, [dropdownOptions, localRuleData.ruleOpList]);
 
   // Function that gets the dropdown options and list of operator based on the field selected.
@@ -985,7 +1149,6 @@ function AddOperations(props) {
     const variableType = findVariableType(value);
     const operatorList = getOperatorOptions(variableType);
     setOperatorList([...operatorList]);
-
     if (+variableType === STRING_VARIABLE_TYPE) {
       const filteredParam1Options = dropdownOptions;
       setValue1DropdownOptions(filteredParam1Options);
@@ -1008,9 +1171,14 @@ function AddOperations(props) {
 
   // Function that runs when the selected rule changes.
   useEffect(() => {
-    const emptyArr = [];
-    setValue1DropdownOptions([...emptyArr]);
-    getDropdownOptions(localRuleData.ruleOpList[index].param1);
+    if (
+      !localRuleData.ruleOpList[index].param1 === ADD_OPERATION_SECONDARY_DBFLAG
+    ) {
+      const emptyArr = [];
+      setValue1DropdownOptions([...emptyArr]);
+
+      getDropdownOptions(localRuleData.ruleOpList[index].param1);
+    }
   }, [selectedRule]);
 
   // Function that runs when the operation type changes.
@@ -1149,7 +1317,6 @@ function AddOperations(props) {
   const onSelectType = (event) => {
     const { value } = event.target;
     emptyAllDataFields();
-
     if (isRuleBeingCreated === false) {
       setIsRuleBeingModified(true);
     }
@@ -1259,7 +1426,7 @@ function AddOperations(props) {
       setValue1("");
       setValue2("");
       setOperator("");
-      setCalendarType("");
+      // setCalendarType("");
       setField(event.target.value);
       let variableScope, extObjId, varFieldId, variableId;
       setLocalRuleData((prevData) => {
@@ -1305,9 +1472,19 @@ function AddOperations(props) {
       if (event.target.value === ADD_OPERATION_SECONDARY_DBFLAG) {
         setIsDBFlagSelected(true);
         setValue1DropdownOptions([...secondaryDBFlagOptions]);
+        setLocalRuleData((prevState) => {
+          let temp = { ...prevState };
+          temp.ruleOpList[index].param2 = "U";
+          return temp;
+        });
         setValue1(secondaryDBFlagOptions && secondaryDBFlagOptions[0].value);
       } else {
         setIsDBFlagSelected(false);
+        setLocalRuleData((prevState) => {
+          let temp = { ...prevState };
+          temp.ruleOpList[index].param2 = "";
+          return temp;
+        });
 
         let variableType = findVariableType(event.target.value);
         const operatorList = getOperatorOptions(variableType);
@@ -1415,6 +1592,14 @@ function AddOperations(props) {
     }
   };
 
+  const isValueSecondaryDBFlag = (value) => {
+    let isValueDBFlag = false;
+    if (value === ADD_OPERATION_SECONDARY_DBFLAG) {
+      isValueDBFlag = true;
+    }
+    return isValueDBFlag;
+  };
+
   // Function that runs when the user changes the first value dropdown for a SET operation.
   const handleValue1Change = (event) => {
     if (!checkDuplicateValues(event, "param2")) {
@@ -1442,13 +1627,29 @@ function AddOperations(props) {
       if (isField1Const) {
         variableScope = "C";
       }
+      console.log(
+        "333",
+        "VALUESSSS",
+        event.target.value,
+        extObjId,
+        varFieldId,
+        variableId
+      );
+
       setLocalRuleData((prevData) => {
         let temp = { ...prevData };
         temp.ruleOpList[index].param2 = event.target.value;
-        temp.ruleOpList[index].extObjID2 = extObjId;
-        temp.ruleOpList[index].varFieldId_2 = varFieldId;
-        temp.ruleOpList[index].variableId_2 = variableId;
-        temp.ruleOpList[index].type2 = variableScope ? variableScope : "C";
+        temp.ruleOpList[index].extObjID2 =
+          extObjId === "" || extObjId === undefined ? "0" : extObjId;
+        temp.ruleOpList[index].varFieldId_2 =
+          varFieldId === "" || varFieldId === undefined ? "0" : varFieldId;
+        temp.ruleOpList[index].variableId_2 =
+          variableId === "" || variableId === undefined ? "0" : variableId;
+        temp.ruleOpList[index].type2 = variableScope
+          ? variableScope
+          : isValueSecondaryDBFlag(localRuleData.ruleOpList[index].param1)
+          ? ""
+          : "C";
         /*  if(props.currentTab==="Reminder")
         {
           temp.ruleOpList[index].type1="V";
@@ -1485,6 +1686,26 @@ function AddOperations(props) {
     }
 
     return isConstantIncluded;
+  };
+
+  const isConstList = (value) => {
+    let isConstantList = false;
+    if (value !== "") {
+      dropdownOptions?.forEach((element) => {
+        if (element.VariableName === value && element.VariableScope === "C") {
+          isConstantList = true;
+        }
+      });
+    }
+
+    return isConstantList;
+  };
+
+  const addConstants = () => {
+    constantsData.forEach((element) => {
+      const obj = { VariableName: element.ConstaName, VariableScope: "C" };
+      //temp.unshift()
+    });
   };
 
   // Function that runs when the user changes the second value dropdown for a SET operation.
@@ -1663,9 +1884,62 @@ function AddOperations(props) {
   //call back function to set emailData of popup email
 
   const passEmailData = (data) => {
+    console.log("777", "data", data);
     setParentEmailData(data);
     setLocalRuleData((prevData) => {
       let temp = { ...prevData };
+      let varIdTo;
+      let varFieldTo;
+      let extObjTo;
+      let varIdFrom;
+      let varFieldFrom;
+      let extObjFrom;
+      let varIdCC;
+      let varFieldCC;
+      let extObjCC;
+      let varIdBCC;
+      let varFieldBCC;
+      let extObjBCC;
+
+      if (JSON.parse(data.type1) == true) {
+        varIdFrom = "0";
+        varFieldFrom = "0";
+        extObjFrom = "0";
+      } else {
+        varIdFrom = getVarDetails(data.from).VariableId;
+        varFieldFrom = getVarDetails(data.from).VarFieldId;
+        extObjFrom = getVarDetails(data.from).ExtObjectId;
+      }
+
+      if (JSON.parse(data.type2) == true) {
+        varIdTo = "0";
+        varFieldTo = "0";
+        extObjTo = "0";
+      } else {
+        varIdTo = getVarDetails(data.to).VariableId;
+        varFieldTo = getVarDetails(data.to).VarFieldId;
+        extObjTo = getVarDetails(data.to).ExtObjectId;
+      }
+
+      if (JSON.parse(data.type3) == true) {
+        varIdCC = "0";
+        varFieldCC = "0";
+        extObjCC = "0";
+      } else {
+        varIdCC = getVarDetails(data.cc).VariableId;
+        varFieldCC = getVarDetails(data.cc).VarFieldId;
+        extObjCC = getVarDetails(data.cc).ExtObjectId;
+      }
+
+      if (JSON.parse(data.type4) == true) {
+        varIdBCC = "0";
+        varFieldBCC = "0";
+        extObjBCC = "0";
+      } else {
+        varIdBCC = getVarDetails(data.bcc).VariableId;
+        varFieldBCC = getVarDetails(data.bcc).VarFieldId;
+        extObjBCC = getVarDetails(data.bcc).ExtObjectId;
+      }
 
       let mailInfo = {
         toUser: data.to,
@@ -1675,25 +1949,29 @@ function AddOperations(props) {
         priority: data.priority,
         subject: data.subject,
         message: data.body,
-        variableIdTo: getVarDetails(data.to).VariableId,
-        varFieldIdTo: getVarDetails(data.to).VarFieldId,
-        extObjIDTo: getVarDetails(data.to).ExtObjectId,
-        variableIdFrom: getVarDetails(data.from).VariableId,
-        varFieldIdFrom: getVarDetails(data.from).VarFieldId,
-        extObjIDFrom: getVarDetails(data.from).ExtObjectId,
-        variableIdCC: getVarDetails(data.cc).VariableId,
-        varFieldIdCC: getVarDetails(data.cc).VarFieldId,
-        extObjIDCC: getVarDetails(data.cc).ExtObjectId,
-        variableIdBCC: getVarDetails(data.bcc).VariableId,
-        varFieldIdBCC: getVarDetails(data.bcc).VarFieldId,
-        extObjIDBCC: getVarDetails(data.bcc).ExtObjectId,
+        variableIdTo: varIdTo,
+        varFieldIdTo: varFieldTo,
+        extObjIDTo: extObjTo,
+        variableIdFrom: varIdFrom,
+        varFieldIdFrom: varFieldFrom,
+        extObjIDFrom: extObjFrom,
+        variableIdCC: varIdCC,
+        varFieldIdCC: varFieldCC,
+        extObjIDCC: extObjCC,
+        variableIdBCC: varIdBCC,
+        varFieldIdBCC: varFieldBCC,
+        extObjIDBCC: extObjBCC,
       };
 
       temp.ruleOpList[index].mailTrigInfo = { mailInfo: mailInfo };
-
+      console.log("123", "temp", temp);
       return temp;
     });
   };
+
+  const dateList = getFieldListing().filter(
+    (element) => +element.VariableType === DATE_VARIABLE_TYPE
+  );
 
   return (
     <div
@@ -1720,46 +1998,51 @@ function AddOperations(props) {
           {
             //updated by mahtab in dropdown
           }
-          <CustomizedDropdown
-            id="AR_Operation_Type_Dropdown"
-            disabled={isProcessReadOnly}
-            className={
-              direction === RTL_DIRECTION
-                ? arabicStyles.typeDropdown
-                : styles.typeDropdown
-            }
-            value={
-              props.currentTab == "Reminder"
-                ? REMINDER_OPERATION_TYPE
-                : operationType
-            }
-            onChange={(event) => onSelectType(event)}
-            validationBoolean={checkValidation}
-            validationBooleanSetterFunc={setCheckValidation}
-            showAllErrorsSetterFunc={setDoesSelectedRuleHaveErrors}
-            maxHeight="10rem"
-          >
-            {operationTypeOptions
-              .filter((item) => operationsAllowed.includes(item.value))
-              .map((element) => {
-                return (
-                  <MenuItem
-                    className={styles.menuItemStyles}
-                    key={element.value}
-                    value={element.value}
-                  >
-                    {element.label}
-                  </MenuItem>
-                );
-              })}
-          </CustomizedDropdown>
-          {noFieldOperations.includes(operationType) && !isProcessReadOnly ? (
-            <DeleteOutlinedIcon
-              id="AR_Delete_Button"
-              className={styles.noFieldDeleteIcon}
-              onClick={() => deleteOperation(index)}
-            />
-          ) : null}
+          <div className={styles.flexColumn}>
+            <p className={styles.operationsLabel}>{t("type")}</p>
+            <CustomizedDropdown
+              id="AR_Operation_Type_Dropdown"
+              disabled={isReadOnly}
+              className={
+                direction === RTL_DIRECTION
+                  ? arabicStyles.typeDropdown
+                  : styles.typeDropdown
+              }
+              value={
+                props.currentTab === "Reminder"
+                  ? REMINDER_OPERATION_TYPE
+                  : operationType
+              }
+              onChange={(event) => onSelectType(event)}
+              validationBoolean={checkValidation}
+              validationBooleanSetterFunc={setCheckValidation}
+              showAllErrorsSetterFunc={setDoesSelectedRuleHaveErrors}
+              maxHeight="10rem"
+            >
+              {operationTypeOptions
+                .filter((item) => operationsAllowed.includes(item.value))
+                .map((element) => {
+                  return (
+                    <MenuItem
+                      className={styles.menuItemStyles}
+                      key={element.value}
+                      value={element.value}
+                    >
+                      {element.label}
+                    </MenuItem>
+                  );
+                })}
+            </CustomizedDropdown>
+          </div>
+          {noFieldOperations.includes(operationType) &&
+            showDelIcon &&
+            !isReadOnly && (
+              <DeleteOutlinedIcon
+                id="AR_Delete_Button"
+                className={styles.noFieldDeleteIcon}
+                onClick={() => deleteOperation(index)}
+              />
+            )}
         </div>
       </div>
       {
@@ -1778,7 +2061,7 @@ function AddOperations(props) {
             <p className={styles.operationsLabel}>{t("variable")}</p>
             <CustomizedDropdown
               id="AR_Field_Type_Dropdown"
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               className={
                 direction === RTL_DIRECTION
                   ? arabicStyles.fieldDropdown
@@ -1833,7 +2116,7 @@ function AddOperations(props) {
             <p className={styles.operationsLabel}>{t("value")}</p>
             <CustomizedDropdown
               id="AR_Value1_Dropdown"
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               className={
                 direction === RTL_DIRECTION
                   ? arabicStyles.valueDropdown
@@ -1846,7 +2129,7 @@ function AddOperations(props) {
               showAllErrorsSetterFunc={setDoesSelectedRuleHaveErrors}
               isConstant={isField1Const}
               setIsConstant={(val) => setIsField1Const(val)}
-              showConstValue={true}
+              showConstValue={!isDBFlagSelected}
               constType={findVariableType(
                 localRuleData.ruleOpList[index].param1
               )}
@@ -1899,7 +2182,7 @@ function AddOperations(props) {
                 <p className={styles.operationsLabel}>{t("operator")}</p>
                 <CustomizedDropdown
                   id="AR_Operator_Type_Dropdown"
-                  disabled={isProcessReadOnly}
+                  disabled={isReadOnly}
                   className={
                     direction === RTL_DIRECTION
                       ? arabicStyles.operatorDropdown
@@ -1937,7 +2220,7 @@ function AddOperations(props) {
                 <p className={styles.operationsLabel}>{t("value")}</p>
                 <CustomizedDropdown
                   id="AR_Value2_Dropdown"
-                  disabled={isProcessReadOnly}
+                  disabled={isReadOnly}
                   className={
                     direction === RTL_DIRECTION
                       ? arabicStyles.valueDropdown
@@ -1981,7 +2264,7 @@ function AddOperations(props) {
                 <p className={styles.operationsLabel}>{t("calenderType")}</p>
                 <CustomizedDropdown
                   id="AR_Calendar_Type_Dropdown"
-                  disabled={isDateTypeFieldSelected || isProcessReadOnly}
+                  disabled={isDateTypeFieldSelected || isReadOnly}
                   className={
                     direction === RTL_DIRECTION
                       ? arabicStyles.calendarTypeDropdown
@@ -2000,7 +2283,11 @@ function AddOperations(props) {
                     calendarTypeOptions.map((element) => {
                       return (
                         <MenuItem
-                          className={styles.menuItemStyles}
+                          className={
+                            isDateTypeFieldSelected || isReadOnly
+                              ? styles.menuItemStylesDisabled
+                              : styles.menuItemStyles
+                          }
                           key={element.value}
                           value={element.value}
                         >
@@ -2012,13 +2299,13 @@ function AddOperations(props) {
               </div>
             </div>
           ) : null}
-          {showDelIcon && !isProcessReadOnly ? (
+          {showDelIcon && !isReadOnly && (
             <DeleteOutlinedIcon
               id="AR_Delete_Button"
               className={styles.deleteIcon}
               onClick={() => deleteOperation(index)}
             />
-          ) : null}
+          )}
         </React.Fragment>
       ) : null}
 
@@ -2035,7 +2322,7 @@ function AddOperations(props) {
             <p className={styles.operationsLabel}>{t("trigger")}</p>
             <CustomizedDropdown
               id="AR_Trigger_List_Dropdown"
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               className={
                 direction === RTL_DIRECTION
                   ? arabicStyles.triggerDropdown
@@ -2062,7 +2349,7 @@ function AddOperations(props) {
             </CustomizedDropdown>
           </div>
           <div className={styles.dropdownMargin}>
-            {!isProcessReadOnly ? (
+            {!isReadOnly ? (
               <button
                 id="AR_Define_Trigger_Button"
                 onClick={openModal}
@@ -2084,17 +2371,18 @@ function AddOperations(props) {
             }}
           >
             <TriggerDefinition
+              isModalOpen={isModalOpen}
               hideLeftPanel={true}
               handleCloseModal={handleClose}
             />
           </Modal>
-          {showDelIcon && !isProcessReadOnly ? (
+          {showDelIcon && !isReadOnly && (
             <DeleteOutlinedIcon
               id="AR_Delete_Button"
               className={styles.deleteIcon}
               onClick={() => deleteOperation(index)}
             />
-          ) : null}
+          )}
         </React.Fragment>
       ) : null}
 
@@ -2118,7 +2406,7 @@ function AddOperations(props) {
             {!showCallOp ? (
               <CustomizedDropdown
                 id="AR_Operand_Type_Dropdown"
-                disabled={isProcessReadOnly}
+                disabled={isReadOnly}
                 className={
                   direction === RTL_DIRECTION
                     ? arabicStyles.operandDropdown
@@ -2166,7 +2454,7 @@ function AddOperations(props) {
             <p className={styles.operationsLabel}>{t("applicationName")}</p>
             <CustomizedDropdown
               id="AR_Application_Name_Dropdown"
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               className={
                 direction === RTL_DIRECTION
                   ? arabicStyles.valueDropdown
@@ -2213,7 +2501,7 @@ function AddOperations(props) {
             <p className={styles.operationsLabel}>{t("functionName")}</p>
             <CustomizedDropdown
               id="AR_Field_Type_Dropdown"
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               className={
                 direction === RTL_DIRECTION
                   ? arabicStyles.valueDropdown
@@ -2270,13 +2558,13 @@ function AddOperations(props) {
               />
             </Modal>
           </div>
-          {showDelIcon && !isProcessReadOnly ? (
+          {showDelIcon && !isReadOnly && (
             <DeleteOutlinedIcon
               id="AR_Delete_Button"
               className={styles.deleteIcon}
               onClick={() => deleteOperation(index)}
             />
-          ) : null}
+          )}
         </div>
       ) : null}
 
@@ -2297,7 +2585,7 @@ function AddOperations(props) {
             <p className={styles.operationsLabel}>{t("variableName")}</p>
             <CustomizedDropdown
               id="AR_Assigned_To_Dropdown"
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               className={
                 direction === RTL_DIRECTION
                   ? arabicStyles.assignedToVariableDropdown
@@ -2322,13 +2610,13 @@ function AddOperations(props) {
               })}
             </CustomizedDropdown>
           </div>
-          {showDelIcon && !isProcessReadOnly ? (
+          {showDelIcon && !isReadOnly && (
             <DeleteOutlinedIcon
               id="AR_Delete_Button"
               className={styles.deleteIcon}
               onClick={() => deleteOperation(index)}
             />
-          ) : null}
+          )}
         </div>
       ) : null}
 
@@ -2348,7 +2636,7 @@ function AddOperations(props) {
           >
             <p className={styles.dropdownMargin}></p>
             <Radio
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               id="AO_Worksteps_Option"
               checked={+routeToType === 1}
               onChange={routeToRadioHandler}
@@ -2358,7 +2646,7 @@ function AddOperations(props) {
             />
             <p className={styles.routeToType}>{t("workstep(s)")}</p>
             <Radio
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               id="AO_Variables_Option"
               checked={+routeToType === 2}
               onChange={routeToRadioHandler}
@@ -2369,7 +2657,7 @@ function AddOperations(props) {
             <p className={styles.routeToType}>{t("variable(s)")}</p>
             <CustomizedDropdown
               id="AO_Route_To_Dropdown"
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               className={styles.inputVariableDropdown}
               value={selectedRouteToValue}
               onChange={(event) => routeToHandler(event)}
@@ -2409,13 +2697,13 @@ function AddOperations(props) {
                 : null}
             </CustomizedDropdown>
           </div>
-          {showDelIcon && !isProcessReadOnly ? (
+          {showDelIcon && !isReadOnly && (
             <DeleteOutlinedIcon
               id="AR_Delete_Button"
               className={styles.deleteIcon}
               onClick={() => deleteOperation(index)}
             />
-          ) : null}
+          )}
         </div>
       ) : null}
 
@@ -2447,7 +2735,7 @@ function AddOperations(props) {
                   </p>
                   <CustomizedDropdown
                     id="AO_Escalate_To_Variable_Dropdown"
-                    disabled={isProcessReadOnly}
+                    disabled={isReadOnly}
                     className={
                       direction === RTL_DIRECTION
                         ? arabicStyles.escalateToVariableDropdown
@@ -2488,7 +2776,7 @@ function AddOperations(props) {
                   style={{ alignItems: "center", marginTop: "0.75rem" }}
                 >
                   <Radio
-                    disabled={isProcessReadOnly}
+                    disabled={isReadOnly}
                     id="AO_Escalate_trigger_Define_Mail_Option"
                     checked={+escalateWithTriggerRadio === 1}
                     onChange={escalateToRadioHandler}
@@ -2497,7 +2785,7 @@ function AddOperations(props) {
                   />
                   <p className={styles.routeToType}>{t("defineMail")}</p>
                   <Radio
-                    disabled={isProcessReadOnly}
+                    disabled={isReadOnly}
                     id="AO_Escalate_trigger_Select_Mail_Option"
                     checked={+escalateWithTriggerRadio === 2}
                     onChange={escalateToRadioHandler}
@@ -2557,7 +2845,6 @@ function AddOperations(props) {
                       style={{
                         marginLeft: "10px",
                         marginTop: "-1rem",
-                        
                       }}
                       className={styles.routeToType}
                     >
@@ -2571,7 +2858,7 @@ function AddOperations(props) {
                               ? arabicStyles.textInputField
                               : styles.textInputField
                           }
-                          style={{margin:"0"}}
+                          style={{ margin: "0" }}
                           value={frequencyValue}
                           onChange={(event) => {
                             frequencyValueHandler(event);
@@ -2610,36 +2897,59 @@ function AddOperations(props) {
                   }
                 >
                   <p className={styles.operationsLabel}>{t("Date")}</p>
+                  {/*code updated on 26 September 2022 for BugId 115913*/}
                   <CustomizedDropdown
                     id="AO_Escalate_To_Date_Dropdown"
-                    disabled={isProcessReadOnly}
+                    disabled={isReadOnly}
                     className={
                       direction === RTL_DIRECTION
                         ? arabicStyles.escalateToFieldsDropdown
                         : styles.escalateToFieldsDropdown
                     }
                     value={dateValue}
-                    onChange={(event) => dateValueHandler(event)}
+                    onChange={(event) => {
+                      setTimeout(() => {
+                        dateValueHandler(event);
+                      }, 200);
+                    }}
                     validationBoolean={checkValidation}
                     validationBooleanSetterFunc={setCheckValidation}
                     showAllErrorsSetterFunc={setDoesSelectedRuleHaveErrors}
+                    isConstant={isDateConst}
+                    setIsConstant={(val) => {
+                      setIsDateConst(val);
+                      localStorage.setItem("dateConst", val);
+                    }}
+                    showConstValue={true}
+                    constType="8"
                   >
-                    {getFieldListing()
-                      .filter(
-                        (element) =>
-                          +element.VariableType === DATE_VARIABLE_TYPE
-                      )
-                      .map((element) => {
-                        return (
-                          <MenuItem
-                            className={styles.menuItemStyles}
-                            key={element.VariableName}
-                            value={element.VariableName}
-                          >
-                            {element.VariableName}
-                          </MenuItem>
-                        );
-                      })}
+                    {dateList.length > 0 ? (
+                      getFieldListing()
+                        .filter(
+                          (element) =>
+                            +element.VariableType === DATE_VARIABLE_TYPE
+                        )
+                        .map((element) => {
+                          return (
+                            <MenuItem
+                              className={styles.menuItemStyles}
+                              key={element.VariableName}
+                              value={element.VariableName}
+                            >
+                              {element.VariableName}
+                            </MenuItem>
+                          );
+                        })
+                    ) : (
+                      <MenuItem
+                        className={styles.menuItemStyles}
+                        value=""
+                        disabled
+                        selected
+                      >
+                        {t("noDateTypeVarCreated")}
+                      </MenuItem>
+                    )}
                   </CustomizedDropdown>
                 </div>
                 <div
@@ -2652,24 +2962,43 @@ function AddOperations(props) {
                   <p className={styles.operationsLabel}>{t("days")}</p>
                   <CustomizedDropdown
                     id="AO_Escalate_To_Days_Dropdown"
-                    disabled={isProcessReadOnly}
+                    disabled={isReadOnly}
                     className={
                       direction === RTL_DIRECTION
                         ? arabicStyles.escalateToFieldsDropdown
                         : styles.escalateToFieldsDropdown
                     }
                     value={daysValue}
-                    onChange={(event) => daysValueHandler(event)}
+                    onChange={(event) => {
+                      setTimeout(() => {
+                        daysValueHandler(event);
+                      }, 200);
+                    }}
                     validationBoolean={checkValidation}
                     validationBooleanSetterFunc={setCheckValidation}
                     showAllErrorsSetterFunc={setDoesSelectedRuleHaveErrors}
+                    isConstant={isDaysConst}
+                    setIsConstant={(val) => {
+                      setIsDaysConst(val);
+                      localStorage.setItem("daysConst", val);
+                    }}
+                    showConstValue={true}
+                    constType="3"
                   >
-                    {getFieldListing()
-                      .filter(
-                        (element) =>
-                          +element.VariableType === INTEGER_VARIABLE_TYPE
+                    {dropdownOptions
+                      ?.filter(
+                        (d) =>
+                          (d.VariableScope == "C" ||
+                            d.VariableScope == "U" ||
+                            d.VariableScope != "S") &&
+                          d.VariableType != "8" &&
+                          d.VariableType != "11" &&
+                          d.VariableType != "6" &&
+                          d.VariableId !== "10001" &&
+                          d.VariableId !== "42" &&
+                          d.VariableId !== "10022"
                       )
-                      .map((element) => {
+                      ?.map((element) => {
                         return (
                           <MenuItem
                             className={styles.menuItemStyles}
@@ -2692,24 +3021,43 @@ function AddOperations(props) {
                   <p className={styles.operationsLabel}>{t("hours")}</p>
                   <CustomizedDropdown
                     id="AO_Escalate_To_Hours_Dropdown"
-                    disabled={isProcessReadOnly}
+                    disabled={isReadOnly}
                     className={
                       direction === RTL_DIRECTION
                         ? arabicStyles.escalateToFieldsDropdown
                         : styles.escalateToFieldsDropdown
                     }
                     value={hoursValue}
-                    onChange={(event) => hoursValueHandler(event)}
+                    onChange={(event) => {
+                      setTimeout(() => {
+                        hoursValueHandler(event);
+                      }, 200);
+                    }}
                     validationBoolean={checkValidation}
                     validationBooleanSetterFunc={setCheckValidation}
                     showAllErrorsSetterFunc={setDoesSelectedRuleHaveErrors}
+                    isConstant={isHourConst}
+                    setIsConstant={(val) => {
+                      setIsHourConst(val);
+                      localStorage.setItem("hourConst", val);
+                    }}
+                    showConstValue={true}
+                    constType="3"
                   >
-                    {getFieldListing()
-                      .filter(
-                        (element) =>
-                          +element.VariableType === INTEGER_VARIABLE_TYPE
+                    {dropdownOptions
+                      ?.filter(
+                        (d) =>
+                          (d.VariableScope == "C" ||
+                            d.VariableScope == "U" ||
+                            d.VariableScope != "S") &&
+                          d.VariableType != "8" &&
+                          d.VariableType != "11" &&
+                          d.VariableType != "6" &&
+                          d.VariableId !== "10001" &&
+                          d.VariableId !== "42" &&
+                          d.VariableId !== "10022"
                       )
-                      .map((element) => {
+                      ?.map((element) => {
                         return (
                           <MenuItem
                             className={styles.menuItemStyles}
@@ -2732,24 +3080,43 @@ function AddOperations(props) {
                   <p className={styles.operationsLabel}>{t("minutes")}</p>
                   <CustomizedDropdown
                     id="AO_Escalate_To_Minutes_Dropdown"
-                    disabled={isProcessReadOnly}
+                    disabled={isReadOnly}
                     className={
                       direction === RTL_DIRECTION
                         ? arabicStyles.escalateToFieldsDropdown
                         : styles.escalateToFieldsDropdown
                     }
                     value={minutesValue}
-                    onChange={(event) => minutesValueHandler(event)}
+                    onChange={(event) => {
+                      setTimeout(() => {
+                        minutesValueHandler(event);
+                      }, 200);
+                    }}
                     validationBoolean={checkValidation}
                     validationBooleanSetterFunc={setCheckValidation}
                     showAllErrorsSetterFunc={setDoesSelectedRuleHaveErrors}
+                    isConstant={isMinConst}
+                    setIsConstant={(val) => {
+                      setIsMinConst(val);
+                      localStorage.setItem("minConst", val);
+                    }}
+                    showConstValue={true}
+                    constType="3"
                   >
-                    {getFieldListing()
-                      .filter(
-                        (element) =>
-                          +element.VariableType === INTEGER_VARIABLE_TYPE
+                    {dropdownOptions
+                      ?.filter(
+                        (d) =>
+                          (d.VariableScope == "C" ||
+                            d.VariableScope == "U" ||
+                            d.VariableScope != "S") &&
+                          d.VariableType != "8" &&
+                          d.VariableType != "11" &&
+                          d.VariableType != "6" &&
+                          d.VariableId !== "10001" &&
+                          d.VariableId !== "42" &&
+                          d.VariableId !== "10022"
                       )
-                      .map((element) => {
+                      ?.map((element) => {
                         return (
                           <MenuItem
                             className={styles.menuItemStyles}
@@ -2772,24 +3139,43 @@ function AddOperations(props) {
                   <p className={styles.operationsLabel}>{t("seconds")}</p>
                   <CustomizedDropdown
                     id="AO_Escalate_To_Secs_Dropdown"
-                    disabled={isProcessReadOnly}
+                    disabled={isReadOnly}
                     className={
                       direction === RTL_DIRECTION
                         ? arabicStyles.escalateToFieldsDropdown
                         : styles.escalateToFieldsDropdown
                     }
                     value={secondsValue}
-                    onChange={(event) => secondsValueHandler(event)}
+                    onChange={(event) => {
+                      setTimeout(() => {
+                        secondsValueHandler(event);
+                      }, 200);
+                    }}
                     validationBoolean={checkValidation}
                     validationBooleanSetterFunc={setCheckValidation}
                     showAllErrorsSetterFunc={setDoesSelectedRuleHaveErrors}
+                    isConstant={isSecConst}
+                    setIsConstant={(val) => {
+                      setIsSecConst(val);
+                      localStorage.setItem("secConst", val);
+                    }}
+                    showConstValue={true}
+                    constType="3"
                   >
-                    {getFieldListing()
-                      .filter(
-                        (element) =>
-                          +element.VariableType === INTEGER_VARIABLE_TYPE
+                    {dropdownOptions
+                      ?.filter(
+                        (d) =>
+                          (d.VariableScope == "C" ||
+                            d.VariableScope == "U" ||
+                            d.VariableScope != "S") &&
+                          d.VariableType != "8" &&
+                          d.VariableType != "11" &&
+                          d.VariableType != "6" &&
+                          d.VariableId !== "10001" &&
+                          d.VariableId !== "42" &&
+                          d.VariableId !== "10022"
                       )
-                      .map((element) => {
+                      ?.map((element) => {
                         return (
                           <MenuItem
                             className={styles.menuItemStyles}
@@ -2812,7 +3198,7 @@ function AddOperations(props) {
                   <p className={styles.operationsLabel}>{t("calendarTypes")}</p>
                   <CustomizedDropdown
                     id="AO_Calendar_Type_Dropdown"
-                    disabled={isProcessReadOnly}
+                    disabled={isReadOnly}
                     className={
                       direction === RTL_DIRECTION
                         ? arabicStyles.escalateToFieldsDropdown
@@ -2849,7 +3235,7 @@ function AddOperations(props) {
               style={{ alignItems: "center" }}
             >
               <Checkbox
-                disabled={ repeatAfterStatus }
+                disabled={repeatAfterStatus}
                 id="AO_Repeat_after_checkbox"
                 className={
                   direction === RTL_DIRECTION
@@ -2878,18 +3264,18 @@ function AddOperations(props) {
                     : styles.textInputField
                 }
                 value={repeatAfterMinutesValue}
-                disabled={isProcessReadOnly || !repeatAfterValue}
+                disabled={isReadOnly || !repeatAfterValue}
                 type="number"
                 onChange={(event) => repeatAfterMinutesValueHandler(event)}
               />
               <p className={styles.operationsLabelMid}>{t("minutes")}</p>
-              {showDelIcon && !isProcessReadOnly ? (
+              {showDelIcon && !isReadOnly && (
                 <DeleteOutlinedIcon
                   id="AR_Delete_Button"
                   className={styles.deleteIcon}
                   onClick={() => deleteOperation(index)}
                 />
-              ) : null}
+              )}
             </div>
           </div>
         ) : null
@@ -2926,7 +3312,7 @@ function AddOperations(props) {
                     : styles.textInputField
                 }
                 value={auditPercentage}
-                disabled={isProcessReadOnly}
+                disabled={isReadOnly}
                 type="number"
                 onChange={(event) => auditPercentageHandler(event)}
               />
@@ -2958,7 +3344,7 @@ function AddOperations(props) {
               </p>
               <CustomizedDropdown
                 id="AO_If_Sampled_Dropdown"
-                disabled={isProcessReadOnly}
+                disabled={isReadOnly}
                 className={
                   direction === RTL_DIRECTION
                     ? arabicStyles.inputVariableDropdown
@@ -3002,7 +3388,7 @@ function AddOperations(props) {
               </p>
               <CustomizedDropdown
                 id="AO_Not_Sampled_Dropdown"
-                disabled={isProcessReadOnly}
+                disabled={isReadOnly}
                 className={
                   direction === RTL_DIRECTION
                     ? arabicStyles.inputVariableDropdown
@@ -3029,13 +3415,13 @@ function AddOperations(props) {
               </CustomizedDropdown>
             </div>
           </div>
-          {showDelIcon && !isProcessReadOnly ? (
+          {showDelIcon && !isReadOnly && (
             <DeleteOutlinedIcon
               id="AR_Delete_Button"
               className={styles.deleteIcon}
               onClick={() => deleteOperation(index)}
             />
-          ) : null}
+          )}
         </div>
       ) : null}
 
@@ -3055,7 +3441,7 @@ function AddOperations(props) {
             <p className={styles.dropdownMargin}></p>
             <CustomizedDropdown
               id="AO_Workstep_Dropdown"
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               className={
                 direction === RTL_DIRECTION
                   ? arabicStyles.inputVariableDropdown
@@ -3082,7 +3468,7 @@ function AddOperations(props) {
             </CustomizedDropdown>
             <CustomizedDropdown
               id="AO_Child_Variable_Dropdown"
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               className={
                 direction === RTL_DIRECTION
                   ? arabicStyles.inputVariableDropdown
@@ -3116,7 +3502,7 @@ function AddOperations(props) {
             </CustomizedDropdown>
             <CustomizedDropdown
               id="AO_Child_Array_Dropdown"
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               className={
                 direction === RTL_DIRECTION
                   ? arabicStyles.inputVariableDropdown
@@ -3149,41 +3535,45 @@ function AddOperations(props) {
               })}
             </CustomizedDropdown>
           </div>
-          {showDelIcon && !isProcessReadOnly ? (
+          {showDelIcon && !isReadOnly && (
             <DeleteOutlinedIcon
               id="AR_Delete_Button"
               className={styles.deleteIcon}
               onClick={() => deleteOperation(index)}
             />
-          ) : null}
+          )}
         </div>
       ) : null}
 
       {
         /* updated by mahtab for reminder email modal  */
-        <div
-          className={
-            direction == RTL_DIRECTION
-              ? styles.mainContainerRTL
-              : styles.mainContainer
-          }
-        >
-          <Modal
-            show={isModalOpen}
-            modalClosed={handleClose}
-            style={{
-              left: "32%",
-              top: "30%",
-              padding: "0px",
-            }}
+
+        props?.currentTab == "Reminder" ? (
+          <div
+            className={
+              direction == RTL_DIRECTION
+                ? styles.mainContainerRTL
+                : styles.mainContainer
+            }
           >
-            <EmailPopup
-              passEmailData={passEmailData}
-              handleCloseEmailModal={handleCloseEmailModal}
-              parentEmailData={parentEmailData}
-            />
-          </Modal>
-        </div>
+            <Modal
+              show={isModalOpen}
+              modalClosed={handleClose}
+              style={{
+                left: "32%",
+                top: "30%",
+                padding: "0px",
+                zIndex: "9999",
+              }}
+            >
+              <EmailPopup
+                passEmailData={passEmailData}
+                handleCloseEmailModal={handleCloseEmailModal}
+                parentEmailData={parentEmailData}
+              />
+            </Modal>
+          </div>
+        ) : null
       }
     </div>
   );

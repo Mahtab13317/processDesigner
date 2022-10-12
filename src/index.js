@@ -169,6 +169,12 @@ window.loadInboxMC = function () {
   }
 };
 
+window.loadCalender = function (props) {
+  if (window && window?.loadMicroFrontend) {
+    window.loadMicroFrontend(props);
+  }
+};
+
 const launchpadKey = JSON.parse(localStorage.getItem("launchpadKey"));
 const token = launchpadKey?.token;
 if (token) {

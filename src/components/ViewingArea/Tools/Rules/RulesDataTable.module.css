@@ -1,14 +1,14 @@
 .dataTable {
   min-height: 10rem;
-  height: 10rem;
-  max-height: 12rem;
+  height: 24rem;
   overflow: auto;
+  border: 1px solid #eeeeee;
 }
 
 .dataTableBody {
   border: 1px solid #f0f0f0;
   display: block;
-  max-height: 12rem;
+  max-height: 20.7rem;
   overflow-y: auto;
 }
 

@@ -21,7 +21,7 @@ function DropdownWithIcon({ activityInfo, ...props }) {
     <Select
       disabled={props.disabled}
       IconComponent={ExpandMoreIcon}
-      style={{ width: "95%", height: "2.5rem" }}
+      style={{ width: "95%", height: "var(--line_height)" }}
       variant="outlined"
       value={selectedValue}
       onChange={getSelectedActivity}
@@ -30,7 +30,7 @@ function DropdownWithIcon({ activityInfo, ...props }) {
         <p
           style={{
             marginInline: "0.4rem",
-            fontSize: "1rem",
+            fontSize: "var(--base_font_text_size)",
           }}
         >
           {""}
@@ -39,7 +39,11 @@ function DropdownWithIcon({ activityInfo, ...props }) {
       {activityInfo.map((item) => {
         return (
           <MenuItem
-            style={{ width: "100%", marginBlock: "0.2rem" }}
+            style={{
+              width: "100%",
+              marginBlock: "0.2rem",
+              fontSize: "var(--base_font_text_size)",
+            }}
             value={item.id}
           >
             <div
@@ -52,9 +56,8 @@ function DropdownWithIcon({ activityInfo, ...props }) {
               <img
                 src={item.icon}
                 style={{
-                  height: "1rem",
-                  width: "1rem",
-                  marginTop: "0.125rem",
+                  height: "1.25rem",
+                  width: "1.25rem",
                 }}
                 alt=""
               />
@@ -62,7 +65,7 @@ function DropdownWithIcon({ activityInfo, ...props }) {
               <p
                 style={{
                   marginInline: "0.4rem",
-                  font: "1rem",
+                  fontSize: "var(--base_font_text_size)",
                 }}
               >
                 {item.name}

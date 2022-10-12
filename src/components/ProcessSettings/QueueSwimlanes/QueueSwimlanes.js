@@ -59,7 +59,7 @@ function QueueSwimlanes(props) {
     });
     if (res.data.status === 0) {
       setLanes((prev) => {
-        let temp = structuredClone(prev);
+        let temp = global.structuredClone(prev);
         temp.forEach((lane) => {
           if (lane.LaneId + "" === row.LaneId + "") {
             lane.DefaultQueue = event.target.value;

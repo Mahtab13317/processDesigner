@@ -11,7 +11,14 @@ import { RTL_DIRECTION } from "../../../../../Constants/appConstants";
 function ForwardTemplateMapping(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
-  let { schemaList, template, setUpdatedTemplate, checked, setChecked } = props;
+  let {
+    schemaList,
+    template,
+    setUpdatedTemplate,
+    checked,
+    setChecked,
+    isReadOnly,
+  } = props;
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const loadedActivityPropertyData = store.getState("activityPropertyData");
@@ -184,6 +191,7 @@ function ForwardTemplateMapping(props) {
                       return temp;
                     });
                   }}
+                  disabled={isReadOnly}
                   id={`ccm_${d.name}_check`}
                   className={
                     direction === RTL_DIRECTION
@@ -229,7 +237,9 @@ function ForwardTemplateMapping(props) {
                     getContentAnchorEl: null,
                   }}
                   inputProps={{
-                    readOnly: checked[d.name] && !checked[d.name].isChecked,
+                    readOnly:
+                      (checked[d.name] && !checked[d.name].isChecked) ||
+                      isReadOnly,
                   }}
                   style={{
                     backgroundColor:

@@ -81,11 +81,31 @@ function ViewsForms(props) {
   const [formAssociationData, setformAssociationData] = useGlobalState(
     "allFormAssociationData"
   );
+
+  const getProcessType = (processType) => {
+    let temp;
+    switch (processType) {
+      case "L":
+        temp = "L";
+        break;
+      case "R":
+        temp = "R";
+        break;
+      case "LC":
+        temp = "L";
+        break;
+      default:
+        temp = "R";
+    }
+    return temp;
+  };
   useEffect(() => {
     const getFormAssocData = async () => {
       const res = await axios.get(
         SERVER_URL +
-          `${ENDPOINT_GET_FORMASSOCIATIONS}/${localLoadedProcessData.ProcessDefId}/${localLoadedProcessData.ProcessType}`
+          `${ENDPOINT_GET_FORMASSOCIATIONS}/${
+            localLoadedProcessData.ProcessDefId
+          }/${getProcessType(localLoadedProcessData.ProcessType)}`
       );
       if (res?.data?.FormAssociations?.formsInfos.length === 0) {
         setlayoutSelectionFlow(true);

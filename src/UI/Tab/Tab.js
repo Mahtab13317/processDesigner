@@ -81,7 +81,6 @@ export default function ScrollableTabsButtonAuto(props) {
       className={`${classes.root} ${props.tabType} ${props.tabStyling} tabStyling`}
       style={{ direction: props.direction }}
     >
-   
       <AppBar
         className={props.tabBarStyle}
         style={{

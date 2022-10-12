@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 function FormsOtherProcesses() {
   const getFormId = (data) => {
-    console.log("vvvvvvvvvvvvvvvv", data);
+    console.log("formsotherprocess", data);
   };
   React.useEffect(() => {
     if (document.getElementById("mf_formsOtherProcesses")) {
@@ -17,9 +17,10 @@ function FormsOtherProcesses() {
     };
   }, [document.getElementById("mf_formsOtherProcesses")]);
   return (
-    <div style={{ width: "100%", height: "100%", paddingTop: "0.6rem" }}>
-      <div id="mf_formsOtherProcesses"></div>
-    </div>
+    <div
+      style={{ width: "100%", height: "100%", paddingTop: "0.6rem" }}
+      id="mf_formsOtherProcesses"
+    ></div>
   );
 }
 

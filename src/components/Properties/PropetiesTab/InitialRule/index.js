@@ -24,6 +24,7 @@ import axios from "axios";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 import arabicStyles from "./arabicStyles.module.css";
 import TabsHeading from "../../../../UI/TabsHeading/index.js";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall.js";
 function InitialRule(props) {
   let { t } = useTranslation();
   const dispatch = useDispatch();
@@ -33,7 +34,10 @@ function InitialRule(props) {
   const [spinner, setspinner] = useState(true);
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(localActivityPropertyData);
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [attachList, setAttachList] = useState([]);
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   useEffect(() => {
     if (localLoadedActivityPropertyData?.Status === 0) {
@@ -207,6 +211,7 @@ function InitialRule(props) {
 
   return (
     <div>
+      <TabsHeading heading={props.heading} />
       {spinner ? (
         <CircularProgress style={{ marginTop: "30vh", marginLeft: "40%" }} />
       ) : (
@@ -215,20 +220,20 @@ function InitialRule(props) {
             props.isDrawerExpanded ? styles.expandedView : styles.collapsedView
           }`}
         >
-        
-         <TabsHeading heading={props.heading} />
           <div className={`${styles.attachmentHeader} row`}>
             <p className={styles.addAttachHeading}>{t("attachedRule")}</p>
-            <button
-              onClick={handleOpen}
-              className={
-                direction === RTL_DIRECTION
-                  ? arabicStyles.addAttachBtn
-                  : styles.addAttachBtn
-              }
-            >
-              {t("addAttachment")}
-            </button>
+            {!isReadOnly && (
+              <button
+                onClick={handleOpen}
+                className={
+                  direction === RTL_DIRECTION
+                    ? arabicStyles.addAttachBtn
+                    : styles.addAttachBtn
+                }
+              >
+                {t("addAttachment")}
+              </button>
+            )}
           </div>
           <table className={styles.tableDiv}>
             <thead className={styles.tableHeader}>
@@ -307,16 +312,18 @@ function InitialRule(props) {
                         className={styles.downloadIcon}
                         onClick={() => handleDownload(item.docId)}
                       />
-                      <DeleteOutlineIcon
-                        className={styles.deleteIcon1}
-                        onClick={() => handleRemoveFields(item.docId)}
-                      />
+                      {!isReadOnly && (
+                        <DeleteOutlineIcon
+                          className={styles.deleteIcon1}
+                          onClick={() => handleRemoveFields(item.docId)}
+                        />
+                      )}
                     </td>
                   </tr>
                 ))}
             </tbody>
           </table>
-          <Rule />
+          <Rule isReadOnly={isReadOnly} />
 
           {showAttach ? (
             <Modal
@@ -349,6 +356,7 @@ const mapStateToProps = (state) => {
     cellID: state.selectedCellReducer.selectedId,
     cellName: state.selectedCellReducer.selectedName,
     openProcessType: state.openProcessClick.selectedType,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 export default connect(mapStateToProps, null)(InitialRule);

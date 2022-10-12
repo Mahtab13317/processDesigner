@@ -49,6 +49,7 @@ function ReusableOneMap(props) {
           overflow: "hidden",
           textOverflow: "ellipsis",
         }}
+        disabled={props.isReadOnly}
         value={selectedMappingField}
         MenuProps={{
           anchorOrigin: {

@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from "react";
-import StarRateIcon from "@material-ui/icons/StarRate";
-import Button from "@material-ui/core/Button";
+// #BugID - 109986
+// #BugDescription - validation for ToDO duplicate name length has been added.
+// Changes made to solve Bug 115775 - Todo: blank screen with not found message appears while pressing enter button in the Todo field
+import React, { useEffect, useRef, useState } from "react";
 import "../Interfaces.css";
 import { useTranslation } from "react-i18next";
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { Select, MenuItem } from "@material-ui/core";
-import { makeStyles, Typography } from "@material-ui/core";
 import RadioGroups from "./RadioButtonsGroup";
-import { useGlobalState } from "state-pool";
 import dropdown from "../../../../assets/subHeader/dropdown.svg";
 import AddToListDropdown from "../../../../UI/AddToListDropdown/AddToListDropdown";
 import { RTL_DIRECTION } from "../../../../Constants/appConstants";
@@ -16,9 +15,9 @@ import styles from "../DocTypes/index.module.css";
 import CloseIcon from "@material-ui/icons/Close";
 import arabicStyles from "../DocTypes/arabicStyles.module.css";
 import "../Exception/Exception.css";
+import { FieldValidations } from "../../../../utility/FieldValidations/fieldValidations";
 
 function AddToDo(props) {
-  const [loadedVariables] = useGlobalState("variableDefinition");
   const associateFields = ["CalenderName", "Status"];
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
@@ -30,6 +29,7 @@ function AddToDo(props) {
   const [selectedGroup, setselectedGroup] = useState([]);
   const [showGroupDropdown, setShowGroupDropdown] = useState(false);
   const [grpList, setgrpList] = useState([]);
+  const toDoRef = useRef();
 
   useEffect(() => {
     let tempGrpList =
@@ -108,6 +108,17 @@ function AddToDo(props) {
     props.toDoAssoFieldToModify,
   ]);
 
+  // code added on 7 September 2022 for BugId 112250
+  useEffect(() => {
+    if (props.addAnotherTodo) {
+      setNameInput("");
+      setDescriptionInput("");
+      setMandatoryValue(false);
+      setAssociateField("defaultValue");
+      setselectedGroup([]);
+    }
+  }, [props.addAnotherTodo]);
+
   const onSelectGroup = (grp) => {
     setselectedGroup([grp.id]);
   };
@@ -132,28 +143,34 @@ function AddToDo(props) {
               : styles.modalHeading
           }
         >
-          {t("addToDo")}
+          {props.toDoNameToModify ? t("modifyToDo") : t("addToDo")}
         </h3>
         <CloseIcon
           onClick={() => props.handleClose()}
           className={styles.closeIcon}
         />
       </div>
-      <div
-        className={`${styles.modalSubHeader} flex`}
-        style={{ gap: "0.25vw" }}
-      >
+      <div className={`${styles.modalSubHeader} flex`} style={{ gap: "2vw" }}>
         <div style={{ flex: "1.2" }}>
           <label className={styles.modalLabel}>
             {t("todoName")}
             <span className={styles.starIcon}>*</span>
           </label>
           <form>
+            {/*code added on 8 August 2022 for BugId 112903*/}
             <input
               id="ToDoNameInput"
               value={nameInput}
               onChange={(e) => setNameFunc(e)}
               className={styles.modalInput}
+              ref={toDoRef}
+              onKeyPress={(e) => {
+                if (e.charCode == "13") {
+                  e.preventDefault();
+                } else {
+                  FieldValidations(e, 150, toDoRef.current, 50);
+                }
+              }}
             />
           </form>
           {props.showNameError ? (
@@ -161,7 +178,7 @@ function AddToDo(props) {
               style={{
                 color: "red",
                 fontSize: "10px",
-                marginTop: "-0.25rem",
+                marginTop: "-1rem",
                 marginBottom: "0.5rem",
                 display: "block",
               }}
@@ -174,7 +191,7 @@ function AddToDo(props) {
               style={{
                 color: "red",
                 fontSize: "10px",
-                marginTop: "-0.25rem",
+                marginTop: "-1rem",
                 marginBottom: "0.5rem",
                 display: "block",
               }}
@@ -227,7 +244,7 @@ function AddToDo(props) {
                     })}
                   </span>
                   <span
-                    style={{ position: "absolute", right: "0.5vw", top: "10%" }}
+                    style={{ position: "absolute", right: "0.5vw", top: "-8%" }}
                   >
                     <img
                       src={dropdown}
@@ -250,13 +267,12 @@ function AddToDo(props) {
                     style={{ top: "100%", left: "0", width: "100%" }}
                     onKeydown={(val) => {
                       let maxId = 0;
-                      grpList &&
-                        grpList.map((el) => {
-                          if (el.id > maxId) {
-                            maxId = +el.id + 1;
-                          }
-                        });
-                      setselectedGroup([maxId]);
+                      grpList?.map((el) => {
+                        if (+el.id > +maxId) {
+                          maxId = el.id;
+                        }
+                      });
+                      setselectedGroup([+maxId + 1]);
                       props.addGroupToList(val);
                     }} // funtion for api call
                     calledFromWorkdesk={true}
@@ -327,6 +343,8 @@ function AddToDo(props) {
               setTodoTypeValue={setTodoTypeValue}
               pickList={props.pickList}
               setPickList={props.setPickList}
+              addAnotherTodo={props.addAnotherTodo}
+              setAddAnotherTodo={props.setAddAnotherTodo}
             />
           </div>
           {props.showTriggerError ? (
@@ -350,6 +368,7 @@ function AddToDo(props) {
             ? arabicStyles.modalFooter
             : styles.modalFooter
         }
+        style={{ padding: "0.5rem 0" }}
       >
         <button
           className={
@@ -413,7 +432,7 @@ function AddToDo(props) {
             className={styles.okButton}
             id="addNclose_AddTodoModal_Button"
           >
-            {t("save")}
+            {t("modify")}
           </button>
         ) : null}
       </div>

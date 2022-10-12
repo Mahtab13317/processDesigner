@@ -94,7 +94,7 @@ function Workdesk(props) {
   };
 
   const getTabElements = () => {
-    let arr = [<Todo />, <Action />, <Exception />, <Document />, <Scan />];
+    let arr = [<Todo />, <Action />, <Exception />, <Document />, <Scan  />];
     if (bmobile) {
       arr.splice(arr?.length - 1, 0, <Mobile />);
     }

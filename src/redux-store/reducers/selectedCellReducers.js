@@ -6,6 +6,7 @@ const initialState = {
   selectedActivityType: null,
   selectedActivitySubType: null,
   selectedType: null,
+  selectedCheckedOut: false,
 };
 
 const selectedCellReducer = (state = initialState, action) => {
@@ -19,6 +20,7 @@ const selectedCellReducer = (state = initialState, action) => {
       selectedSeqId: action.payload.seqId,
       selectedQueueId: action.payload.queueId,
       selectedType: action.payload.type,
+      selectedCheckedOut: action.payload.checkedOut
     };
   }
   if (action.type === "SELECTED_TASK") {

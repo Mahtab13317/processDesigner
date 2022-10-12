@@ -1,17 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { store, useGlobalState } from "state-pool";
-import * as actionCreators from "../../../../redux-store/actions/selectedCellActions";
-import { connect } from "react-redux";
-import { getActivityProps } from "../../../../utility/abstarctView/getActivityProps";
 import styles from "./index.module.css";
 import { Select, MenuItem } from "@material-ui/core";
 import { Checkbox } from "@material-ui/core";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  setSave,
-  ActivityPropertySaveCancelValue,
-} from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked.js";
+import { useDispatch } from "react-redux";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import {
   propertiesLabel,
@@ -21,6 +14,7 @@ import arabicStyles from "./ArabicStyles.module.css";
 
 function Table(props) {
   let { t } = useTranslation();
+  const { isReadOnly } = props;
   const direction = `${t("HTML_DIR")}`;
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
@@ -144,7 +138,7 @@ function Table(props) {
 
     dispatch(
       setActivityPropertyChange({
-        SAPAdapter: { isModified: true, hasError: false },
+        [propertiesLabel.sap]: { isModified: true, hasError: false },
       })
     );
   };
@@ -175,6 +169,11 @@ function Table(props) {
       }
     }
     setlocalLoadedActivityPropertyData(tempLocalState);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.sap]: { isModified: true, hasError: false },
+      })
+    );
   };
 
   const outputCheck = (e, index, paramIndex) => {
@@ -203,6 +202,11 @@ function Table(props) {
       }
     }
     setlocalLoadedActivityPropertyData(tempLocalState);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.sap]: { isModified: true, hasError: false },
+      })
+    );
   };
 
   return (
@@ -220,6 +224,7 @@ function Table(props) {
             <div className={styles.tableLabel}>
               <Checkbox
                 checked={checkInput[i]}
+                disabled={isReadOnly}
                 onChange={(e) => {
                   inputCheck(e, i, data.Index);
                 }}
@@ -232,6 +237,7 @@ function Table(props) {
             <div className={styles.tableLabel}>
               <Checkbox
                 checked={checkOutput[i]}
+                disabled={isReadOnly}
                 onChange={(e) => outputCheck(e, i, data.Index)}
                 style={{
                   height: "14px",
@@ -256,6 +262,7 @@ function Table(props) {
                   },
                   getContentAnchorEl: null,
                 }}
+                disabled={isReadOnly}
                 style={{ width: "8rem", border: ".5px solid #c4c4c4" }}
                 value={selectedVal[i].name}
                 onChange={(e) => {

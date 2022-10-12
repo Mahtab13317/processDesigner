@@ -18,7 +18,7 @@ function Mapping(props) {
   let { t } = useTranslation();
   const dispatch = useDispatch();
   //code added on 22 Aug 2022 for BugId 112019
-  const { value, setValue } = props;
+  const { value, setValue, isReadOnly } = props;
   const openProcessData = useSelector(OpenProcessSliceValue);
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
@@ -111,7 +111,8 @@ function Mapping(props) {
       })
     );
 
-    let temp = localLoadedActivityPropertyData;
+    // code edited on 30 August 2022 for BugId 113881
+    let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
     temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo.map((el) => {
       if (el.methodIndex == props.serviceNameClicked.id) {
         el.timeoutInterval = event.target.value;
@@ -376,7 +377,9 @@ function Mapping(props) {
         idx = index;
       }
     });
-    if (doExists) {
+
+    // code edited on 30 August 2022 for BugId 113882
+    if (doExists && selectedValue !== "") {
       temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo[
         indexValue
       ].fwdParamMapList[idx] = {
@@ -389,6 +392,12 @@ function Mapping(props) {
         paramIndex: list.fieldIndex,
         selectedVar: list.fieldName,
       };
+    }
+    // code edited on 30 August 2022 for BugId 113882
+    else if (doExists && selectedValue === "") {
+      temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo[
+        indexValue
+      ].fwdParamMapList.splice(idx, 1);
     } else {
       temp?.ActivityProperty?.webserviceInfo?.objWebServiceDataInfo[indexValue]
         ?.fwdParamMapList
@@ -435,7 +444,7 @@ function Mapping(props) {
     );
   };
 
-  const handleReverseFieldMapping = (selectedValue, list, indexInput) => {
+  const handleReverseFieldMapping = (selectedValue, list) => {
     setReverseMappingList((prev) => {
       let tempList = [...prev];
       tempList.forEach((el, index) => {
@@ -475,7 +484,8 @@ function Mapping(props) {
       }
     });
 
-    if (doExists) {
+    // code edited on 30 August 2022 for BugId 113882
+    if (doExists && selectedValue !== "") {
       temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo[
         indexValue
       ].revParamMapList[idx] = {
@@ -488,6 +498,12 @@ function Mapping(props) {
         paramIndex: selectedValue.fieldIndex,
         selectedVar: selectedValue.fieldName,
       };
+    }
+    // code edited on 30 August 2022 for BugId 113882
+    else if (doExists && selectedValue === "") {
+      temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo[
+        indexValue
+      ].revParamMapList.splice(idx, 1);
     } else {
       temp?.ActivityProperty?.webserviceInfo?.objWebServiceDataInfo[indexValue]
         ?.revParamMapList
@@ -546,7 +562,8 @@ function Mapping(props) {
         },
       })
     );
-    let temp = localLoadedActivityPropertyData;
+    // code edited on 30 August 2022 for BugId 113881
+    let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
     temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo.map((el) => {
       if (el.methodIndex == props.serviceNameClicked.id) {
         el.invocationType = e.target.value;
@@ -608,6 +625,7 @@ function Mapping(props) {
             style={{
               fontSize: "var(--base_text_font_size)",
             }}
+            disabled={isReadOnly}
             MenuProps={{
               anchorOrigin: {
                 vertical: "bottom",
@@ -667,6 +685,7 @@ function Mapping(props) {
               style={{
                 fontSize: "var(--base_text_font_size)",
               }}
+              disabled={isReadOnly}
               MenuProps={{
                 anchorOrigin: {
                   vertical: "bottom",
@@ -704,6 +723,7 @@ function Mapping(props) {
           </p>
           <TextInput
             type="number"
+            readOnlyCondition={isReadOnly}
             inputValue={timeOutValue}
             idTag="timeOutWebservice"
             onChangeEvent={(e) => handleTimeOutChange(e)}
@@ -785,6 +805,7 @@ function Mapping(props) {
                       variablesListForDropDown,
                       list
                     )}
+                    isReadOnly={isReadOnly}
                     dropDownKey="VariableName"
                     handleFieldMapping={(val) =>
                       handleForwardFieldMapping(val, list)
@@ -845,9 +866,10 @@ function Mapping(props) {
                       reverseDropdownOptions,
                       list
                     )}
+                    isReadOnly={isReadOnly}
                     dropDownKey="fieldName"
                     handleFieldMapping={(val) =>
-                      handleReverseFieldMapping(val, list, index)
+                      handleReverseFieldMapping(val, list)
                     }
                     invocationType={invocationType}
                   />

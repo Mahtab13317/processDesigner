@@ -10,7 +10,7 @@ function MappingModal(props) {
     dataFields,
     setDataFields,
     fieldName,
-    isProcessReadOnly,
+    isReadOnly,
     documentList,
     variablesList,
   } = props;
@@ -40,7 +40,7 @@ function MappingModal(props) {
           dataFields={dataFields}
           setDataFields={setDataFields}
           handleClose={() => setIsOpen(false)}
-          isProcessReadOnly={isProcessReadOnly}
+          isReadOnly={isReadOnly}
           documentList={documentList}
           variablesList={variablesList}
         />

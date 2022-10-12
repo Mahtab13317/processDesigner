@@ -133,7 +133,7 @@ function SetProperties(props) {
   return (
     <React.Fragment>
       <div className={styles.propertiesColumnView}>
-        <div className="flex">
+        <div className="flex alignCenter">
           <div className={styles.propertiesTriggerLabel}>
             {t("SET")}{" "}
             <span className="relative">

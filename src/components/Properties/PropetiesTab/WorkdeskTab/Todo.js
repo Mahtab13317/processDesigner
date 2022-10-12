@@ -18,6 +18,8 @@ import {
   ENDPOINT_ADD_GROUP,
   RTL_DIRECTION,
   propertiesLabel,
+  PROCESSTYPE_DEPLOYED,
+  PROCESSTYPE_REGISTERED,
 } from "../../../../Constants/appConstants";
 import arabicStyles from "./ArabicStyles.module.css";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
@@ -26,13 +28,17 @@ import {
   setOpenProcess,
 } from "../../../../redux-store/slices/OpenProcessSlice";
 import "./index.css";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function Todo(props) {
+
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [checkTodo, setCheckTodo] = useState(false);
   const [allToDoData, setAllToDoData] = useState([]);
   const [defineListVal, setDefineListVal] = useState("");
@@ -59,6 +65,8 @@ function Todo(props) {
   const dispatch = useDispatch();
   const openProcessData = useSelector(OpenProcessSliceValue);
   const [localState, setLocalState] = useState(null);
+  const [addAnotherTodo, setAddAnotherTodo] = useState(false);
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   useEffect(() => {
     let tempList = {
@@ -359,7 +367,9 @@ function Todo(props) {
     let exist = false;
     toDoData?.TodoGroupLists?.forEach((group) => {
       group?.ToDoList?.forEach((todo) => {
-        if (todo.ToDoName.toLowerCase() == ToDoToAdd.toLowerCase()) {
+        if (
+          todo.ToDoName.trim().toLowerCase() == ToDoToAdd.trim().toLowerCase()
+        ) {
           exist = true;
         }
       });
@@ -373,7 +383,13 @@ function Todo(props) {
         })
       );
     } else {
-      if (ToDoToAdd.trim() !== "" && ToDoDesc.trim() !== "") {
+      // code added on 30 August 2022 for BugId 114886
+      if (
+        ToDoToAdd.trim() !== "" &&
+        ToDoDesc.trim() !== "" &&
+        groupId &&
+        (groupId + "")?.trim() !== ""
+      ) {
         let maxToDoId = 0;
         toDoData?.TodoGroupLists?.map((group) => {
           group?.ToDoList?.map((listElem) => {
@@ -447,14 +463,23 @@ function Todo(props) {
               setToDoData(tempData);
               if (button_type !== "addAnother") {
                 setAddTodo(false);
+                // code added on 7 September 2022 for BugId 112250
+                setAddAnotherTodo(false);
               }
               if (button_type === "addAnother") {
-                document.getElementById("ToDoNameInput").value = "";
-                document.getElementById("ToDoNameInput").focus();
+                // code added on 7 September 2022 for BugId 112250
+                setAddAnotherTodo(true);
               }
             }
           });
-      } else if (ToDoToAdd.trim() === "" || ToDoDesc.trim() === "") {
+      }
+      // code added on 30 August 2022 for BugId 114886
+      else if (
+        ToDoToAdd.trim() === "" ||
+        ToDoDesc.trim() === "" ||
+        !groupId ||
+        (groupId + "")?.trim() === ""
+      ) {
         dispatch(
           setToastDataFunc({
             message: t("mandatoryErr"),
@@ -539,7 +564,7 @@ function Todo(props) {
       }
     }
   };
-
+  
   return (
     <React.Fragment>
       <div className={styles.flexRow}>
@@ -558,6 +583,7 @@ function Todo(props) {
                   ? arabicStyles.mainCheckbox
                   : styles.mainCheckbox
               }
+              disabled={isReadOnly}
               data-testid="CheckTodo"
               type="checkbox"
             />
@@ -580,7 +606,7 @@ function Todo(props) {
                 }}
                 id="Dropdown"
                 className={styles.todoSelect}
-                disabled={!checkTodo}
+                disabled={!checkTodo || isReadOnly}
                 value={defineListVal}
                 onChange={(e) => definedListHandler(e)}
               >
@@ -603,10 +629,14 @@ function Todo(props) {
             <div style={{ flex: "1", marginLeft: "2rem" }}>
               <button
                 disabled={
-                  !checkTodo || (checkTodo && defineListVal.trim() === "")
+                  !checkTodo ||
+                  (checkTodo && defineListVal.trim() === "") ||
+                  isReadOnly
                 }
                 className={
-                  !checkTodo || (checkTodo && defineListVal.trim() === "")
+                  !checkTodo ||
+                  (checkTodo && defineListVal.trim() === "") ||
+                  isReadOnly
                     ? styles.disabledBtn
                     : styles.addBtn
                 }
@@ -616,8 +646,18 @@ function Todo(props) {
                 {t("associate")}
               </button>
               <button
-                disabled={!checkTodo}
-                className={!checkTodo ? styles.disabledBtn : styles.addBtn}
+                disabled={
+                  !checkTodo ||
+                  props.openProcessType === PROCESSTYPE_DEPLOYED ||
+                  props.openProcessType === PROCESSTYPE_REGISTERED
+                }
+                className={
+                  !checkTodo ||
+                  props.openProcessType === PROCESSTYPE_DEPLOYED ||
+                  props.openProcessType === PROCESSTYPE_REGISTERED
+                    ? styles.disabledBtn
+                    : styles.addBtn
+                }
                 onClick={defineHandler}
                 data-testid="defineBtn"
               >
@@ -646,9 +686,11 @@ function Todo(props) {
           </div>
           <div className={styles.deassociateDiv}>
             <button
-              disabled={!checkTodo || (checkTodo && !selectedTodoItem)}
+              disabled={
+                !checkTodo || (checkTodo && !selectedTodoItem) || isReadOnly
+              }
               className={
-                !checkTodo || (checkTodo && !selectedTodoItem)
+                !checkTodo || (checkTodo && !selectedTodoItem) || isReadOnly
                   ? styles.disabledBtn
                   : styles.deleteBtn
               }
@@ -778,7 +820,7 @@ function Todo(props) {
           ) : null}
         </div>
       </div>
-      <Modal open={addTodo} onClose={() => setAddTodo(false)}>
+      <Modal open={addTodo}>
         <AddToDo
           handleClose={() => setAddTodo(false)}
           addToDoToList={addToDoToList}
@@ -791,6 +833,8 @@ function Todo(props) {
           groups={toDoData.TodoGroupLists}
           handleMandatoryCheck={handleMandatoryCheck}
           addGroupToList={addGroupToList}
+          addAnotherTodo={addAnotherTodo} // code added on 7 September 2022 for BugId 112250
+          setAddAnotherTodo={setAddAnotherTodo} // code added on 7 September 2022 for BugId 112250
         />
       </Modal>
     </React.Fragment>
@@ -802,6 +846,7 @@ const mapStateToProps = (state) => {
     openProcessID: state.openProcessClick.selectedId,
     openProcessName: state.openProcessClick.selectedProcessName,
     openProcessType: state.openProcessClick.selectedType,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

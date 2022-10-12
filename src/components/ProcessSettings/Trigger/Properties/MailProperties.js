@@ -18,6 +18,8 @@ import {
   PROCESSTYPE_LOCAL,
   RTL_DIRECTION,
 } from "../../../../Constants/appConstants";
+import { useRef } from "react";
+import { FieldValidations } from "../../../../utility/FieldValidations/fieldValidations";
 
 function MailProperties(props) {
   const loadedProcessData = store.getState("loadedProcessData");
@@ -42,6 +44,7 @@ function MailProperties(props) {
   ];
   const [existingTrigger, setExistingTrigger] = useState(false);
   let readOnlyProcess = props.openProcessType !== PROCESSTYPE_LOCAL;
+  const triggerSubRef = useRef();
 
   useEffect(() => {
     props.setMailProperties({});
@@ -114,6 +117,15 @@ function MailProperties(props) {
     );
   };
 
+  const ValidateEmail = (name, isConst) => {
+    if(data[isConst]){
+      var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+      if(!data[name]?.match(mailformat)){
+        alert("INVALID FROM EMAIL")
+      }
+    }
+  };
+
   const onChange = (name, value) => {
     setData((prev) => {
       let newData = { ...prev };
@@ -156,6 +168,15 @@ function MailProperties(props) {
             </span>
           </div>
           <SelectWithInput
+            onBlur={()=>
+              {
+                if(data["isFromConstant"]){
+                  var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+                  if(!data['fromInput']?.match(mailformat)){
+                    alert("INVALID FROM EMAIL!!")
+                  }
+                }
+              }}
             width={"75%"}
             dropdownOptions={variableDefinition}
             optionKey="VariableName"
@@ -196,6 +217,15 @@ function MailProperties(props) {
           </div>
           <SelectWithInput
             width={"75%"}
+            onBlur={()=>
+              {
+                if(data["isToConstant"]){
+                  var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+                  if(!data['toInput']?.match(mailformat)){
+                    alert("INVALID TO EMAIL!!")
+                  }
+                }
+              }}
             dropdownOptions={variableDefinition}
             optionKey="VariableName"
             setIsConstant={(val) => {
@@ -224,6 +254,15 @@ function MailProperties(props) {
           </div>
           <SelectWithInput
             width={"75%"}
+            onBlur={()=>
+              {
+                if(data["isCcConstant"]){
+                  var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+                  if(!data['ccInput']?.match(mailformat)){
+                    alert("INVALID CC EMAIL!!")
+                  }
+                }
+              }}
             dropdownOptions={variableDefinition}
             optionKey="VariableName"
             setIsConstant={(val) => {
@@ -252,6 +291,15 @@ function MailProperties(props) {
           </div>
           <SelectWithInput
             width={"75%"}
+            onBlur={()=>
+              {
+                if(data["isBccConstant"]){
+                  var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+                  if(!data['bccInput']?.match(mailformat)){
+                    alert("INVALID BCC EMAIL!!")
+                  }
+                }
+              }}
             dropdownOptions={variableDefinition}
             optionKey="VariableName"
             setIsConstant={(val) => {
@@ -341,6 +389,10 @@ function MailProperties(props) {
               }}
               disabled={readOnlyProcess}
               className={styles.subjectMailInput}
+              ref={triggerSubRef}
+              onKeyPress={(e) =>
+                FieldValidations(e, 250, triggerSubRef.current, 250)
+              }
             />
           </div>
         </div>

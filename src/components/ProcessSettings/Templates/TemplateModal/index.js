@@ -17,16 +17,14 @@ import {
 import { store, useGlobalState } from "state-pool";
 import MultiSelect from "../../../../UI/MultiSelect";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
+import { useRef } from "react";
+import { FieldValidations } from "../../../../utility/FieldValidations/fieldValidations";
 
 function TemplateModal(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
-  const loadedActivityPropertyData = store.getState("activityPropertyData");
-  const [localLoadedProcess] = useGlobalState("variableDefinition");
-  const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
-    useGlobalState(loadedActivityPropertyData);
   const [selectedTool, setSelectedTool] = useState("");
   const [toolsList, setToolsList] = useState([]);
   const [configData, setConfigData] = useState([]);
@@ -42,7 +40,7 @@ function TemplateModal(props) {
   const [selectedInputFormatList, setSelectedInputFormatList] = useState([]);
   const [selectedOutputFormatList, setSelectedOutputFormatList] = useState([]);
   const [selectedFile, setselectedFile] = useState();
-  const [dateList, setdateList] = useState([
+  const dateList = [
     "dd/MMM/yyyy",
     "yyyy-MM-dd",
     "M/d/yyyy",
@@ -58,9 +56,10 @@ function TemplateModal(props) {
     "dd MMMMM, yyyy",
     "dd-MM-yyyy",
     "dd/MM/yyyy",
-  ]);
+  ];
   const dispatch = useDispatch();
   const [selectedTemplateName, setselectedTemplateName] = useState("");
+  const sectionNameRef = useRef();
 
   useEffect(() => {
     if (props.selected) {
@@ -202,18 +201,18 @@ function TemplateModal(props) {
     }
   };
 
+  // code added on 11 October 2022 for BugId 116472	
   const registerHandler = async () => {
     if (selectedDoctype == "") {
       dispatch(
         setToastDataFunc({
-          message: t("slectFileError"),
+          message: t("docFomatError"),
           severity: "error",
           open: true,
         })
       );
-    }
-
-    if (selectedOutput == "") {
+      return false;
+    } else if (selectedOutput == "") {
       dispatch(
         setToastDataFunc({
           message: t("outputfomatError"),
@@ -221,15 +220,35 @@ function TemplateModal(props) {
           open: true,
         })
       );
-    } else {
+    } else if (selectedDateFormat == "") {
+      dispatch(
+        setToastDataFunc({
+          message: t("dateFomatError"),
+          severity: "error",
+          open: true,
+        })
+      );
+    }
+    else if(argumentStatement=="")
+    {
+      dispatch(
+        setToastDataFunc({
+          message: t("argumentError"),
+          severity: "error",
+          open: true,
+        })
+      );
+    }
+     else {
+      // code added on 30 September 2022 for BugId 116474
       let payload = {
-        templateType: selectedDoctype,
+        templateType: selectedInputFormat,
         templateArgument: argumentStatement,
         templateFormat: selectedOutput,
         templateInputFormat: selectedInputFormat,
         templateDateFormat: selectedDateFormat,
         templateTool: selectedTool,
-        docName: selectedFile?.name.split(".").slice(0, -1).join("."),
+        docName: selectedDoctype,
       };
       const formData = new FormData();
       formData.append("docFile", selectedFile);
@@ -254,7 +273,7 @@ function TemplateModal(props) {
             let temp = [...prev];
             temp.push({
               ...response.data,
-              docName: selectedFile?.name.split(".").slice(0, -1).join("."),
+              docName: selectedDoctype,
             });
             return temp;
           });
@@ -299,148 +318,205 @@ function TemplateModal(props) {
         />
       </div>
       <Divider className={styles.modalDivider} />
-      <div className="row">
-        <div>
-          <p className={styles.labelTittle}>
-            {t("tools")} <span style={{ color: "red" }}>*</span>
-          </p>
-          <CustomizedDropdown
-            id="RT_Tools_Dropdown"
-            // disabled={isProcessReadOnly || disabled}
-            // className={
-            //   direction === RTL_DIRECTION
-            //     ? arabicStyles.dropdown
-            //     : styles.dropdown
-            // }
-            value={selectedTool}
-            onChange={(event) => toolselectorHandler(event)}
-            // validationBoolean={checkValidation}
-            // validationBooleanSetterFunc={setCheckValidation}
-            // showAllErrorsSetterFunc={setDoesSelectedRuleHaveErrors}
-            className={styles.dropdown}
-            MenuProps={menuProps}
-          >
-            {toolsList &&
-              toolsList.map((element) => {
-                return (
-                  <MenuItem
-                    className={styles.menuItemStyles}
-                    key={element}
-                    value={element}
-                  >
-                    {element}
-                  </MenuItem>
-                );
-              })}
-          </CustomizedDropdown>
-        </div>
-
-        <div>
-          <p className={styles.labelTittle}>
-            {t("inputFormat")} <span style={{ color: "red" }}>*</span>
-          </p>
-          <CustomizedDropdown
-            id="RT_Input_Dropdown"
-            value={selectedInputFormat}
-            onChange={(event) => handleInputFormatChange(event)}
-            className={styles.dropdown}
-            MenuProps={menuProps}
-          >
-            {selectedInputFormatList &&
-              selectedInputFormatList.map((element) => {
-                return (
-                  <MenuItem
-                    className={styles.menuItemStyles}
-                    key={element}
-                    value={element}
-                  >
-                    {element}
-                  </MenuItem>
-                );
-              })}
-          </CustomizedDropdown>
-        </div>
-      </div>
-
-      <div className="" style={{ marginTop: "3%" }}>
-        <div>
-          <p className={styles.labelTittle}>
-            {t("fileName")} <span style={{ color: "red" }}>*</span>
-          </p>
-        </div>
-
+      <div style={{ padding: "0.5rem 1vw" }}>
         <div className="row">
-          <div
-            style={{
-              width: "65%",
-              height: "1.5625rem",
-              marginBottom: "10px",
-              background: "#F8F8F8 0% 0% no-repeat padding-box",
-              border: "1px solid #CECECE",
-              borderRadius: "2px",
-              paddingLeft: "5px",
-              opacity: "1",
-              marginRight: "5px",
-              // backgroundColor: "red",
-            }}
-          >
-            <input
-              id="add_sectionName"
-              onChange={(e) => setselectedTemplateName(e.target.value)}
-              style={{
-                textAlign: "left",
-                opacity: "1",
-                fontSize: "0.8rem",
-                fontWeight: "400",
-                width: "100%",
-                border: "none",
-              }}
-              value={selectedTemplateName}
-            />
+          <div>
+            <p className={styles.labelTittle}>
+              {t("tools")} <span style={{ color: "red" }}>*</span>
+            </p>
+            <CustomizedDropdown
+              id="RT_Tools_Dropdown"
+              // disabled={isProcessReadOnly || disabled}
+              // className={
+              //   direction === RTL_DIRECTION
+              //     ? arabicStyles.dropdown
+              //     : styles.dropdown
+              // }
+              value={selectedTool}
+              onChange={(event) => toolselectorHandler(event)}
+              // validationBoolean={checkValidation}
+              // validationBooleanSetterFunc={setCheckValidation}
+              // showAllErrorsSetterFunc={setDoesSelectedRuleHaveErrors}
+              className={styles.dropdown}
+              MenuProps={menuProps}
+            >
+              {toolsList &&
+                toolsList.map((element) => {
+                  return (
+                    <MenuItem
+                      className={styles.menuItemStyles}
+                      key={element}
+                      value={element}
+                    >
+                      {element}
+                    </MenuItem>
+                  );
+                })}
+            </CustomizedDropdown>
           </div>
-          <form>
-            <label
+
+          <div>
+            <p className={styles.labelTittle}>
+              {t("inputFormat")} <span style={{ color: "red" }}>*</span>
+            </p>
+            <CustomizedDropdown
+              id="RT_Input_Dropdown"
+              value={selectedInputFormat}
+              onChange={(event) => handleInputFormatChange(event)}
+              className={styles.dropdown}
+              MenuProps={menuProps}
+            >
+              {selectedInputFormatList &&
+                selectedInputFormatList.map((element) => {
+                  return (
+                    <MenuItem
+                      className={styles.menuItemStyles}
+                      key={element}
+                      value={element}
+                    >
+                      {element}
+                    </MenuItem>
+                  );
+                })}
+            </CustomizedDropdown>
+          </div>
+        </div>
+
+        <div className="" style={{ marginTop: "3%" }}>
+          <div>
+            <p className={styles.labelTittle}>
+              {t("fileName")} <span style={{ color: "red" }}>*</span>
+            </p>
+          </div>
+
+          <div className="row">
+            <div
               style={{
-                fontSize: "0.8rem",
-                border: "1px solid #0072C6",
-                height: "1.5625rem",
-                width: "5.2rem",
-                whiteSpace: "nowrap",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-                alignItems: "center",
-                color: "#0072C6",
-                fontWeight: "500",
-                cursor: "pointer",
-                marginTop: "-10px",
+                width: "65%",
+                height: "var(--line_height)",
+                marginBottom: "10px",
+                background: "#F8F8F8 0% 0% no-repeat padding-box",
+                border: "1px solid #CECECE",
+                borderRadius: "2px",
+                paddingLeft: "0",
+                marginRight: "5px",
               }}
             >
               <input
-                type="file"
-                style={{ display: "none" }}
-                onChange={(e) => uploadFile(e)}
+                id="add_sectionName"
+                onChange={(e) => setselectedTemplateName(e.target.value)}
+                style={{
+                  textAlign: "left",
+                  opacity: "1",
+                  fontSize: "0.8rem",
+                  fontWeight: "400",
+                  width: "100%",
+                  height: "100%",
+                  border: "none",
+                }}
+                value={selectedTemplateName}
+                ref={sectionNameRef}
+                onKeyPress={(e) =>
+                  FieldValidations(e, 163, sectionNameRef.current, 100)
+                }
               />
-              {t("Choose File")}
-            </label>
-          </form>
+            </div>
+            <form>
+              <label
+                style={{
+                  fontSize: "var(--base_text_font_size)",
+                  border: "1px solid var(--button_color)",
+                  height: "var(--line_height)",
+                  width: "6vw",
+                  whiteSpace: "nowrap",
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: "var(--button_color)",
+                  fontWeight: "500",
+                  cursor: "pointer",
+                  marginTop: "-10px",
+                }}
+              >
+                <input
+                  type="file"
+                  style={{ display: "none" }}
+                  onChange={(e) => uploadFile(e)}
+                />
+                {t("Choose File")}
+              </label>
+            </form>
+          </div>
         </div>
-      </div>
 
-      <div className="row">
+        <div className="row">
+          <div>
+            <p className={styles.labelTittle}>
+              {t("DocType")} <span style={{ color: "red" }}>*</span>
+            </p>
+            <CustomizedDropdown
+              id="RT_DocType_Dropdown"
+              value={selectedDoctype}
+              onChange={(event) => documentSelectHandler(event)}
+              className={styles.dropdown}
+              MenuProps={menuProps}
+            >
+              {docList &&
+                docList.map((element) => {
+                  return (
+                    <MenuItem
+                      className={styles.menuItemStyles}
+                      key={element}
+                      value={element}
+                    >
+                      {element}
+                    </MenuItem>
+                  );
+                })}
+            </CustomizedDropdown>
+          </div>
+
+          <div>
+            <p className={styles.labelTittle}>
+              {t("outputFormat")} <span style={{ color: "red" }}>*</span>
+            </p>
+            <CustomizedDropdown
+              id="RT_Output_Dropdown"
+              value={selectedOutput}
+              onChange={(event) => setselectedOutput(event.target.value)}
+              className={styles.dropdown}
+              MenuProps={menuProps}
+            >
+              {selectedOutputFormatList &&
+                selectedOutputFormatList.map((element) => {
+                  return (
+                    <MenuItem
+                      className={styles.menuItemStyles}
+                      key={element}
+                      value={element}
+                    >
+                      {element}
+                    </MenuItem>
+                  );
+                })}
+            </CustomizedDropdown>
+          </div>
+        </div>
+
         <div>
           <p className={styles.labelTittle}>
-            {t("DocType")} <span style={{ color: "red" }}>*</span>
+            {t("dateFormat")} <span style={{ color: "red" }}>*</span>
           </p>
           <CustomizedDropdown
-            id="RT_DocType_Dropdown"
-            value={selectedDoctype}
-            onChange={(event) => documentSelectHandler(event)}
+            id="RT_Tools_Dropdown"
+            value={selectedDateFormat}
+            onChange={(event) => setselectedDateFormat(event.target.value)}
             className={styles.dropdown}
             MenuProps={menuProps}
           >
-            {docList &&
-              docList.map((element) => {
+            {dateList &&
+              dateList.map((element) => {
                 return (
                   <MenuItem
                     className={styles.menuItemStyles}
@@ -456,86 +532,36 @@ function TemplateModal(props) {
 
         <div>
           <p className={styles.labelTittle}>
-            {t("outputFormat")} <span style={{ color: "red" }}>*</span>
+            {t("arguments")} <span style={{ color: "red" }}>*</span>
           </p>
-          <CustomizedDropdown
-            id="RT_Output_Dropdown"
-            value={selectedOutput}
-            onChange={(event) => setselectedOutput(event.target.value)}
-            className={styles.dropdown}
-            MenuProps={menuProps}
-          >
-            {selectedOutputFormatList &&
-              selectedOutputFormatList.map((element) => {
-                return (
-                  <MenuItem
-                    className={styles.menuItemStyles}
-                    key={element}
-                    value={element}
-                  >
-                    {element}
-                  </MenuItem>
-                );
-              })}
-          </CustomizedDropdown>
+
+          <MultiSelect
+            completeList={argumentList}
+            labelKey="VariableName"
+            indexKey="VariableId"
+            associatedList={selectedVariableList}
+            handleAssociatedList={(val) => {
+              setselectedVariableList(val);
+            }}
+            showSelectedCount={true}
+            // noDataLabel={t("noWorksteps")}
+            // disabled={readOnlyProcess}
+            // id="trigger_ccwi_workstepMultiSelect"
+          />
+        </div>
+        <div>
+          <textarea
+            style={{
+              width: "100%",
+              height: "7rem",
+              marginTop: "5px",
+              border: "1px solid #c4c4c4",
+            }}
+            value={argumentStatement}
+          />
         </div>
       </div>
-
-      <div>
-        <p className={styles.labelTittle}>{t("dateFormat")}</p>
-        <CustomizedDropdown
-          id="RT_Tools_Dropdown"
-          value={selectedDateFormat}
-          onChange={(event) => setselectedDateFormat(event.target.value)}
-          className={styles.dropdown}
-          MenuProps={menuProps}
-        >
-          {dateList &&
-            dateList.map((element) => {
-              return (
-                <MenuItem
-                  className={styles.menuItemStyles}
-                  key={element}
-                  value={element}
-                >
-                  {element}
-                </MenuItem>
-              );
-            })}
-        </CustomizedDropdown>
-      </div>
-
-      <div>
-        <p className={styles.labelTittle}>
-          {t("arguments")} <span style={{ color: "red" }}>*</span>
-        </p>
-
-        <MultiSelect
-          completeList={argumentList}
-          labelKey="VariableName"
-          indexKey="VariableId"
-          associatedList={selectedVariableList}
-          handleAssociatedList={(val) => {
-            setselectedVariableList(val);
-          }}
-          showSelectedCount={true}
-          // noDataLabel={t("noWorksteps")}
-          // disabled={readOnlyProcess}
-          // id="trigger_ccwi_workstepMultiSelect"
-        />
-      </div>
-      <div>
-        <textarea
-          style={{
-            width: "100%",
-            height: "7rem",
-            marginTop: "5px",
-            border: "1px solid #c4c4c4",
-          }}
-          value={argumentStatement}
-        />
-      </div>
-
+      <Divider className={styles.modalDivider} />
       <div className={styles.footer}>
         <button className="cancel" onClick={() => props.setIsModalOpen(false)}>
           {t("cancel")}

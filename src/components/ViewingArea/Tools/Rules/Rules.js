@@ -4,7 +4,9 @@ import styles from "./rule.module.css";
 import AddNewCondition from "./AddNewCondition";
 import { Divider } from "@material-ui/core";
 import RuleDataList from "./RuleDataList";
-
+import DeleteForeverOutlinedIcon from "@material-ui/icons/DeleteForeverOutlined";
+import DragIndicatorOutlinedIcon from "@material-ui/icons/DragIndicatorOutlined";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import {
   ADD_SYMBOL,
   ENDPOINT_ADD_RULES,
@@ -22,7 +24,7 @@ function Rules(props) {
   let { t } = useTranslation();
   const [selected, setselected] = useState(0);
   const [selectCon, setselectCon] = useState(t("if"));
-
+  const [showDragIcon, setShowDragIcon] = useState(false);
   const [addedVarList, setaddedVarList] = useState([]);
   const [disabled, setdisabled] = useState(false);
   const [rules, setrules] = useState([]);
@@ -167,14 +169,18 @@ function Rules(props) {
 
   // add rule
   const addClickRule = () => {
+    console.log("222","rule adding")
     if (addedVarList.length === 0) {
       alert(t("selectOperations"));
     } else {
+      //code added on 23 September 2022 for BugId 111853 
       let localRuleListOp = [];
       addedVarList &&
         addedVarList.forEach((el) => {
           localRuleListOp.push({
             interfaceName: el.Name,
+            interfaceId:el.NameId
+
           });
         });
 
@@ -192,7 +198,7 @@ function Rules(props) {
         ruleCondList: RuleConditionList,
         ruleOpList: localRuleListOp,
       };
-
+      
       axios.post(SERVER_URL + ENDPOINT_ADD_RULES, postJson).then((res) => {
         if (res.data.Status === 0) {
           rules[selected].Desc = res.data.Description;
@@ -306,6 +312,15 @@ function Rules(props) {
     setshowBtn("");
     setselected(0);
   };
+console.log("123",props)
+  const onDragEnd = (result) => {
+    const { source, destination } = result;
+    if (!destination) return;
+    const rulesArray = [...rules];
+    const [reOrderedRuleItem] = rulesArray.splice(source.index, 1);
+    rulesArray.splice(destination.index, 0, reOrderedRuleItem);
+    setrules(rulesArray);
+  };
 
   return (
     <>
@@ -328,7 +343,7 @@ function Rules(props) {
                 </button>
               </div>
             ) : (
-              <div className="row">
+              <div className="row" style={{ marginBottom: "0.5rem" }}>
                 <p className={styles.noRuleDefined}>
                   {count}
                   {" " + t("rulesAreDedined")}
@@ -345,39 +360,73 @@ function Rules(props) {
                 ) : null}
               </div>
             )}
-            <ul>
-              {rules && rules.length != 0 ? (
-                rules.map((el, index) => {
-                  return (
-                    <li
-                      className={styles.restList}
-                      style={{
-                        backgroundColor:
-                          selected == index ? "#0072C60F " : null,
-                        color: selected == index ? "#000000" : null,
-                        borderLeft:
-                          selected == index ? "5px solid #0072C6" : null,
-                      }}
-                      onClick={() => setselected(index)}
-                    >
-                      {el.Desc}
-                    </li>
-                  );
-                })
-              ) : (
-                <li
-                  className={styles.restList}
-                  style={{
-                    backgroundColor: "#0072C60F ",
-                    color: "#000000",
-                    borderLeft: "5px solid #0072C6",
-                  }}
-                >
-                  {t("no")}
-                  {" " + t("rulesAreDedined")}
-                </li>
-              )}
-            </ul>
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Droppable droppableId="pickListInputs">
+                {(provided) => (
+                  <ul
+                    style={{ overflow: "scroll" }}
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                  >
+                    {rules && rules.length != 0 ? (
+                      rules.map((el, index) => {
+                        return (
+                          <Draggable
+                            draggableId={`${index}`}
+                            key={`${index}`}
+                            index={index}
+                          >
+                            {(provided) => (
+                              <li
+                                className={styles.restList}
+                                onMouseOver={() => setShowDragIcon(true)}
+                                onMouseLeave={() => setShowDragIcon(false)}
+                                style={{
+                                  backgroundColor:
+                                    selected == index ? "#0072C60F " : null,
+                                  color: selected == index ? "#000000" : null,
+                                  borderLeft:
+                                    selected == index
+                                      ? "5px solid #0072C6"
+                                      : null,
+                                }}
+                                {...provided.draggableProps}
+                                ref={provided.innerRef}
+                                onClick={() => setselected(index)}
+                              >
+                                <p
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <span style={{ marginRight: "15px" }} {...provided.dragHandleProps}>
+                                    {index + 1}.
+                                  </span>
+                                  {el.Desc}
+                                </p>
+                              </li>
+                            )}
+                          </Draggable>
+                        );
+                      })
+                    ) : (
+                      <li
+                        className={styles.restList}
+                        style={{
+                          backgroundColor: "#0072C60F ",
+                          color: "#000000",
+                          borderLeft: "5px solid #0072C6",
+                        }}
+                      >
+                        {t("no")}
+                        {" " + t("rulesAreDedined")}
+                      </li>
+                    )}
+                  </ul>
+                )}
+              </Droppable>
+            </DragDropContext>
           </div>
           <div className={styles.vl}></div>
           <div className={styles.RightPannel}>

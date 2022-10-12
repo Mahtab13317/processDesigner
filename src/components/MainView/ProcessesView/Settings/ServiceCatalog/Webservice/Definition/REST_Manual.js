@@ -518,7 +518,7 @@ function REST_Manual(props) {
               webServiceObj.authType === NO_AUTH
                 ? styles.disabledBtn
                 : styles.secondaryBtn
-            } ${styles.mb1} ${styles.mlr2}`}
+            } ${styles.mb1} ${styles.mlr1}`}
             onClick={() => setOpenModal(DEFINE_AUTH_DETAILS)}
             disabled={webServiceObj.authType === NO_AUTH}
             id={`webs_authenDetails_${props.scope}`}

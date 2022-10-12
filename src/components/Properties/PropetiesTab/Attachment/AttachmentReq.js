@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Modal from "../../../../UI/Modal/Modal.js";
 import SystemUpdateAltIcon from "@material-ui/icons/SystemUpdateAlt";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-
 import { useGlobalState, store } from "state-pool";
 import styles from "./attachment.module.css";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -22,7 +21,6 @@ import { connect, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice.js";
 import axios from "axios";
-import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 import arabicStyles from "../InitialRule/arabicStyles.module.css";
 
 function AttachmentReq(props) {

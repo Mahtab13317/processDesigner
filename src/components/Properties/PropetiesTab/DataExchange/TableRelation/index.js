@@ -1,3 +1,5 @@
+// #BugID - 116700
+// #BugDescription - Added check to avoid edge case.
 import React from "react";
 import CustomizedDropdown from "../../../../../UI/Components_With_ErrrorHandling/Dropdown";
 import { MenuItem } from "@material-ui/core";
@@ -30,6 +32,7 @@ function TableRelation(props) {
     multiSelectedTableNames,
     mappingColumnList,
     filteredProcessTableExptList,
+    isReadOnly,
   } = props;
   const disabled =
     selectedProcessTable === "" ||
@@ -47,7 +50,7 @@ function TableRelation(props) {
         </div>
 
         <CustomizedDropdown
-          //   disabled={isProcessReadOnly}
+          disabled={isReadOnly}
           id="TR_Process_Table_Dropdown"
           className={styles.dropdown}
           value={selectedProcessTable}
@@ -79,7 +82,7 @@ function TableRelation(props) {
           <span className={styles.asterisk}>*</span>
         </div>
         <CustomizedDropdown
-          //   disabled={isProcessReadOnly}
+          disabled={isReadOnly}
           id="TR_Process_Table_Column_Dropdown"
           className={styles.dropdown}
           value={column1Value}
@@ -98,7 +101,7 @@ function TableRelation(props) {
                   </MenuItem>
                 );
               })
-            : filteredProcessTableExptList.map((element) => {
+            : filteredProcessTableExptList?.map((element) => {
                 return (
                   <MenuItem
                     className={styles.menuItemStyles}
@@ -120,7 +123,7 @@ function TableRelation(props) {
       <div className={styles.flexColumn}>
         <p className={styles.fieldTitle}>{t("dataExchangeTable")}</p>
         <CustomizedDropdown
-          //   disabled={isProcessReadOnly}
+          disabled={isReadOnly}
           id="TR_Data_Exchg_Table_Dropdown"
           className={styles.dropdown}
           value={selectedTRDataExchngTable}
@@ -164,7 +167,7 @@ function TableRelation(props) {
           <span className={styles.asterisk}>*</span>
         </div>
         <CustomizedDropdown
-          //   disabled={isProcessReadOnly}
+          disabled={isReadOnly}
           id="TR_Data_Exchg_Table_Column_Dropdown"
           className={styles.dropdown}
           value={column2Value}
@@ -226,15 +229,22 @@ function TableRelation(props) {
         <button
           id="TR_Cancel_Relation_Btn"
           onClick={cancelTableRelationHandler}
-          className={styles.cancelBtn}
+          className={clsx(
+            styles.cancelBtn,
+            isReadOnly && styles.disabledBtnStyles
+          )}
+          disabled={isReadOnly}
         >
           {t("cancel")}
         </button>
         <button
           id="TR_Add_Relation_Btn"
-          disabled={disabled}
+          disabled={disabled || isReadOnly}
           onClick={addTableRelationHandler}
-          className={clsx(styles.addBtn, disabled && styles.disabledBtnStyles)}
+          className={clsx(
+            styles.addBtn,
+            (disabled || isReadOnly) && styles.disabledBtnStyles
+          )}
         >
           {t("add")}
         </button>
@@ -360,11 +370,13 @@ function TableRelation(props) {
                         )}
                       </div>
                     )}
-                    <DeleteOutlinedIcon
-                      id="TR_Delete_Relation_Btn"
-                      onClick={() => deleteTableRelationHandler(index)}
-                      className={styles.deleteIcon}
-                    />
+                    {!isReadOnly && (
+                      <DeleteOutlinedIcon
+                        id="TR_Delete_Relation_Btn"
+                        onClick={() => deleteTableRelationHandler(index)}
+                        className={styles.deleteIcon}
+                      />
+                    )}
                   </div>
                 </div>
               );

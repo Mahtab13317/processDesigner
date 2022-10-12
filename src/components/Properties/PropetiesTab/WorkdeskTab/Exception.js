@@ -1,3 +1,5 @@
+// #BugID - 109977
+// #BugDescription - validation for exception dulicate name has been added.
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "./todo.module.css";
@@ -10,6 +12,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { connect } from "react-redux";
 import {
   ENDPOINT_ADD_EXCEPTION,
+  PROCESSTYPE_DEPLOYED,
+  PROCESSTYPE_REGISTERED,
   propertiesLabel,
   SERVER_URL,
 } from "../../../../Constants/appConstants";
@@ -20,6 +24,7 @@ import {
   setOpenProcess,
 } from "../../../../redux-store/slices/OpenProcessSlice";
 import "./index.css";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function Exception(props) {
   let { t } = useTranslation();
@@ -27,6 +32,8 @@ function Exception(props) {
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [checkException, setCheckException] = useState(false);
   const [allExpData, setAllExpData] = useState([]);
   const [exceptionItemData, setExceptionItemData] = useState({});
@@ -47,7 +54,9 @@ function Exception(props) {
     ExceptionGroups: [],
   });
   const openProcessData = useSelector(OpenProcessSliceValue);
+  const [addAnotherExp, setAddAnotherExp] = useState(false);
   const [localState, setLocalState] = useState(null);
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   useEffect(() => {
     let tempList = {
@@ -86,6 +95,12 @@ function Exception(props) {
         }
       });
   }, [openProcessData.loadedData]);
+
+  /*****************************************************************************************
+   * @author asloob_ali BUG ID : 114885  Exception: description of the associated Exception in activity is not displayed
+   * Reason: property name key mismatched.
+   *  Resolution :updated key correctly.
+   *  Date : 05/10/2022             **************/
 
   const CheckExceptionHandler = () => {
     let val;
@@ -209,7 +224,7 @@ function Exception(props) {
               [expectionListVal]: {
                 editable: true,
                 expTypeInfo: {
-                  expTypeDesc: selected.ExceptionDesc,
+                  expTypeDesc: selected.Description,
                   expTypeId: selected.ExceptionId,
                   expTypeName: selected.ExceptionName,
                 },
@@ -236,7 +251,7 @@ function Exception(props) {
               ...tempdataLocal?.exceptionMap,
               [expectionListVal]: {
                 expTypeInfo: {
-                  expTypeDesc: selected.ExceptionDesc,
+                  expTypeDesc: selected.Description,
                   expTypeId: selected.ExceptionId,
                   expTypeName: selected.ExceptionName,
                 },
@@ -255,7 +270,7 @@ function Exception(props) {
             exceptionMap: {
               [expectionListVal]: {
                 expTypeInfo: {
-                  expTypeDesc: selected.ExceptionDesc,
+                  expTypeDesc: selected.Description,
                   expTypeId: selected.ExceptionId,
                   expTypeName: selected.ExceptionName,
                 },
@@ -354,14 +369,15 @@ function Exception(props) {
   const addExceptionToList = (
     ExceptionToAdd,
     button_type,
-    groupId = "0",
+    groupId, // code edited on 7 Sep 2022 for BugId 114884
     ExceptionDesc
   ) => {
     let exist = false;
     expData?.ExceptionGroups.map((group) => {
       group.ExceptionList.map((exception) => {
         if (
-          exception.ExceptionName.toLowerCase() === ExceptionToAdd.toLowerCase()
+          exception.ExceptionName.trim().toLowerCase() ===
+          ExceptionToAdd.trim().toLowerCase()
         ) {
           exist = true;
         }
@@ -375,8 +391,14 @@ function Exception(props) {
           open: true,
         })
       );
+      return;
     } else {
-      if (ExceptionToAdd.trim() !== "") {
+      // code edited on 7 Sep 2022 for BugId 114884
+      if (
+        ExceptionToAdd?.trim() !== "" &&
+        groupId &&
+        ExceptionDesc?.trim() !== ""
+      ) {
         let maxExceptionId = 0;
         expData.ExceptionGroups.map((group) => {
           group.ExceptionList.map((listElem) => {
@@ -420,16 +442,21 @@ function Exception(props) {
                 }
               });
               setExpData(tempData);
-              if (button_type != "addAnother") {
+              if (button_type !== "addAnother") {
                 setaddException(false);
-              }
-              if (button_type == "addAnother") {
-                document.getElementById("ExceptionNameInput").value = "";
-                document.getElementById("ExceptionNameInput").focus();
+                setAddAnotherExp(false);
+              } else if (button_type === "addAnother") {
+                setAddAnotherExp(true);
               }
             }
           });
-      } else if (ExceptionToAdd.trim() === "") {
+      }
+      // code edited on 7 Sep 2022 for BugId 114884
+      else if (
+        ExceptionToAdd?.trim() === "" ||
+        !groupId ||
+        ExceptionDesc?.trim() === ""
+      ) {
         dispatch(
           setToastDataFunc({
             message: t("mandatoryErr"),
@@ -437,7 +464,7 @@ function Exception(props) {
             open: true,
           })
         );
-        document.getElementById("ExceptionNameInput").focus();
+        setAddAnotherExp(false);
       }
     }
   };
@@ -452,6 +479,7 @@ function Exception(props) {
               onChange={() => CheckExceptionHandler()}
               className={styles.mainCheckbox}
               data-testid="CheckExp"
+              disabled={isReadOnly}
               type="checkbox"
             />
             {t("EXCEPTION")}
@@ -473,7 +501,7 @@ function Exception(props) {
                 }}
                 id="Dropdown"
                 className={styles.todoSelect}
-                disabled={!checkException}
+                disabled={!checkException || isReadOnly}
                 value={expectionListVal}
                 onChange={(e) => definedExpHandler(e)}
               >
@@ -498,12 +526,14 @@ function Exception(props) {
                 disabled={
                   !checkException ||
                   (checkException && expectionListVal.trim() === "") ||
-                  (checkException && selectedExpItem)
+                  (checkException && selectedExpItem) ||
+                  isReadOnly
                 }
                 className={
                   !checkException ||
                   (checkException && expectionListVal.trim() === "") ||
-                  (checkException && selectedExpItem)
+                  (checkException && selectedExpItem) ||
+                  isReadOnly
                     ? styles.disabledBtn
                     : styles.addBtn
                 }
@@ -513,8 +543,18 @@ function Exception(props) {
                 {t("associate")}
               </button>
               <button
-                disabled={!checkException}
-                className={!checkException ? styles.disabledBtn : styles.addBtn}
+                disabled={
+                  !checkException ||
+                  props.openProcessType === PROCESSTYPE_DEPLOYED ||
+                  props.openProcessType === PROCESSTYPE_REGISTERED
+                }
+                className={
+                  !checkException ||
+                  props.openProcessType === PROCESSTYPE_DEPLOYED ||
+                  props.openProcessType === PROCESSTYPE_REGISTERED
+                    ? styles.disabledBtn
+                    : styles.addBtn
+                }
                 onClick={defineHandler}
                 data-testid="defineBtn"
               >
@@ -543,9 +583,15 @@ function Exception(props) {
           </div>
           <div className={styles.deassociateDiv}>
             <button
-              disabled={!checkException || (checkException && !selectedExpItem)}
+              disabled={
+                !checkException ||
+                (checkException && !selectedExpItem) ||
+                isReadOnly
+              }
               className={
-                !checkException || (checkException && !selectedExpItem)
+                !checkException ||
+                (checkException && !selectedExpItem) ||
+                isReadOnly
                   ? styles.disabledBtn
                   : styles.deleteBtn
               }
@@ -757,12 +803,14 @@ function Exception(props) {
           </div>
         </div>
       </div>
-      <Modal open={addExpection} onClose={() => setaddException(false)}>
+      <Modal open={addExpection}>
         <AddException
           handleClose={() => setaddException(false)}
           addExceptionToList={addExceptionToList}
           calledFromWorkdesk={true}
           groups={expData.ExceptionGroups}
+          addAnotherExp={addAnotherExp}
+          setAddAnotherExp={setAddAnotherExp}
         />
       </Modal>
     </React.Fragment>
@@ -774,6 +822,7 @@ const mapStateToProps = (state) => {
     openProcessID: state.openProcessClick.selectedId,
     openProcessName: state.openProcessClick.selectedProcessName,
     openProcessType: state.openProcessClick.selectedType,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

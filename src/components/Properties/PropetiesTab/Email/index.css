@@ -1,6 +1,10 @@
+/*
+scroll bar added for bug id 115276
+*/
+
 .marginAllAround {
   height: 32rem;
-  overflow: auto;
+  /* overflow: auto; */
   padding: 1rem 1vw;
   background: white;
 }
@@ -71,6 +75,18 @@
   letter-spacing: 0px;
   color: var(--button_color);
   cursor: pointer;
+}
+
+.disabledbtnEmail {
+  min-width: 4vw;
+  background: rgba(0, 0, 0, 0.12);
+  border: none;
+  color: rgba(0, 0, 0, 0.7);
+  border-radius: 2px;
+  text-align: center;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
+  letter-spacing: 0px;
+  cursor: default;
 }
 
 .boldText {

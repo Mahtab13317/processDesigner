@@ -1,3 +1,4 @@
+// Changes made to solve Bug 113392 - Version history: while opening the previous version from the version history the screen loads forever
 import React, { useState, useEffect } from "react";
 import cx from "classnames";
 import { useTranslation } from "react-i18next";
@@ -34,11 +35,14 @@ const ProcessView = (props) => {
   const loadedProcessData = store.getState("loadedProcessData");
   const openProcessesArr = store.getState("openProcessesArr");
   const variablesList = store.getState("variableDefinition");
+  const calendarList = store.getState("calendarList");
   const [variableList, setLocalVariablesList] = useGlobalState(variablesList);
   const [caseEnabled, setCaseEnabled] = useState(false);
   const [spinner, setspinner] = useState(true);
   const [localArrProcessesData, setLocalArrProcessesData] =
     useGlobalState(arrProcessesData);
+  const [localCalendarList, setlocalCalendarList] =
+    useGlobalState(calendarList);
   const [localLoadedProcessData, setlocalLoadedProcessData] =
     useGlobalState(loadedProcessData);
   const [localOpenProcessesArr, setLocalOpenProcessesArr] =
@@ -310,6 +314,10 @@ const ProcessView = (props) => {
     return tempArr;
   };
 
+  useEffect(() => {
+    if (localLoadedProcessData === null) setspinner(true);
+  }, [localLoadedProcessData]);
+
   //fetch processData from openProcess API
   useEffect(() => {
     if (initialRender) {
@@ -364,9 +372,10 @@ const ProcessView = (props) => {
                   setLocalOpenProcessesArr(temp);
                 }
                 setspinner(false);
-              } else {
-                alert(res.data.Message);
               }
+              // else {
+              //   alert(res.data.Message);
+              // }
             })
             .catch((err) => console.log(err));
         } else {
@@ -383,6 +392,17 @@ const ProcessView = (props) => {
             .then((res) => {
               if (res.data.Status === 0) {
                 const newProcessData = res.data.OpenProcess;
+                axios
+                  .get(
+                    SERVER_URL +
+                      "/calendar/" +
+                      newProcessData.ProcessDefId +
+                      "/" +
+                      newProcessData.ProcessType
+                  )
+                  .then((res) => {
+                    setlocalCalendarList(res.data?.Calendar);
+                  });
                 setTableName(newProcessData.TableName);
                 setProcessData(newProcessData);
                 setlocalLoadedProcessData(newProcessData);
@@ -415,9 +435,10 @@ const ProcessView = (props) => {
                 }
                 setspinner(false);
                 setLocalVariablesList(newProcessData.Variable); // Updating VariableList
-              } else {
-                alert(res.data.Message);
               }
+              // else {
+              //   alert(res.data.Message);
+              // }
             })
             .catch((err) => {
               console.log(err);
@@ -426,7 +447,7 @@ const ProcessView = (props) => {
         }
       }
     }
-  }, [localLoadedProcessData]);
+  }, [localLoadedProcessData, initialRender]);
 
   // connections in localLoadedProcessData updated in properties section, and to reflect that on
   // screen processData needs to be updated
@@ -434,7 +455,7 @@ const ProcessView = (props) => {
     if (localLoadedProcessData !== null) {
       setProcessData(localLoadedProcessData);
     }
-  }, [localLoadedProcessData?.Connections]);
+  }, [localLoadedProcessData?.Connections, localLoadedProcessData?.Versions]);
 
   useEffect(() => {
     let temp = JSON.parse(JSON.stringify(processData));
@@ -455,12 +476,12 @@ const ProcessView = (props) => {
 
   useEffect(() => {
     setInitialRender(true);
-  }, [props.openProcessID]);
+  }, [props.openProcessID, props.openProcessVersion, props.templateId]);
 
   return (
     <div className="tabViewingArea">
       {/*code edited on 26 July 2022 for BugId 110024*/}
-      <Header processData={processData} setProcessData={setProcessData}/>
+      <Header processData={processData} setProcessData={setProcessData} />
       <td style={{ direction: `${t("HTML_DIR")}` }}>
         <Tabs
           tabType="processSubTab"
@@ -476,7 +497,7 @@ const ProcessView = (props) => {
           TabElement={[
             <div
               className={cx("pmviewingArea")}
-              style={{ marginTop: "0", height: "81vh" }}
+              style={{ marginTop: "0", height: "calc(100vh - 10.5rem)" }} //code edited on 6 Sep 2022 for BugId 114227
             >
               <ViewingArea
                 processType={openProcessType}
@@ -504,6 +525,7 @@ const mapStateToProps = (state) => {
     templateId: state.openTemplateReducer.templateId,
     templateName: state.openTemplateReducer.templateName,
     openTemplateFlag: state.openTemplateReducer.openFlag,
+    openProcessVersion: state.openProcessClick.selectedVersion,
   };
 };
 

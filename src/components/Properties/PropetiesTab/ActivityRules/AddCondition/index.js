@@ -33,19 +33,20 @@ function AddCondition(props) {
   const {
     index,
     addNewCondition,
+    deleteCondition,
     disabled,
-    showDelIcon,
     localRuleData,
     setLocalRuleData,
     isRuleBeingCreated,
     setIsRuleBeingModified,
-    isProcessReadOnly,
+    isReadOnly,
     checkValidation,
     setCheckValidation,
     ruleConditionErrors,
     setRuleConditionErrors,
     isAlwaysRule,
   } = props;
+
   const [loadedProcessData] = useGlobalState("loadedProcessData");
   const variableData = loadedProcessData.Variable;
   const constantsData = loadedProcessData.DynamicConstant;
@@ -195,8 +196,20 @@ function AddCondition(props) {
 
     if (isParam2Const) {
       variableScope = "C";
+      varFieldId = "0";
+      variableId = "0";
+      extObjId = "0";
     }
-
+    console.log(
+      "888",
+      "LOCAL DATA BEFORE",
+      localRuleData,
+      extObjId,
+      varFieldId,
+      variableId,
+      variableScope,
+      param2DropdownOptions
+    );
     setLocalRuleData((prevData) => {
       let temp = { ...prevData };
       temp.ruleCondList[index].param2 = event.target.value;
@@ -204,6 +217,7 @@ function AddCondition(props) {
       temp.ruleCondList[index].varFieldId_2 = varFieldId;
       temp.ruleCondList[index].variableId_2 = variableId;
       temp.ruleCondList[index].type2 = variableScope ? variableScope : "C";
+      console.log("888", "LOCAL DATA AFTER", temp);
       return temp;
     });
     setParam2(event.target.value);
@@ -226,16 +240,6 @@ function AddCondition(props) {
       localRuleData.ruleCondList.length
     );
     if (isRuleBeingCreated === false) {
-      setIsRuleBeingModified(true);
-    }
-  };
-
-  // Function that runs when the user deletes a condition.
-  const deleteRow = () => {
-    const temp = { ...localRuleData };
-    temp.ruleCondList.splice(index, 1);
-    setLocalRuleData(temp);
-    if (!isRuleBeingCreated) {
       setIsRuleBeingModified(true);
     }
   };
@@ -288,7 +292,7 @@ function AddCondition(props) {
       }
     }
 
-    if (+localRuleData.ruleCondList[index].param2)
+    if (localRuleData.ruleCondList[index].param2 !== "")
       setSelectedLogicalOperator(localRuleData.ruleCondList[index].logicalOp);
     if (
       localRuleData.ruleCondList[index].param1 === RULES_ALWAYS_CONDITION ||
@@ -311,7 +315,7 @@ function AddCondition(props) {
       >
         <CustomizedDropdown
           id="AR_Param1_Dropdown"
-          disabled={isProcessReadOnly || disabled}
+          disabled={isReadOnly || disabled}
           className={
             direction === RTL_DIRECTION
               ? arabicStyles.dropdown
@@ -344,7 +348,7 @@ function AddCondition(props) {
 
         <CustomizedDropdown
           id="AR_Rule_Condition_Dropdown"
-          disabled={isProcessReadOnly || disabled}
+          disabled={isReadOnly || disabled}
           className={
             direction === RTL_DIRECTION
               ? arabicStyles.dropdown
@@ -375,7 +379,7 @@ function AddCondition(props) {
 
         <CustomizedDropdown
           id="AR_Param2_Dropdown"
-          disabled={isProcessReadOnly || disabled}
+          disabled={isReadOnly || disabled}
           className={
             direction === RTL_DIRECTION
               ? arabicStyles.dropdown
@@ -410,7 +414,7 @@ function AddCondition(props) {
 
         <Select
           id="AR_Logical_Operator_Dropdown"
-          disabled={isProcessReadOnly || disabled}
+          disabled={isReadOnly || disabled}
           className={
             direction === RTL_DIRECTION
               ? arabicStyles.dropdown
@@ -437,8 +441,11 @@ function AddCondition(props) {
         <div className={styles.deleteIcon}>
           {localRuleData &&
           localRuleData?.ruleCondList?.length > 1 &&
-          !isProcessReadOnly ? (
-            <DeleteOutlinedIcon id="AR_Delete_Row_Button" onClick={deleteRow} />
+          !isReadOnly ? (
+            <DeleteOutlinedIcon
+              id="AR_Delete_Row_Button"
+              onClick={() => deleteCondition(index)}
+            />
           ) : null}
         </div>
       </div>

@@ -706,7 +706,7 @@ function Webservice(props) {
                         height: `${
                           props.callLocation === "webServicePropTab"
                             ? "60vh"
-                            : "70vh"
+                            : "72vh"
                         }`,
                       }
                     : {}

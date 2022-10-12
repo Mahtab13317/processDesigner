@@ -10,6 +10,13 @@
 // #BugDescription - Added condition for disabling if radio option in parallel distribute activity.
 // #BugID - 112369
 // #BugDescription - Added provision to add constants in list with constants already made.
+// #BugID - 107757
+// #BugDescription - Added checks and conditions for OMS Adapter.
+// #BugID - 115262
+// #BugDescription - Added checks so that rule description cannot be clicked while rule is being added.
+// #BugID - 115261
+// #BugDescription - Added conditions to make rule condition have always condition for parallel distribute activity.
+
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "./index.module.css";
@@ -23,7 +30,6 @@ import AddCondition from "./AddCondition";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import axios from "axios";
 import clsx from "clsx";
-import StarRateIcon from "@material-ui/icons/StarRate";
 import { getVariableType } from "../../../../utility/ProcessSettings/Triggers/getVariableType";
 import {
   RadioGroup,
@@ -67,6 +73,8 @@ import {
   RTL_DIRECTION,
   propertiesLabel,
   CONSTANT,
+  DATE_VARIABLE_TYPE,
+  ADD_OPERATION_SECONDARY_DBFLAG,
 } from "../../../../Constants/appConstants";
 import {
   getOperator,
@@ -96,6 +104,11 @@ import {
 import { noIncomingTypes } from "../../../../utility/bpmnView/noIncomingTypes.js";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 import TabsHeading from "../../../../UI/TabsHeading";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
+import { getVariableByName } from "../../../../utility/ProcessSettings/Triggers/triggerCommonFunctions";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { useRef } from "react";
+import { FieldValidations } from "../../../../utility/FieldValidations/fieldValidations";
 
 function ActivityRules(props) {
   let { t } = useTranslation();
@@ -117,9 +130,9 @@ function ActivityRules(props) {
   const globalActivityData = store.getState("activityPropertyData");
   const [localActivityPropertyData, setLocalActivityPropertyData] =
     useGlobalState(globalActivityData);
-  const activityProcessData = store.getState("loadedProcessData").value;
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [activityProcessData] = useGlobalState(loadedProcessData);
   const [localRuleData, setLocalRuleData] = useState({}); // State to store the rule data for the selected rule locally.
-  const [isProcessReadOnly, setIsProcessReadOnly] = useState(false); // State to store boolean for check if the process is readonly or not.
   const [selectedRule, setSelectedRule] = useState(0); // To store the index of the selected rule.
   const [selectedCondition, setSelectedCondition] =
     useState(RULES_IF_CONDITION); // To store the selected condition for a rule.
@@ -140,6 +153,7 @@ function ActivityRules(props) {
   const [doesSelectedRuleHaveErrors, setDoesSelectedRuleHaveErrors] =
     useState(false);
   const [ruleConditionErrors, setRuleConditionErrors] = useState(false);
+  const [actionNameError, setActionNameError] = useState(false);
   const [actionName, setActionName] = useState("");
   const [actions, setActions] = useState([]); //Action data
   const [actionCount, setActionCount] = useState(0); //to show action Count
@@ -148,6 +162,8 @@ function ActivityRules(props) {
   const [addClicked, setAddClicked] = useState(false);
   const [isActParallelDistribute, setIsActParallelDistribute] = useState(false);
   const [currentTabName, setCurrentTabName] = useState(null); //added by mahtab to check the current tab name in an activity
+  let isReadOnly = isReadOnlyFunc(activityProcessData, props.cellCheckedOut);
+  const actionNameRef = useRef();
 
   // Function that runs when the component loads.
   useEffect(() => {
@@ -168,6 +184,7 @@ function ActivityRules(props) {
         }
       });
   }, []);
+
   //added by mahtab to setting current tab
   useEffect(() => {
     if (activityTab !== "") {
@@ -185,9 +202,10 @@ function ActivityRules(props) {
     localRuleData?.ruleCondList?.forEach((element) => {
       conditionFieldKeys["ruleCondition"]?.forEach((value) => {
         if (
-          element[value] === "" ||
+          !element[value] ||
+          element[value]?.trim() === "" ||
           element[value] === null ||
-          element[value] === CONSTANT
+          element[value]?.trim() === CONSTANT
         ) {
           conditionFieldsFilled = false;
         }
@@ -223,17 +241,26 @@ function ActivityRules(props) {
         });
       } else {
         oprtnType = element.opType;
-        operationFieldKeys[element.opType]?.forEach((value) => {
-          if (element[value] === "" || element[value] === null) {
+        if (
+          oprtnType === SET_OPERATION_TYPE &&
+          element.param1 === ADD_OPERATION_SECONDARY_DBFLAG
+        ) {
+          if (element.param2 === "") {
             operationFieldsFilled = false;
           }
-        });
+        } else {
+          operationFieldKeys[element.opType]?.forEach((value) => {
+            if (element[value] === "" || element[value] === null) {
+              operationFieldsFilled = false;
+            }
+          });
+        }
       }
     });
 
     setDoesSelectedRuleHaveErrors(!operationFieldsFilled);
     setRuleConditionErrors(!conditionFieldsFilled);
-    if (operationFieldsFilled && conditionFieldKeys) {
+    if (operationFieldsFilled && conditionFieldsFilled) {
       setCheckValidation(false);
       if (addClicked) {
         addRule();
@@ -243,10 +270,63 @@ function ActivityRules(props) {
     }
   };
 
+  console.log("222", "LOCAL RULE DATA", localRuleData, rules);
+
+  // Function that validates the rule being currently added/modified.
+  const validateAction = () => {
+    let conditionFieldsFilled = true,
+      operationFieldsFilled = true,
+      actionNameFilled = true;
+    let conditionFieldKeys = {
+      ruleCondition: ["param1", "param2", "operator"],
+    };
+
+    if (!actionName || actionName?.trim() === "") {
+      actionNameFilled = false;
+    }
+
+    localRuleData?.ruleCondList?.forEach((element) => {
+      conditionFieldKeys["ruleCondition"]?.forEach((value) => {
+        if (
+          !element[value] ||
+          element[value]?.trim() === "" ||
+          element[value] === null ||
+          element[value]?.trim() === CONSTANT
+        ) {
+          conditionFieldsFilled = false;
+        }
+      });
+    });
+
+    localRuleData?.ruleOpList?.forEach((element, i) => {
+      operationFieldKeys[element.opType]?.forEach((value) => {
+        if (element[value] === "" || element[value] === null) {
+          operationFieldsFilled = false;
+        }
+      });
+    });
+
+    setDoesSelectedRuleHaveErrors(!operationFieldsFilled);
+    setRuleConditionErrors(!conditionFieldsFilled);
+    setActionNameError(!actionNameFilled);
+    if (operationFieldsFilled && conditionFieldsFilled && actionNameFilled) {
+      setCheckValidation(false);
+      if (addClicked) {
+        addAction();
+      }
+    } else {
+      setAddClicked(false);
+    }
+  };
+
   // Function that runs when the localRuleData changes to check the validation in the dropdown and fields.
   useEffect(() => {
     if (checkValidation) {
-      validateRule();
+      if (calledFromAction) {
+        validateAction();
+      } else {
+        validateRule();
+      }
     }
   }, [localRuleData, checkValidation]);
 
@@ -305,13 +385,6 @@ function ActivityRules(props) {
     setWorkstepList(activityList);
   }, [activityProcessData.MileStones]);
 
-  // Function that runs when the openProcessType prop changes.
-  useEffect(() => {
-    if (openProcessType !== PROCESSTYPE_LOCAL) {
-      setIsProcessReadOnly(true);
-    }
-  }, [openProcessType]);
-
   // Function to set global data when the user does any action.
   const setGlobalData = (rules) => {
     let temp = JSON.parse(JSON.stringify(localActivityPropertyData));
@@ -343,9 +416,37 @@ function ActivityRules(props) {
       (cellActivitySubType === 1 || cellActivitySubType === 2)
     ) {
       temp.ActivityProperty.distributeInfo.disRuleInfo = rules;
+    } else if (cellActivityType === 33 && cellActivitySubType === 1) {
+      temp.ActivityProperty.esInfo.esRuleList = rules;
+    } else if (cellActivityType === 22 && cellActivitySubType === 1) {
+      temp.ActivityProperty.esInfo.esRuleList = rules;
     }
     setLocalActivityPropertyData(temp);
     dispatch(setActivityPropertyChange(getDataKey()));
+  };
+
+  const setGlobalActionData = (actions) => {
+    let temp = JSON.parse(JSON.stringify(localActivityPropertyData));
+    let tempList = {};
+    actions?.forEach((el) => {
+      tempList = { ...tempList, [el.actionId]: el };
+    });
+    if (temp?.ActivityProperty?.wdeskInfo?.m_objActionDetails?.actionMap) {
+      temp.ActivityProperty.wdeskInfo.m_objActionDetails.actionMap = {
+        ...tempList,
+      };
+    } else {
+      temp.ActivityProperty.wdeskInfo.m_objActionDetails = {
+        ...temp?.ActivityProperty?.wdeskInfo?.m_objActionDetails,
+        actionMap: tempList,
+      };
+    }
+    setLocalActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.workdesk]: { isModified: true, hasError: false },
+      })
+    );
   };
 
   // Function that runs when the component loads and is responsible for checking which operations are allowed for the particular activity that is showing the rules now.
@@ -383,6 +484,8 @@ function ActivityRules(props) {
       activityTab === "Reminder"
     ) {
       operationsList = reminderOperations;
+    } else if (cellActivityType === 22 && cellActivitySubType === 1) {
+      operationsList = entryDetailsOperations;
     }
     setOperationsAllowed(operationsList);
   }, []);
@@ -449,15 +552,15 @@ function ActivityRules(props) {
         ruleCondList: (entrySettingsData &&
           entrySettingsData.ActivityProperty &&
           activityData &&
-          activityData.length > 0 &&
-          activityData[selectedRule].ruleCondList) || [
+          activityData?.length > 0 &&
+          activityData[selectedRule]?.ruleCondList) || [
           getRuleConditionObject(),
         ],
         ruleOpList: (entrySettingsData &&
           entrySettingsData.ActivityProperty &&
           activityData &&
-          activityData.length > 0 &&
-          activityData[selectedRule].ruleOpList) || [
+          activityData?.length > 0 &&
+          activityData[selectedRule]?.ruleOpList) || [
           getRuleOperationObject(1, activityTab === "Reminder" && "39"),
         ],
       };
@@ -493,7 +596,7 @@ function ActivityRules(props) {
 
   // Function to set the action count.
   useEffect(() => {
-    if (actions) {
+    if (actions && !isRuleBeingCreated) {
       setActionCount(actions.length);
     }
   }, [actions]);
@@ -527,65 +630,85 @@ function ActivityRules(props) {
 
   // Function that gets called when the user changes a selected rule.
   const handleSelectedRuleChange = (index) => {
-    expandDrawer(true);
-    setSelectedRule(index);
-    if (
-      localRuleData &&
-      localRuleData.ruleCondList &&
-      localRuleData.ruleCondList[0].param1 === RULES_ALWAYS_CONDITION
-    ) {
-      setSelectedCondition(RULES_ALWAYS_CONDITION);
-      setDisabled(true);
-    } else if (
-      rules &&
-      rules[selectedRule] &&
-      rules[selectedRule].ruleCondList &&
-      rules[selectedRule].ruleCondList[0].param1 === RULES_OTHERWISE_CONDITION
-    ) {
-      setSelectedCondition(RULES_OTHERWISE_CONDITION);
-      setDisabled(true);
-      setIsOtherwiseSelected(true);
-    } else {
-      setSelectedCondition(RULES_IF_CONDITION);
-      setDisabled(false);
-    }
+    if (!isRuleBeingCreated || index !== rules?.length - 1) {
+      expandDrawer(true);
+      setSelectedRule(index);
+      if (
+        localRuleData &&
+        localRuleData.ruleCondList &&
+        localRuleData.ruleCondList[0].param1 === RULES_ALWAYS_CONDITION
+      ) {
+        setSelectedCondition(RULES_ALWAYS_CONDITION);
+        setDisabled(true);
+      } else if (
+        rules &&
+        rules[selectedRule] &&
+        rules[selectedRule].ruleCondList &&
+        rules[selectedRule].ruleCondList[0].param1 === RULES_OTHERWISE_CONDITION
+      ) {
+        setSelectedCondition(RULES_OTHERWISE_CONDITION);
+        setDisabled(true);
+        setIsOtherwiseSelected(true);
+      } else {
+        setSelectedCondition(RULES_IF_CONDITION);
+        setDisabled(false);
+      }
 
-    if (isRuleBeingCreated) {
-      //updated by mahtab
-      let temp = rules && rules?.lenght > 0 ? [...rules] : [];
-      temp.splice(selectedRule, 1);
-      setRules(temp);
-      setGlobalData(temp);
-      setSelectedRule((prevCount) => {
-        if (prevCount > 0) {
-          return prevCount;
-        } else {
-          return 0;
-        }
-      });
-      setShowAddRuleButton(true);
+      if (isRuleBeingCreated) {
+        //updated by mahtab
+        let temp = rules && rules?.length > 0 ? [...rules] : [];
+        temp.splice(selectedRule, 1);
+        setRules(temp);
+        setGlobalData(temp);
+        setSelectedRule((prevCount) => {
+          if (prevCount > 0) {
+            return prevCount;
+          } else {
+            return 0;
+          }
+        });
+        setShowAddRuleButton(true);
+      }
+      setIsRuleBeingModified(false);
       setIsRuleBeingCreated(false);
+      setCheckValidation(false);
+      setDoesSelectedRuleHaveErrors(false);
+      setRuleConditionErrors(false);
     }
-    setIsRuleBeingModified(false);
-    setIsRuleBeingCreated(false);
-    setCheckValidation(false);
-    setDoesSelectedRuleHaveErrors(false);
-    setRuleConditionErrors(false);
   };
 
   // Function that gets called and adds a new rule condition, when the user adds a logical operator to a rule condition.
   const addNewCondition = (value, index, ruleDataLength) => {
-    if (value !== "" && index === ruleDataLength - 1) {
+    if (value !== "3" && index === ruleDataLength - 1) {
       let maxId = 0;
       localRuleData.ruleCondList.forEach((element) => {
-        if (element.CondOrderId > maxId) {
-          maxId = element.CondOrderId;
+        if (element.condOrderId > maxId) {
+          maxId = element.condOrderId;
         }
       });
+
       let newCondition = getRuleConditionObject(+maxId + 1);
       const temp = { ...localRuleData };
       temp.ruleCondList.push(newCondition);
       setLocalRuleData(temp);
+      setCheckValidation(false);
+    } else if (value === "3" && ruleDataLength > 1) {
+      const temp = { ...localRuleData };
+      temp.ruleCondList.splice(temp.ruleCondList.length - 1, 1);
+      setLocalRuleData(temp);
+    }
+  };
+
+  // Function that runs when the user deletes a condition.
+  const deleteCondition = (ind) => {
+    let temp = JSON.parse(JSON.stringify(localRuleData));
+    temp.ruleCondList.splice(ind, 1);
+    if (temp.ruleCondList.length > 0) {
+      temp.ruleCondList[temp.ruleCondList.length - 1].logicalOp = "3";
+    }
+    setLocalRuleData(temp);
+    if (!isRuleBeingCreated) {
+      setIsRuleBeingModified(true);
     }
   };
 
@@ -622,6 +745,24 @@ function ActivityRules(props) {
     } else {
       setDisabled(false);
     }
+    if (!isRuleBeingCreated) {
+      setIsRuleBeingModified(true);
+    }
+  };
+
+  // This function runs when any pinned tile is dragged and dropped in the list.
+  const onDragEnd = (result) => {
+    const { source, destination } = result;
+    if (!destination) return;
+    let rulesArray = JSON.parse(JSON.stringify(rules));
+    const [reOrderedTile] = rulesArray.splice(source.index, 1);
+    rulesArray.splice(destination.index, 0, reOrderedTile);
+    setSelectedRule(destination.index);
+    rulesArray.forEach((element, index) => {
+      element.ruleOrderId = index + 1;
+    });
+    setRules(rulesArray);
+    setGlobalData(rulesArray);
   };
 
   // Function that gets called when the user clicks on the add rule button after defining a new rule.
@@ -630,11 +771,29 @@ function ActivityRules(props) {
     setAddClicked(true);
   };
 
+  const removeRuleCalFlagAccToVariable = (opList) => {
+    let updateOpList = JSON.parse(JSON.stringify(opList));
+    updateOpList.forEach((element) => {
+      if (
+        element.opType ===
+        (SET_OPERATION_TYPE || SET_PARENT_DATA_OPERATION_TYPE)
+      ) {
+        const varDetails = getVariableByName(
+          element.param1,
+          activityProcessData?.Variable
+        );
+        if (+varDetails?.VariableType !== DATE_VARIABLE_TYPE) {
+          element.ruleCalFlag = "";
+        }
+      }
+    });
+    return updateOpList;
+  };
+
   // Function that runs when the user clicks on add rule after defining a rule.
   const addRule = () => {
     let ruleCondList = [];
     let ruleOpList = [];
-
     localRuleData &&
       localRuleData.ruleCondList.forEach((element) => {
         const conditionObject = {
@@ -656,18 +815,62 @@ function ActivityRules(props) {
       });
     localRuleData &&
       localRuleData.ruleOpList.forEach((element) => {
-        const operationObject = getRuleOperationDataObj(element);
+        let operationObject = {};
+        operationObject = getRuleOperationDataObj(element);
         ruleOpList.push(operationObject);
       });
-
     const temp = [...rules];
     temp[selectedRule].ruleCondList = ruleCondList;
-    temp[selectedRule].ruleOpList = ruleOpList;
+    temp[selectedRule].ruleOpList = removeRuleCalFlagAccToVariable(ruleOpList);
 
     setRules(temp);
     setGlobalData(temp);
     setIsRuleBeingCreated(false);
     dispatch(setActivityPropertyChange(getDataKey()));
+    setShowAddRuleButton(true);
+    setAddClicked(false);
+  };
+
+  // Function that runs when the user clicks on add rule after defining a rule.
+  const addAction = () => {
+    let ruleCondList = [];
+    let ruleOpList = [];
+    localRuleData?.ruleCondList?.forEach((element) => {
+      const conditionObject = {
+        condOrderId: element.condOrderId,
+        param1: element.param1,
+        type1: element.type1,
+        extObjID1: element.extObjID1,
+        variableId_1: element.variableId_1,
+        varFieldId_1: element.varFieldId_1,
+        operator: element.operator === "" ? "0" : element.operator,
+        param2: element.param2,
+        type2: element.type2,
+        extObjID2: element.extObjID2,
+        variableId_2: element.variableId_2,
+        varFieldId_2: element.varFieldId_2,
+        logicalOp: element.logicalOp,
+      };
+      ruleCondList.push(conditionObject);
+    });
+    localRuleData?.ruleOpList?.forEach((element) => {
+      let operationObject = {};
+      operationObject = getRuleOperationDataObj(element);
+      ruleOpList.push(operationObject);
+    });
+    const temp = [...actions];
+    temp[actionIndex].actionName = actionName;
+    temp[actionIndex].ruleInfo.ruleCondList = ruleCondList;
+    temp[actionIndex].ruleInfo.ruleOpList =
+      removeRuleCalFlagAccToVariable(ruleOpList);
+    setActions(temp);
+    setGlobalActionData(temp);
+    setIsRuleBeingCreated(false);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.workdesk]: { isModified: true, hasError: false },
+      })
+    );
     setShowAddRuleButton(true);
     setAddClicked(false);
   };
@@ -682,8 +885,9 @@ function ActivityRules(props) {
         },
       };
     } else if (
-      cellActivityType === 10 &&
-      (cellActivitySubType === 3 || cellActivitySubType === 6)
+      (cellActivityType === 10 &&
+        (cellActivitySubType === 3 || cellActivitySubType === 6)) ||
+      (cellActivityType === 33 && cellActivitySubType === 1)
     ) {
       return {
         [propertiesLabel.EntrySetting]: { isModified: true, hasError: false },
@@ -715,6 +919,10 @@ function ActivityRules(props) {
       return {
         [propertiesLabel.distribute]: { isModified: true, hasError: false },
       };
+    } else if (cellActivityType === 22 && cellActivitySubType === 1) {
+      return {
+        [propertiesLabel.webService]: { isModified: true, hasError: false },
+      };
     }
   };
 
@@ -729,8 +937,7 @@ function ActivityRules(props) {
     setCheckValidation(false);
     setIsRuleBeingCreated(true);
     let maxRuleId = 0;
-    rules &&
-      rules?.length > 0 &&
+    rules?.length > 0 &&
       rules?.forEach((element) => {
         if (element.ruleOrderId > maxRuleId) {
           maxRuleId = element.ruleOrderId;
@@ -757,21 +964,28 @@ function ActivityRules(props) {
     setRules(temp);
     setSelectedRule(temp.length - 1);
     setShowAddRuleButton(false);
+    if (isParallelDistribute) {
+      let rest = JSON.parse(JSON.stringify(localRuleData));
+      setLocalRuleData({
+        ...rest,
+        ruleCondList: [getAlwaysRuleConditionObject()],
+      });
+    }
   };
 
   // Function that gets called when the user clicks on add action button in the left panel to add a new action locally.
   const addActionLocally = () => {
+    expandDrawer(true);
     let maxActionId = 0;
-    actions &&
-      actions.length > 0 &&
+    actions?.length > 0 &&
       actions.forEach((element) => {
-        if (element.ActionId > maxActionId) {
-          maxActionId = element.ActionId;
+        if (+element.actionId > +maxActionId) {
+          maxActionId = element.actionId;
         }
       });
     let newAction = {
       actionId: +maxActionId + 1 + "",
-      actionName: "",
+      actionName: "New Action",
       ruleInfo: {
         ruleCondList: [getRuleConditionObject()],
         ruleOpList: [getRuleOperationObject()],
@@ -781,12 +995,21 @@ function ActivityRules(props) {
         ruleType: "A",
       },
     };
-    let temp = [...actions];
+    let temp = actions?.length > 0 ? [...actions] : [];
     temp.push(newAction);
     setActions(temp);
     setActionIndex(temp.length - 1);
+    setActionName("");
     setShowAddRuleButton(false);
+    setDoesSelectedRuleHaveErrors(false);
+    setCheckValidation(false);
     setIsRuleBeingCreated(true);
+    const timeout = setTimeout(() => {
+      const input = document.getElementById("ActionNameInput");
+      input.select();
+      input.focus();
+    }, 500);
+    return () => clearTimeout(timeout);
   };
 
   // Function that gets called when the user clicks on add operation button for a new or existing rule.
@@ -801,16 +1024,13 @@ function ActivityRules(props) {
           }
         });
       let newOperation;
-      /*  if (activityTab === "Reminder") {
-        newOperation = getRuleOperationObject(maxOrderId + 1, "39");
-      } else {
-        newOperation = getRuleOperationObject(maxOrderId + 1);
-      } */
+
       newOperation = getRuleOperationObject(maxOrderId + 1);
       const temp = { ...localRuleData };
       temp.ruleOpList.push(newOperation);
       setLocalRuleData(temp);
       setDoesSelectedRuleHaveErrors(false);
+      setCheckValidation(false);
     }
   };
 
@@ -851,6 +1071,9 @@ function ActivityRules(props) {
     let temp = JSON.parse(JSON.stringify(localRuleData));
     temp.ruleOpList.splice(index, 1);
     setLocalRuleData(temp);
+    if (temp.ruleOpList.length > 0) {
+      temp.ruleOpList[temp.ruleOpList.length - 1].logicalOp = "3";
+    }
     if (!isRuleBeingCreated) {
       setIsRuleBeingModified(true);
     }
@@ -883,17 +1106,33 @@ function ActivityRules(props) {
 
     localRuleData &&
       localRuleData.ruleOpList.forEach((element) => {
-        const operationObject = getRuleOperationDataObj(element);
+        let operationObject = {};
+
+        if (cellActivityType === 7 && cellActivitySubType === 1) {
+          operationObject = { ...element };
+        } else {
+          operationObject = getRuleOperationDataObj(element);
+        }
         ruleOpList.push(operationObject);
       });
 
-    const temp = [...rules];
-    temp[selectedRule].ruleCondList = localRuleData.ruleCondList;
-    temp[selectedRule].ruleOpList = localRuleData.ruleOpList;
-    setRules(temp);
-    setGlobalData(temp);
-    setIsRuleBeingModified(false);
-    dispatch(setActivityPropertyChange(getDataKey()));
+    if (calledFromAction) {
+      const temp = [...actions];
+      temp[actionIndex].ruleInfo.ruleCondList = localRuleData.ruleCondList;
+      temp[actionIndex].ruleInfo.ruleOpList = localRuleData.ruleOpList;
+      temp[actionIndex].actionName = actionName;
+      setActions(temp);
+      setGlobalActionData(temp);
+      setIsRuleBeingModified(false);
+    } else {
+      const temp = [...rules];
+      temp[selectedRule].ruleCondList = localRuleData.ruleCondList;
+      temp[selectedRule].ruleOpList = localRuleData.ruleOpList;
+      setRules(temp);
+      setGlobalData(temp);
+      setIsRuleBeingModified(false);
+      dispatch(setActivityPropertyChange(getDataKey()));
+    }
   };
 
   // Function that gets called when the user clicks on the cancel button while adding a new rule.
@@ -931,62 +1170,68 @@ function ActivityRules(props) {
 
   // Function that gets called when the user clicks on the cancel button after making changes to an existing rule.
   const restoreRuleChanges = () => {
-    let temp = { ...localRuleData };
-    const entrySettingsData = JSON.parse(
-      JSON.stringify(localActivityPropertyData)
-    );
-    let activityDataArr =
-      entrySettingsData.ActivityProperty.esInfo &&
-      entrySettingsData.ActivityProperty.esInfo.esRuleList;
-    if (cellActivityType === 7 && cellActivitySubType === 1) {
-      activityDataArr =
-        entrySettingsData.ActivityProperty.routingCriteria &&
-        entrySettingsData.ActivityProperty.routingCriteria.routCriteriaList;
-    } else if (
-      cellActivityType === 5 &&
-      (cellActivitySubType === 1 || cellActivitySubType === 2)
-    ) {
-      activityDataArr =
-        entrySettingsData.ActivityProperty.distributeInfo &&
-        entrySettingsData.ActivityProperty.distributeInfo.disRuleInfo;
-    } else if (
-      cellActivityType === 4 &&
-      cellActivitySubType === 1 &&
-      activityTab === "Reminder"
-    ) {
-      activityDataArr =
-        entrySettingsData.ActivityProperty.reminderInfo &&
-        entrySettingsData.ActivityProperty.reminderInfo.reminderList;
+    if (calledFromAction) {
+      let temp = { ...localRuleData };
+      const actionData = JSON.parse(JSON.stringify(localActivityPropertyData));
+      let activityDataArr =
+        actionData?.ActivityProperty?.wdeskInfo?.m_objActionDetails?.actionMap;
+      let tempArr = [...actions];
+      temp.ruleCondList = activityDataArr[actionIndex].ruleCondList;
+      temp.ruleOpList = activityDataArr[actionIndex].ruleOpList;
+      setLocalRuleData(temp);
+      tempArr[actionIndex].ruleCondList =
+        activityDataArr[actionIndex].ruleCondList;
+      tempArr[actionIndex].ruleOpList = activityDataArr[actionIndex].ruleOpList;
+      setActions(tempArr);
+    } else {
+      let temp = { ...localRuleData };
+      const entrySettingsData = JSON.parse(
+        JSON.stringify(localActivityPropertyData)
+      );
+      let activityDataArr =
+        entrySettingsData.ActivityProperty.esInfo &&
+        entrySettingsData.ActivityProperty.esInfo.esRuleList;
+      if (cellActivityType === 7 && cellActivitySubType === 1) {
+        activityDataArr =
+          entrySettingsData.ActivityProperty.routingCriteria &&
+          entrySettingsData.ActivityProperty.routingCriteria.routCriteriaList;
+      } else if (
+        cellActivityType === 5 &&
+        (cellActivitySubType === 1 || cellActivitySubType === 2)
+      ) {
+        activityDataArr =
+          entrySettingsData.ActivityProperty.distributeInfo &&
+          entrySettingsData.ActivityProperty.distributeInfo.disRuleInfo;
+      } else if (
+        cellActivityType === 4 &&
+        cellActivitySubType === 1 &&
+        activityTab === "Reminder"
+      ) {
+        activityDataArr =
+          entrySettingsData.ActivityProperty.reminderInfo &&
+          entrySettingsData.ActivityProperty.reminderInfo.reminderList;
+      }
+      let tempArr = [...rules];
+      temp.ruleCondList = activityDataArr[selectedRule].ruleCondList;
+      temp.ruleOpList = activityDataArr[selectedRule].ruleOpList;
+      setLocalRuleData(temp);
+      tempArr[selectedRule].ruleCondList =
+        activityDataArr[selectedRule].ruleCondList;
+      tempArr[selectedRule].ruleOpList =
+        activityDataArr[selectedRule].ruleOpList;
+      setRules(tempArr);
     }
-    let tempArr = [...rules];
-    temp.ruleCondList = activityDataArr[selectedRule].ruleCondList;
-    temp.ruleOpList = activityDataArr[selectedRule].ruleOpList;
-    setLocalRuleData(temp);
-    tempArr[selectedRule].ruleCondList =
-      activityDataArr[selectedRule].ruleCondList;
-    tempArr[selectedRule].ruleOpList = activityDataArr[selectedRule].ruleOpList;
-    setRules(tempArr);
     setIsRuleBeingModified(false);
     setIsRuleBeingCreated(false);
   };
 
   // Function that gets called when the user deletes an existing rule.
   const deleteRule = () => {
-    let temp = [...rules];
-    temp.splice(selectedRule, 1);
-    setRules(temp);
-    setGlobalData(temp);
-    setSelectedRule((prevCount) => {
-      if (prevCount > 0) {
-        return prevCount - 1;
-      } else return 0;
-    });
-    dispatch(setActivityPropertyChange(getDataKey()));
-
     if (calledFromAction) {
       let temp = [...actions];
       temp.splice(actionIndex, 1);
       setActions(temp);
+      setGlobalActionData(temp);
       setActionIndex((prevCount) => {
         if (prevCount > 0) {
           return prevCount - 1;
@@ -995,6 +1240,17 @@ function ActivityRules(props) {
         }
       });
       setActionName("");
+    } else {
+      let temp = [...rules];
+      temp.splice(selectedRule, 1);
+      setRules(temp);
+      setGlobalData(temp);
+      setSelectedRule((prevCount) => {
+        if (prevCount > 0) {
+          return prevCount - 1;
+        } else return 0;
+      });
+      dispatch(setActivityPropertyChange(getDataKey()));
     }
   };
 
@@ -1224,6 +1480,226 @@ function ActivityRules(props) {
     return getFinalRuleStatement();
   };
 
+  // Function that builds the rule statement for a rule.
+  const buildActionStatement = (index) => {
+    let ruleStatement = "";
+    let operationStatement = "";
+    let ruleType = RULES_IF_CONDITION;
+    if (
+      actions[index]?.ruleInfo?.ruleCondList &&
+      actions[index]?.ruleInfo?.ruleCondList[0].param1 ===
+        RULES_ALWAYS_CONDITION
+    ) {
+      ruleType = RULES_ALWAYS_CONDITION;
+    } else if (
+      actions[index]?.ruleInfo?.ruleCondList &&
+      actions[index]?.ruleInfo?.ruleCondList[0].param1 ===
+        RULES_OTHERWISE_CONDITION
+    ) {
+      ruleType = RULES_OTHERWISE_CONDITION;
+    }
+    actions[index]?.ruleInfo?.ruleCondList.forEach((element) => {
+      const concatenatedString = ruleStatement.concat(
+        SPACE,
+        element.param1,
+        SPACE,
+        t("is"),
+        SPACE,
+        getConditionalOperator(element.operator),
+        SPACE,
+        element.param2,
+        SPACE,
+        getLogicalOperator(element.logicalOp)
+      );
+      ruleStatement = concatenatedString;
+    });
+
+    // Function to get calendar type based on ruleCalFlag.
+    const getCalendarTypeName = (flag) => {
+      return flag === Y_FLAG ? t("workingDay") : t("calendarDay");
+    };
+
+    // Function to get total time for escalate to and escalate to with trigger.
+    const getTotalTime = (durationObj) => {
+      return `'${durationObj.paramDays}'${t("days")}+ '${
+        durationObj.paramHours
+      }'${t("hrs")}+ '${durationObj.paramMinutes}'${t("minutes")} +'${
+        durationObj.paramSeconds
+      }'${t("seconds")}`;
+    };
+
+    // Function that builds the operation text.
+    function getOperationText(element) {
+      switch (element.opType) {
+        case COMMIT_OPERATION_TYPE:
+        case INC_PRIORITY_OPERATION_TYPE:
+        case DEC_PRIORITY_OPERATION_TYPE:
+        case REINITIATE_OPERATION_TYPE:
+        case ROLLBACK_OPERATION_TYPE:
+          return getTypedropdown(element.opType);
+        case ASSIGNED_TO_OPERATION_TYPE:
+          return getTypedropdown(element.opType) + SPACE + element.param1;
+        case SET_OPERATION_TYPE:
+        case SET_PARENT_DATA_OPERATION_TYPE:
+          if (element.param1 === SECONDARYDBFLAG) {
+            return (
+              getTypedropdown(element.opType) +
+              SPACE +
+              element.param1 +
+              SPACE +
+              EQUAL_TO +
+              SPACE +
+              getSecondaryDBFlagValue(element.param2)
+            );
+          } else {
+            return (
+              getTypedropdown(element.opType) +
+              SPACE +
+              element.param1 +
+              SPACE +
+              EQUAL_TO +
+              SPACE +
+              (isValueDateType(element.param2).isValDateType
+                ? moment(element.param2).format("DD/MM/YYYY")
+                : element.param2) +
+              // element.param2 +
+              SPACE +
+              getOperator(element.operator) +
+              SPACE +
+              element.param3
+            );
+          }
+        case TRIGGER_OPERATION_TYPE:
+          return getTypedropdown(element.opType) + SPACE + element.param1;
+        case SET_AND_EXECUTE_OPERATION_TYPE:
+          return (
+            getTypedropdown(element.opType) +
+            SPACE +
+            element.param1 +
+            SPACE +
+            EQUAL_TO +
+            SPACE +
+            getFunctionTypeName(element.param2) +
+            SPACE +
+            getSelectedOptionLabel(element.param2)
+          );
+        case CALL_OPERATION_TYPE:
+          return (
+            getTypedropdown(element.opType) +
+            SPACE +
+            getFunctionTypeName(element.param1) +
+            SPACE +
+            getSelectedOptionLabel(element.param1)
+          );
+        case ROUTE_TO_OPERATION_TYPE:
+          return getTypedropdown(element.opType) + SPACE + element.param1;
+        case ESCALATE_TO_OPERATION_TYPE:
+          return (
+            getTypedropdown(element.opType) +
+            SPACE +
+            element.param1 +
+            SPACE +
+            t("after") +
+            SPACE +
+            element.param2 +
+            SPACE +
+            getTotalTime(element.durationInfo) +
+            SPACE +
+            getCalendarTypeName(element.ruleCalFlag)
+          );
+        case ESCALATE_WITH_TRIGGER_OPERATION_TYPE:
+        case REMINDER_OPERATION_TYPE:
+          return (
+            getTypedropdown(element.opType) +
+            SPACE +
+            element.triggerName +
+            SPACE +
+            "Frequency" +
+            SPACE +
+            element.iReminderFrequency +
+            SPACE +
+            t("after") +
+            SPACE +
+            element.param2 +
+            SPACE +
+            getTotalTime(element.durationInfo) +
+            SPACE +
+            getCalendarTypeName(element.ruleCalFlag)
+          );
+        case AUDIT_OPERATION_TYPE:
+          return (
+            getTypedropdown(element.opType) +
+            SPACE +
+            element.param1 +
+            PERCENTAGE_SYMBOL +
+            SPACE +
+            t("ifSampled") +
+            SPACE +
+            `'${element.param2}'` +
+            SPACE +
+            t("notSampled") +
+            SPACE +
+            `'${element.param3}'`
+          );
+        case DISTRIBUTE_TO_OPERATION_TYPE:
+          return (
+            getTypedropdown(element.opType) +
+            SPACE +
+            element.param1 +
+            SPACE +
+            getChildStatement(element)
+          );
+        default:
+          return "";
+      }
+    }
+
+    // Function to check if the operation is the last operation or not.
+    const isLastOperation = (elemIndex) => {
+      return elemIndex === actions[index]?.ruleInfo?.ruleOpList.length - 1;
+    };
+    actions[index]?.ruleInfo?.ruleOpList.forEach((element, elemIndex) => {
+      const concatenatedOperations = operationStatement.concat(
+        getOperationText(element),
+        !isLastOperation(elemIndex) ? "," : ".",
+        SPACE
+      );
+      operationStatement = concatenatedOperations;
+    });
+
+    // Function that gets the final rule statement.
+    function getFinalRuleStatement() {
+      if (ruleType === RULES_ALWAYS_CONDITION) {
+        let alwaysOpList = "";
+        actions[index]?.ruleInfo?.ruleOpList.forEach((element, elemIndex) => {
+          const concatenatedOperations = alwaysOpList.concat(
+            getOperationText(element),
+            !isLastOperation(elemIndex) ? "," : ".",
+            SPACE
+          );
+          alwaysOpList = concatenatedOperations;
+        });
+        return ruleType + SPACE + alwaysOpList;
+      } else if (ruleType === RULES_OTHERWISE_CONDITION) {
+        let otherwiseOpList = "";
+        actions[index]?.ruleInfo?.ruleOpList.forEach((element, elemIndex) => {
+          const concatenatedOperations = otherwiseOpList.concat(
+            getOperationText(element),
+            !isLastOperation(elemIndex) ? "," : ".",
+            SPACE
+          );
+          otherwiseOpList = concatenatedOperations;
+        });
+        return ruleType + SPACE + otherwiseOpList;
+      } else {
+        return (
+          ruleType + ruleStatement + t("then") + SPACE + operationStatement
+        );
+      }
+    }
+    return getFinalRuleStatement();
+  };
+
   // Function to get the child statement for distribute to operation.
   const getChildStatement = (element) => {
     const isChildVariablePresent = element.param2.trim() !== "";
@@ -1287,6 +1763,9 @@ function ActivityRules(props) {
   // Function to gets called when the user enters an action name in the input field.
   const actionHandler = (event) => {
     setActionName(event.target.value);
+    if (!isRuleBeingCreated) {
+      setIsRuleBeingModified(true);
+    }
   };
 
   // Function that gets called when the actionData changes.
@@ -1294,20 +1773,16 @@ function ActivityRules(props) {
     setActions(actionData);
   }, [actionData]);
 
+  //code edited on 21 Sep 2022 for BugId 111854
   // Function that gets called when the actionIndex changes.
   useEffect(() => {
-    if (calledFromAction) {
-      let temp = [
-        actions && actions[actionIndex] && actions[actionIndex].ruleInfo,
-      ];
+    if (calledFromAction && actions && actions.length !== 0) {
+      let temp = [actions && actions[actionIndex]?.ruleInfo];
       setRules(temp);
       setActionCount(actions && actions.length);
-
+      setActionName(actions[actionIndex].actionName);
       const dataObj = {
-        ruleCondList:
-          actions && actions.length > 0
-            ? actions[actionIndex]?.ruleInfo?.ruleCondList
-            : actionData[actionIndex]?.ruleInfo?.ruleCondList,
+        ruleCondList: actions[actionIndex]?.ruleInfo?.ruleCondList,
         ruleOpList:
           actions && actions.length > 0
             ? actions[actionIndex]?.ruleInfo?.ruleOpList
@@ -1315,637 +1790,755 @@ function ActivityRules(props) {
       };
       setLocalRuleData({ ...dataObj });
     }
-  }, [actionIndex]);
+  }, [actionIndex, actions]);
+
+  // Function that runs when the selected rule changes or rules are added,deleted or modified.
+  useEffect(() => {
+    if (
+      actions &&
+      actions[actionIndex] &&
+      actions[actionIndex]?.ruleInfo?.ruleCondList &&
+      actions[actionIndex]?.ruleInfo?.ruleCondList[0].param1 ===
+        RULES_ALWAYS_CONDITION
+    ) {
+      setSelectedCondition(RULES_ALWAYS_CONDITION);
+      setDisabled(true);
+      setIsOtherwiseSelected(false);
+    } else {
+      setSelectedCondition(RULES_IF_CONDITION);
+      setDisabled(false);
+      setIsOtherwiseSelected(false);
+    }
+  }, [actionIndex, actions]);
 
   // Function that gets called when the user clicks on the add action button.
   const addActionHandler = () => {
-    let temp = [...actions];
-    temp[actionIndex].actionName = actionName;
-    setActions(temp);
+    setCheckValidation(true);
+    setAddClicked(true);
   };
 
   return (
     <>
       <TabsHeading heading={props?.heading} />
-    <div
-      className={
-        direction === RTL_DIRECTION
-          ? arabicStyles.ruleScreen
-          : styles.ruleScreen
-      }
-    >
-      {(calledFromAction && actionCount > 0) ||
-      (!calledFromAction && rulesCount > 0) ||
-      isRuleBeingCreated ? (
-        <>
-       
-          <div
-            className={styles.leftPanel}
-            style={{
-              width: isDrawerExpanded ? "26%" : "100%",
-            }}
-          >
-            {calledFromAction ? (
-              <div>
-                {actionCount === 0 ? (
-                  <div
-                    className={
-                      direction === RTL_DIRECTION
-                        ? arabicStyles.flexRow
-                        : styles.flexRow
-                    }
-                  >
-                    <p
-                      className={
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.noRuleDefined
-                          : styles.noRuleDefined
-                      }
-                      style={{ fontSize: "1.1rem", marginRight: "0.8rem" }}
-                    >
-                      {t("no")}
-                      {SPACE + t("actionAreDefined")}
-                    </p>
-                    {!isProcessReadOnly && showAddRuleButton ? (
-                      <button
-                        id="AR_Add_Action_Locally"
-                        className={
-                          direction === RTL_DIRECTION
-                            ? arabicStyles.addRuleLocallyButton
-                            : styles.addRuleLocallyButton
-                        }
-                        onClick={addActionLocally}
-                      >
-                        {t("addAction")}
-                      </button>
-                    ) : null}
-                  </div>
-                ) : (
-                  <div className="row">
-                    <p
-                      className={
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.noRuleDefined
-                          : styles.noRuleDefined
-                      }
-                    >
-                      {actionCount === 1
-                        ? actionCount + SPACE + t("actionIsDefined")
-                        : actionCount + SPACE + t("actionAreDefined")}
-                    </p>
-                    {!isProcessReadOnly && showAddRuleButton ? (
-                      <button
-                        id="AR_Add_Action_Locally"
-                        className={
-                          direction === RTL_DIRECTION
-                            ? arabicStyles.addRuleLocallyButton
-                            : styles.addRuleLocallyButton
-                        }
-                        onClick={addActionLocally}
-                      >
-                        {t("addAction")}
-                      </button>
-                    ) : null}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div>
-                {rulesCount === 0 ? (
-                  <div
-                    className={
-                      direction === RTL_DIRECTION
-                        ? arabicStyles.flexRow1
-                        : styles.flexRow1
-                    }
-                  >
-                    <p
-                      className={
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.noRuleDefined
-                          : styles.noRuleDefined
-                      }
-                    >
-                      {t("no")}
-                      {SPACE + t("rulesAreDefined")}
-                    </p>
-                    {!isProcessReadOnly && showAddRuleButton ? (
-                      <button
-                        id="AR_Add_Rule_Locally"
-                        className={
-                          direction === RTL_DIRECTION
-                            ? arabicStyles.addRuleLocallyButton
-                            : styles.addRuleLocallyButton
-                        }
-                        onClick={addRuleLocally}
-                      >
-                        {t("addRule")}
-                      </button>
-                    ) : null}
-                  </div>
-                ) : (
-                  <div
-                    className={
-                      direction === RTL_DIRECTION
-                        ? arabicStyles.flexRow1
-                        : styles.flexRow1
-                    }
-                  >
-                    <p
-                      className={
-                        direction === RTL_DIRECTION
-                          ? arabicStyles.noRuleDefined
-                          : styles.noRuleDefined
-                      }
-                      style={{ fontSize: "1.1rem", marginRight: "0.8rem" }}
-                    >
-                      {rulesCount === 1
-                        ? rulesCount + SPACE + t("ruleIsDefined")
-                        : rulesCount + SPACE + t("rulesAreDefined")}
-                    </p>
-                    {!isProcessReadOnly && showAddRuleButton ? (
-                      <button
-                        id="AR_Add_Rule_Locally"
-                        className={
-                          direction === RTL_DIRECTION
-                            ? arabicStyles.addRuleLocallyButton
-                            : styles.addRuleLocallyButton
-                        }
-                        onClick={addRuleLocally}
-                      >
-                        {t("addRule")}
-                      </button>
-                    ) : null}
-                  </div>
-                )}
-              </div>
-            )}
-            {calledFromAction ? (
-              <ul>
-                {actions && actions.length !== 0 ? (
-                  actions.map((element, index) => {
-                    return (
-                      <li onClick={() => setActionIndex(index)}>
-                        {element.actionName}
-                      </li>
-                    );
-                  })
-                ) : (
-                  <li
-                    className={
-                      direction === RTL_DIRECTION
-                        ? arabicStyles.restList
-                        : styles.restList
-                    }
-                  >
-                    {t("no")}
-                    {SPACE + t("actionsareDefined")}
-                  </li>
-                )}
-              </ul>
-            ) : (
-              <ul>
-                {rules && rules.length !== 0 ? (
-                  rules.map((element, index) => {
-                    return (
-                      <li
-                        id="AR_Open_Rule"
-                        className={
-                          selectedRule === index
-                            ? direction === RTL_DIRECTION
-                              ? arabicStyles.ruleStatement
-                              : styles.ruleStatement
-                            : direction === RTL_DIRECTION
-                            ? arabicStyles.restList
-                            : styles.restList
-                        }
-                        onClick={() => handleSelectedRuleChange(index)}
-                      >
-                        <RuleStatement
-                          index={index}
-                          rules={rules}
-                          isRuleBeingCreated={
-                            index === selectedRule ? isRuleBeingCreated : false
-                          }
-                          buildRuleStatement={buildRuleStatement}
-                          shortenRuleStatement={shortenRuleStatement}
-                          registeredFunctions={registeredFunctions}
-                          registeredOptionsLabelsData={
-                            registeredOptionsLabelsData
-                          }
-                        />
-                      </li>
-                    );
-                  })
-                ) : (
-                  <li
-                    className={
-                      direction === RTL_DIRECTION
-                        ? arabicStyles.restList
-                        : styles.restList
-                    }
-                  >
-                    {t("no")}
-                    {SPACE + t("rulesAreDefined")}
-                  </li>
-                )}
-              </ul>
-            )}
-          </div>
-          <div
-            className={
-              direction === RTL_DIRECTION
-                ? arabicStyles.verticalDivision
-                : styles.verticalDivision
-            }
-          ></div>
-          <div
-            style={{
-              width: isDrawerExpanded ? "74%" : "0%",
-            }}
-          >
-            {isDrawerExpanded ? (
-              <div
-                className={
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.rightPanel
-                    : styles.rightPanel
-                }
-              >
-                {calledFromAction ? (
-                  <div className="row" style={{ margin: "-20px 0 12px 0" }}>
-                    <p
-                      style={{
-                        font: " normal normal normal 16px/22px Open Sans",
-                        fontSize: "var(--title_text_font_size)",
-                      }}
-                    >
-                      {t("actionName")}
-                    </p>
-                    <input
-                      onChange={(event) => actionHandler(event)}
-                      value={actionName}
-                      style={{ marginLeft: "2rem", height: "24px" }}
-                    />
-                  </div>
-                ) : null}
-
-                <div
-                  className={
-                    direction === RTL_DIRECTION
-                      ? arabicStyles.flexRow1
-                      : styles.flexRow1
-                  }
-                >
-                  <p
-                    className={styles.mainHeading}
-                    style={{
-                      fontSize: "var(--subtitle_text_font_size)",
-                      display: "flex",
-                    }}
-                  >
-                    {t("rulesCondition")}
-                    <span className={styles.starIcon}>*</span>
-                  </p>
-                  {isRuleBeingCreated ? (
+      <div
+        className={
+          direction === RTL_DIRECTION
+            ? arabicStyles.ruleScreen
+            : styles.ruleScreen
+        }
+        style={{
+          height: calledFromAction ? "51vh" : "61vh",
+          maxHeight: calledFromAction ? "51vh" : "61vh",
+        }}
+      >
+        {(calledFromAction && actionCount > 0) ||
+        (!calledFromAction && rulesCount > 0) ||
+        isRuleBeingCreated ? (
+          <>
+            <div
+              className={styles.leftPanel}
+              style={{
+                width: isDrawerExpanded ? "26%" : "100%",
+              }}
+            >
+              {calledFromAction ? (
+                <div>
+                  {actionCount === 0 ? (
                     <div
                       className={
                         direction === RTL_DIRECTION
-                          ? arabicStyles.buttonsDiv
-                          : styles.buttonsDiv
+                          ? arabicStyles.flexRow1
+                          : styles.flexRow1
                       }
                     >
-                      <button
-                        id="AR_Cancel_Rule_Changes"
+                      <p
                         className={
                           direction === RTL_DIRECTION
-                            ? arabicStyles.cancelHeaderBtn
-                            : styles.cancelHeaderBtn
+                            ? arabicStyles.noRuleDefined
+                            : styles.noRuleDefined
                         }
-                        onClick={cancelRule}
-                        style={{
-                          display: isProcessReadOnly ? "none" : "",
-                        }}
                       >
-                        {t("cancel")}
-                      </button>
-                      {calledFromAction ? (
+                        {t("no")}
+                        {SPACE + t("actionsareDefined")}
+                      </p>
+                      {!isReadOnly && showAddRuleButton ? (
                         <button
-                          id="AR_Add_Action_Button"
+                          id="AR_Add_Action_Locally"
                           className={
                             direction === RTL_DIRECTION
-                              ? arabicStyles.addHeaderBtn
-                              : styles.addHeaderBtn
+                              ? arabicStyles.addRuleLocallyButton
+                              : styles.addRuleLocallyButton
                           }
-                          onClick={addActionHandler}
-                          style={{
-                            display: isProcessReadOnly ? "none" : "",
-                          }}
+                          onClick={addActionLocally}
                         >
                           {t("addAction")}
                         </button>
-                      ) : (
-                        <button
-                          id="AR_Add_Rule_Button"
-                          className={
-                            direction === RTL_DIRECTION
-                              ? arabicStyles.addHeaderBtn
-                              : styles.addHeaderBtn
-                          }
-                          onClick={addRuleHandler}
-                          style={{
-                            display: isProcessReadOnly ? "none" : "",
-                          }}
-                        >
-                          {t("addRule")}
-                        </button>
-                      )}
+                      ) : null}
                     </div>
                   ) : (
                     <div
                       className={
                         direction === RTL_DIRECTION
-                          ? arabicStyles.buttonsDiv
-                          : styles.buttonsDiv
+                          ? arabicStyles.flexRow1
+                          : styles.flexRow1
                       }
                     >
-                      {!isOtherwiseSelected && (
+                      <p
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.noRuleDefined
+                            : styles.noRuleDefined
+                        }
+                      >
+                        {actionCount === 1
+                          ? actionCount + SPACE + t("actionIsDefined")
+                          : actionCount + SPACE + t("actionsareDefined")}
+                      </p>
+                      {!isReadOnly && showAddRuleButton ? (
                         <button
-                          id="AR_Delete_Rule_Button"
+                          id="AR_Add_Action_Locally"
+                          className={
+                            direction === RTL_DIRECTION
+                              ? arabicStyles.addRuleLocallyButton
+                              : styles.addRuleLocallyButton
+                          }
+                          onClick={addActionLocally}
+                        >
+                          {t("addAction")}
+                        </button>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  {rulesCount === 0 ? (
+                    <div
+                      className={
+                        direction === RTL_DIRECTION
+                          ? arabicStyles.flexRow1
+                          : styles.flexRow1
+                      }
+                    >
+                      <p
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.noRuleDefined
+                            : styles.noRuleDefined
+                        }
+                      >
+                        {t("no")}
+                        {SPACE + t("rulesAreDefined")}
+                      </p>
+                      {!isReadOnly && showAddRuleButton ? (
+                        <button
+                          id="AR_Add_Rule_Locally"
+                          className={
+                            direction === RTL_DIRECTION
+                              ? arabicStyles.addRuleLocallyButton
+                              : styles.addRuleLocallyButton
+                          }
+                          onClick={addRuleLocally}
+                        >
+                          {t("addRule")}
+                        </button>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <div
+                      className={
+                        direction === RTL_DIRECTION
+                          ? arabicStyles.flexRow1
+                          : styles.flexRow1
+                      }
+                    >
+                      <p
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.noRuleDefined
+                            : styles.noRuleDefined
+                        }
+                        style={{ fontSize: "1.1rem", marginRight: "0.8rem" }}
+                      >
+                        {rulesCount === 1
+                          ? rulesCount + SPACE + t("ruleIsDefined")
+                          : rulesCount + SPACE + t("rulesAreDefined")}
+                      </p>
+                      {!isReadOnly && showAddRuleButton ? (
+                        <button
+                          id="AR_Add_Rule_Locally"
+                          className={
+                            direction === RTL_DIRECTION
+                              ? arabicStyles.addRuleLocallyButton
+                              : styles.addRuleLocallyButton
+                          }
+                          onClick={addRuleLocally}
+                        >
+                          {t("addRule")}
+                        </button>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+              )}
+              {calledFromAction ? (
+                <ul className={styles.rulesList}>
+                  {actions && actions.length !== 0 ? (
+                    actions.map((element, index) => {
+                      return (
+                        <li
+                          className={
+                            actionIndex === index
+                              ? direction === RTL_DIRECTION
+                                ? arabicStyles.ruleStatement
+                                : styles.ruleStatement
+                              : direction === RTL_DIRECTION
+                              ? arabicStyles.restList
+                              : styles.restList
+                          }
+                          onClick={() => setActionIndex(index)}
+                        >
+                          <RuleStatement
+                            index={index}
+                            rules={actions}
+                            action={element}
+                            isRuleBeingCreated={
+                              index === actionIndex ? isRuleBeingCreated : false
+                            }
+                            buildRuleStatement={buildActionStatement}
+                            shortenRuleStatement={shortenRuleStatement}
+                            registeredFunctions={registeredFunctions}
+                            registeredOptionsLabelsData={
+                              registeredOptionsLabelsData
+                            }
+                            calledFromAction={true}
+                          />
+                        </li>
+                      );
+                    })
+                  ) : (
+                    <li
+                      className={
+                        direction === RTL_DIRECTION
+                          ? arabicStyles.restList
+                          : styles.restList
+                      }
+                    >
+                      {t("no")}
+                      {SPACE + t("actionsareDefined")}
+                    </li>
+                  )}
+                </ul>
+              ) : (
+                <div className={styles.rulesList}>
+                  <DragDropContext onDragEnd={onDragEnd}>
+                    <Droppable droppableId="rules_reordering">
+                      {(provided) => (
+                        <div
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
+                        >
+                          <ul>
+                            {rules && rules.length !== 0 ? (
+                              rules.map((element, index) => {
+                                return (
+                                  <Draggable
+                                    key={`${element.ruleId}`}
+                                    draggableId={`${element.ruleId}`}
+                                    index={index}
+                                    isDragDisabled={
+                                      element?.ruleCondList[0]?.param1 ===
+                                      RULES_OTHERWISE_CONDITION
+                                    }
+                                  >
+                                    {(provided) => (
+                                      <div
+                                        id="AR_Open_Rule"
+                                        className={
+                                          selectedRule === index
+                                            ? direction === RTL_DIRECTION
+                                              ? arabicStyles.ruleStatement
+                                              : styles.ruleStatement
+                                            : direction === RTL_DIRECTION
+                                            ? arabicStyles.restList
+                                            : styles.restList
+                                        }
+                                        onClick={() =>
+                                          handleSelectedRuleChange(index)
+                                        }
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        ref={provided.innerRef}
+                                      >
+                                        <RuleStatement
+                                          index={index}
+                                          rules={rules}
+                                          isOtherwiseSelected={
+                                            isOtherwiseSelected
+                                          }
+                                          provided={provided}
+                                          isRuleBeingCreated={
+                                            index === selectedRule
+                                              ? isRuleBeingCreated
+                                              : false
+                                          }
+                                          buildRuleStatement={
+                                            buildRuleStatement
+                                          }
+                                          shortenRuleStatement={
+                                            shortenRuleStatement
+                                          }
+                                          registeredFunctions={
+                                            registeredFunctions
+                                          }
+                                          registeredOptionsLabelsData={
+                                            registeredOptionsLabelsData
+                                          }
+                                          calledFromAction={false}
+                                        />
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                );
+                              })
+                            ) : (
+                              <li
+                                className={
+                                  direction === RTL_DIRECTION
+                                    ? arabicStyles.restList
+                                    : styles.restList
+                                }
+                              >
+                                {t("no")}
+                                {SPACE + t("rulesAreDefined")}
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                </div>
+              )}
+            </div>
+            <div
+              className={
+                direction === RTL_DIRECTION
+                  ? arabicStyles.verticalDivision
+                  : styles.verticalDivision
+              }
+            ></div>
+            <div
+              style={{
+                width: isDrawerExpanded ? "74%" : "0%",
+              }}
+            >
+              {isDrawerExpanded ? (
+                <div
+                  className={
+                    direction === RTL_DIRECTION
+                      ? arabicStyles.rightPanel
+                      : styles.rightPanel
+                  }
+                >
+                  <div
+                    className={
+                      calledFromAction ? styles.flexStartRow : styles.flexRow1
+                    }
+                  >
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                      {calledFromAction ? (
+                        <div style={{ marginBottom: "0.5rem" }}>
+                          <div className="row">
+                            <p
+                              style={{
+                                font: " normal normal 600 13px/22px Open Sans",
+                              }}
+                            >
+                              {t("actionName")}
+                              <span className={styles.starIcon}>*</span>
+                            </p>
+                            <input
+                              onChange={(event) => actionHandler(event)}
+                              value={actionName}
+                              disabled={isReadOnly}
+                              style={{ marginLeft: "2rem", height: "24px" }}
+                              ref={actionNameRef}
+                              id="ActionNameInput"
+                              onKeyPress={(e) =>
+                                FieldValidations(
+                                  e,
+                                  150,
+                                  actionNameRef.current,
+                                  30
+                                )
+                              }
+                            />
+                          </div>
+                          <div>
+                            {actionNameError ? (
+                              <p className={styles.errorStatement}>
+                                {t("mandatoryActionName")}
+                              </p>
+                            ) : null}
+                          </div>
+                        </div>
+                      ) : null}
+                      <p
+                        className={styles.mainHeading}
+                        style={{
+                          fontSize: "var(--subtitle_text_font_size)",
+                          display: "flex",
+                        }}
+                      >
+                        {calledFromAction
+                          ? t("condition")
+                          : t("rulesCondition")}
+                        <span className={styles.starIcon}>*</span>
+                      </p>
+                    </div>
+
+                    {isRuleBeingCreated ? (
+                      <div
+                        className={
+                          direction === RTL_DIRECTION
+                            ? arabicStyles.buttonsDiv
+                            : styles.buttonsDiv
+                        }
+                      >
+                        <button
+                          id="AR_Cancel_Rule_Changes"
                           className={
                             direction === RTL_DIRECTION
                               ? arabicStyles.cancelHeaderBtn
                               : styles.cancelHeaderBtn
                           }
-                          onClick={deleteRule}
+                          onClick={cancelRule}
                           style={{
-                            display: isProcessReadOnly ? "none" : "",
+                            display: isReadOnly ? "none" : "",
                           }}
                         >
-                          {t("delete")}
+                          {t("cancel")}
                         </button>
-                      )}
-
-                      {isRuleBeingModified ? (
-                        <div className={styles.buttonsDiv}>
+                        {calledFromAction ? (
                           <button
-                            id="AR_Cancel_Rule_Changes"
-                            className={
-                              direction === RTL_DIRECTION
-                                ? arabicStyles.cancelHeaderBtn
-                                : styles.cancelHeaderBtn
-                            }
-                            onClick={restoreRuleChanges}
-                            style={{
-                              display: isProcessReadOnly ? "none" : "",
-                            }}
-                          >
-                            {t("cancel")}
-                          </button>
-                          <button
-                            id="AR_Modify_Rule"
+                            id="AR_Add_Action_Button"
                             className={
                               direction === RTL_DIRECTION
                                 ? arabicStyles.addHeaderBtn
                                 : styles.addHeaderBtn
                             }
-                            onClick={modifyRule}
+                            onClick={addActionHandler}
                             style={{
-                              display: isProcessReadOnly ? "none" : "",
+                              display: isReadOnly ? "none" : "",
                             }}
                           >
-                            {t("modifyRule")}
+                            {t("addAction")}
                           </button>
-                        </div>
-                      ) : null}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  {ruleConditionErrors ? (
-                    <p className={styles.errorStatement}>
-                      {t("mandatoryErrorStatement")}
-                    </p>
-                  ) : null}
-                </div>
-
-                <RadioGroup
-                  onChange={optionSelector}
-                  value={selectedCondition}
-                  className={
-                    direction === RTL_DIRECTION
-                      ? arabicStyles.radioButton
-                      : styles.radioButton
-                  }
-                >
-                  <FormControlLabel
-                    disabled={isProcessReadOnly || isOtherwiseSelected}
-                    id="AR_Always_Option"
-                    className={styles.radioOption}
-                    value={RULES_ALWAYS_CONDITION}
-                    control={
-                      <Radio
-                        style={{
-                          color: "var(--radio_color)",
-                          padding: "0.5rem 0.5vw 0.5rem 0.75vw",
-                        }}
-                      />
-                    }
-                    label={
-                      <p style={{ fontSize: "var(--base_text_font_size)" }}>
-                        {t("always")}
-                      </p>
-                    }
-                  />
-                  <FormControlLabel
-                    disabled={
-                      isProcessReadOnly ||
-                      isOtherwiseSelected ||
-                      isActParallelDistribute
-                    }
-                    id="AR_If_Option"
-                    value={RULES_IF_CONDITION}
-                    control={
-                      <Radio
-                        style={{
-                          color: "var(--radio_color)",
-                          padding: "0.5rem 0.5vw 0.5rem 0.75vw",
-                        }}
-                      />
-                    }
-                    label={
-                      <p style={{ fontSize: "var(--base_text_font_size)" }}>
-                        {t("if")}
-                      </p>
-                    }
-                  />
-                  <FormControlLabel
-                    disabled={isProcessReadOnly || !isOtherwiseSelected}
-                    id="AR_Otherwise_Option"
-                    value={RULES_OTHERWISE_CONDITION}
-                    control={
-                      <Radio
-                        style={{
-                          color: "var(--radio_color)",
-                          padding: "0.5rem 0.5vw 0.5rem 0.75vw",
-                        }}
-                      />
-                    }
-                    label={
-                      <p style={{ fontSize: "var(--base_text_font_size)" }}>
-                        {t("otherwise")}
-                      </p>
-                    }
-                  />
-                </RadioGroup>
-                <div className={styles.ruleData}>
-                  <div
-                    className={clsx(
-                      styles.flexRow,
-                      styles.ruleConditionLabelsDiv
-                    )}
-                  >
-                    <p className={clsx(styles.operationsLabel)}>
-                      {t("variable")}
-                    </p>
-                    <p className={clsx(styles.operationsLabel)}>
-                      {t("operator")}
-                    </p>
-                    <p className={clsx(styles.operationsLabel)}>{t("value")}</p>
-                  </div>
-                  {localRuleData?.ruleCondList?.length > 0 &&
-                    localRuleData?.ruleCondList?.map((element, index) => {
-                      return (
-                        <AddCondition
-                          localRuleData={localRuleData}
-                          setLocalRuleData={setLocalRuleData}
-                          index={index}
-                          addNewCondition={addNewCondition}
-                          selectedRule={selectedRule}
-                          showDelIcon={
-                            rules?.length > 0 &&
-                            rules[selectedRule]?.ruleCondList?.length > 1
-                          }
-                          disabled={disabled}
-                          isRuleBeingCreated={isRuleBeingCreated}
-                          setIsRuleBeingModified={setIsRuleBeingModified}
-                          isProcessReadOnly={isProcessReadOnly}
-                          checkValidation={checkValidation}
-                          setCheckValidation={setCheckValidation}
-                          ruleConditionErrors={ruleConditionErrors}
-                          setRuleConditionErrors={setRuleConditionErrors}
-                          isAlwaysRule={
-                            selectedCondition === RULES_ALWAYS_CONDITION
-                          }
-                        />
-                      );
-                    })}
-
-                  <React.Fragment>
-                    <p className={styles.showHeading}>
-                      <span className="flex">
-                        {t("operations")}
-                        <span className={styles.starIcon}>*</span>
-                      </span>
-                      <Divider
+                        ) : (
+                          <button
+                            id="AR_Add_Rule_Button"
+                            className={
+                              direction === RTL_DIRECTION
+                                ? arabicStyles.addHeaderBtn
+                                : styles.addHeaderBtn
+                            }
+                            onClick={addRuleHandler}
+                            style={{
+                              display: isReadOnly ? "none" : "",
+                            }}
+                          >
+                            {t("addRule")}
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <div
                         className={
                           direction === RTL_DIRECTION
-                            ? arabicStyles.showLine
-                            : styles.showLine
+                            ? arabicStyles.buttonsDiv
+                            : styles.buttonsDiv
                         }
-                      />
-                    </p>
-                    {doesSelectedRuleHaveErrors ? (
+                      >
+                        {!isOtherwiseSelected && (
+                          <button
+                            id="AR_Delete_Rule_Button"
+                            className={
+                              direction === RTL_DIRECTION
+                                ? arabicStyles.cancelHeaderBtn
+                                : styles.cancelHeaderBtn
+                            }
+                            onClick={deleteRule}
+                            style={{
+                              display: isReadOnly ? "none" : "",
+                            }}
+                          >
+                            {t("delete")}
+                          </button>
+                        )}
+
+                        {isRuleBeingModified ? (
+                          <div className={styles.buttonsDiv}>
+                            <button
+                              id="AR_Cancel_Rule_Changes"
+                              className={
+                                direction === RTL_DIRECTION
+                                  ? arabicStyles.cancelHeaderBtn
+                                  : styles.cancelHeaderBtn
+                              }
+                              onClick={restoreRuleChanges}
+                              style={{
+                                display: isReadOnly ? "none" : "",
+                              }}
+                            >
+                              {t("cancel")}
+                            </button>
+                            <button
+                              id="AR_Modify_Rule"
+                              className={
+                                direction === RTL_DIRECTION
+                                  ? arabicStyles.addHeaderBtn
+                                  : styles.addHeaderBtn
+                              }
+                              onClick={modifyRule}
+                              style={{
+                                display: isReadOnly ? "none" : "",
+                              }}
+                            >
+                              {calledFromAction
+                                ? t("modifyAction")
+                                : t("modifyRule")}
+                            </button>
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    {ruleConditionErrors ? (
                       <p className={styles.errorStatement}>
                         {t("mandatoryErrorStatement")}
                       </p>
                     ) : null}
-                    {!isProcessReadOnly && activityTab !== "Reminder" ? (
-                      <button
-                        id="AR_Add_New_Operation"
-                        onClick={addNewOperation}
-                        className={
-                          direction === RTL_DIRECTION
-                            ? arabicStyles.addOperationButton
-                            : styles.addOperationButton
+                  </div>
+                  <div
+                    className={styles.ruleData}
+                    style={{ height: calledFromAction ? "80%" : "87%" }}
+                  >
+                    <RadioGroup
+                      onChange={(e) => optionSelector(e)}
+                      value={selectedCondition}
+                      className={
+                        direction === RTL_DIRECTION
+                          ? arabicStyles.radioButton
+                          : styles.radioButton
+                      }
+                    >
+                      <FormControlLabel
+                        disabled={isReadOnly || isOtherwiseSelected}
+                        id="AR_Always_Option"
+                        className={styles.radioOption}
+                        value={RULES_ALWAYS_CONDITION}
+                        control={
+                          <Radio
+                            style={{
+                              color: "var(--radio_color)",
+                              padding: "0.5rem 0.5vw 0.5rem 0.75vw",
+                            }}
+                          />
                         }
-                      >
-                        {t("addOperation")}
-                      </button>
-                    ) : null}
-                    {localRuleData?.ruleOpList?.length > 0 &&
-                      localRuleData.ruleOpList.map((element, index) => {
+                        label={
+                          <p style={{ fontSize: "var(--base_text_font_size)" }}>
+                            {t("always")}
+                          </p>
+                        }
+                      />
+                      <FormControlLabel
+                        disabled={
+                          isReadOnly ||
+                          isOtherwiseSelected ||
+                          isActParallelDistribute
+                        }
+                        id="AR_If_Option"
+                        value={RULES_IF_CONDITION}
+                        control={
+                          <Radio
+                            style={{
+                              color: "var(--radio_color)",
+                              padding: "0.5rem 0.5vw 0.5rem 0.75vw",
+                            }}
+                          />
+                        }
+                        label={
+                          <p style={{ fontSize: "var(--base_text_font_size)" }}>
+                            {t("if")}
+                          </p>
+                        }
+                      />
+                      <FormControlLabel
+                        disabled={isReadOnly || !isOtherwiseSelected}
+                        id="AR_Otherwise_Option"
+                        value={RULES_OTHERWISE_CONDITION}
+                        control={
+                          <Radio
+                            style={{
+                              color: "var(--radio_color)",
+                              padding: "0.5rem 0.5vw 0.5rem 0.75vw",
+                            }}
+                          />
+                        }
+                        label={
+                          <p style={{ fontSize: "var(--base_text_font_size)" }}>
+                            {t("otherwise")}
+                          </p>
+                        }
+                      />
+                    </RadioGroup>
+                    <div
+                      className={clsx(
+                        styles.flexRow,
+                        styles.ruleConditionLabelsDiv
+                      )}
+                    >
+                      <p className={clsx(styles.operationsLabel)}>
+                        {t("variable")}
+                      </p>
+                      <p className={clsx(styles.operationsLabel)}>
+                        {t("operator")}
+                      </p>
+                      <p className={clsx(styles.operationsLabel)}>
+                        {t("value")}
+                      </p>
+                    </div>
+                    {localRuleData?.ruleCondList?.length > 0 &&
+                      localRuleData?.ruleCondList?.map((element, index) => {
                         return (
-                          <AddOperations
-                            index={index}
+                          <AddCondition
                             localRuleData={localRuleData}
                             setLocalRuleData={setLocalRuleData}
+                            index={index}
+                            addNewCondition={addNewCondition}
+                            deleteCondition={deleteCondition}
                             selectedRule={selectedRule}
-                            deleteOperation={deleteOperation}
+                            disabled={disabled}
                             isRuleBeingCreated={isRuleBeingCreated}
                             setIsRuleBeingModified={setIsRuleBeingModified}
-                            isProcessReadOnly={isProcessReadOnly}
-                            registeredFunctions={registeredFunctions}
-                            operationsAllowed={operationsAllowed}
-                            workstepList={workstepList}
+                            isReadOnly={isReadOnly}
                             checkValidation={checkValidation}
                             setCheckValidation={setCheckValidation}
-                            setDoesSelectedRuleHaveErrors={
-                              setDoesSelectedRuleHaveErrors
+                            ruleConditionErrors={ruleConditionErrors}
+                            setRuleConditionErrors={setRuleConditionErrors}
+                            isAlwaysRule={
+                              selectedCondition === RULES_ALWAYS_CONDITION
                             }
-                            showDelIcon={
-                              rules?.length > 0 &&
-                              rules[selectedRule]?.ruleOpList?.length > 1
-                                ? true
-                                : false
-                            }
-                            variablesWithRights={variablesWithRights}
-                            currentTab={currentTabName}
                           />
                         );
                       })}
-                  </React.Fragment>
+
+                    <React.Fragment>
+                      <p className={styles.showHeading}>
+                        <span className="flex">
+                          {t("operations")}
+                          <span className={styles.starIcon}>*</span>
+                        </span>
+                        <Divider
+                          className={
+                            direction === RTL_DIRECTION
+                              ? arabicStyles.showLine
+                              : styles.showLine
+                          }
+                        />
+                      </p>
+                      {doesSelectedRuleHaveErrors ? (
+                        <p className={styles.errorStatement}>
+                          {t("mandatoryErrorStatement")}
+                        </p>
+                      ) : null}
+                      {!isReadOnly && activityTab !== "Reminder" ? (
+                        <button
+                          id="AR_Add_New_Operation"
+                          onClick={addNewOperation}
+                          className={
+                            direction === RTL_DIRECTION
+                              ? arabicStyles.addOperationButton
+                              : styles.addOperationButton
+                          }
+                        >
+                          {t("addOperation")}
+                        </button>
+                      ) : null}
+                      {localRuleData?.ruleOpList?.length > 0 &&
+                        localRuleData.ruleOpList.map((element, index) => {
+                          return (
+                            <AddOperations
+                              index={index}
+                              localRuleData={localRuleData}
+                              setLocalRuleData={setLocalRuleData}
+                              selectedRule={selectedRule}
+                              deleteOperation={deleteOperation}
+                              isRuleBeingCreated={isRuleBeingCreated}
+                              setIsRuleBeingModified={setIsRuleBeingModified}
+                              isReadOnly={isReadOnly}
+                              registeredFunctions={registeredFunctions}
+                              operationsAllowed={operationsAllowed}
+                              workstepList={workstepList}
+                              checkValidation={checkValidation}
+                              setCheckValidation={setCheckValidation}
+                              setDoesSelectedRuleHaveErrors={
+                                setDoesSelectedRuleHaveErrors
+                              }
+                              showDelIcon={
+                                localRuleData &&
+                                localRuleData?.ruleOpList?.length > 1
+                              }
+                              variablesWithRights={variablesWithRights}
+                              currentTab={currentTabName}
+                            />
+                          );
+                        })}
+                    </React.Fragment>
+                  </div>
                 </div>
-              </div>
-            ) : null}
+              ) : null}
+            </div>
+          </>
+        ) : (
+          <div className={styles.noRulesDiv}>
+            <NoRulesScreen
+              isReadOnly={isReadOnly}
+              calledFromAction={calledFromAction}
+            />
+            <div style={{ textAlign: "center", marginTop: "1rem" }}>
+              {calledFromAction && !isReadOnly ? (
+                <button
+                  id="AR_Add_Rule_Locally"
+                  className={
+                    direction === RTL_DIRECTION
+                      ? arabicStyles.addRuleLocallyButton
+                      : styles.addRuleLocallyButton
+                  }
+                  onClick={addActionLocally}
+                >
+                  {t("addAction")}
+                </button>
+              ) : (
+                <button
+                  id="AR_Add_Rule_Locally"
+                  className={
+                    direction === RTL_DIRECTION
+                      ? arabicStyles.addRuleLocallyButton
+                      : styles.addRuleLocallyButton
+                  }
+                  style={{ display: isReadOnly ? "none" : "" }}
+                  onClick={addRuleLocally}
+                >
+                  {t("addRule")}
+                </button>
+              )}
+            </div>
           </div>
-        </>
-      ) : (
-        <div className={styles.noRulesDiv}>
-          <NoRulesScreen
-            isProcessReadOnly={isProcessReadOnly}
-            calledFromAction={calledFromAction}
-          />
-          <div style={{ textAlign: "center", marginTop: "1rem" }}>
-            {calledFromAction && !isProcessReadOnly ? (
-              <button
-                id="AR_Add_Rule_Locally"
-                className={
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.addRuleLocallyButton
-                    : styles.addRuleLocallyButton
-                }
-                onClick={addRuleLocally}
-              >
-                {t("addRule")}
-              </button>
-            ) : (
-              <button
-                id="AR_Add_Rule_Locally"
-                className={
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.addRuleLocallyButton
-                    : styles.addRuleLocallyButton
-                }
-                onClick={addRuleLocally}
-              >
-                {t("addRule")}
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
     </>
   );
 }
@@ -1963,6 +2556,7 @@ const mapStateToProps = (state) => {
     openProcessID: state.openProcessClick.selectedId,
     openProcessName: state.openProcessClick.selectedProcessName,
     openProcessType: state.openProcessClick.selectedType,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

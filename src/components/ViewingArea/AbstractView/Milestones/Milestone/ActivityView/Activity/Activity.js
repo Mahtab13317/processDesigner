@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../Activities.css";
 import DragIndicatorIcon from "@material-ui/icons/DragIndicator";
 import { getActivityProps } from "../../../../../../../utility/abstarctView/getActivityProps";
 import c_Names from "classnames";
-import { connect } from "react-redux";
+import { connect, useDispatch, useSelector } from "react-redux";
 import * as actionCreators from "../../../../../../../redux-store/actions/Properties/showDrawerAction";
 import * as actionCreators_task from "../../../../../../../redux-store/actions/AbstractView/TaskAction";
 import * as actionCreatorsOpenProcess from "../../../../../../../redux-store/actions/processView/actions.js";
@@ -14,11 +14,13 @@ import {
   Grid,
   ClickAwayListener,
   Button,
+  Typography,
 } from "@material-ui/core";
 import Modal from "../../../../../../../UI/ActivityModal/Modal";
 import { TaskInActivity } from "./TaskInActivity";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import defaultLogo from "../../../../../../../assets/abstractView/Icons/default.svg";
+import ActivityCheckedOutLogo from "../../../../../../../assets/bpmnViewIcons/ActivityCheckedOut.svg";
 import { useTranslation } from "react-i18next";
 import ToolsList from "../../../../../BPMNView/Toolbox/ToolsList";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
@@ -46,6 +48,9 @@ import {
 } from "../../../../../../../Constants/bpmnView";
 import { deleteActivity } from "../../../../../../../utility/CommonAPICall/DeleteActivity";
 import {
+  MENUOPTION_CHECKIN_ACT,
+  MENUOPTION_CHECKOUT_ACT,
+  MENUOPTION_UNDO_CHECKOUT_ACT,
   PROCESSTYPE_LOCAL,
   view,
 } from "../../../../../../../Constants/appConstants";
@@ -54,6 +59,14 @@ import { store, useGlobalState } from "state-pool";
 import { MoveActivity } from "../../../../../../../utility/CommonAPICall/MoveActivity";
 import { milestoneWidthToIncrease } from "../../../../../../../utility/abstarctView/addWorkstepAbstractView";
 import { getRenameActivityQueueObj } from "../../../../../../../utility/abstarctView/getRenameActQueueObj";
+import CheckOutActModal from "./CheckoutActivity";
+import UIModal from "../../../../../../../UI/Modal/Modal.js";
+import UndoCheckoutActivity from "./UndoCheckoutActivity";
+import CheckInActivity from "./CheckInActivity";
+import { validateActivityObject } from "../../../../../../../utility/CommonAPICall/validateActivityObject";
+import ModalForm from "../../../../../../../UI/ModalForm/modalForm";
+import { FieldValidations } from "../../../../../../../utility/FieldValidations/fieldValidations";
+import { listOfImages } from "../../../../../../../utility/iconLibrary";
 
 function Activity(props) {
   let { t } = useTranslation();
@@ -81,10 +94,18 @@ function Activity(props) {
   const [OpenProcessCallActivity, setOpenProcessCallActivity] = useState(false);
   //code added on 3 June 2022 for BugId 110210
   const [searchedVal, setSearchedVal] = useState("");
+  const [actionModal, setActionModal] = useState(null);
+  const [openQRenameConfModal, setOpenQueueRenameConfirmationModal] =
+    useState(false);
+  const [isDefaultIcon, setIsDefaultIcon] = useState(false);
+  const [isParentLaneCheckedOut, setIsParentLaneCheckedOut] = useState(false);
+
   const laneId =
     props.processData.MileStones[props.milestoneIndex].Activities[
       props.activityindex
     ].LaneId;
+
+  const dispatch = useDispatch();
 
   const swimlaneData = props.processData.Lanes?.filter((list) => {
     return +list.LaneId !== -99;
@@ -104,9 +125,70 @@ function Activity(props) {
   const [swimlaneValue, setSwimlaneValue] = useState(selectedSwimlane);
   const loadedProcessData = store.getState("loadedProcessData");
   const [setlocalLoadedProcessData] = useGlobalState(loadedProcessData);
+  const activityRef = useRef();
+
+  useEffect(() => {
+    let isDefault = true;
+    let tempJson = JSON.parse(JSON.stringify(props.processData));
+    tempJson?.MileStones?.forEach((mile) => {
+      mile?.Activities?.forEach((act) => {
+        if (+act.ActivityId === +props.activityId) {
+          if (act.ImageName && act.ImageName?.trim() !== "") {
+            isDefault = false;
+          }
+        }
+      });
+    });
+    setIsDefaultIcon(isDefault);
+  }, [props.processData]);
+
+  const getActivityIcon = () => {
+    let iconName = null;
+    let tempJson = JSON.parse(JSON.stringify(props.processData));
+    tempJson?.MileStones?.forEach((mile) => {
+      mile?.Activities?.forEach((act) => {
+        if (+act.ActivityId === +props.activityId) {
+          iconName = act.ImageName;
+        }
+      });
+    });
+    let iconImage;
+    listOfImages?.names?.forEach((el, index) => {
+      if (el === iconName) {
+        iconImage = listOfImages?.images[index];
+      }
+    });
+    return iconImage?.default;
+  };
 
   // Function that changes and updates the activityName for a given activity card.
   const handleInputChange = (e) => {
+    if (
+      actNameValue ===
+      props.processData.MileStones[props.milestoneIndex].Activities[
+        props.activityindex
+      ].ActivityName
+    ) {
+      validateActivityObject({
+        processDefId: props.processData.ProcessDefId,
+        processType: props.processData.ProcessType,
+        activityName:
+          props.processData.MileStones[props.milestoneIndex].Activities[
+            props.activityindex
+          ].ActivityName,
+        activityId:
+          props.processData.MileStones[props.milestoneIndex].Activities[
+            props.activityindex
+          ].ActivityId,
+        errorMsg: `${t("renameValidationErrorMsg")}`,
+        onSuccess: (workitemValidationFlag) => {
+          if (!workitemValidationFlag) {
+            setActNameValue(e.target.value);
+          }
+        },
+        dispatch,
+      });
+    }
     setActNameValue(e.target.value);
   };
 
@@ -118,7 +200,41 @@ function Activity(props) {
     } else return [t("Properties")];
   };
 
-  const renameActivityFunc = () => {
+  const isSwimlaneQueue = (qId) => {
+    const index = props.processData.Lanes?.findIndex(
+      (swimlane) => swimlane.QueueId === qId
+    );
+
+    return index !== -1;
+  };
+
+  const closeQueueRenameModal = () => {
+    setOpenQueueRenameConfirmationModal(false);
+  };
+  const renameActWithoutQueueName = () => {
+    renameActivityFunc(false);
+    closeQueueRenameModal();
+  };
+  const renameActWithQueueName = () => {
+    renameActivityFunc(true);
+    closeQueueRenameModal();
+  };
+  const handleRenameActivityFunction = () => {
+    const qId =
+      props.processData?.MileStones[props.milestoneIndex]?.Activities[
+        props.activityindex
+      ]?.QueueId;
+
+    if (qId && qId < 0) {
+      if (isSwimlaneQueue()) {
+        renameActivityFunc(false);
+      } else if (!isSwimlaneQueue()) {
+        setOpenQueueRenameConfirmationModal(true);
+      }
+    }
+  };
+
+  const renameActivityFunc = (queueRename) => {
     let currentAct =
       props.processData.MileStones[props.milestoneIndex].Activities[
         props.activityindex
@@ -142,7 +258,9 @@ function Activity(props) {
         props.processData.ProcessName,
         currentAct.QueueId,
         queueInfo,
-        false
+        false,
+        queueRename,
+        dispatch
       );
     }
   };
@@ -169,7 +287,13 @@ function Activity(props) {
 
   const handleClickAway = () => {
     setactivityType(false);
-    renameActivityFunc(props.milestoneIndex, props.activityindex);
+    let currentAct =
+      props.processData.MileStones[props.milestoneIndex].Activities[
+        props.activityindex
+      ];
+    if (actNameValue !== currentAct.ActivityName) {
+      handleRenameActivityFunction();
+    }
     if (props.selectedActivity === props.activityId) {
       props.selectActivityHandler(null);
     }
@@ -188,6 +312,11 @@ function Activity(props) {
     } else {
       setOpenProcessCallActivity(false);
     }
+    props.processData?.Lanes?.forEach((lane) => {
+      if (+lane.LaneId === +laneId && lane.CheckedOut === "Y") {
+        setIsParentLaneCheckedOut(true);
+      }
+    });
   }, []);
 
   const getActionName = (actionName) => {
@@ -202,18 +331,46 @@ function Activity(props) {
         props.processData.MileStones[props.milestoneIndex].Activities[
           props.activityindex
         ].ActivityName;
+      let isPrimaryAct =
+        props.processData.MileStones[props.milestoneIndex]?.Activities[
+          props.activityindex
+        ]?.PrimaryActivity === "Y"
+          ? true
+          : false;
       deleteActivity(
         id,
         name,
         props.processData.ProcessDefId,
-        props.setprocessData
+        props.setprocessData,
+        props.processData?.CheckedOut,
+        dispatch,
+        t,
+        isPrimaryAct
       );
     } else if (actionName === "Rename") {
-      const input = document.getElementById(
-        `${props.milestoneIndex}_${props.activityindex}`
-      );
-      input.select();
-      input.focus();
+      validateActivityObject({
+        processDefId: props.processData.ProcessDefId,
+        processType: props.processData.ProcessType,
+        activityName:
+          props.processData.MileStones[props.milestoneIndex].Activities[
+            props.activityindex
+          ].ActivityName,
+        activityId:
+          props.processData.MileStones[props.milestoneIndex].Activities[
+            props.activityindex
+          ].ActivityId,
+        errorMsg: `${t("renameValidationErrorMsg")}`,
+        onSuccess: (workitemValidationFlag) => {
+          if (!workitemValidationFlag) {
+            const input = document.getElementById(
+              `${props.milestoneIndex} _ ${props.activityindex}`
+            );
+            input.select();
+            input.focus();
+          }
+        },
+        dispatch,
+      });
     } else if (actionName === t("ConvertToCaseWorkdesk")) {
       ChangeActivityType(
         props.processData.ProcessDefId,
@@ -247,6 +404,12 @@ function Activity(props) {
         setlocalLoadedProcessData(null);
         history.push("/process");
       }
+    } else if (actionName === t("Checkout")) {
+      setActionModal(MENUOPTION_CHECKOUT_ACT);
+    } else if (actionName === t("undoCheckout")) {
+      setActionModal(MENUOPTION_UNDO_CHECKOUT_ACT);
+    } else if (actionName === t("checkIn")) {
+      setActionModal(MENUOPTION_CHECKIN_ACT);
     }
   };
 
@@ -471,9 +634,13 @@ function Activity(props) {
         props.setNewId,
         "abstract",
         props.milestoneIndex,
-        props.activityindex
+        props.activityindex,
+        // code added on 11 Oct 2022 for BugId 116379
+        () => {
+          setSwimlaneValue([laneId + 1]);
+          changeLaneVal({ id: +laneId + 1, name: swimlaneName });
+        }
       );
-      setSwimlaneValue([laneId + 1]);
       setShowSwimlaneDropdown(false);
     } else {
       setShowSwimlaneDropdown(false);
@@ -481,8 +648,28 @@ function Activity(props) {
     }
   };
 
-  if (props.processType !== PROCESSTYPE_LOCAL) {
-    sortSectionLocalProcess = [t("Properties")];
+  if (
+    props.processType !== PROCESSTYPE_LOCAL &&
+    props.processData.CheckedOut === "N" &&
+    !isParentLaneCheckedOut
+  ) {
+    if (
+      props.processData.MileStones[props.milestoneIndex].Activities[
+        props.activityindex
+      ].CheckedOut === "N"
+    ) {
+      sortSectionLocalProcess = [t("Properties"), t("Checkout")];
+    } else if (
+      props.processData.MileStones[props.milestoneIndex].Activities[
+        props.activityindex
+      ].CheckedOut === "Y"
+    ) {
+      sortSectionLocalProcess = [
+        t("Properties"),
+        t("undoCheckout"),
+        t("checkIn"),
+      ];
+    }
   } else if (+props.activityType === 10 && +props.activitySubType === 3) {
     sortSectionOne = [
       t("Rename"),
@@ -599,9 +786,18 @@ function Activity(props) {
                       style={{
                         marginLeft: direction !== "rtl" ? "0.75rem" : "0",
                         marginRight: direction == "rtl" ? "0.75rem" : "0",
-                        marginBottom: "0.5rem"
+                        marginBottom: "0.5rem",
                       }}
                     >
+                      {props.processData.MileStones[props.milestoneIndex]
+                        .Activities[props.activityindex].CheckedOut === "Y" &&
+                        !isParentLaneCheckedOut && (
+                          <img
+                            src={ActivityCheckedOutLogo}
+                            alt="Checked-out"
+                            className="checkedOutIcon"
+                          />
+                        )}
                       <Grid container style={{ alignItems: "center" }}>
                         <Grid item style={{ height: "1.75rem" }}>
                           {showDragIcon &&
@@ -610,24 +806,31 @@ function Activity(props) {
                               className="dragIcon"
                               {...provided.dragHandleProps}
                             >
-                              <DragIndicatorIcon  style={{
-                                    color: "#606060",
-                                    height: "1.75rem",
-                                    width: "1.75rem",
-                                  }}/>
+                              <DragIndicatorIcon
+                                style={{
+                                  color: "#606060",
+                                  height: "1.75rem",
+                                  width: "1.75rem",
+                                }}
+                              />
                             </div>
                           ) : (
                             <img
-                              src={props.activityType ? src : defaultLogo}
+                              src={
+                                isDefaultIcon
+                                  ? props.activityType
+                                    ? src
+                                    : defaultLogo
+                                  : getActivityIcon()
+                              }
                               className="logoSize"
                             />
                           )}
                         </Grid>
                         <Grid item id="activityInputId">
+                          {/*code added on 8 August 2022 for BugId 112903*/}
                           <input
-                            id={
-                              props.milestoneIndex + "_" + props.activityindex
-                            }
+                            id={`${props.milestoneIndex} _ ${props.activityindex}`}
                             // autoFocus
                             className="activityInput"
                             style={{
@@ -637,14 +840,20 @@ function Activity(props) {
                               handleInputChange(e);
                             }}
                             onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                renameActivityFunc(
-                                  props.milestoneIndex,
-                                  props.activityindex
-                                );
+                              if (
+                                e.key === "Enter" &&
+                                actNameValue !==
+                                  props.processData.MileStones[
+                                    props.milestoneIndex
+                                  ].Activities[props.activityindex].ActivityName
+                              ) {
+                                handleRenameActivityFunction();
                               }
+
+                              FieldValidations(e, 180, activityRef.current, 30);
                             }}
                             value={actNameValue}
+                            ref={activityRef}
                             disabled={
                               props.processType !== PROCESSTYPE_LOCAL
                                 ? true
@@ -652,38 +861,47 @@ function Activity(props) {
                             }
                           />
                         </Grid>
+
                         <Grid item className="moreVertIconDiv">
-                          <Modal
-                            backDrop={false}
-                            getActionName={getActionName}
-                            modalPaper="modalPaperActivity"
-                            sortByDiv="sortByDivActivity"
-                            sortByDiv_arabic="sortByDiv_arabicActivity"
-                            oneSortOption="oneSortOptionActivity"
-                            showTickIcon={false}
-                            sortSectionOne={sortSectionOne}
-                            sortSectionTwo={sortSectionTwo}
-                            disableOption={OpenProcessCallActivity}
-                            disableOptionValue={t("openProcess")}
-                            sortSectionThree={sortSectionThree}
-                            sortSectionFour={sortSectionFour}
-                            sortSectionLocalProcess={sortSectionLocalProcess}
-                            buttonToOpenModal={
-                              <div className="threeDotsButton">
-                                <MoreVertIcon
-                                  style={{
-                                    color: "#606060",
-                                    height: "1.25rem",
-                                    width: "1.25rem",
-                                  }}
-                                />
-                              </div>
-                            }
-                            modalWidth="180"
-                            dividerLine="dividerLineActivity"
-                            isArabic={false}
-                            processType={props.processType}
-                          />
+                          {(sortSectionOne?.length > 0 ||
+                            sortSectionTwo?.length > 0 ||
+                            sortSectionThree?.length > 0 ||
+                            sortSectionFour?.length > 0 ||
+                            sortSectionLocalProcess?.length > 0) && (
+                            <Modal
+                              backDrop={false}
+                              getActionName={getActionName}
+                              modalPaper="modalPaperActivity"
+                              sortByDiv="sortByDivActivity"
+                              sortByDiv_arabic="sortByDiv_arabicActivity"
+                              oneSortOption="oneSortOptionActivity"
+                              showTickIcon={false}
+                              sortSectionOne={sortSectionOne}
+                              sortSectionTwo={sortSectionTwo}
+                              disableOption={OpenProcessCallActivity}
+                              disableOptionValue={t("openProcess")}
+                              sortSectionThree={sortSectionThree}
+                              sortSectionFour={sortSectionFour}
+                              processData={props.processData}
+                              isParentLaneCheckedOut={isParentLaneCheckedOut}
+                              sortSectionLocalProcess={sortSectionLocalProcess}
+                              buttonToOpenModal={
+                                <div className="threeDotsButton">
+                                  <MoreVertIcon
+                                    style={{
+                                      color: "#606060",
+                                      height: "1.25rem",
+                                      width: "1.25rem",
+                                    }}
+                                  />
+                                </div>
+                              }
+                              modalWidth="180"
+                              dividerLine="dividerLineActivity"
+                              isArabic={false}
+                              processType={props.processType}
+                            />
+                          )}
                         </Grid>
                       </Grid>
                     </Box>
@@ -898,6 +1116,128 @@ function Activity(props) {
           </div>
         </div>
       </ClickAwayListener>
+      {actionModal === MENUOPTION_CHECKOUT_ACT ? (
+        <UIModal
+          show={actionModal === MENUOPTION_CHECKOUT_ACT}
+          style={{
+            padding: "0",
+            width: "33vw",
+            left: "33%",
+            top: "30%",
+          }}
+          modalClosed={() => setActionModal(null)}
+          children={
+            <CheckOutActModal
+              setModalClosed={() => setActionModal(null)}
+              modalType={MENUOPTION_CHECKOUT_ACT}
+              actName={
+                props.processData.MileStones[props.milestoneIndex].Activities[
+                  props.activityindex
+                ].ActivityName
+              }
+              actId={
+                props.processData.MileStones[props.milestoneIndex].Activities[
+                  props.activityindex
+                ].ActivityId
+              }
+              laneId={
+                props.processData.MileStones[props.milestoneIndex].Activities[
+                  props.activityindex
+                ].LaneId
+              }
+              setprocessData={props.setprocessData}
+            />
+          }
+        />
+      ) : null}
+      {actionModal === MENUOPTION_UNDO_CHECKOUT_ACT ? (
+        <UIModal
+          show={actionModal === MENUOPTION_UNDO_CHECKOUT_ACT}
+          style={{
+            padding: "0",
+            width: "33vw",
+            left: "33%",
+            top: "30%",
+          }}
+          modalClosed={() => setActionModal(null)}
+          children={
+            <UndoCheckoutActivity
+              setModalClosed={() => setActionModal(null)}
+              modalType={MENUOPTION_UNDO_CHECKOUT_ACT}
+              actName={
+                props.processData.MileStones[props.milestoneIndex].Activities[
+                  props.activityindex
+                ].ActivityName
+              }
+              actId={
+                props.processData.MileStones[props.milestoneIndex].Activities[
+                  props.activityindex
+                ].ActivityId
+              }
+              laneId={
+                props.processData.MileStones[props.milestoneIndex].Activities[
+                  props.activityindex
+                ].LaneId
+              }
+              setprocessData={props.setprocessData}
+            />
+          }
+        />
+      ) : null}
+      {actionModal === MENUOPTION_CHECKIN_ACT ? (
+        <UIModal
+          show={actionModal === MENUOPTION_CHECKIN_ACT}
+          style={{
+            padding: "0",
+            width: "33vw",
+            left: "33%",
+            top: "30%",
+          }}
+          modalClosed={() => setActionModal(null)}
+          children={
+            <CheckInActivity
+              setModalClosed={() => setActionModal(null)}
+              modalType={MENUOPTION_CHECKIN_ACT}
+              actName={
+                props.processData.MileStones[props.milestoneIndex].Activities[
+                  props.activityindex
+                ].ActivityName
+              }
+              actId={
+                props.processData.MileStones[props.milestoneIndex].Activities[
+                  props.activityindex
+                ].ActivityId
+              }
+              activity={
+                props.processData.MileStones[props.milestoneIndex].Activities[
+                  props.activityindex
+                ]
+              }
+              setprocessData={props.setprocessData}
+            />
+          }
+        />
+      ) : null}
+
+      {openQRenameConfModal && (
+        <ModalForm
+          title="Rename Queue"
+          containerHeight={180}
+          isOpen={openQRenameConfModal}
+          closeModal={closeQueueRenameModal}
+          Content={
+            <Typography style={{ fontSize: "var(--base_text_font_size)" }}>
+              Do you want to rename the queue with activity rename as well?
+            </Typography>
+          }
+          btn1Title="No"
+          onClick1={renameActWithoutQueueName}
+          headerCloseBtn={true}
+          onClickHeaderCloseBtn={closeQueueRenameModal}
+          btn2Title="Yes"
+          onClick2={renameActWithQueueName}
+        />
+      )}
     </React.Fragment>
   );
 }

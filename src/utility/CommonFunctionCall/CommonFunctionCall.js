@@ -1,5 +1,10 @@
 import { store, useGlobalState } from "state-pool";
-import { SERVER_URL } from "./../../Constants/appConstants";
+import {
+  PROCESSTYPE_DEPLOYED,
+  PROCESSTYPE_REGISTERED,
+  COMPLEX_VARTYPE,
+  SERVER_URL,
+} from "./../../Constants/appConstants";
 import axios from "axios";
 
 export const ConditionalOperator = [
@@ -100,17 +105,35 @@ export const CalenderType = [];
 
 export const getVariablesBasedOnTypes = function GetVariablesBasedOnTypes({
   types = [],
+  variables,
 }) {
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData, setlocalLoadedProcessData] =
     useGlobalState(loadedProcessData);
   if (localLoadedProcessData?.Variable) {
     if (types.length > 0) {
-      return localLoadedProcessData.Variable.filter((variable) =>
-        types.includes(+variable.VariableType)
+      return (variables ? variables : localLoadedProcessData.Variable).filter(
+        (variable) =>
+          types.includes(+variable.VariableType) && variable.Unbounded === "N"
       );
     }
     return localLoadedProcessData.Variable;
+  }
+  return [];
+};
+
+export const getVariablesBasedOnTypes1 = function GetVariablesBasedOnTypes({
+  types = [],
+  variables,
+}) {
+  if (variables) {
+    if (types.length > 0) {
+      return variables.filter(
+        (variable) =>
+          types.includes(+variable.VariableType) && variable.Unbounded === "N"
+      );
+    }
+    return variables;
   }
   return [];
 };
@@ -129,16 +152,28 @@ export const getVariablesByScopes = function GetVariablesByScopes({
   variables,
   scopes = [],
 }) {
-  const allVars = variables || [];
+  let newVarList = [];
+  let allVars = variables || [];
   if (allVars) {
     if (scopes.length > 0) {
-      return variables.filter((variable) =>
-        scopes.includes(variable.VariableScope)
+      allVars = variables.filter(
+        (variable) =>
+          scopes.includes(variable.VariableScope) && variable.Unbounded === "N"
       );
     }
-    return [...allVars];
   }
-  return [];
+  allVars.forEach((item, i) => {
+    if (item.VariableType === COMPLEX_VARTYPE) {
+      let tempList = getComplex(item);
+      tempList?.forEach((el) => {
+        newVarList.push(el);
+      });
+    } else {
+      newVarList.push(item);
+    }
+  });
+
+  return newVarList;
 };
 
 export const getVariableIdByName = function GetVariableId({ variables, name }) {
@@ -233,4 +268,94 @@ export const getVarTypeAndIsArray = (varVal) => {
     default:
       return { variableType: "10", isArray: "N" };
   }
+};
+
+export const isReadOnlyFunc = (openProcess, cellCheckedOut) => {
+  return (
+    (openProcess.ProcessType === PROCESSTYPE_DEPLOYED ||
+      openProcess.ProcessType === PROCESSTYPE_REGISTERED) &&
+    cellCheckedOut === "N"
+  );
+};
+
+export const isProcessDeployedFunc = (openProcess) => {
+  return (
+    openProcess.ProcessType === PROCESSTYPE_DEPLOYED ||
+    openProcess.ProcessType === PROCESSTYPE_REGISTERED
+  );
+};
+
+const getComplex = (variable) => {
+  let varList = [];
+  let varRelationMapArr = variable?.RelationAndMapping
+    ? variable.RelationAndMapping
+    : variable["Relation&Mapping"];
+  varRelationMapArr?.Mappings?.Mapping?.forEach((el) => {
+    if (el.VariableType === "11") {
+      let tempList = getComplex(el);
+      tempList.forEach((ell) => {
+        varList.push({
+          ...ell,
+          SystemDefinedName: `${variable.VariableName}.${ell.VariableName}`,
+          VariableName: `${variable.VariableName}.${ell.VariableName}`,
+        });
+      });
+    } else {
+      varList.push({
+        DefaultValue: "",
+        ExtObjectId: el.ExtObjectId ? el.ExtObjectId : variable.ExtObjectId,
+        SystemDefinedName: `${variable.VariableName}.${el.VariableName}`,
+        Unbounded: el.Unbounded,
+        VarFieldId: el.VarFieldId,
+        VarPrecision: el.VarPrecision,
+        VariableId: el.VariableId,
+        VariableLength: el.VariableLength,
+        VariableName: `${variable.VariableName}.${el.VariableName}`,
+        VariableScope: el.VariableScope
+          ? el.VariableScope
+          : variable.VariableScope,
+        VariableType: el.VariableType,
+      });
+    }
+  });
+
+  return varList;
+};
+
+export const getVariableBasedOnScopeAndTypes = ({
+  types = [],
+  scopes = [],
+  variables,
+}) => {
+  const allVars = getVariablesBasedOnTypes1({ types, variables });
+  if (scopes.length > 0) {
+    return getVariablesByScopes({ variables: allVars, scopes });
+  }
+  return allVars;
+};
+
+export const removeTheme = () => {
+  let token = JSON.parse(localStorage.getItem("launchpadKey"))?.token;
+  let themeString = window.location.origin + "/oap-rest/app/theme";
+  for (let i = 0; i < document.styleSheets.length; i++) {
+    if (
+      document.styleSheets[i]?.href?.includes(token) ||
+      document.styleSheets[i]?.href?.includes(themeString)
+    ) {
+      document.styleSheets[i].disabled = true;
+    }
+  }
+};
+
+export const removeUserSession = () => {
+  localStorage.removeItem("launchpadKey");
+  localStorage.removeItem("modelerData");
+  localStorage.removeItem("locale");
+  localStorage.removeItem("cabinet");
+  sessionStorage.removeItem("lastLoginTime");
+  
+};
+
+export const containsText = (text, searchText) => {
+  return text?.toLowerCase().indexOf(searchText?.toLowerCase()) > -1;
 };

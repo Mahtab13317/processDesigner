@@ -38,6 +38,8 @@ import DoneIcon from "@material-ui/icons/Done";
 import axios from "axios";
 import { connect } from "react-redux";
 import { store, useGlobalState } from "state-pool";
+import { useRef } from "react";
+import { FieldValidations } from "../../../../utility/FieldValidations/fieldValidations";
 
 function UserDefined(props) {
   let { t } = useTranslation();
@@ -62,6 +64,10 @@ function UserDefined(props) {
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData, setlocalLoadedProcessData] =
     useGlobalState(loadedProcessData);
+
+  const appNameRef = useRef();
+  const methodNameRef = useRef();
+  const paramNameRef = useRef();
 
   const ParamTooltip = withStyles((theme) => ({
     tooltip: {
@@ -320,6 +326,20 @@ function UserDefined(props) {
     });
   };
 
+  {
+    /*code added on 10 October 2022 for BugId 116894*/
+  }
+  const checkParamType = (val) => {
+    const x = parseInt(val);
+    let y = "";
+    if (isNaN(x)) {
+      y = val;
+    } else {
+      y = getVariableType(x.toString());
+    }
+    return y;
+  };
+
   return (
     <div className={styles.mainDiv}>
       <div className={styles.headerDiv}>
@@ -386,10 +406,16 @@ function UserDefined(props) {
                       : styles.variableNameInput
                   }
                   //code added on 16 June 2022 for BugId 110847
+                  //code updated on 13 August 2022 for BugId 112903
                   autocomplete="off"
                   name="appName"
+                  id="appName"
                   value={data.appName}
                   onChange={onChange}
+                  ref={appNameRef}
+                  onKeyPress={(e) =>
+                    FieldValidations(e, 148, appNameRef.current, 500)
+                  }
                 />
               </p>
               <p
@@ -408,8 +434,13 @@ function UserDefined(props) {
                   //code added on 16 June 2022 for BugId 110847
                   autocomplete="off"
                   name="methodName"
+                  id="method_name"
                   value={data.methodName}
                   onChange={onChange}
+                  ref={methodNameRef}
+                  onKeyPress={(e) =>
+                    FieldValidations(e, 152, methodNameRef.current, 500)
+                  }
                 />
               </p>
               <p
@@ -606,6 +637,11 @@ function UserDefined(props) {
                             value={param.paramName}
                             onChange={(e) =>
                               onParamChange(index, e, e.target.value)
+                            }
+                            id="paramName"
+                            ref={paramNameRef}
+                            onKeyPress={(e) =>
+                              FieldValidations(e, 152, appNameRef.current, 500)
                             }
                           />
                         </span>
@@ -941,6 +977,7 @@ function UserDefined(props) {
                                         : styles.paramType
                                     }
                                   >
+                                    {/*code updated on 10 October 2022 for BugId 116894*/}
                                     <Select
                                       className={
                                         direction === RTL_DIRECTION
@@ -959,7 +996,8 @@ function UserDefined(props) {
                                         getContentAnchorEl: null,
                                       }}
                                       name="ParamType"
-                                      value={getVariableType(param.ParamType)}
+                                      //value={getVariableType(param.ParamType)}
+                                      value={checkParamType(param.ParamType)}
                                       onChange={(e) =>
                                         onParamChangeInEditMethod(
                                           index,

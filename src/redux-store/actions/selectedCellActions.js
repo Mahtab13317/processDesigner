@@ -5,7 +5,8 @@ export const selectedCell = (
   activitySubType,
   seqId,
   queueId,
-  type
+  type,
+  checkedOut
 ) => {
   return {
     type: "SELECTED_CELL",
@@ -17,6 +18,7 @@ export const selectedCell = (
       seqId,
       queueId,
       type,
+      checkedOut
     },
   };
 };

@@ -23,7 +23,6 @@ import {
 import SelectField from "../../../../UI/Components_With_ErrrorHandling/SelectField";
 import { useDispatch } from "react-redux";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
-import moment from "moment";
 
 function AddCondition(props) {
   let { t } = useTranslation();
@@ -207,14 +206,14 @@ function AddCondition(props) {
           setConditionalDropdown(conditionalOperator);
         }
         setParam2(localData.param2);
-        setLogicalOperator(getLogicalOperatorReverse(localData.logicalOp));
+        setIsParam2Const(localData.type2 === "C");
         setSelectedOperator(localData.operator);
       } else {
         setParam1("");
         setParam2("");
-        setLogicalOperator("+");
         setSelectedOperator("");
       }
+      setLogicalOperator(getLogicalOperatorReverse(localData.logicalOp));
     }
   }, [localData, streamsData]);
 
@@ -402,7 +401,6 @@ function AddCondition(props) {
 
   return (
     <div>
-      
       <div className={styles.addNewRule}>
         {/*code edited on 5 August 2022 for Bug 112847 */}
         <SelectField
@@ -413,7 +411,9 @@ function AddCondition(props) {
           isNotMandatory={disabled ? true : false}
           onChange={(event) => handleParam1Value(event)}
           disabled={disabled}
-          validateError={props.validateError} //code edited on 5 August 2022 for Bug 112847
+          validateError={
+            localData?.isNew ? !localData?.isNew : props.validateError
+          } //code edited on 5 August 2022 for Bug 112847
         >
           {param1DropdownOptions?.map((element) => {
             return (
@@ -437,7 +437,9 @@ function AddCondition(props) {
           onChange={(event) => onSelectOperator(event)}
           disabled={disabled}
           isNotMandatory={disabled ? true : false}
-          validateError={props.validateError} //code edited on 5 August 2022 for Bug 112847
+          validateError={
+            localData?.isNew ? !localData?.isNew : props.validateError
+          } //code edited on 5 August 2022 for Bug 112847
         >
           {conditionalDropdown &&
             conditionalDropdown.map((element) => {
@@ -460,7 +462,9 @@ function AddCondition(props) {
           className={styles.dropdown}
           value={param2}
           onChange={(event, isConstant) => handleParam2Value(event, isConstant)}
-          validateError={props.validateError} //code edited on 5 August 2022 for Bug 112847
+          validateError={
+            localData?.isNew ? !localData?.isNew : props.validateError
+          } //code edited on 5 August 2022 for Bug 112847
           isConstant={isParam2Const}
           setIsConstant={(val) => setIsParam2Const(val)}
           isNotMandatory={disabled ? true : false}

@@ -21,28 +21,26 @@ import {
 } from "../../../../Constants/appConstants.js";
 import arabicStyles from "./ArabicStyles.module.css";
 import TabsHeading from "../../../../UI/TabsHeading";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function SearchResults(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
+  const dispatch = useDispatch();
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
-  const [checkBoxVal, setCheckBoxVal] = useState(false);
-
   const [check, setCheck] = useState({});
-
   const [allVariable, setallVariable] = useState([]);
-  const dispatch = useDispatch();
+  const [searchVariable, setSearchVariable] = useState([]);
+  const [execute, setExecute] = useState("0");
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   function createData(VariableName, VariableId) {
     return { VariableName, VariableId };
   }
-
-  const [searchVariable, setSearchVariable] = useState([]);
-  const [execute, setExecute] = useState("0");
 
   useEffect(() => {
     let temp =
@@ -163,7 +161,7 @@ function SearchResults(props) {
 
   return (
     <React.Fragment>
-    <TabsHeading heading={props?.heading} />
+      <TabsHeading heading={props?.heading} />
       <div className={styles.SearchVariable} style={{ direction: direction }}>
         <div style={{ width: "98%" }}>
           <p
@@ -212,6 +210,7 @@ function SearchResults(props) {
                               draggableId={`${index}`}
                               key={`${index}`}
                               index={index}
+                              isDragDisabled={isReadOnly}
                             >
                               {(provided) => (
                                 <div
@@ -226,12 +225,14 @@ function SearchResults(props) {
                                     }}
                                   >
                                     <div {...provided.dragHandleProps}>
-                                      <DragIndicatorOutlinedIcon
-                                        style={{
-                                          marginTop: "10px",
-                                          height: "22px",
-                                        }}
-                                      />
+                                      {!isReadOnly && (
+                                        <DragIndicatorOutlinedIcon
+                                          style={{
+                                            marginTop: "10px",
+                                            height: "22px",
+                                          }}
+                                        />
+                                      )}
                                     </div>
                                     <td
                                       className={
@@ -259,6 +260,7 @@ function SearchResults(props) {
                                           height: "14px",
                                           width: "14px",
                                         }}
+                                        disabled={isReadOnly}
                                       />
                                     </td>
                                   </tr>
@@ -282,16 +284,7 @@ function SearchResults(props) {
 
 const mapStateToProps = (state) => {
   return {
-    showDrawer: state.showDrawerReducer.showDrawer,
-    cellID: state.selectedCellReducer.selectedId,
-    cellName: state.selectedCellReducer.selectedName,
-    cellType: state.selectedCellReducer.selectedType,
-    cellActivityType: state.selectedCellReducer.selectedActivityType,
-    cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
-    openProcessID: state.openProcessClick.selectedId,
-    openProcessName: state.openProcessClick.selectedProcessName,
-    openProcessType: state.openProcessClick.selectedType,
-    isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

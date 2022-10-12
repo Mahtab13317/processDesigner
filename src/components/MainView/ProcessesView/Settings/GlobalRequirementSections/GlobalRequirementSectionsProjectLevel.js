@@ -1,6 +1,8 @@
 // Changes made to solve 110715 (Global Requirement section: Buttons not visible while Adding section) and
 // 113580 (if the requirements are on project level not on Global level then the message should be different)
 // 110720, Global Requirement section: section with lengthy data was not added
+// #BugID - 115179
+// #BugDescription - Updated functionality for add section for requirement
 
 import { Button } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
@@ -94,6 +96,7 @@ function GlobalRequirementSections(props) {
           }
         });
         setreqData(sortByKey(data, "OrderId"));
+        localStorage.setItem("reqData",JSON.stringify(sortByKey(data, "OrderId")))
       }
     }
     getSections();
@@ -169,7 +172,10 @@ function GlobalRequirementSections(props) {
     }
 
     const flagForApi = await commonApiCalls(DELETE, toDeleteSection);
-    if (flagForApi) setreqData(arrangeData(temp));
+    if (flagForApi){
+      setreqData(arrangeData(temp));
+      localStorage.setItem('reqData', JSON.stringify(arrangeData(temp)));
+    }
     else return;
   };
 
@@ -238,11 +244,12 @@ function GlobalRequirementSections(props) {
 
   const mapNewSection = async (data) => {
     let temp = JSON.parse(JSON.stringify(reqData));
+    let tempLocal=JSON.parse(localStorage.getItem('reqData'));
     if (levelToMap === LEVEL1) {
       const flagForApi = await commonApiCalls(ADD, data, "0");
       if (flagForApi) {
-        temp.push({ ...data, SectionId: flagForApi.SectionId });
-        setreqData(temp);
+        //temp.push({ ...data, SectionId: data.OrderId });
+        setreqData(tempLocal);
       } else return;
     } else if (levelToMap === LEVEL2) {
       const flagForApi = await commonApiCalls(
@@ -442,9 +449,10 @@ function GlobalRequirementSections(props) {
   };
 
   return (
+    /*code updated on 21 September 2022 for BugId 114557*/
     <div
       className={styles.page}
-      style={{ width: "98%", height: "75vh", margin: "1rem 1vw" }}
+      style={{ width: "98%", height: "70vh", margin: "1rem 1vw" }}
     >
       <div className={styles.headingProjectLevel}>
         <div className={styles.headingBox}>

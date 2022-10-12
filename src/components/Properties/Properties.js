@@ -29,6 +29,7 @@ import {
   MODIFY_CONSTANT,
   ENDPOINT_GET_GLOBALTASKTEMPLATES,
   propertiesLabel,
+  PROCESSTYPE_LOCAL,
 } from "../../Constants/appConstants";
 import { getActivityProps } from "../../utility/abstarctView/getActivityProps";
 import { useDispatch, useSelector, connect } from "react-redux";
@@ -59,6 +60,12 @@ import {
 } from "../../redux-store/slices/webserviceChangeSlice";
 import { ProcessTaskTypeValue } from "../../redux-store/slices/ProcessTaskTypeSlice";
 import { propertiesTabsForActivities as Tab } from "../../utility/propertiesTabsForActivity/propertiesTabsForActivity";
+import {
+  ActivityCheckoutValue,
+  setCheckoutActEdited,
+} from "../../redux-store/slices/ActivityCheckoutSlice";
+import CheckInActivityValidation from "./CheckInActivityValidation";
+import { getVariableType } from "../../utility/ProcessSettings/Triggers/getVariableType";
 
 function PropertiesTab(props) {
   const { isDrawerExpanded, direction } = props;
@@ -87,6 +94,7 @@ function PropertiesTab(props) {
   const [isModified, setIsModified] = useState(false);
   const [isSavingAsGlobalTemp, setIsSavingAsGlobalTemp] = useState(false);
   const [initialWebservice, setInitialWebservice] = useState(null);
+  const [showCheckedInAlert, setShowCheckedInAlert] = useState(false);
   const globalTemplates = useSelector(
     (state) => state.globalTaskTemplate.globalTemplates
   );
@@ -94,6 +102,7 @@ function PropertiesTab(props) {
   const openProcessData = useSelector(OpenProcessSliceValue);
   const webserviceVal = useSelector(webserviceChangeVal);
   const ProcessTaskType = useSelector(ProcessTaskTypeValue);
+  const CheckedAct = useSelector(ActivityCheckoutValue);
 
   // to call getActivityProperty API
   useEffect(() => {
@@ -101,18 +110,32 @@ function PropertiesTab(props) {
     if (localLoadedProcessData && props.cellID && props.showDrawer) {
       if (props.cellType === getSelectedCellType("TASKTEMPLATE")) {
         setSelectedActivityIcon(taskTemplateIcon);
+        dispatch(setOpenProcess({ loadedData: { ...localLoadedProcessData } }));
       } else if (props.cellType === getSelectedCellType("TASK")) {
         setSelectedActivityIcon(taskTemplateIcon);
         fetchTaskProperties();
+        dispatch(setOpenProcess({ loadedData: { ...localLoadedProcessData } }));
       } else if (props.cellType === getSelectedCellType("ACTIVITY")) {
-        fetchActivityProperties();
-        setSelectedActivityIcon(
-          getActivityProps(props.cellActivityType, props.cellActivitySubType)[0]
-        );
+        if (
+          CheckedAct.isCheckoutActEdited &&
+          CheckedAct.actCheckedId !== props.cellID
+        ) {
+          setShowCheckedInAlert(true);
+        } else {
+          fetchActivityProperties();
+          setSelectedActivityIcon(
+            getActivityProps(
+              props.cellActivityType,
+              props.cellActivitySubType
+            )[0]
+          );
+          dispatch(
+            setOpenProcess({ loadedData: { ...localLoadedProcessData } })
+          );
+        }
       }
-      dispatch(setOpenProcess({ loadedData: { ...localLoadedProcessData } }));
     }
-  }, [props.cellID, props.showDrawer]);
+  }, [props.cellID, props.showDrawer, props.cellType]);
 
   //to get global task templates
   const getGlobalTemplates = async () => {
@@ -124,6 +147,7 @@ function PropertiesTab(props) {
       dispatch(setGlobalTaskTemplates(globalTemps));
     }
   };
+
   useEffect(() => {
     getGlobalTemplates();
   }, []);
@@ -135,7 +159,6 @@ function PropertiesTab(props) {
       props.cellType === getSelectedCellType("TASKTEMPLATE")
     ) {
       let activityName = props.cellTaskType;
-
       ActivityPropertyTabs.forEach((item) => {
         if (item.name === activityName) {
           let tabs = [...item.components];
@@ -146,7 +169,6 @@ function PropertiesTab(props) {
             tabs.splice(1, 0, Tab(48));
           }
           setTabsForActivity(tabs);
-          console.log("TABCONSOLE", tabs);
           tabs.forEach((tabEl) => {
             tabList = {
               ...tabList,
@@ -209,6 +231,7 @@ function PropertiesTab(props) {
     props.cellActivityType,
     props.cellActivitySubType,
     ProcessTaskType,
+    props.cellType,
   ]);
 
   useEffect(() => {
@@ -260,6 +283,36 @@ function PropertiesTab(props) {
   };
 
   const fetchActivityProperties = () => {
+    if (
+      localLoadedProcessData.ProcessType !== PROCESSTYPE_LOCAL &&
+      props.cellType === getSelectedCellType("ACTIVITY") &&
+      props.cellCheckedOut === "Y" &&
+      CheckedAct.isCheckoutActEdited
+    ) {
+      let localActProperty = JSON.parse(
+        JSON.stringify(CheckedAct.checkedActProp)
+      );
+      let targetId = 0;
+      localLoadedProcessData?.Connections?.forEach((conn) => {
+        if (conn.SourceId == localActProperty?.ActivityProperty?.actId) {
+          targetId = conn.TargetId;
+        }
+      });
+      setInitialTarget(targetId);
+      dispatch(
+        setWebservice({
+          initialConn: targetId,
+        })
+      );
+      setWebserviceFunc(localActProperty);
+      setlocalLoadedActivityPropertyData(localActProperty);
+      setoriginalProcessData(localActProperty);
+    } else {
+      getActProperty();
+    }
+  };
+
+  const getActProperty = () => {
     axios
       .get(
         SERVER_URL +
@@ -364,13 +417,46 @@ function PropertiesTab(props) {
           }
         );
         if (response.data.Status === 0) {
+          toastHandler(response.data.Message, "success");
+          // code added on 3 Oct 2022 for BugId 116521
+          //to update task variables in open process call data
+          const tempProcessData = JSON.parse(
+            JSON.stringify(localLoadedProcessData)
+          );
+          tempProcessData?.Tasks?.forEach((task, index) => {
+            if (+props.cellID === task.TaskId) {
+              let taskTempVar = [];
+              newTaskData?.taskGenPropInfo?.taskTemplateInfo?.m_arrTaskTemplateVarList?.forEach(
+                (taskVr) => {
+                  taskTempVar.push({
+                    ControlType: "",
+                    DBLinking: taskVr.m_strDBLinking,
+                    DisplayName: taskVr.m_strDisplayName,
+                    OrderId: taskVr.m_iOrderId,
+                    TemplateVariableId: taskVr.m_iTempVarId,
+                    VariableName: taskVr.m_strVariableName,
+                    VariableType: getVariableType(
+                      `${taskVr.m_strVariableType}`
+                    ),
+                  });
+                }
+              );
+              tempProcessData.Tasks[index].TaskTemplateVar = [...taskTempVar];
+              tempProcessData.Tasks[index].TaskMode =
+                newTaskData?.taskGenPropInfo?.m_strSubPrcType;
+            }
+          });
+          setLocalLoadedProcessData(tempProcessData);
           dispatch(setActivityPropertyToDefault());
           setIsModified(false);
-          setoriginalProcessData(localLoadedActivityPropertyData);
           setsaveCancelDisabled(true);
           if (saveCancelStatus.CloseClicked) {
             props.setShowDrawer(false);
             dispatch(setSave({ CloseClicked: false }));
+            setlocalLoadedActivityPropertyData(null);
+            setoriginalProcessData(null);
+          } else {
+            setoriginalProcessData(localLoadedActivityPropertyData);
           }
           setToastDataFunc({
             message: response.data.message || "Saved Successfully.",
@@ -386,36 +472,79 @@ function PropertiesTab(props) {
         });
       }
     } else {
-      try {
-        const response = await axiosInstance.post(
-          `${ENDPOINT_SAVE_TASK_PROPERTY}`,
-          {
-            ...newTaskData,
-            processDefId: localLoadedProcessData.ProcessDefId,
-            status: MODIFY_CONSTANT,
-          }
-        );
-        if (response.data.Status === 0) {
+      if (
+        newTaskData?.taskType !== 2 &&
+        localLoadedActivityPropertyData?.taskGenPropInfo?.taskTemplateInfo
+          ?.m_arrTaskTemplateVarList?.length === 0
+      ) {
+        dispatch(
           setToastDataFunc({
-            message: response.data.message || "Saved Successfully.",
-            severity: "success",
+            severity: "error",
+            message: "Add atleast one variable in Data Tab",
+            open: "true",
+          })
+        );
+      } else {
+        try {
+          const response = await axiosInstance.post(
+            `${ENDPOINT_SAVE_TASK_PROPERTY}`,
+            {
+              ...newTaskData,
+              processDefId: localLoadedProcessData.ProcessDefId,
+              status: MODIFY_CONSTANT,
+            }
+          );
+          if (response.data.Status === 0) {
+            setToastDataFunc({
+              message: response.data.message || "Saved Successfully.",
+              severity: "success",
+              open: true,
+            });
+            // code added on 3 Oct 2022 for BugId 116521
+            //to update task variables in open process call data
+            const tempProcessData = JSON.parse(
+              JSON.stringify(localLoadedProcessData)
+            );
+            tempProcessData?.Tasks?.forEach((task, index) => {
+              if (+props.cellID === task.TaskId) {
+                let taskTempVar = [];
+                newTaskData?.taskGenPropInfo?.taskTemplateInfo?.m_arrTaskTemplateVarList?.forEach(
+                  (taskVr) => {
+                    taskTempVar.push({
+                      ControlType: "",
+                      DBLinking: taskVr.m_strDBLinking,
+                      DisplayName: taskVr.m_strDisplayName,
+                      OrderId: taskVr.m_iOrderId,
+                      TemplateVariableId: taskVr.m_iTempVarId,
+                      VariableName: taskVr.m_strVariableName,
+                      VariableType: getVariableType(
+                        `${taskVr.m_strVariableType}`
+                      ),
+                    });
+                  }
+                );
+                tempProcessData.Tasks[index].TaskTemplateVar = [...taskTempVar];
+                tempProcessData.Tasks[index].TaskMode =
+                  newTaskData?.taskGenPropInfo?.m_strSubPrcType;
+              }
+            });
+            setLocalLoadedProcessData(tempProcessData);
+            dispatch(setActivityPropertyToDefault());
+            setIsModified(false);
+            setoriginalProcessData(localLoadedActivityPropertyData);
+            setsaveCancelDisabled(true);
+            if (saveCancelStatus.CloseClicked) {
+              props.setShowDrawer(false);
+              dispatch(setSave({ CloseClicked: false }));
+            }
+          }
+        } catch (error) {
+          setToastDataFunc({
+            message: error?.response?.data?.message || "server error",
+            severity: "error",
             open: true,
           });
-          dispatch(setActivityPropertyToDefault());
-          setIsModified(false);
-          setoriginalProcessData(localLoadedActivityPropertyData);
-          setsaveCancelDisabled(true);
-          if (saveCancelStatus.CloseClicked) {
-            props.setShowDrawer(false);
-            dispatch(setSave({ CloseClicked: false }));
-          }
         }
-      } catch (error) {
-        setToastDataFunc({
-          message: error?.response?.data?.message || "server error",
-          severity: "error",
-          open: true,
-        });
       }
     }
   };
@@ -441,6 +570,7 @@ function PropertiesTab(props) {
         inputPayload
       );
       if (response.data.Status === 0) {
+        toastHandler(response.data.Message, "success");
         //deleting global template from redux store as well
         const newGlobalTemplates = [...globalTemplates].filter(
           (item) => item.m_iTemplateId !== inputPayload.m_iTemplateId
@@ -469,6 +599,16 @@ function PropertiesTab(props) {
     }
   };
 
+  const toastHandler = (message, severity) => {
+    dispatch(
+      setToastDataFunc({
+        message: message,
+        severity: severity,
+        open: true,
+      })
+    );
+  };
+
   const postDataForCallActivity = () => {
     let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
     if (temp) {
@@ -477,15 +617,60 @@ function PropertiesTab(props) {
       axios
         .post(SERVER_URL + ENDPOINT_SAVEPROPERTY, temp.ActivityProperty)
         .then((response) => {
-          if (response.data.Status === 0) {
+          if (response?.data?.Status === 0) {
+            toastHandler(response.data.Message, "success");
+            //to update primaryActivity flag in open process call data
+            const tempProcessData = JSON.parse(
+              JSON.stringify(localLoadedProcessData)
+            );
+            const actId = temp.ActivityProperty.actId;
+            tempProcessData?.MileStones.map((milestone, mileIndex) => {
+              milestone.Activities.map((act, actIindex) => {
+                if (
+                  act.ActivityId === actId &&
+                  temp.ActivityProperty.primaryAct === "Y"
+                ) {
+                  act.PrimaryActivity = "Y";
+                } else if (
+                  act.ActivityId !== actId &&
+                  temp.ActivityProperty.primaryAct === "Y"
+                ) {
+                  act.PrimaryActivity = "N";
+                }
+                if (act.ActivityId === actId) {
+                  act.ImageName =
+                    localLoadedActivityPropertyData?.ActivityProperty?.imageName;
+                }
+                if (
+                  +act.ActivityType === 32 &&
+                  +act.ActivitySubType === 1 &&
+                  act.ActivityId === actId
+                ) {
+                  let taskAss = [];
+                  Object.values(
+                    localLoadedActivityPropertyData?.ActivityProperty?.wdeskInfo
+                      ?.objPMWdeskTasks?.taskMap
+                  )?.forEach((el) => {
+                    taskAss.push(el?.taskTypeInfo?.taskId);
+                  });
+                  act.AssociatedTasks = [...taskAss];
+                }
+                return act;
+              });
+              return milestone;
+            });
+            setLocalLoadedProcessData(tempProcessData);
             dispatch(setActivityPropertyToDefault());
             setIsModified(false);
-            setoriginalProcessData(localLoadedActivityPropertyData);
             setsaveCancelDisabled(true);
             setWebserviceFunc(localLoadedActivityPropertyData);
             if (saveCancelStatus.CloseClicked) {
               props.setShowDrawer(false);
               dispatch(setSave({ CloseClicked: false }));
+              setlocalLoadedActivityPropertyData(null);
+              setoriginalProcessData(null);
+            } else {
+              setoriginalProcessData(localLoadedActivityPropertyData);
             }
           }
         })
@@ -509,7 +694,34 @@ function PropertiesTab(props) {
       ) {
         saveTaskProperties();
       } else {
-        postDataForCallActivity();
+        if (
+          localLoadedProcessData.ProcessType !== PROCESSTYPE_LOCAL &&
+          props.cellType === getSelectedCellType("ACTIVITY") &&
+          props.cellCheckedOut === "Y"
+        ) {
+          dispatch(
+            setCheckoutActEdited({
+              isCheckoutActEdited: true,
+              checkedActProp: localLoadedActivityPropertyData,
+              actCheckedId: props.cellID,
+              actCheckedName: props.cellName,
+            })
+          );
+          dispatch(setActivityPropertyToDefault());
+          setIsModified(false);
+          setsaveCancelDisabled(true);
+          setWebserviceFunc(localLoadedActivityPropertyData);
+          if (saveCancelStatus.CloseClicked) {
+            props.setShowDrawer(false);
+            dispatch(setSave({ CloseClicked: false }));
+            setlocalLoadedActivityPropertyData(null);
+            setoriginalProcessData(null);
+          } else {
+            setoriginalProcessData(localLoadedActivityPropertyData);
+          }
+        } else {
+          postDataForCallActivity();
+        }
       }
       dispatch(setWebservice({ webserviceChanged: false }));
     } else {
@@ -570,10 +782,13 @@ function PropertiesTab(props) {
     dispatch(setSave({ SaveClicked: false, CancelClicked: true }));
     dispatch(setActivityPropertyToDefault());
     setsaveCancelDisabled(true);
-    setlocalLoadedActivityPropertyData(originalProcessData);
     if (saveCancelStatus.CloseClicked) {
       props.setShowDrawer(false);
       dispatch(setSave({ CloseClicked: false }));
+      setlocalLoadedActivityPropertyData(null);
+      setoriginalProcessData(null);
+    } else {
+      setlocalLoadedActivityPropertyData(originalProcessData);
     }
   };
 
@@ -667,12 +882,28 @@ function PropertiesTab(props) {
       />
     </div>
   );
+
   const handleSaveAsGlobalTemplate = () => {
     setIsSavingAsGlobalTemp(true);
   };
+
   const handleCloseGlobalTempModal = () => {
     setIsSavingAsGlobalTemp(false);
   };
+
+  const handleCheckInActPropRevert = () => {
+    dispatch(
+      setCheckoutActEdited({
+        isCheckoutActEdited: false,
+        checkedActProp: {},
+        actCheckedId: null,
+        actCheckedName: null,
+      })
+    );
+    getActProperty();
+    setShowCheckedInAlert(false);
+  };
+
   return (
     <div>
       <Drawer
@@ -681,7 +912,7 @@ function PropertiesTab(props) {
         }}
         BackdropProps={{ invisible: true }}
         anchor={direction === RTL_DIRECTION ? "left" : "right"}
-        open={props.showDrawer}
+        open={showCheckedInAlert ? false : props.showDrawer}
       >
         <CommonTabHeader
           activityType={props.cellActivityType}
@@ -728,11 +959,26 @@ function PropertiesTab(props) {
           >
             {t("discard")}
           </button>
-          {props.cellType === getSelectedCellType("TASK") &&
+          {/* {props.cellType === getSelectedCellType("TASK") &&
           props.cellTaskType === TaskType.globalTask &&
           localLoadedActivityPropertyData?.taskGenPropInfo?.taskTemplateInfo
             ?.m_bGlobalTemplate === false &&
           isDrawerExpanded ? (
+            <button
+              id="propertiesGlobalTempButton"
+              className={"propertiesGlobalTempButton"}
+              onClick={handleSaveAsGlobalTemplate}
+            >
+              {t("SaveAsGlobalTemplate")}
+            </button>
+          ) : null} */}
+          {
+            //code added on 11 October 2022 for BugId 116930
+          }
+          {props.cellType === getSelectedCellType("TASK") &&
+          props.cellTaskType === TaskType.globalTask &&
+          localLoadedActivityPropertyData?.taskGenPropInfo?.taskTemplateInfo
+            ?.m_bGlobalTemplate === false ? (
             <button
               id="propertiesGlobalTempButton"
               className={"propertiesGlobalTempButton"}
@@ -785,6 +1031,31 @@ function PropertiesTab(props) {
           />
         )}
       </Drawer>
+      {showCheckedInAlert ? (
+        <Modal
+          show={showCheckedInAlert}
+          style={{
+            top: "40%",
+            left: "35%",
+            width: "30%",
+            padding: "0",
+            zIndex: "1500",
+            boxShadow: "0px 3px 6px #00000029",
+            border: "1px solid #D6D6D6",
+            borderRadius: "3px",
+          }}
+          children={
+            <CheckInActivityValidation
+              discardChangesFunc={() => {
+                setShowCheckedInAlert(false);
+                props.setShowDrawer(false);
+              }}
+              saveChangesFunc={handleCheckInActPropRevert}
+              actName={CheckedAct.actCheckedName}
+            />
+          }
+        />
+      ) : null}
     </div>
   );
 }
@@ -796,6 +1067,7 @@ const mapStateToProps = (state) => {
     cellName: state.selectedCellReducer.selectedName,
     cellType: state.selectedCellReducer.selectedType,
     cellActivityType: state.selectedCellReducer.selectedActivityType,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
     cellTaskType: state.selectedCellReducer.selectedTaskType,
     cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,

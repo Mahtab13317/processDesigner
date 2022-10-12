@@ -9,7 +9,12 @@ function NoRulesScreen(props) {
 
   return (
     <div className={styles.emptyStateMainDiv}>
-      <img className={styles.emptyStateImage} src={EmptyStateIcon} alt="" />
+      <img
+        className={styles.emptyStateImage}
+        src={EmptyStateIcon}
+        alt=""
+        style={{ marginTop: props.calledFromAction ? "4rem" : "6rem" }}
+      />
       {!isProcessReadOnly ? (
         props.calledFromAction ? (
           <p className={styles.emptyStateHeading}>{t("createAction")}</p>

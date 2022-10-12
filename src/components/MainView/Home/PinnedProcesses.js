@@ -10,9 +10,12 @@ import axios from "axios";
 import {
   SERVER_URL_LAUNCHPAD,
   PMWEB_CONTEXT,
+  PMWEB,
 } from "../../../Constants/appConstants";
 import ProcessIconTable from "../../../assets/HomePage/HS_Process.svg";
 import { makeStyles } from "@material-ui/core";
+import { useDispatch } from "react-redux";
+import { setToastDataFunc } from "../../../redux-store/slices/ToastDataHandlerSlice";
 
 const useStyles = makeStyles({
   listItemIconRoot: {
@@ -47,6 +50,7 @@ const useStyles = makeStyles({
 
 function PinnedProcesses(props) {
   let { t } = useTranslation();
+  const dispatch = useDispatch();
   const classes = useStyles();
   const [pinnedData, setpinnedData] = React.useState([]);
   useEffect(() => {
@@ -60,6 +64,35 @@ function PinnedProcesses(props) {
     }
     getPinnedProcesses();
   }, []);
+  const handleUnpin = (e, data) => {
+    axios
+      .post(SERVER_URL_LAUNCHPAD + "/unpin", {
+        status: data.Status,
+        id: data.Id,
+        applicationName: PMWEB,
+        applicationId: "1",
+
+        type: data.Type,
+      })
+      .then((response) => {
+        if (response.data.Status === 0) {
+          const newPinnedData = pinnedData.filter(
+            (pinnedItem) => pinnedItem.Id !== data.Id
+          );
+          setpinnedData(newPinnedData);
+          props.pinnedDataList(newPinnedData);
+          props.getPinnedDataLength(newPinnedData.length);
+          dispatch(
+            setToastDataFunc({
+              message: t("unpinSuccess"),
+              severity: "success",
+              open: true,
+            })
+          );
+        }
+      });
+    e.stopPropagation();
+  };
 
   // {Id:23,Name:'Expense Approval', Version:'2.1', Parent:'Expense Reporting', Type:'L', ModificationDate:'7 Mar, 05:06PM', Status:"Created", StatusDate:"12 Jan", Editor:"Sejal", EditDateTime:"4:00AM"},
 
@@ -85,6 +118,7 @@ function PinnedProcesses(props) {
           processType={data.Status}
           modifiedDate={data.ModificationDate}
           id={data.Id}
+          handleUnpin={(e) => handleUnpin(e, data)}
         />
       );
     });

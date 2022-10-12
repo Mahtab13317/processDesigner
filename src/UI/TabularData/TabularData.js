@@ -201,10 +201,10 @@ function TabularData(props) {
     setRowSelected(rowId);
     props.openProcessClick(
       props.rows[rowId].data.props.children[1], //processId
-      props.rows[rowId].data.props.children[3], //processName
+      props.rows[rowId].data.props.children[3], //parent
       props.rows[rowId].data.props.children[2], //status
       props.rows[rowId].data.props.children[4], //version
-      props.rows[rowId].data.props.children[0] //parent
+      props.rows[rowId].data.props.children[0] //processname
     );
     props.openTemplate(null, null, false);
     history.push("/process");

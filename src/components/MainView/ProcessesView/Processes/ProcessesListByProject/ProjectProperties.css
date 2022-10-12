@@ -62,3 +62,24 @@
   color: white;
   cursor: pointer;
 }
+
+.upperSection {
+  margin: 10px 0px;
+  display: flex;
+  height: 60px;
+  justify-content: space-between;
+  flex-direction: column;
+}
+
+.lowerSection {
+  margin: 10px 0px;
+  display: flex;
+  height: 40px;
+  justify-content: space-between;
+  flex-direction: column;
+}
+
+.upperSubSection,
+.lowerSubSection {
+  font-size: 12px;
+}

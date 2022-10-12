@@ -17,7 +17,7 @@ function MappingDataModal(props) {
     setValue,
     handleClose,
     fieldName,
-    isProcessReadOnly,
+    isReadOnly,
     documentList,
     variablesList,
     mappingDetails,
@@ -176,7 +176,7 @@ function MappingDataModal(props) {
         <p className={styles.modalSubHeading}>{t("mappingType")}</p>
         <div className={styles.flexRow}>
           <Radio
-            disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="mapping_data_modal_data_radio"
             checked={typeValue === "0"}
             onChange={handleType}
@@ -185,7 +185,7 @@ function MappingDataModal(props) {
           />
           <p className={styles.text}>{t("data")}</p>
           <Radio
-            disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="mapping_data_modal_document_radio"
             checked={typeValue !== "0"}
             onChange={handleType}
@@ -198,7 +198,7 @@ function MappingDataModal(props) {
           <div className={styles.flexColumn}>
             <p className={styles.mappedField}>{t("mappedField")}</p>
             <CustomizedDropdown
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               id="mapping_data_modal_mapped_field_dropdown"
               className={styles.typeInput}
               value={mappedField}
@@ -236,7 +236,7 @@ function MappingDataModal(props) {
         <div className={styles.flexRow}>
           <div className={styles.flexRow}>
             <Checkbox
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               id="mapping_data_modal_quotes_checkbox"
               readOnly={typeValue !== "0"}
               size="small"
@@ -256,7 +256,7 @@ function MappingDataModal(props) {
           {typeValue !== "0" && (
             <div className={styles.flexRow}>
               <Checkbox
-                disabled={isProcessReadOnly}
+                disabled={isReadOnly}
                 id="mapping_data_modal_export_all_documents_checkbox"
                 readOnly={typeValue !== "0"}
                 size="small"
@@ -285,7 +285,7 @@ function MappingDataModal(props) {
               checked={alignment === "L"}
               value={"L"}
               size="small"
-              disabled={isProcessReadOnly || typeValue !== "0"}
+              disabled={isReadOnly || typeValue !== "0"}
               onChange={(event) => setAlignment(event.target.value)}
             />
             <p className={styles.text}>{t("left")}</p>
@@ -294,14 +294,14 @@ function MappingDataModal(props) {
               checked={alignment === "R"}
               value={"R"}
               size="small"
-              disabled={isProcessReadOnly || typeValue !== "0"}
+              disabled={isReadOnly || typeValue !== "0"}
               onChange={(event) => setAlignment(event.target.value)}
             />
             <p className={styles.text}>{t("right")}</p>
           </div>
         </div>
       </div>
-      {!isProcessReadOnly ? (
+      {!isReadOnly ? (
         <div className={styles.buttonsDiv}>
           <button
             id="mapping_data_modal_cancel_button"

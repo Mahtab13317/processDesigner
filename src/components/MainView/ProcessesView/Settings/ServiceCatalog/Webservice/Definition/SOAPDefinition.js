@@ -277,7 +277,7 @@ function SOAPDefinition(props) {
           *
         </span>
       </label>
-      <div className="flex alignCenter">
+      <div className="flex alignStart">
         <TextInput
           inputValue={webServiceObj?.wsdl_url}
           classTag={styles.webSInput}

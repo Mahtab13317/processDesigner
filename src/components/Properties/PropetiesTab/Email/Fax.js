@@ -18,6 +18,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -85,6 +86,7 @@ function Fax(props) {
   const [varDocSelected, setVarDocSelected] = useState(DropdownOptions[0]);
   const [allChecked, setAllChecked] = useState(false);
   const [isStatusCreated, setIsStatusCreated] = useState(null);
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   const menuProps = {
     anchorOrigin: {
@@ -225,13 +227,13 @@ function Fax(props) {
       tempCheck = {
         ...tempCheck,
         [el]: {
-          m_bCreateCheckbox: tempList[el]?.m_bCreateCheckbox
+          m_bCreateCheckbox: typeof tempList != "undefined" && tempList[el]?.m_bCreateCheckbox
             ? tempList[el].m_bCreateCheckbox
             : false,
-          m_bFax: tempList[el]?.m_bFax ? tempList[el].m_bFax : false,
+          m_bFax: typeof tempList != "undefined" && tempList[el]?.m_bFax ? tempList[el].m_bFax : false,
         },
       };
-      if (!tempList[el]?.m_bFax) {
+      if (typeof tempList != "undefined" && !tempList[el]?.m_bFax) {
         isFaxAllChecked = false;
       }
     });
@@ -454,6 +456,7 @@ function Fax(props) {
               value={varDocSelected}
               onChange={(event) => docTypeHandler(event)}
               style={{ margin: "var(--spacing_v) 0" }}
+              disabled={isReadOnly}
             >
               {DropdownOptions?.map((element) => {
                 return (
@@ -469,8 +472,9 @@ function Fax(props) {
             </Select>
           </div>
           <button
-            className="addbtnEmail"
             style={{ margin: "0 !important" }}
+            className={isReadOnly ? "disabledbtnEmail" : "addbtnEmail"}
+            disabled={isReadOnly}
             onClick={addHandler}
           >
             {t("add")}
@@ -490,6 +494,7 @@ function Fax(props) {
               setIsConstant={(val) => setIsFaxConst(val)}
               showConstValue={true}
               menuItemStyles="menuItemStylesDropdown"
+              disabled={isReadOnly}
             >
               {FaxDropdown?.map((element) => {
                 return (
@@ -534,6 +539,7 @@ function Fax(props) {
                   className="emailCheck"
                   checked={allChecked}
                   onChange={(e) => handleAllCheck(e)}
+                  disabled={isReadOnly}
                 />
                 {t("fax")}
               </StyledTableCell>
@@ -570,6 +576,7 @@ function Fax(props) {
                     name="m_bFax"
                     checked={checked[el]?.m_bFax}
                     onChange={(e) => CheckHandler(e, el)}
+                    disabled={isReadOnly}
                   />
                 </StyledTableCell>
                 <StyledTableCell
@@ -580,11 +587,13 @@ function Fax(props) {
                     className="emailCheck"
                     name="m_bCreateCheckbox"
                     disabled={
-                      allData[el].DocName !== "Status"
+                      allData[el].DocName !== "Status" || isReadOnly
                         ? true
-                        : isStatusCreated && allData[el].DocName === "Status"
+                        : (isStatusCreated &&
+                            allData[el].DocName === "Status") ||
+                          isReadOnly
                         ? true
-                        : !checked[el]?.m_bFax
+                        : !checked[el]?.m_bFax || isReadOnly
                         ? true
                         : false
                     }
@@ -606,6 +615,7 @@ function Fax(props) {
 const mapStateToProps = (state) => {
   return {
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

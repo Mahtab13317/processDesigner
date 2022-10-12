@@ -4,11 +4,15 @@ import arabicStyles from "./arabicStyles.module.css";
 import { useTranslation } from "react-i18next";
 import { RTL_DIRECTION } from "../../Constants/appConstants";
 import CloseIcon from "@material-ui/icons/Close";
+import { useSelector } from "react-redux";
 
 function ObjectDependencies(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   let { processAssociation, cancelFunc } = props;
+  const errorMessage = useSelector(
+    (state) => state.activityReducer.errorMessage
+  );
 
   return (
     <div>
@@ -24,7 +28,9 @@ function ObjectDependencies(props) {
         </h3>
         <CloseIcon onClick={cancelFunc} className={styles.closeIcon} />
       </div>
-      <p className={styles.modalSubHeading}>{t("objectDependencyStmt")}</p>
+      <p className={styles.modalSubHeading}>
+        {errorMessage || t("objectDependencyStmt")}
+      </p>
       <div className={styles.webS_PA_table}>
         <div
           className={

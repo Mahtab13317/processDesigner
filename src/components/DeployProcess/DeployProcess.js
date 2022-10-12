@@ -1,5 +1,4 @@
 // To solve bug - Making comments mandatory while deploying process- 110015
-
 import React, { useState, useEffect } from "react";
 import classes from "./DeployProcess.module.css";
 import { useTranslation } from "react-i18next";
@@ -20,6 +19,8 @@ import {
   ENDPOINT_DEPLOYPROCESS,
 } from "../../Constants/appConstants";
 import axios from "axios";
+import { useRef } from "react";
+import { FieldValidations } from "../../utility/FieldValidations/fieldValidations";
 
 function DeployProcess(props) {
   let { t } = useTranslation();
@@ -52,6 +53,9 @@ function DeployProcess(props) {
   const [createWSFlag, setCreateWSFlag] = useState(null);
   const [comment, setComment] = useState(null);
   const [showCommentError, setShowCommentError] = useState(false);
+  const displayNameRef = useRef();
+  const prefixRef = useRef();
+  const suffixRef = useRef();
 
   useEffect(() => {
     axios
@@ -157,15 +161,19 @@ function DeployProcess(props) {
     if (comment) {
       setShowCommentError(false);
       axios.post(SERVER_URL + ENDPOINT_REGISTERPROCESS, obj).then((res) => {
-        if (res.data.Status === 0 && !res.data.hasOwnProperty("Error")) {
+        // code added on 30 September 2022 for BugId 116474
+        const temp = res?.data?.Error?.filter((el) => {
+          return el.ErrorLevel == "E";
+        });
+        if (res.data.Status === 0 && (!temp || temp?.length === 0)) {
           props.setErrorVariables([]);
           if (props.setShowDeployModal) {
             props.setShowDeployModal(true);
             props.toggleDrawer();
           }
           props.setModalClosed();
-        } else if (res.data.Status === 0 && res.data.hasOwnProperty("Error")) {
-          props.setErrorVariables(res.data.Error);
+        } else if (res.data.Status === 0 && temp?.length > 0) {
+          props.setErrorVariables(temp);
           props.toggleDrawer();
           if (props.setShowDeployFailModal) {
             props.setShowDeployFailModal(true);
@@ -384,6 +392,10 @@ function DeployProcess(props) {
                     color: "#606060",
                     marginRight: "0.625rem",
                   }}
+                  ref={prefixRef}
+                  onKeyPress={(e) =>
+                    FieldValidations(e, 160, prefixRef.current, 20)
+                  }
                 />
                 <p style={{ marginTop: "0.1875rem" }}> / </p>
                 <input
@@ -398,6 +410,10 @@ function DeployProcess(props) {
                     color: "#606060",
                     marginLeft: "0.625rem",
                   }}
+                  ref={suffixRef}
+                  onKeyPress={(e) =>
+                    FieldValidations(e, 160, suffixRef.current, 20)
+                  }
                 />
               </div>
             </div>
@@ -497,6 +513,10 @@ function DeployProcess(props) {
                   color: "#606060",
                   marginLeft: "0.625rem",
                 }}
+                ref={displayNameRef}
+                onKeyPress={(e) =>
+                  FieldValidations(e, 160, displayNameRef.current, 20)
+                }
               />
             </div>
           </div>
@@ -713,9 +733,10 @@ function DeployProcess(props) {
                   flexDirection: "column",
                 }}
               >
-                <span style={{ fontSize: "12px", color: "#606060" }}>
-                  Comments
-                </span>
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <p className={classes.fieldsName}>Comment</p>
+                  <span className={classes.starIcon}>★</span>
+                </div>
                 <textarea
                   style={{
                     width: "360px",
@@ -747,7 +768,10 @@ function DeployProcess(props) {
         {props.deployFrom == "Settings" ? (
           <button
             className={classes.buttons}
-            style={{ backgroundColor: "var(--button_color)", cursor: "pointer" }}
+            style={{
+              backgroundColor: "var(--button_color)",
+              cursor: "pointer",
+            }}
             onClick={() => saveProcessHandler()}
           >
             Save
@@ -759,7 +783,10 @@ function DeployProcess(props) {
                 ? classes.DeploynSaveButton
                 : classes.buttons
             }
-            style={{ backgroundColor: "var(--button_color)", cursor: "pointer" }}
+            style={{
+              backgroundColor: "var(--button_color)",
+              cursor: "pointer",
+            }}
             onClick={() => deployProcessHandler()}
           >
             {props.buttonFrom == "DeployHeader" ? "Save & Deploy" : t("Deploy")}

@@ -2,47 +2,107 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "./JmsConsumer.module.css";
 import { Select, MenuItem, Checkbox } from "@material-ui/core";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import * as actionCreators from "../../../../redux-store/actions/Properties/showDrawerAction.js";
 import StarRateIcon from "@material-ui/icons/StarRate";
 import Modal from "../../../../UI/Modal/Modal";
 import { store, useGlobalState } from "state-pool";
 import XmlModal from "./XmlModal";
-import axios from "axios";
-import {
-  ENDPOINT_DESTINATIONJMSCONSUMER,
-  ENDPOINT_PROCESSVARIABLEJMSCONSUMER,
-  ENDPOINT_SEARCHJMSCONSUMER,
-  ENDPOINT_UPDATEJMSCONSUMER,
-  SERVER_URL,
-} from "../../../../Constants/appConstants";
+import clsx from "clsx";
 import TabsHeading from "../../../../UI/TabsHeading";
+import CustomizedDropdown from "../../../../UI/Components_With_ErrrorHandling/Dropdown";
+import { propertiesLabel } from "../../../../Constants/appConstants";
+import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function JmsConsumer(props) {
   let { t } = useTranslation();
-
+  const dispatch = useDispatch();
+  const globalActivityData = store.getState("activityPropertyData");
+  const [localActivityPropertyData, setLocalActivityPropertyData] =
+    useGlobalState(globalActivityData);
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
-  const [localLoadedProcess] = useGlobalState("variableDefinition");
   const [modalClicked, setModalClicked] = useState(false);
-  const [inputXml, setinputXml] = useState(
-    `<start>\n<data1>${t("scanAction")}</data1>\n<data2></data2>\n</start>`
-  );
   const [destinationName, setDestinationName] = useState("");
-  const loadedActivityPropertyData = store.getState("activityPropertyData");
-  const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
-    useGlobalState(loadedActivityPropertyData);
-  const [processVariableDropdown, setprocessVariableDropdown] = useState(
-    localLoadedProcessData?.Variable
-  );
-
+  const [processVariableDropdown, setProcessVariableDropdown] = useState([]);
   const [masterCheckUpdate, setmasterCheckUpdate] = useState(false);
   const [masterCheckSearch, setmasterCheckSearch] = useState(false);
+  const [jmsConsumerData, setJmsConsumerData] = useState({});
+  const [messageDataCheckbox, setMessageDataCheckbox] = useState(false); // State that stores the value of message data checkbox.
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut); //code updated on 26 September 2022 for BugId 115467
 
-  const [jmsConsumerData, setJmsConsumerData] = useState(
-    localLoadedActivityPropertyData?.ActivityProperty?.consumerInfo
-  );
-  // const [searchValue, setSearchValue] = useState(null);
+  // Function that runs when the component loads.
+  useEffect(() => {
+    setDestinationName(
+      localActivityPropertyData?.ActivityProperty?.consumerInfo?.destinationName?.trim()
+    );
+  }, []);
+
+  // Function that runs when the variables data changes.
+  useEffect(() => {
+    setProcessVariableDropdown(
+      localLoadedProcessData?.Variable?.filter(
+        (element) =>
+          element.VariableScope === "M" ||
+          element.VariableScope === "I" ||
+          element.VariableScope === "U"
+      )
+    );
+  }, [localLoadedProcessData?.Variable]);
+
+  // Function that runs when the localActivityPropertyData.ActivityProperty data changes.
+  useEffect(() => {
+    if (localActivityPropertyData) {
+      setJmsConsumerData({
+        ImportedXMLData:
+          localActivityPropertyData?.ActivityProperty?.consumerInfo
+            ?.messageDataList,
+      });
+    }
+  }, [localActivityPropertyData?.ActivityProperty]);
+
+  console.log("555", "JMS DATA", jmsConsumerData, localActivityPropertyData);
+
+  const masterMessageDataHandler = () => {
+    console.log("222", "MASTER", messageDataCheckbox);
+    setMessageDataCheckbox((prevState) => {
+      return !prevState;
+    });
+    let [temp] = [jmsConsumerData.ImportedXMLData];
+    temp?.forEach((element) => {
+      element.m_bEnabledata = !messageDataCheckbox;
+      if (messageDataCheckbox) {
+        element.selectedProcessVariable = "";
+        element.varFieldId = "0";
+        element.variableId = "0";
+        element.m_bsearch = false;
+        element.m_bupdate = false;
+        setmasterCheckSearch(false);
+        setmasterCheckUpdate(false);
+      }
+    });
+    setJmsConsumerData({ ImportedXMLData: temp });
+    setGlobalData("allData", temp);
+  };
+
+  // Function to set global data when the user does any action.
+  const setGlobalData = (key, value, ind) => {
+    let temp = JSON.parse(JSON.stringify(localActivityPropertyData));
+    if (key === "destinationName") {
+      temp.ActivityProperty.consumerInfo.destinationName = value;
+    } else if (key === "allData") {
+      temp.ActivityProperty.consumerInfo.messageDataList = value;
+    } else {
+      temp.ActivityProperty.consumerInfo.messageDataList[ind][key] = value;
+    }
+    setLocalActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.jmsConsumer]: { isModified: true, hasError: false },
+      })
+    );
+  };
 
   const importXmlHandler = () => {
     setModalClicked(true);
@@ -57,214 +117,125 @@ function JmsConsumer(props) {
     props.expandDrawer(!props.isDrawerExpanded);
   };
 
-  useEffect(() => {
-    setDestinationName(
-      localLoadedActivityPropertyData?.ActivityProperty?.consumerInfo
-        ?.destinationName
-    );
-    // setSearchValue()
-  }, []);
-
   const responseXmlData = (data) => {
+    console.log("999", "RESPONSE DATA", data);
     setJmsConsumerData((prev) => {
       let temp = [];
-      data &&
-        data.MessageData.forEach((el) => {
-          temp.push(el);
-        });
+      data?.forEach((el) => {
+        temp.push(el);
+      });
+      console.log("999", "XML DATA", { ImportedXMLData: temp });
       return { ImportedXMLData: temp };
     });
   };
 
-  const onSelectName = (e, index) => {
-    let messageDataName;
+  console.log("555", "PROCESS VARS", processVariableDropdown);
+
+  const onSelectName = (event, index) => {
     let variableIdSelected;
     let varFieldIdSelected;
-    let searchSelected;
-    let updateSelected;
-    let processVariable;
-    setJmsConsumerData((prev) => {
-      let temp = [...prev.ImportedXMLData];
-      temp[index].ProcessVariableName = e.target.value;
-      processVariable = e.target.value;
-      messageDataName = temp[index].ExtParamName;
-      searchSelected = temp[index].Search;
-      updateSelected = temp[index].Update;
-      return { ...prev, ImportedXMLData: temp };
-    });
+    const { value } = event.target;
 
-    processVariableDropdown.map((value) => {
-      if (value.VariableName === e.target.value) {
-        varFieldIdSelected = value.VarFieldId;
-        variableIdSelected = value.VariableId;
+    processVariableDropdown?.forEach((element) => {
+      if (element.VariableName === value) {
+        varFieldIdSelected = element.VarFieldId;
+        variableIdSelected = element.VariableId;
       }
     });
 
-    // let jsonBody = {
-    //   processDefId: props.openProcessID,
-    //   activityId: localLoadedActivityPropertyData.ActivityProperty.ActivityId,
-    //   jMSConsumerType: "C",
-    //   destinationName: destinationName,
-    //   arrMessageData: [
-    //     {
-    //       messageData: messageDataName,
-    //       selectedProcessVariable: processVariable,
-    //       search: searchSelected,
-    //       update: updateSelected,
-    //       variableId: variableIdSelected,
-    //       varFieldId: varFieldIdSelected,
-    //     },
-    //   ],
-    // };
-    // axios
-    //   .post(SERVER_URL + ENDPOINT_PROCESSVARIABLEJMSCONSUMER, jsonBody)
-    //   .then((res) => {
-    //     if (res.data.Status === 0) {
-    //     }
-    //     console.log(res);
-    //   });
+    setJmsConsumerData((prev) => {
+      let temp = [...prev.ImportedXMLData];
+      temp[index].selectedProcessVariable = value;
+      temp[index].varFieldId = varFieldIdSelected;
+      temp[index].variableId = variableIdSelected;
+      setGlobalData("allData", temp);
+      return { ...prev, ImportedXMLData: temp };
+    });
   };
 
-  const nameHandler = (e) => {
-    setDestinationName(e.target.value);
+  const enableDataFlagHandler = (enableFlag, ind) => {
+    setJmsConsumerData((prev) => {
+      let temp = [...prev.ImportedXMLData];
+      temp[ind].m_bEnabledata = !enableFlag;
+      if (enableFlag) {
+        temp[ind].selectedProcessVariable = "";
+        temp[ind].varFieldId = "0";
+        temp[ind].variableId = "0";
+      }
+      setGlobalData("allData", temp);
+      return { ...prev, ImportedXMLData: temp };
+    });
+  };
+
+  const nameHandler = (event) => {
+    setDestinationName(event.target.value);
+    setGlobalData("destinationName", event.target.value);
   };
 
   const searchHandler = (searchCheck, index) => {
-    let messageDataName;
-    let variableIdSelected;
-    let varFieldIdSelected;
-    let searchSelected;
-    let updateSelected;
-    let processVariable;
     setJmsConsumerData((prev) => {
       let temp = [...prev.ImportedXMLData];
-      processVariable = temp[index].ProcessVariableName;
-      messageDataName = temp[index].ExtParamName;
-      searchSelected = !searchCheck;
-      temp[index].Search = !searchCheck;
-      updateSelected = temp[index].Update;
-      variableIdSelected = temp[index].VariableId;
-      varFieldIdSelected = temp[index].VarFieldId;
+      temp[index].m_bsearch = !searchCheck;
+      setGlobalData("allData", temp);
       return { ...prev, ImportedXMLData: temp };
     });
-
-    // let jsonBody = {
-    //   processDefId: props.openProcessID,
-    //   activityId: localLoadedActivityPropertyData.ActivityProperty.ActivityId,
-    //   jMSConsumerType: "C",
-    //   destinationName: destinationName,
-    //   arrMessageData: [
-    //     {
-    //       messageData: messageDataName,
-    //       selectedProcessVariable: processVariable,
-    //       search: searchSelected,
-    //       update: updateSelected,
-    //       variableId: variableIdSelected,
-    //       varFieldId: varFieldIdSelected,
-    //     },
-    //   ],
-    // };
-    // axios
-    //   .post(SERVER_URL + ENDPOINT_SEARCHJMSCONSUMER, jsonBody)
-    //   .then((res) => {
-    //     if (res.data.Status === 0) {
-    //     }
-    //     console.log(res);
-    //   });
   };
+
   const updateHandler = (updateCheck, index) => {
-    let messageDataName;
-    let variableIdSelected;
-    let varFieldIdSelected;
-    let searchSelected;
-    let updateSelected;
-    let processVariable;
     setJmsConsumerData((prev) => {
       let temp = [...prev.ImportedXMLData];
-      processVariable = temp[index].ProcessVariableName;
-      messageDataName = temp[index].ExtParamName;
-      searchSelected = temp[index].Search;
-      temp[index].Update = !updateCheck;
-      updateSelected = !updateCheck;
-      variableIdSelected = temp[index].VariableId;
-      varFieldIdSelected = temp[index].VarFieldId;
+      temp[index].m_bupdate = !updateCheck;
+      setGlobalData("allData", temp);
       return { ...prev, ImportedXMLData: temp };
     });
-
-    // let jsonBody = {
-    //   processDefId: props.openProcessID,
-    //   activityId: localLoadedActivityPropertyData.ActivityProperty.ActivityId,
-    //   jMSConsumerType: "C",
-    //   destinationName: destinationName,
-    //   arrMessageData: [
-    //     {
-    //       messageData: messageDataName,
-    //       selectedProcessVariable: processVariable,
-    //       search: searchSelected,
-    //       update: updateSelected,
-    //       variableId: variableIdSelected,
-    //       varFieldId: varFieldIdSelected,
-    //     },
-    //   ],
-    // };
-    // axios
-    //   .post(SERVER_URL + ENDPOINT_UPDATEJMSCONSUMER, jsonBody)
-    //   .then((res) => {
-    //     if (res.data.Status === 0) {
-    //     }
-    //     console.log(res);
-    //   });
-  };
-  const changeDestintionNameHandler = () => {
-    // let jsonBody = {
-    //   processDefId: props.openProcessID,
-    //   activityId: localLoadedActivityPropertyData.ActivityProperty.ActivityId,
-    //   jMSConsumerType: "C",
-    //   destinationName: destinationName,
-    //   destinationId:
-    //     localLoadedActivityPropertyData.ActivityProperty.JMSConsumer
-    //       .DestinationId,
-    // };
-    // axios
-    //   .post(SERVER_URL + ENDPOINT_DESTINATIONJMSCONSUMER, jsonBody)
-    //   .then((res) => {
-    //     if (res.data.Status === 0) {
-    //     }
-    //     console.log(res);
-    //   });
   };
 
+  // Function that runs when the component loads.
   useEffect(() => {
-    let searchArray = [];
-    let updateArray = [];
-    jmsConsumerData?.messageDataList.map((val) => {
-      searchArray.push(val.Search);
-      updateArray.push(val.Update);
+    let searchArray = [],
+      updateArray = [],
+      enableDataArray = [];
+    jmsConsumerData?.ImportedXMLData?.forEach((element) => {
+      searchArray.push(element.m_bsearch);
+      updateArray.push(element.m_bupdate);
+      enableDataArray.push(element.m_bEnabledata);
     });
     if (searchArray.includes(false)) {
       setmasterCheckSearch(false);
+    } else {
+      setmasterCheckSearch(true);
     }
     if (updateArray.includes(false)) {
       setmasterCheckUpdate(false);
+    } else {
+      setmasterCheckUpdate(true);
     }
-  }, [jmsConsumerData]);
+    if (enableDataArray.includes(false)) {
+      setMessageDataCheckbox(false);
+    } else {
+      setMessageDataCheckbox(true);
+    }
+  }, [jmsConsumerData?.ImportedXMLData]);
 
   const masterCheckHandler = () => {
     let temp = jmsConsumerData;
     temp &&
-      temp.ImportedXMLData.map((val) => {
-        return (val.Search = !masterCheckSearch);
+      temp?.ImportedXMLData?.map((val) => {
+        return (val.m_bsearch = !masterCheckSearch);
       });
     setJmsConsumerData(temp);
+    setGlobalData("allData", temp.ImportedXMLData);
     setmasterCheckSearch(!masterCheckSearch);
   };
+
   const masterUpdateHandler = () => {
     let temp = jmsConsumerData;
     temp &&
-      temp.ImportedXMLData.map((val) => {
-        return (val.Update = !masterCheckUpdate);
+      temp?.ImportedXMLData?.map((val) => {
+        return (val.m_bupdate = !masterCheckUpdate);
       });
     setJmsConsumerData(temp);
+    setGlobalData("allData", temp.ImportedXMLData);
     setmasterCheckUpdate(!masterCheckUpdate);
   };
 
@@ -273,8 +244,7 @@ function JmsConsumer(props) {
       <TabsHeading heading={props?.heading} />
       {props.isDrawerExpanded ? (
         <React.Fragment>
-          {" "}
-          <div className="row" style={{ marginTop: "3rem" }}>
+          <div className={styles.flexColumn} style={{ marginTop: "3rem" }}>
             <p className={styles.destinationText}>
               {t("destinationName")}
               <StarRateIcon
@@ -286,108 +256,120 @@ function JmsConsumer(props) {
                 }}
               />
             </p>
-
-            <input
-              className={styles.input}
-              id="jmsConsumerInput"
-              value={destinationName}
-              onChange={(e) => nameHandler(e)}
-              onBlur={changeDestintionNameHandler}
-            />
-            <button
-              className={
-                destinationName && destinationName.trim().length === 0
-                  ? styles.importXmlBtnDisable
-                  : styles.importXmlBtn
-              }
-              id="importXmlBtn"
-              onClick={importXmlHandler}
-              disabled={destinationName && destinationName.trim().length === 0}
-            >
-              {t("importXml")}
-            </button>
+            <div className={styles.flexRow}>
+              <input
+                className={styles.input}
+                id="jmsConsumerInput"
+                value={destinationName}
+                onChange={(e) => nameHandler(e)}
+                disabled={isReadOnly} //code updated on 26 September 2022 for BugId 115467
+              />
+              <button
+                className={
+                  destinationName?.trim()?.length === 0
+                    ? styles.importXmlBtnDisable
+                    : styles.importXmlBtn
+                }
+                id="importXmlBtn"
+                onClick={importXmlHandler}
+                disabled={destinationName?.trim()?.length === 0 || isReadOnly} //code updated on 26 September 2022 for BugId 115467
+             
+              >
+                {t("importXml")}
+              </button>
+            </div>
           </div>
-          {jmsConsumerData && jmsConsumerData.messageDataList.length > 0 ? (
-            <div className="row" style={{ marginTop: "2rem" }}>
-              <div className={styles.message}>
-                <Checkbox />
-                {t("messageData")}
+          {jmsConsumerData && jmsConsumerData?.ImportedXMLData?.length > 0 && (
+            <div
+              className={clsx(styles.flexRow, styles.headerStrip)}
+              style={{ marginTop: "2rem" }}
+            >
+              <div className={clsx(styles.flexRow, styles.headerMargin)}>
+                <Checkbox
+                  checked={messageDataCheckbox}
+                  onChange={() => masterMessageDataHandler()}
+                  disabled={isReadOnly} //code updated on 26 September 2022 for BugId 115467
+                />
+                <p className={styles.message}> {t("messageData")}</p>
               </div>
-              <div className={styles.search}>
+              <div className={clsx(styles.flexRow, styles.headerMargin)}>
                 <Checkbox
                   checked={masterCheckSearch}
+                  disabled={!messageDataCheckbox || isReadOnly} //code updated on 26 September 2022 for BugId 115467
                   onChange={() => masterCheckHandler()}
+                  
                 />
-                {t("search")}
+                <p className={styles.search}>{t("search")}</p>
               </div>
-              <div className={styles.update}>
+              <div className={clsx(styles.flexRow, styles.headerMargin)}>
                 <Checkbox
                   checked={masterCheckUpdate}
+                  disabled={!messageDataCheckbox || isReadOnly} //code updated on 26 September 2022 for BugId 115467
                   onChange={() => masterUpdateHandler()}
+                 
                 />
-                {t("update")}
+                <p className={styles.update}>{t("update")}</p>
               </div>
-              <div className={styles.variable}>{t("processVariable")}</div>
+              <div className={clsx(styles.flexRow, styles.headerMargin)}>
+                <p className={styles.variable}> {t("processVariable")}</p>
+              </div>
             </div>
-          ) : null}
+          )}
           {jmsConsumerData &&
-            jmsConsumerData?.messageDataList.map((val, index) => {
+            jmsConsumerData?.ImportedXMLData?.map((val, index) => {
               return (
-                <div className="row" style={{ marginTop: "1rem" }}>
-                  <div className={styles.message}>
-                    <Checkbox />
+                <div
+                  className={clsx(styles.flexRow, styles.dataMainDiv)}
+                  style={{ marginTop: "1rem" }}
+                >
+                  <div className={styles.dataParamName}>
+                    <Checkbox
+                      id="enableDataFlag"
+                      checked={val.m_bEnabledata}
+                      onChange={() =>
+                        enableDataFlagHandler(val.m_bEnabledata, index)
+                      }
+                      disabled={isReadOnly} //code updated on 26 September 2022 for BugId 115467
+                    />
                     {val.messageData}
                   </div>
-                  <div className={styles.search}>
+                  <div className={clsx(styles.search, styles.checkboxMargins)}>
                     <Checkbox
-                      checked={val.Search}
-                      onChange={() => searchHandler(val.Search, index)}
+                      checked={val.m_bsearch}
+                      disabled={!val.m_bEnabledata || isReadOnly}
+                      onChange={() => searchHandler(val.m_bsearch, index)}
                       id="searchBox"
                     />
                   </div>
-                  <div className={styles.update}>
+                  <div className={clsx(styles.update, styles.checkboxMargins)}>
                     <Checkbox
-                      checked={val.Update}
-                      onChange={() => updateHandler(val.Update, index)}
+                      checked={val.m_bupdate}
+                      disabled={!val.m_bEnabledata}
+                      onChange={() => updateHandler(val.m_bupdate, index)}
                       id="updateBox"
                     />
                   </div>
                   <div className={styles.variable}>
-                    <Select
-                      className="selectDropdown"
-                      MenuProps={{
-                        anchorOrigin: {
-                          vertical: "bottom",
-                          horizontal: "left",
-                        },
-                        transformOrigin: {
-                          vertical: "top",
-                          horizontal: "left",
-                        },
-                        getContentAnchorEl: null,
-                      }}
-                      value={val.VariableProperty}
+                    <CustomizedDropdown
+                      id="JMS_Consumer_Variable_Dropdown"
+                      className={styles.variableDropdown}
+                      value={val.selectedProcessVariable}
                       onChange={(e) => onSelectName(e, index)}
-                      id="variableDropdown"
-                      style={{
-                        border: ".5px solid grey",
-                        width: "9rem",
-                        height: "2rem",
-                        fontSize: "14px",
-                      }}
+                      disabled={!val.m_bEnabledata || isReadOnly}
+                      isNotMandatory={true}
                     >
-                      {processVariableDropdown.map((val) => {
+                      {processVariableDropdown?.map((element) => {
                         return (
                           <MenuItem
                             className={styles.menuItemStyles}
-                            key={val.VariableName}
-                            value={val.VariableName}
+                            key={element.VariableName}
+                            value={element.VariableName}
                           >
-                            {val.VariableName}
+                            {element.VariableName}
                           </MenuItem>
                         );
                       })}
-                    </Select>
+                    </CustomizedDropdown>
                   </div>
                 </div>
               );
@@ -396,7 +378,7 @@ function JmsConsumer(props) {
       ) : (
         <React.Fragment>
           {
-            <div className="row" style={{ marginTop: "1rem" }}>
+            <div className={styles.flexColumn} style={{ marginTop: "1rem" }}>
               <p className={styles.destinationTextCollapse}>
                 {t("destinationName")}
                 <StarRateIcon
@@ -408,30 +390,32 @@ function JmsConsumer(props) {
                   }}
                 />
               </p>
-              <input
-                className={styles.inputCollapse}
-                id="jmsConsumerInput"
-                value={destinationName}
-                onChange={(e) => nameHandler(e)}
-                onBlur={changeDestintionNameHandler}
-              />
+              <div className={styles.flexRow}>
+                <input
+                  className={styles.inputCollapse}
+                  id="jmsConsumerInput"
+                  value={destinationName}
+                  onChange={(e) => nameHandler(e)}
+                  disabled={isReadOnly}
+                />
 
-              <button
-                className={
-                  destinationName.trim().length === 0
-                    ? styles.importXmlBtnDisable
-                    : styles.importXmlBtn
-                }
-                id="importXmlBtn"
-                onClick={importXmlHandlerCollapse}
-                disabled={destinationName.trim().length === 0}
-              >
-                {t("importXml")}
-              </button>
+                <button
+                  className={
+                    destinationName?.trim()?.length === 0
+                      ? styles.importXmlBtnDisable
+                      : styles.importXmlBtn
+                  }
+                  id="importXmlBtn"
+                  onClick={importXmlHandlerCollapse}
+                  disabled={destinationName?.trim()?.length === 0 || isReadOnly}
+                >
+                  {t("importXml")}
+                </button>
+              </div>
             </div>
           }
-          {jmsConsumerData && jmsConsumerData.messageDataList.length > 0 ? (
-            <div className="row" style={{ marginTop: "2rem" }}>
+          {jmsConsumerData && jmsConsumerData?.ImportedXMLData?.length > 0 && (
+            <div className={styles.flexRow} style={{ marginTop: "2rem" }}>
               <div
                 className={styles.messageCollapse}
                 onClick={messageCollapseHandler}
@@ -439,13 +423,13 @@ function JmsConsumer(props) {
                 <i>{t("messageData")}</i>
               </div>
             </div>
-          ) : null}
+          )}
           {jmsConsumerData &&
-            jmsConsumerData?.messageDataList.map((val) => {
+            jmsConsumerData?.ImportedXMLData?.map((val) => {
               return (
                 <div className="row" style={{ marginTop: "1rem" }}>
-                  <div className={styles.message}>
-                    <Checkbox />
+                  <div className={styles.dataParamName}>
+                    <Checkbox disabled={isReadOnly} />
                     {val.messageData}
                   </div>
                 </div>
@@ -459,7 +443,7 @@ function JmsConsumer(props) {
           show={modalClicked}
           style={{
             width: "30vw",
-            height: "40vh",
+            height: " 52vh",
             left: "35%",
             top: "30%",
             padding: "0",
@@ -470,9 +454,7 @@ function JmsConsumer(props) {
               responseXmlData={responseXmlData}
               setModalClicked={setModalClicked}
               destinationName={destinationName}
-              activityId={
-                localLoadedActivityPropertyData.ActivityProperty.ActivityId
-              }
+              activityId={localActivityPropertyData.ActivityProperty.ActivityId}
               processId={props.openProcessID}
             />
           }

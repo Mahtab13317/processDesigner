@@ -1,3 +1,5 @@
+// Changes made to solve Bug with ID 115457 -> Process Searching: search result result should refresh after erasing the entry of the search field
+//Changes made to solve Bug 112902 - Enabled process -> Group by project is not working
 import React, { useState, useEffect } from "react";
 import Checkbox from "@material-ui/core/Checkbox";
 import SearchProcess from "../../../../../UI/Search Component/index";
@@ -16,7 +18,7 @@ function ProcessListByType_TableNSearchNSortNFilter(props) {
   let [searchTerm, setSearchTerm] = useState("");
   let [selectionOne, setSelectionOne] = useState(0);
   let [selectionTwo, setSelectionTwo] = useState(0);
-
+  const [filteredLength, setfilteredLength] = useState(null);
   let Pending =
     props.selectedProcessCode == ("RP" || "EP")
       ? tileProcess(props.selectedProcessCode)[2]
@@ -25,6 +27,10 @@ function ProcessListByType_TableNSearchNSortNFilter(props) {
   let sortSelectionFunc = (sortSelectionOne, sortSelectionTwo) => {
     setSelectionOne(sortSelectionOne);
     setSelectionTwo(sortSelectionTwo);
+  };
+
+  const clearSearchResult = () => {
+    setSearchTerm("");
   };
 
   return (
@@ -36,29 +42,14 @@ function ProcessListByType_TableNSearchNSortNFilter(props) {
             ? tileProcess(props.selectedProcessCode)[1] + " " + Pending
             : ""}{" "}
           {props.selectedProcessCode ? "" : "Processes"} (
-          {props.selectedProcessCount})
+          {/* {props.selectedProcessCount}) */}
+          {filteredLength} )
         </p>
         <div className="filterBox">
-          <div
-            style={{
-              marginRight: "1vw",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <Checkbox
-              onChange={() => setGroupByProjectCheck(!groupByProjectcheck)}
-              checked={groupByProjectcheck}
-              className="groupProjectCheck"
-              size="small"
-              inputProps={{ "aria-label": "uncontrolled-checkbox" }}
-            />
-            {t("processList.GroupByProject")}
-          </div>
-          {/* <Checkbox onChange={()=>setPinToTopCheck(!pinToTopcheck)} checked={pinToTopcheck} size= 'small' inputProps={{ 'aria-label': 'uncontrolled-checkbox' }} />{t('processList.ShowPinnedAtTop')} */}
           <SearchProcess
             id="ProcessesTab_searchProcess"
             setSearchTerm={setSearchTerm}
+            clearSearchResult={clearSearchResult}
             searchIconAlign="right"
             placeholder="Search"
             style={{
@@ -113,14 +104,20 @@ function ProcessListByType_TableNSearchNSortNFilter(props) {
           >
             {t("processList.pinnedProcesses")}
           </h4>
-          <ProcessListByTypeTable
-            searchTerm={searchTerm}
-            selectedProcessCode={props.selectedProcessCode}
-            showTableHead={true}
-            processList={props.pinnedDataList?.filter((data) => {
-              return data.Type == props.selectedProcessCode;
-            })}
-          />
+
+          {props.pinnedDataList?.filter((data) => {
+            return data.Type == props.selectedProcessCode;
+          }).length > 0 && (
+            <ProcessListByTypeTable
+              searchTerm={searchTerm}
+              selectedProcessCode={props.selectedProcessCode}
+              showTableHead={true}
+              setfilteredLength={setfilteredLength}
+              processList={props.pinnedDataList?.filter((data) => {
+                return data.Type == props.selectedProcessCode;
+              })}
+            />
+          )}
           <h4
             style={{
               fontWeight: "600",
@@ -141,6 +138,7 @@ function ProcessListByType_TableNSearchNSortNFilter(props) {
             selectedProcessCode={props.selectedProcessCode}
             showTableHead={false}
             processList={props.processList}
+            setfilteredLength={setfilteredLength}
           />
         </div>
       ) : (
@@ -149,6 +147,7 @@ function ProcessListByType_TableNSearchNSortNFilter(props) {
           maxHeightofTable="440px"
           showTableHead={true}
           processList={props.processList}
+          setfilteredLength={setfilteredLength}
         />
       )}
     </div>

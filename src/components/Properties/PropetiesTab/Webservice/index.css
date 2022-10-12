@@ -20,6 +20,19 @@
   padding: 0 1vw !important;
 }
 
+.disabledButton_webSProp{
+  background: rgba(0, 0, 0, 0.12);
+  border: none;
+  color: rgba(0, 0, 0, 0.7);
+  border-radius: 2px;
+  text-align: center;
+  font: normal normal 600 var(--base_text_font_size) / 17px var(--font_family);
+  letter-spacing: 0px;
+  cursor: default;
+  display: flex;
+  padding: 0 1vw !important;
+}
+
 /*code added on 22 June 2022 for BugId 111065 and BugId 110846*/
 .webServicePropertiestable .MuiTableCell-root {
   padding: 0.25rem 0vw 0.25rem 0.25vw !important;

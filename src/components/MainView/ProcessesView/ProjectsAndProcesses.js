@@ -1,3 +1,4 @@
+// Changes made to solve bug with ID Bug 112353 - After Process importing the changes of imported process are reflecting only after the reopening of the process
 import React, { useState, useEffect } from "react";
 import "./ProcessesView.css";
 import Processes from "./Processes/Processes";
@@ -157,7 +158,10 @@ function ProjectsAndProcesses(props) {
         .catch((err) => console.log(err));
     } else if (selectedProcessCode) {
       axios
-        .get(SERVER_URL + `/getprocesslist/${selectedProcessCode}/-1`)
+        .get(
+          SERVER_URL +
+            `/getprocesslist/${selectedProcessCode == "L" ? "L" : "R"}/-1`
+        )
         .then((res) => {
           if (res.status === 200) {
             setProcessesPerProject(res.data.Processes);
@@ -165,7 +169,7 @@ function ProjectsAndProcesses(props) {
         })
         .catch((err) => console.log(err));
     }
-  }, [selectedProjectId]);
+  }, [selectedProjectId, selectedProcessCode]);
 
   useEffect(() => {
     setSelectedProjectId(null);

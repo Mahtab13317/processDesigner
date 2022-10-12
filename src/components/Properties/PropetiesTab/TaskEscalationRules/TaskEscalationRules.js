@@ -2,49 +2,36 @@ import React, { useState, useEffect } from "react";
 import { Button, Divider, Grid, Typography } from "@material-ui/core";
 import "../../Properties.css";
 import { useTranslation } from "react-i18next";
-
-import { connect, useDispatch, useSelector } from "react-redux";
-
+import { connect, useDispatch } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
-
 import { store, useGlobalState } from "state-pool";
-import * as actionCreators from "../../../../redux-store/actions/selectedCellActions";
 import * as actionCreatorsDrawer from "../../../../redux-store/actions/Properties/showDrawerAction.js";
-
 import CircularProgress from "@material-ui/core/CircularProgress";
 import {
   DATE_VARIABLE_TYPE,
-  PROCESSTYPE_LOCAL,
   propertiesLabel,
-  RTL_DIRECTION,
 } from "../../../../Constants/appConstants.js";
-import {
-  setActivityPropertyChange,
-  ActivityPropertyChangeValue,
-} from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
-import {
-  ActivityPropertySaveCancelValue,
-  setSave,
-} from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked.js";
+import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import Field from "../../../../UI/InputFields/TextField/Field.js";
 import TurnAroundTime from "../../../../UI/InputFields/TurnAroundTime/TurnAroundTime.js";
 import styles from "./taskescalation.module.css";
-import arabicStyles from "./taskescalationarabic.module.css";
 import {
-  getAllVariableOptions,
+  getVariableBasedOnScopeAndTypes,
   getVariableExtObjectIdByName,
   getVariableIdByName,
   getVariablesByScopes,
   getVariableScopeByName,
   getVariableVarFieldIdByName,
+  isProcessDeployedFunc,
+  isReadOnlyFunc,
 } from "../../../../utility/CommonFunctionCall/CommonFunctionCall.js";
 import {
   TRIGGER_PRIORITY_HIGH,
   TRIGGER_PRIORITY_LOW,
   TRIGGER_PRIORITY_MEDIUM,
 } from "../../../../Constants/triggerConstants.js";
-import { getSelectedCellType } from "../../../../utility/abstarctView/getSelectedCellType";
 import TabsHeading from "../../../../UI/TabsHeading";
+
 const makeFieldInputs = (value) => {
   return {
     value: value,
@@ -52,12 +39,13 @@ const makeFieldInputs = (value) => {
     helperText: "",
   };
 };
+
 const useStyles = makeStyles((props) => ({
   input: {
-    height: "2.0625rem",
+    height: "var(--line_height)",
   },
   inputWithError: {
-    height: "2.0625rem",
+    height: "var(--line_height)",
     width: "4.875rem",
   },
   errorStatement: {
@@ -114,35 +102,24 @@ const useStyles = makeStyles((props) => ({
     fontSize: "var(--base_text_font_size)",
   },
 }));
+
 function TaskEscalationRules(props) {
   let { t } = useTranslation();
   const dispatch = useDispatch();
   const direction = `${t("HTML_DIR")}`;
-
   const classes = useStyles({ ...props, direction });
-
-  const tabStatus = useSelector(ActivityPropertyChangeValue);
-
   const loadedProcessData = store.getState("loadedProcessData"); //current processdata clicked
   const localActivityPropertyData = store.getState("activityPropertyData");
-
-  const [localLoadedProcessData, setlocalLoadedProcessData] =
-    useGlobalState(loadedProcessData);
-  const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
-  const [
-    localLoadedActivityPropertyData,
-    setlocalLoadedActivityPropertyData,
-    updatelocalLoadedActivityPropertyData,
-  ] = useGlobalState(localActivityPropertyData);
-
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
+  const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
+    useGlobalState(localActivityPropertyData);
+  let isReadOnly = isProcessDeployedFunc(localLoadedProcessData);
   const [spinner, setspinner] = useState(true);
-
   //rules related states
   const [addingRule, setAddingRule] = useState(false);
   const [modifyingRule, setModifyingRule] = useState(false);
   const [selectedRule, setSelectedRule] = useState(null);
   const [allRules, setAllRules] = useState([]);
-
   const [mailData, setMailData] = useState({
     subjectValInput: "",
     mailValue: "",
@@ -157,7 +134,6 @@ function TaskEscalationRules(props) {
     bccInput: "",
     error: {},
   });
-
   const [TATData, setTATData] = useState({
     days: 0,
     hours: 0,
@@ -173,23 +149,16 @@ function TaskEscalationRules(props) {
     t(TRIGGER_PRIORITY_MEDIUM),
     t(TRIGGER_PRIORITY_HIGH),
   ];
-
-  let readOnlyProcess = props.openProcessType !== PROCESSTYPE_LOCAL;
   const [allDateTypeVars, setDateTypeVars] = useState([]);
-
   const [escalateAfter, setEscalateAfter] = useState(
     makeFieldInputs({ param2: "", type2: "C", variableId_2: "0" })
   );
-
   const [subject, setSubject] = useState(
     makeFieldInputs({ includeVariable: "", content: "" })
   );
   const [msg, setMsg] = useState(
     makeFieldInputs({ includeVariable: "", content: "" })
   );
-
-  const [isDisableTab, setisDisableTab] = useState(false);
-
   const getDisplayNameForSysDefVars = (key) => {
     const varNames = {
       CreatedDateTime: "Workitem Creation Date Time",
@@ -243,12 +212,6 @@ function TaskEscalationRules(props) {
     }
   }, [localLoadedActivityPropertyData]);
 
-  useEffect(() => {
-    if (localLoadedProcessData.ProcessType !== PROCESSTYPE_LOCAL) {
-      setisDisableTab(true);
-    }
-  }, [localLoadedProcessData.ProcessType]);
-
   const getPriority = (id) => {
     const priorityVal = { 1: "Low", 2: "Medium", 3: "High" };
     if (priorityVal[id]) {
@@ -256,6 +219,7 @@ function TaskEscalationRules(props) {
     }
     return "";
   };
+
   const getPriorityNumber = (name) => {
     const priorityVal = { Low: 1, Medium: 2, High: 3 };
     if (priorityVal[name]) {
@@ -263,6 +227,7 @@ function TaskEscalationRules(props) {
     }
     return "";
   };
+
   const addNewRule = () => {
     props.expandDrawer(true);
     dispatch(
@@ -354,6 +319,7 @@ function TaskEscalationRules(props) {
     setAddingRule(true);
     setSelectedRule(newRule);
   };
+
   const handleSelectedRule = (rule) => {
     props.expandDrawer(true);
     dispatch(
@@ -435,6 +401,7 @@ function TaskEscalationRules(props) {
     }
     setSelectedRule(rule);
   };
+
   const addVarToSubContent = () => {
     if (subject.value.includeVariable) {
       const newSub = { ...subject };
@@ -443,6 +410,7 @@ function TaskEscalationRules(props) {
       setSubject({ ...newSub });
     }
   };
+
   const addVarToMsgContent = () => {
     if (msg.value.includeVariable) {
       const newMSG = { ...msg };
@@ -469,10 +437,8 @@ function TaskEscalationRules(props) {
     setSubject({ ...subject, ...newSub });
   };
 
-  const validateFields = () => {};
   const addOrModifyRuleToRules = () => {
     const rule = { ...selectedRule };
-
     const operationObj = (rule.ruleOpList && rule.ruleOpList[0]) || {};
     operationObj["ruleCalFlag"] = TATData.calendarType || "N";
     operationObj["durationInfo"] = {
@@ -653,14 +619,13 @@ function TaskEscalationRules(props) {
 
   const updateLocalProp = (rules) => {
     const newPropObj = { ...localLoadedActivityPropertyData };
-
     newPropObj.taskGenPropInfo.m_objTaskRulesListInfo.esRuleList = rules;
     setlocalLoadedActivityPropertyData(newPropObj);
     setSelectedRule(null);
   };
+
   const cancelAddingRuleToRules = () => {
     const newRules = [...allRules];
-
     if (addingRule) {
       const index = newRules.findIndex(
         (item) => item.ruleId === selectedRule.ruleId
@@ -720,243 +685,318 @@ function TaskEscalationRules(props) {
       }
     }
   };
+
   const getVarsOptionsForMails = () => {
-    const allVarsForScopeM =
-      getVariablesByScopes({
+    return (
+      getVariableBasedOnScopeAndTypes({
         variables: localLoadedProcessData?.Variable,
-        scopes: ["M"],
-      }) || [];
-    return allVarsForScopeM.filter(
-      (variable) => variable.VariableType === "10"
+        scopes: ["U", "I"],
+        types: [10, 11],
+      }) || []
     );
   };
 
   return (
     <>
-    <TabsHeading heading={props?.heading} />
+      <TabsHeading heading={props?.heading} />
       <Grid container direction="column">
-      <Grid item style={{ paddingBottom: "1.5rem" }}>
-        <div style={{ width: "100%", height: "100%" }}>
-          <hr style={{ opacity: "0.5", width: "100%" }} />
-          {spinner ? (
-            <CircularProgress
-              style={{ marginTop: "30vh", marginLeft: "40%" }}
-            />
-          ) : (
-            <div
-              className={classes.mainDiv}
-              style={{
-                flexDirection: props.isDrawerExpanded ? "row" : "column",
-              }}
-            >
+        <Grid item style={{ paddingBottom: "1.5rem" }}>
+          <div style={{ width: "100%", height: "100%" }}>
+            <hr style={{ opacity: "0.5", width: "100%" }} />
+            {spinner ? (
+              <CircularProgress
+                style={{ marginTop: "30vh", marginLeft: "40%" }}
+              />
+            ) : (
               <div
+                className={classes.mainDiv}
                 style={{
-                  marginLeft: "0.8rem",
-                  marginRight: "0.8rem",
-                  height: "100%",
-
-                  marginBottom: "0.9rem",
-                  width: props.isDrawerExpanded ? "25%" : null,
-                  paddingTop: props.isDrawerExpanded ? "0.6rem" : "0.2rem",
+                  flexDirection: props.isDrawerExpanded ? "row" : "column",
                 }}
               >
-                <Grid container direction="column" spacing={2}>
-                  <Grid item>
-                    <Typography
-                      component="h5"
-                      className={classes.GroupTitleMain}
-                    >
-                      {`${t("escalation")} ${t("rule")}(S)`.toUpperCase()}
-                    </Typography>
-                  </Grid>
-                  <Grid item>
-                    <Grid container>
-                      <Grid item>
-                        <Typography
-                          style={{ fontSize: "var(--title_text_font_size)" }}
-                        >
-                          {allRules.length > 0
-                            ? `${allRules.length} ${
-                                allRules.length === 1 ? "Rule is" : "Rules are"
-                              } defined`
-                            : null}
-                        </Typography>
-                      </Grid>
-                      <Grid item style={{ marginLeft: "auto" }}>
-                        <Button
-                          // variant="outlined"
-                          //color="primary"
-                          //size="small"
-                          className="secondary"
-                          onClick={() => addNewRule()}
-                          disabled={addingRule || modifyingRule}
-                        >
-                          {`${t("addRule")}`}
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                  {allRules.map((rule, index) => (
-                    <div
-                      className={
-                        selectedRule !== null &&
-                        selectedRule.ruleId === rule.ruleId
-                          ? styles.selectedListItem
-                          : styles.listItem
-                      }
-                      onClick={() => handleSelectedRule(rule)}
-                      id={`taskEscalation_listItem${index}`}
-                    >
-                      <Typography
-                        style={{ fontSize: "var(--base_text_font_size)" }}
-                      >
-                        {Object.keys(rule).length === 0 ? (
-                          "New Rule"
-                        ) : (
-                          <>
-                            {/**
-                           *  rule.ruleOpList[0]?.Type2 === "C"
-                                ? moment(rule.ruleOpList[0]?.Param2).format(
-                                    "MM-YYYY"
-                                  )
-                                :
-                           */}
-                            <span
-                              style={{ fontSize: "var(--base_text_font_size)" }}
-                            >
-                              ESCALATE TO WITH TRIGGER After
-                            </span>{" "}
-                            <span className={classes.bold}>
-                              {(rule.ruleOpList &&
-                                rule.ruleOpList[0]?.param2) ||
-                                null}
-                            </span>{" "}
-                            <span className={classes.bold}>
-                              + '
-                              {`${
-                                (rule.ruleOpList &&
-                                  rule.ruleOpList[0]?.durationInfo
-                                    ?.paramDays) ||
-                                0
-                              }`}
-                              'Day(s)
-                            </span>
-                            <span className={classes.bold}>
-                              + '
-                              {`${
-                                (rule.ruleOpList &&
-                                  rule.ruleOpList[0]?.durationInfo
-                                    ?.paramHours) ||
-                                0
-                              }`}
-                              'Hr(s)
-                            </span>
-                            <span className={classes.bold}>
-                              + '
-                              {`${
-                                (rule.ruleOpList &&
-                                  rule.ruleOpList[0]?.durationInfo
-                                    ?.paramMinutes) ||
-                                0
-                              }`}
-                              'Min(s)
-                            </span>{" "}
-                            <span className={classes.bold}>
-                              {rule.ruleOpList &&
-                              rule.ruleOpList[0]?.ruleCalFlag === "Y"
-                                ? "Working Day(s)"
-                                : "Calendar Day(s)"}
-                            </span>
-                          </>
-                        )}
-                      </Typography>
-                    </div>
-                  ))}
-                </Grid>
-              </div>
-              <Divider orientation="vertical" flexItem fullWidth />
-              {selectedRule && props.isDrawerExpanded && (
                 <div
                   style={{
                     marginLeft: "0.8rem",
                     marginRight: "0.8rem",
-
-                    marginBottom: "0.9rem",
-                    width: props.isDrawerExpanded ? "75%" : null,
                     height: "100%",
+                    marginBottom: "0.9rem",
+                    width: props.isDrawerExpanded ? "25%" : null,
                     paddingTop: props.isDrawerExpanded ? "0.6rem" : "0.2rem",
-                    pointerEvents:
-                      !addingRule && !modifyingRule ? "none" : "auto",
                   }}
                 >
                   <Grid container direction="column" spacing={2}>
-                    <Grid item container>
+                    <Grid item>
+                      <Grid container>
+                        <Grid item>
+                          <Typography
+                            style={{ fontSize: "var(--title_text_font_size)" }}
+                          >
+                            {allRules.length > 0
+                              ? `${allRules.length} ${
+                                  allRules.length === 1
+                                    ? "Rule is"
+                                    : "Rules are"
+                                } defined`
+                              : null}
+                          </Typography>
+                        </Grid>
+                        <Grid item style={{ marginLeft: "auto" }}>
+                          <Button
+                            // variant="outlined"
+                            //color="primary"
+                            //size="small"
+                            className="secondary"
+                            onClick={() => addNewRule()}
+                            disabled={addingRule || modifyingRule}
+                          >
+                            {`${t("addRule")}`}
+                          </Button>
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                    {allRules.map((rule, index) => (
+                      <div
+                        className={
+                          selectedRule !== null &&
+                          selectedRule.ruleId === rule.ruleId
+                            ? styles.selectedListItem
+                            : styles.listItem
+                        }
+                        onClick={() => handleSelectedRule(rule)}
+                        id={`taskEscalation_listItem${index}`}
+                      >
+                        <Typography
+                          style={{ fontSize: "var(--base_text_font_size)" }}
+                        >
+                          {Object.keys(rule).length === 0 ? (
+                            "New Rule"
+                          ) : (
+                            <>
+                              <span
+                                style={{
+                                  fontSize: "var(--base_text_font_size)",
+                                }}
+                              >
+                                ESCALATE TO WITH TRIGGER After
+                              </span>{" "}
+                              <span className={classes.bold}>
+                                {(rule.ruleOpList &&
+                                  rule.ruleOpList[0]?.param2) ||
+                                  null}
+                              </span>{" "}
+                              <span className={classes.bold}>
+                                + '
+                                {`${
+                                  (rule.ruleOpList &&
+                                    rule.ruleOpList[0]?.durationInfo
+                                      ?.paramDays) ||
+                                  0
+                                }`}
+                                'Day(s)
+                              </span>
+                              <span className={classes.bold}>
+                                + '
+                                {`${
+                                  (rule.ruleOpList &&
+                                    rule.ruleOpList[0]?.durationInfo
+                                      ?.paramHours) ||
+                                  0
+                                }`}
+                                'Hr(s)
+                              </span>
+                              <span className={classes.bold}>
+                                + '
+                                {`${
+                                  (rule.ruleOpList &&
+                                    rule.ruleOpList[0]?.durationInfo
+                                      ?.paramMinutes) ||
+                                  0
+                                }`}
+                                'Min(s)
+                              </span>{" "}
+                              <span className={classes.bold}>
+                                {rule.ruleOpList &&
+                                rule.ruleOpList[0]?.ruleCalFlag === "Y"
+                                  ? "Working Day(s)"
+                                  : "Calendar Day(s)"}
+                              </span>
+                            </>
+                          )}
+                        </Typography>
+                      </div>
+                    ))}
+                  </Grid>
+                </div>
+                <Divider orientation="vertical" flexItem fullWidth />
+                {selectedRule && props.isDrawerExpanded && (
+                  <div
+                    style={{
+                      marginLeft: "0.8rem",
+                      marginRight: "0.8rem",
+                      marginBottom: "0.9rem",
+                      width: props.isDrawerExpanded ? "75%" : null,
+                      height: "100%",
+                      paddingTop: props.isDrawerExpanded ? "0.6rem" : "0.2rem",
+                      pointerEvents:
+                        !addingRule && !modifyingRule ? "none" : "auto",
+                    }}
+                  >
+                    <Grid container direction="column" spacing={2}>
+                      <Grid item container>
+                        <Grid item>
+                          <Typography
+                            component="h5"
+                            className={classes.GroupTitleSecondary}
+                          >
+                            {`${t("escalation")} ${t("details")}`.toUpperCase()}
+                          </Typography>
+                        </Grid>
+                        {(addingRule || modifyingRule) && !isReadOnly && (
+                          <Grid item style={{ marginLeft: "auto" }}>
+                            <Button
+                              className="tertiary"
+                              onClick={() => cancelAddingRuleToRules()}
+                            >
+                              {`${t("cancel")}`}
+                            </Button>
+                            <Button
+                              className="primary"
+                              onClick={() => addOrModifyRuleToRules()}
+                              style={{ marginLeft: "8px" }}
+                            >
+                              {`${t(modifyingRule ? "modifyRule" : "addRule")}`}
+                            </Button>
+                          </Grid>
+                        )}
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Grid
+                          container
+                          direction={props.isDrawerExpanded ? "row" : "column"}
+                          spacing={1}
+                          alignItems={props.isDrawerExpanded ? "center" : null}
+                        >
+                          <Grid
+                            item
+                            container
+                            spacing={props.isDrawerExpanded ? 1 : 2}
+                            alignItems="center"
+                            xs={props.isDrawerExpanded ? 3 : 12}
+                          >
+                            <Grid item xs={props.isDrawerExpanded ? 10 : 11}>
+                              <Field
+                                selectCombo={true}
+                                name="EscalateAfter"
+                                type={
+                                  escalateAfter.value?.type2 === "C"
+                                    ? "date"
+                                    : null
+                                }
+                                label={`${t("escalate")} ${t("after")}`}
+                                value={escalateAfter.value?.param2}
+                                onChange={onChangeEscalateAfter}
+                                dropdownOptions={allDateTypeVars || []}
+                                optionKey="value"
+                                setIsConstant={(val) => {
+                                  onChangeEscalateAfter(
+                                    "isEscalateAfterConstant",
+                                    val
+                                  );
+                                }}
+                                setValue={(val) => {
+                                  onChangeEscalateAfter("EscalateAfter", val);
+                                }}
+                                isConstant={escalateAfter.value?.type2 === "C"}
+                                showEmptyString={false}
+                                showConstValue={true}
+                                inputClass={
+                                  styles["selectWithInputTextField_WS"] || ""
+                                }
+                                constantInputClass={
+                                  styles["multiSelectConstInput_WS"] || ""
+                                }
+                                selectWithInput={styles["selectWithInput_WS"]}
+                                disabled={isReadOnly}
+                              />
+                            </Grid>
+                            <Grid item xs={props.isDrawerExpanded ? 2 : 1}>
+                              <Typography style={{ fontSize: "16px" }}>
+                                +
+                              </Typography>
+                            </Grid>
+                          </Grid>
+                          <Grid
+                            item
+                            xs={props.isDrawerExpanded ? 9 : 12}
+                            style={{
+                              paddingTop: props.isDrawerExpanded
+                                ? "2.3rem"
+                                : "2px",
+                            }}
+                          >
+                            <TurnAroundTime
+                              selectCombo={true}
+                              days={TATData.days || 0}
+                              hours={TATData.hours || 0}
+                              minutes={TATData.minutes || 0}
+                              calendarType={TATData.calendarType || ""}
+                              isDaysConstant={TATData.isDaysConstant}
+                              isMinutesConstant={TATData.isMinutesConstant}
+                              isHoursConstant={TATData.isHoursConstant}
+                              handleChange={onChangeTATData}
+                              calendarTypeLabel="Calendar Type"
+                              inputClass={
+                                styles[
+                                  "selectWithInputTextField_WS_Expanded"
+                                ] || ""
+                              }
+                              constantInputClass={
+                                styles["multiSelectConstInput_WS_Expanded"] ||
+                                ""
+                              }
+                              selectWithInput={
+                                styles["selectWithInput_WS_Expanded"]
+                              }
+                              disabled={isReadOnly}
+                            />
+                          </Grid>
+                        </Grid>
+                      </Grid>
                       <Grid item>
                         <Typography
                           component="h5"
                           className={classes.GroupTitleSecondary}
                         >
-                          {`${t("escalation")} ${t("details")}`.toUpperCase()}
+                          {`${t("MAIL")} ${t("Template")}`.toUpperCase()}
                         </Typography>
                       </Grid>
-                      {(addingRule || modifyingRule) && (
-                        <Grid item style={{ marginLeft: "auto" }}>
-                          <Button
-                            className="tertiary"
-                            onClick={() => cancelAddingRuleToRules()}
-                          >
-                            {`${t("cancel")}`}
-                          </Button>
-                          <Button
-                            className="primary"
-                            onClick={() => addOrModifyRuleToRules()}
-                            style={{ marginLeft: "8px" }}
-                          >
-                            {`${t(modifyingRule ? "modifyRule" : "addRule")}`}
-                          </Button>
-                        </Grid>
-                      )}
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Grid
-                        container
-                        direction={props.isDrawerExpanded ? "row" : "column"}
-                        spacing={1}
-                        alignItems={props.isDrawerExpanded ? "center" : null}
-                      >
+                      <Grid item xs={props.isDrawerExpanded ? 9 : 12}>
                         <Grid
-                          item
                           container
-                          spacing={props.isDrawerExpanded ? 1 : 2}
-                          alignItems="center"
-                          xs={props.isDrawerExpanded ? 3 : 12}
+                          direction={props.isDrawerExpanded ? "row" : "column"}
+                          spacing={props.isDrawerExpanded ? 2 : 1}
+                          alignItems={
+                            props.isDrawerExpanded ? "flex-end" : null
+                          }
                         >
-                          <Grid item xs={props.isDrawerExpanded ? 10 : 11}>
+                          <Grid item xs={props.isDrawerExpanded ? 4 : 12}>
                             <Field
                               selectCombo={true}
-                              name="EscalateAfter"
-                              type={
-                                escalateAfter.value?.type2 === "C"
-                                  ? "date"
-                                  : null
-                              }
-                              label={`${t("escalate")} ${t("after")}`}
-                              value={escalateAfter.value?.param2}
-                              onChange={onChangeEscalateAfter}
-                              dropdownOptions={allDateTypeVars || []}
-                              optionKey="value"
+                              label={`${t("from")}`}
+                              dropdownOptions={getVarsOptionsForMails()}
+                              optionKey="VariableName"
                               setIsConstant={(val) => {
-                                onChangeEscalateAfter(
-                                  "isEscalateAfterConstant",
-                                  val
-                                );
+                                onChangeMailData("isFromConstant", val);
                               }}
                               setValue={(val) => {
-                                onChangeEscalateAfter("EscalateAfter", val);
+                                onChangeMailData("fromInput", val);
                               }}
-                              isConstant={escalateAfter.value?.type2 === "C"}
+                              value={mailData.fromInput}
+                              isConstant={mailData.isFromConstant}
                               showEmptyString={false}
                               showConstValue={true}
+                              disabled={isReadOnly}
+                              id="from_select_input"
                               inputClass={
                                 styles["selectWithInputTextField_WS"] || ""
                               }
@@ -966,353 +1006,259 @@ function TaskEscalationRules(props) {
                               selectWithInput={styles["selectWithInput_WS"]}
                             />
                           </Grid>
-                          <Grid item xs={props.isDrawerExpanded ? 2 : 1}>
-                            <Typography style={{ fontSize: "16px" }}>
-                              +
-                            </Typography>
+                          <Grid item xs={props.isDrawerExpanded ? 4 : 12}>
+                            <Field
+                              selectCombo={true}
+                              label={`${t("to")}`}
+                              dropdownOptions={getVarsOptionsForMails()}
+                              optionKey="VariableName"
+                              setIsConstant={(val) => {
+                                onChangeMailData("isToConstant", val);
+                              }}
+                              setValue={(val) => {
+                                onChangeMailData("toInput", val);
+                              }}
+                              value={mailData.toInput}
+                              isConstant={mailData.isToConstant}
+                              showEmptyString={false}
+                              showConstValue={true}
+                              disabled={isReadOnly}
+                              id="to_select_input"
+                              inputClass={
+                                styles["selectWithInputTextField_WS"] || ""
+                              }
+                              constantInputClass={
+                                styles["multiSelectConstInput_WS"] || ""
+                              }
+                              selectWithInput={styles["selectWithInput_WS"]}
+                            />
+                          </Grid>
+                          <Grid item xs={props.isDrawerExpanded ? 4 : 12}>
+                            <Field
+                              selectCombo={true}
+                              dropdownOptions={getVarsOptionsForMails()}
+                              optionKey="VariableName"
+                              label={`${t("cc")}`}
+                              setIsConstant={(val) => {
+                                onChangeMailData("isCcConstant", val);
+                              }}
+                              setValue={(val) => {
+                                onChangeMailData("ccInput", val);
+                              }}
+                              value={mailData.ccInput}
+                              isConstant={mailData.isCcConstant}
+                              showConstValue={true}
+                              id="cc_select_input"
+                              inputClass={
+                                styles["selectWithInputTextField_WS"] || ""
+                              }
+                              constantInputClass={
+                                styles["multiSelectConstInput_WS"] || ""
+                              }
+                              selectWithInput={styles["selectWithInput_WS"]}
+                              disabled={isReadOnly}
+                            />
+                          </Grid>
+                          <Grid item xs={props.isDrawerExpanded ? 4 : 12}>
+                            <Field
+                              selectCombo={true}
+                              dropdownOptions={getVarsOptionsForMails()}
+                              optionKey="VariableName"
+                              label={`${t("bcc")}`}
+                              setIsConstant={(val) => {
+                                onChangeMailData("isBccConstant", val);
+                              }}
+                              setValue={(val) => {
+                                onChangeMailData("bccInput", val);
+                              }}
+                              value={mailData.bccInput}
+                              isConstant={mailData.isBccConstant}
+                              showConstValue={true}
+                              id="bcc_select_input"
+                              inputClass={
+                                styles["selectWithInputTextField_WS"] || ""
+                              }
+                              constantInputClass={
+                                styles["multiSelectConstInput_WS"] || ""
+                              }
+                              selectWithInput={styles["selectWithInput_WS"]}
+                              disabled={isReadOnly}
+                            />
+                          </Grid>
+                          <Grid item xs={props.isDrawerExpanded ? 4 : 12}>
+                            <Field
+                              selectCombo={true}
+                              label={`${t("Priority")}`}
+                              dropdownOptions={priorityOpt}
+                              setValue={(val) => {
+                                onChangeMailData("priorityInput", val);
+                              }}
+                              value={mailData.priorityInput}
+                              showConstValue={false}
+                              id="priority_select_input"
+                              inputClass={
+                                styles[
+                                  "selectWithInputTextField_WS_Expanded"
+                                ] || ""
+                              }
+                              constantInputClass={
+                                styles["multiSelectConstInput_WS_Expanded"] ||
+                                ""
+                              }
+                              selectWithInput={
+                                styles["selectWithInput_WS_Expanded"]
+                              }
+                              disabled={isReadOnly}
+                            />
                           </Grid>
                         </Grid>
-                        <Grid
-                          item
-                          xs={props.isDrawerExpanded ? 9 : 12}
-                          style={{
-                            paddingTop: props.isDrawerExpanded
-                              ? "2.3rem"
-                              : "2px",
-                          }}
+                      </Grid>
+                      <Grid item>
+                        <Typography
+                          component="h5"
+                          className={classes.GroupTitleSecondary}
                         >
-                          <TurnAroundTime
-                            selectCombo={true}
-                            days={TATData.days || 0}
-                            hours={TATData.hours || 0}
-                            minutes={TATData.minutes || 0}
-                            calendarType={TATData.calendarType || ""}
-                            isDaysConstant={TATData.isDaysConstant}
-                            isMinutesConstant={TATData.isMinutesConstant}
-                            isHoursConstant={TATData.isHoursConstant}
-                            handleChange={onChangeTATData}
-                            calendarTypeLabel="Calendar Type"
-                            inputClass={
-                              styles["selectWithInputTextField_WS_Expanded"] ||
-                              ""
-                            }
-                            constantInputClass={
-                              styles["multiSelectConstInput_WS_Expanded"] || ""
-                            }
-                            selectWithInput={
-                              styles["selectWithInput_WS_Expanded"]
-                            }
-                          />
-                        </Grid>
+                          {`${t("Subject")}`}
+                        </Typography>
                       </Grid>
-                    </Grid>
-                    <Grid item>
-                      <Typography
-                        component="h5"
-                        className={classes.GroupTitleSecondary}
-                      >
-                        {`${t("MAIL")} ${t("Template")}`.toUpperCase()}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={props.isDrawerExpanded ? 9 : 12}>
-                      <Grid
-                        container
-                        direction={props.isDrawerExpanded ? "row" : "column"}
-                        spacing={props.isDrawerExpanded ? 2 : 1}
-                        alignItems={props.isDrawerExpanded ? "flex-end" : null}
-                      >
-                        <Grid item xs={props.isDrawerExpanded ? 4 : 12}>
-                          <Field
-                            selectCombo={true}
-                            label={`${t("from")}`}
-                            /* dropdownOptions={
-                              localLoadedProcessData?.Variable || []
-                            }*/
-                            dropdownOptions={getVarsOptionsForMails()}
-                            optionKey="VariableName"
-                            setIsConstant={(val) => {
-                              onChangeMailData("isFromConstant", val);
-                            }}
-                            setValue={(val) => {
-                              onChangeMailData("fromInput", val);
-                            }}
-                            value={mailData.fromInput}
-                            isConstant={mailData.isFromConstant}
-                            showEmptyString={false}
-                            showConstValue={true}
-                            // disabled={readOnlyProcess}
-                            id="from_select_input"
-                            inputClass={
-                              styles["selectWithInputTextField_WS"] || ""
-                            }
-                            constantInputClass={
-                              styles["multiSelectConstInput_WS"] || ""
-                            }
-                            selectWithInput={styles["selectWithInput_WS"]}
-                          />
-                        </Grid>
-                        <Grid item xs={props.isDrawerExpanded ? 4 : 12}>
-                          <Field
-                            selectCombo={true}
-                            label={`${t("to")}`}
-                            dropdownOptions={getVarsOptionsForMails()}
-                            optionKey="VariableName"
-                            setIsConstant={(val) => {
-                              onChangeMailData("isToConstant", val);
-                            }}
-                            setValue={(val) => {
-                              onChangeMailData("toInput", val);
-                            }}
-                            value={mailData.toInput}
-                            isConstant={mailData.isToConstant}
-                            showEmptyString={false}
-                            showConstValue={true}
-                            // disabled={readOnlyProcess}
-                            id="to_select_input"
-                            inputClass={
-                              styles["selectWithInputTextField_WS"] || ""
-                            }
-                            constantInputClass={
-                              styles["multiSelectConstInput_WS"] || ""
-                            }
-                            selectWithInput={styles["selectWithInput_WS"]}
-                          />
-                        </Grid>
-                        <Grid item xs={props.isDrawerExpanded ? 4 : 12}>
-                          <Field
-                            selectCombo={true}
-                            dropdownOptions={getVarsOptionsForMails()}
-                            optionKey="VariableName"
-                            label={`${t("cc")}`}
-                            setIsConstant={(val) => {
-                              onChangeMailData("isCcConstant", val);
-                            }}
-                            setValue={(val) => {
-                              onChangeMailData("ccInput", val);
-                            }}
-                            value={mailData.ccInput}
-                            isConstant={mailData.isCcConstant}
-                            showConstValue={true}
-                            id="cc_select_input"
-                            inputClass={
-                              styles["selectWithInputTextField_WS"] || ""
-                            }
-                            constantInputClass={
-                              styles["multiSelectConstInput_WS"] || ""
-                            }
-                            selectWithInput={styles["selectWithInput_WS"]}
-                          />
-                        </Grid>
-                        <Grid item xs={props.isDrawerExpanded ? 4 : 12}>
-                          <Field
-                            selectCombo={true}
-                            dropdownOptions={getVarsOptionsForMails()}
-                            optionKey="VariableName"
-                            label={`${t("bcc")}`}
-                            setIsConstant={(val) => {
-                              onChangeMailData("isBccConstant", val);
-                            }}
-                            setValue={(val) => {
-                              onChangeMailData("bccInput", val);
-                            }}
-                            value={mailData.bccInput}
-                            isConstant={mailData.isBccConstant}
-                            showConstValue={true}
-                            id="bcc_select_input"
-                            inputClass={
-                              styles["selectWithInputTextField_WS"] || ""
-                            }
-                            constantInputClass={
-                              styles["multiSelectConstInput_WS"] || ""
-                            }
-                            selectWithInput={styles["selectWithInput_WS"]}
-                          />
-                        </Grid>
-                        <Grid item xs={props.isDrawerExpanded ? 4 : 12}>
-                          <Field
-                            selectCombo={true}
-                            label={`${t("Priority")}`}
-                            dropdownOptions={priorityOpt}
-                            setValue={(val) => {
-                              onChangeMailData("priorityInput", val);
-                            }}
-                            value={mailData.priorityInput}
-                            showConstValue={false}
-                            id="priority_select_input"
-                            inputClass={
-                              styles["selectWithInputTextField_WS_Expanded"] ||
-                              ""
-                            }
-                            constantInputClass={
-                              styles["multiSelectConstInput_WS_Expanded"] || ""
-                            }
-                            selectWithInput={
-                              styles["selectWithInput_WS_Expanded"]
-                            }
-                          />
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                    <Grid item>
-                      <Typography
-                        component="h5"
-                        className={classes.GroupTitleSecondary}
-                      >
-                        {`${t("Subject")}`}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={props.isDrawerExpanded ? 9 : 12}>
-                      <Grid
-                        container
-                        direction={props.isDrawerExpanded ? "row" : "column"}
-                        spacing={props.isDrawerExpanded ? 2 : 1}
-                        alignItems={props.isDrawerExpanded ? "center" : null}
-                      >
+                      <Grid item xs={props.isDrawerExpanded ? 9 : 12}>
                         <Grid
-                          item
                           container
-                          spacing={1}
-                          alignItems="center"
-                          xs={props.isDrawerExpanded ? 8 : 12}
+                          direction={props.isDrawerExpanded ? "row" : "column"}
+                          spacing={props.isDrawerExpanded ? 2 : 1}
+                          alignItems={props.isDrawerExpanded ? "center" : null}
                         >
-                          <Grid item xs={props.isDrawerExpanded ? 8 : 10}>
+                          <Grid
+                            item
+                            container
+                            spacing={1}
+                            alignItems="center"
+                            xs={props.isDrawerExpanded ? 8 : 12}
+                          >
+                            <Grid item xs={props.isDrawerExpanded ? 8 : 10}>
+                              <Field
+                                dropdown={true}
+                                name="includeVariable"
+                                label={`${t("includeVariable")}`}
+                                value={subject.value.includeVariable}
+                                onChange={(e) =>
+                                  handleChangeSubAndMsg(e, "Subject")
+                                }
+                                options={
+                                  localLoadedProcessData?.Variable.map(
+                                    (item) => ({
+                                      name: item.VariableName,
+                                      value: item.VariableName,
+                                    })
+                                  ) || []
+                                }
+                                disabled={isReadOnly}
+                              />
+                            </Grid>
+                            <Grid item xs={2} style={{ marginTop: "12px" }}>
+                              <Button
+                                className="secondary"
+                                onClick={() => addVarToSubContent()}
+                                disabled={isReadOnly}
+                              >
+                                Add
+                              </Button>
+                            </Grid>
+                          </Grid>
+                          <Grid item xs={props.isDrawerExpanded ? 10 : 12}>
                             <Field
-                              dropdown={true}
-                              name="includeVariable"
-                              label={`${t("includeVariable")}`}
-                              value={subject.value.includeVariable}
+                              name="content"
+                              label={`${t("Content")}`}
+                              value={subject.value.content}
+                              multiline={true}
                               onChange={(e) =>
                                 handleChangeSubAndMsg(e, "Subject")
                               }
-                              options={
-                                localLoadedProcessData?.Variable.map(
-                                  (item) => ({
-                                    name: item.VariableName,
-                                    value: item.VariableName,
-                                  })
-                                ) || []
-                              }
+                              disabled={isReadOnly}
                             />
                           </Grid>
-                          <Grid item xs={2} style={{ marginTop: "12px" }}>
-                            <Button
-                              className="secondary"
-                              onClick={() => addVarToSubContent()}
-                            >
-                              Add
-                            </Button>
-                          </Grid>
-                        </Grid>
-                        <Grid item xs={props.isDrawerExpanded ? 10 : 12}>
-                          <Field
-                            name="content"
-                            label={`${t("Content")}`}
-                            value={subject.value.content}
-                            multiline={true}
-                            onChange={(e) =>
-                              handleChangeSubAndMsg(e, "Subject")
-                            }
-                          />
                         </Grid>
                       </Grid>
-                    </Grid>
-                    <Grid item>
-                      <Typography
-                        component="h5"
-                        className={classes.GroupTitleSecondary}
-                      >
-                        {`${t("message")}`}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={props.isDrawerExpanded ? 9 : 12}>
-                      <Grid
-                        container
-                        direction={props.isDrawerExpanded ? "row" : "column"}
-                        spacing={props.isDrawerExpanded ? 2 : 1}
-                        alignItems={props.isDrawerExpanded ? "center" : null}
-                      >
-                        <Grid
-                          item
-                          container
-                          spacing={1}
-                          alignItems="center"
-                          xs={props.isDrawerExpanded ? 8 : 12}
+                      <Grid item>
+                        <Typography
+                          component="h5"
+                          className={classes.GroupTitleSecondary}
                         >
-                          <Grid item xs={props.isDrawerExpanded ? 8 : 10}>
+                          {`${t("message")}`}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={props.isDrawerExpanded ? 9 : 12}>
+                        <Grid
+                          container
+                          direction={props.isDrawerExpanded ? "row" : "column"}
+                          spacing={props.isDrawerExpanded ? 2 : 1}
+                          alignItems={props.isDrawerExpanded ? "center" : null}
+                        >
+                          <Grid
+                            item
+                            container
+                            spacing={1}
+                            alignItems="center"
+                            xs={props.isDrawerExpanded ? 8 : 12}
+                          >
+                            <Grid item xs={props.isDrawerExpanded ? 8 : 10}>
+                              <Field
+                                dropdown={true}
+                                name="includeVariable"
+                                label={`${t("includeVariable")}`}
+                                value={msg.value.includeVariable}
+                                onChange={(e) =>
+                                  handleChangeSubAndMsg(e, "Message")
+                                }
+                                options={
+                                  localLoadedProcessData?.Variable.map(
+                                    (item) => ({
+                                      name: item.VariableName,
+                                      value: item.VariableName,
+                                    })
+                                  ) || []
+                                }
+                                disabled={isReadOnly}
+                              />
+                            </Grid>
+                            <Grid item xs={2} style={{ marginTop: "12px" }}>
+                              <Button
+                                className="secondary"
+                                onClick={() => addVarToMsgContent()}
+                                disabled={isReadOnly}
+                              >
+                                {t("add")}
+                              </Button>
+                            </Grid>
+                          </Grid>
+                          <Grid item xs={props.isDrawerExpanded ? 10 : 12}>
                             <Field
-                              dropdown={true}
-                              name="includeVariable"
-                              label={`${t("includeVariable")}`}
-                              value={msg.value.includeVariable}
+                              name="content"
+                              label={`${t("content")}`}
+                              value={msg.value.content}
+                              multiline={true}
                               onChange={(e) =>
                                 handleChangeSubAndMsg(e, "Message")
                               }
-                              options={
-                                localLoadedProcessData?.Variable.map(
-                                  (item) => ({
-                                    name: item.VariableName,
-                                    value: item.VariableName,
-                                  })
-                                ) || []
-                              }
+                              disabled={isReadOnly}
                             />
                           </Grid>
-                          <Grid item xs={2} style={{ marginTop: "12px" }}>
-                            <Button
-                              className="secondary"
-                              onClick={() => addVarToMsgContent()}
-                            >
-                              {t("add")}
-                            </Button>
-                          </Grid>
-                        </Grid>
-                        <Grid item xs={props.isDrawerExpanded ? 10 : 12}>
-                          <Field
-                            name="content"
-                            label={`${t("content")}`}
-                            value={msg.value.content}
-                            multiline={true}
-                            onChange={(e) =>
-                              handleChangeSubAndMsg(e, "Message")
-                            }
-                          />
                         </Grid>
                       </Grid>
                     </Grid>
-                  </Grid>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </Grid>
       </Grid>
-    </Grid>
     </>
   );
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    selectedCell: (
-      id,
-      name,
-      activityType,
-      activitySubType,
-      seqId,
-      queueId,
-      type
-    ) =>
-      dispatch(
-        actionCreators.selectedCell(
-          id,
-          name,
-          activityType,
-          activitySubType,
-          seqId,
-          queueId,
-          type
-        )
-      ),
     expandDrawer: (flag) => dispatch(actionCreatorsDrawer.expandDrawer(flag)),
   };
 };
@@ -1320,11 +1266,6 @@ const mapDispatchToProps = (dispatch) => {
 const mapStateToProps = (state) => {
   return {
     showDrawer: state.showDrawerReducer.showDrawer,
-    cellID: state.selectedCellReducer.selectedId,
-    cellName: state.selectedCellReducer.selectedName,
-    cellType: state.selectedCellReducer.selectedType,
-    cellActivityType: state.selectedCellReducer.selectedActivityType,
-    cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
   };
 };

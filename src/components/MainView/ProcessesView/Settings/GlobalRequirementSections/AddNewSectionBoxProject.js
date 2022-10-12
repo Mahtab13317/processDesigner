@@ -1,9 +1,13 @@
+// #BugID - 115179
+// #BugDescription - add another button issues fixed.
 import { Button } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "../../../Templates/template.module.css";
 import arabicStyles from "../../..//Templates/templateArabicStyles.module.css";
 import { RTL_DIRECTION } from "../../../../../Constants/appConstants";
+import { FieldValidations } from "../../../../../utility/FieldValidations/fieldValidations";
+import { useRef } from "react";
 
 function AddNewSectionBox(props) {
   let { t } = useTranslation();
@@ -15,9 +19,17 @@ function AddNewSectionBox(props) {
   const [newSection, setnewSection] = useState({});
   const [sectionName, setsectionName] = useState("");
   const [desc, setdesc] = useState("");
+  const sectionNameRef=useRef();
+  const sectionDescRef=useRef();
 
   const addHandler = () => {
     if (sectionName !== "") {
+      
+      
+   var get =  JSON.parse(localStorage.getItem('reqData'));
+  
+    var tempLocal=[...get,{...newSection,SectionId: newSection.OrderId}]
+   localStorage.setItem('reqData', JSON.stringify(tempLocal));
       props.mapNewSection(newSection);
       setpreviousOrderId((prevState) => prevState + 1);
       setdesc("");
@@ -27,6 +39,10 @@ function AddNewSectionBox(props) {
 
   const addcloseHandler = () => {
     if (sectionName !== "") {
+      var get =  JSON.parse(localStorage.getItem('reqData'));
+  
+      var tempLocal=[...get,{...newSection,SectionId: newSection.OrderId}]
+     localStorage.setItem('reqData', JSON.stringify(tempLocal));
       props.mapNewSection(newSection);
     }
     cancelButtonClick();
@@ -76,8 +92,13 @@ function AddNewSectionBox(props) {
               ? arabicStyles.nameInput
               : styles.nameInput
           }
+          ref={sectionNameRef}
+                  onKeyPress={(e) =>
+                    FieldValidations(e, 163, sectionNameRef.current, 100)
+                  }
         />
       </div>
+    
       <div>
         <p
           className={
@@ -98,6 +119,11 @@ function AddNewSectionBox(props) {
               ? arabicStyles.descInput
               : styles.descInput
           }
+
+          ref={sectionDescRef}
+                  onKeyPress={(e) =>
+                    FieldValidations(e, 163, sectionDescRef.current, 150)
+                  }
         />
       </div>
       <div className={styles.buttonDiv}>

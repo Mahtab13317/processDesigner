@@ -1,3 +1,5 @@
+// #BugID - 110835
+// #BugDescription - Delete category functionality issue resolved
 import React from "react";
 import Button from "@material-ui/core/Button";
 import { useTranslation } from "react-i18next";
@@ -15,9 +17,11 @@ import { useDispatch } from "react-redux";
 import { setToastDataFunc } from "../../../redux-store/slices/ToastDataHandlerSlice";
 
 function DeleteModal(props) {
+  console.log("3333","temp del",props)
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const dispatch = useDispatch();
+  
   const deleteFunc = () => {
     if (props.category) {
       let json = {
@@ -80,7 +84,7 @@ function DeleteModal(props) {
             .then((res) => {
               if (res?.data?.Status === 0) {
                 props.setProjectList((prev) => {
-                  let temp = structuredClone(prev);
+                  let temp = global.structuredClone(prev);
                   temp.Projects.forEach((proj, index) => {
                     if (proj.ProjectId === projectId) {
                       temp.Projects.splice(index, 1);

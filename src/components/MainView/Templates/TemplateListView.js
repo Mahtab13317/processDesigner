@@ -58,6 +58,8 @@ function TemplateListView(props) {
     props.setTemplatePage(PREVIOUS_PAGE_LIST);
     props.setTemplateDetails(props.category, TEMPLATE_LIST_VIEW);
     props.openTemplate(template.Id, template.Name, true);
+    // code edited on 10 Oct 2022 for BugId 112343 and BugId 112684
+    props.openProcessClick("", "", "", "", "");
     history.push("/process");
   };
 
@@ -117,6 +119,10 @@ function TemplateListView(props) {
               </TemplateTooltip>
             ) : null}
           </span>
+          {
+          // code added on 11 October 2022 for BugId 112359	
+        }
+          <p style={{width:"24%",background:"#F0F0F0"}}>v {el.VersionNo}</p>
         </div>
         <div
           className={
@@ -126,11 +132,14 @@ function TemplateListView(props) {
           }
           onClick={() => previewTemplate(el)}
         >
+        {
+          // code added on 11 October 2022 for BugId 112359	
+        }
           {el.Creator}
           <span className={styles.templateCreationDate}>
             {el.SameDate === "true"
               ? `at ${el.CreatedTime}`
-              : `on ${el.CreatedDate} at ${el.CreatedTime}`}
+              : `${el.CreatedBy} on ${el.CreatedDate} at ${el.CreatedTime}`}
           </span>
         </div>
         <div
@@ -141,7 +150,9 @@ function TemplateListView(props) {
           }
           onClick={() => previewTemplate(el)}
         >
-          {el.AccessedDate?.trim() !== "" ? el.AccessedDate : "-"}
+          {el.AccessedDate?.trim() !== ""
+            ? el.AccessedDate + " at " + el.AccessedTime
+            : "-"}
         </div>
         <div
           className={styles.templateListTableUsage}
@@ -190,7 +201,7 @@ function TemplateListView(props) {
             sortSectionOne={
               el.Scope === SYSTEM_DEFINED_SCOPE
                 ? [t("open")]
-                : [t("open"), t("edit"), t("Rename"), t("delete")]
+                : [t("open"), t("delete")] //code edited on 30 September 2022 for BugId 116226
             }
             buttonToOpenModal={
               <MoreVertOutlined className={styles.moreVertIcon} />
@@ -253,6 +264,10 @@ const mapDispatchToProps = (dispatch) => {
   return {
     openTemplate: (id, name, flag) =>
       dispatch(actionCreators.openTemplate(id, name, flag)),
+    openProcessClick: (id, name, type, version, processName) =>
+      dispatch(
+        actionCreators.openProcessClick(id, name, type, version, processName)
+      ),
     setTemplatePage: (value) =>
       dispatch(actionCreators_template.storeTemplatePage(value)),
     setTemplateDetails: (category, view, createBtnClick, template) =>

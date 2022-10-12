@@ -78,3 +78,70 @@
 .scanInput {
   width: 16rem;
 }
+
+/*-------------------------------------*/
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1vw;
+  border-bottom: 1px solid #c4c4c4;
+}
+
+.modalBody {
+  padding: 0.5rem 1vw;
+}
+
+.modalHeading {
+  font: normal normal 600 var(--title_text_font_size) / 21px var(--font_family);
+  text-align: left;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+.closeIcon {
+  cursor: pointer;
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+.cancelButton {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  border: 1px solid #c4c4c4;
+  border-radius: 2px;
+  text-align: center;
+  font: normal normal 600 var(--subtitle_text_font_size) / 19px
+    var(--font_family);
+  letter-spacing: 0px;
+  color: #606060;
+  padding: 0 1vw !important;
+  cursor: pointer;
+  margin: 0 0.5vw 0 0 !important;
+}
+
+.okButton {
+  background: var(--button_color) 0% 0% no-repeat padding-box;
+  border: 1px solid var(--button_color);
+  border-radius: 2px;
+  text-align: center;
+  font: normal normal 600 var(--subtitle_text_font_size) / 19px
+    var(--font_family);
+  letter-spacing: 0px;
+  color: white;
+  padding: 0 1vw !important;
+  cursor: pointer;
+  margin: 0 0.5vw 0 0 !important;
+}
+
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  padding: 0.75rem 1vw;
+  border-top: 1px solid #c4c4c4;
+}
+
+.variableList{
+  overflow-y: auto;
+  height: 20rem;
+}

@@ -43,7 +43,7 @@ function TableDetails(props) {
     fields,
     data,
     setFields,
-    isProcessReadOnly,
+    isReadOnly,
     documentList,
     variablesList,
     setActivityData,
@@ -601,7 +601,7 @@ function TableDetails(props) {
     >
       <div className={styles.tableTypeDiv}>
         <Radio
-          disabled={isProcessReadOnly}
+          disabled={isReadOnly}
           id="table_details_existing_radio"
           checked={tableType === EXPORT_EXISTING_TABLE_TYPE}
           onChange={handleTableType}
@@ -610,7 +610,7 @@ function TableDetails(props) {
         />
         <p className={styles.tableType}>{t("existingTable")}</p>
         <Radio
-          disabled={isProcessReadOnly}
+          disabled={isReadOnly}
           id="table_details_defined_radio"
           checked={tableType === EXPORT_DEFINED_TABLE_TYPE}
           onChange={handleTableType}
@@ -644,7 +644,7 @@ function TableDetails(props) {
           </div>
           {tableType === EXPORT_EXISTING_TABLE_TYPE ? (
             <CustomizedDropdown
-              disabled={isProcessReadOnly}
+              disabled={isReadOnly}
               id="table_details_existing_table_dropdown"
               className={styles.inputBase}
               value={selectedExistingTable}
@@ -665,7 +665,7 @@ function TableDetails(props) {
             </CustomizedDropdown>
           ) : (
             <TextInput
-              readOnlyCondition={isProcessReadOnly}
+              readOnlyCondition={isReadOnly}
               inputValue={tableName}
               classTag={styles.inputBase}
               onChangeEvent={(event) => tableNameHandler(event.target.value)}
@@ -692,7 +692,7 @@ function TableDetails(props) {
             {t("dateFormat")}
           </p>
           <CustomizedDropdown
-            disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="table_details_date_format_dropdown"
             className={
               direction === RTL_DIRECTION
@@ -766,7 +766,7 @@ function TableDetails(props) {
         >
           {"Length"}
         </p>
-        {!showInputFields && !isProcessReadOnly ? (
+        {!showInputFields && !isReadOnly ? (
           <button
             id="table_details_show_input_strip_button"
             onClick={() => setShowInputFields(true)}
@@ -801,6 +801,7 @@ function TableDetails(props) {
               secondInputBase={typeLength}
               secondInputBaseHandler={setTypeLength}
               checkDisabled={checkDisabled}
+              isReadOnly={isReadOnly}
             />
           </div>
         ) : null}
@@ -810,12 +811,12 @@ function TableDetails(props) {
       dataFields.fieldList.length === 0 ? (
         <div className={styles.emptyStateMainDiv}>
           <img className={styles.emptyStateImage} src={EmptyStateIcon} alt="" />
-          {!isProcessReadOnly && (
+          {!isReadOnly && (
             <p className={styles.emptyStateHeading}>{t("createFields")}</p>
           )}
           <p className={styles.emptyStateText}>
             {t("noDataFieldsCreated")}
-            {isProcessReadOnly ? "." : t("pleaseCreateDataFields")}
+            {isReadOnly ? "." : t("pleaseCreateDataFields")}
           </p>
         </div>
       ) : (
@@ -825,7 +826,7 @@ function TableDetails(props) {
               return (
                 <TableDataStrip
                   dataFields={dataFields}
-                  isProcessReadOnly={isProcessReadOnly}
+                  isReadOnly={isReadOnly}
                   fieldName={d.name}
                   fieldType={d.sTypeInt}
                   attribute={d.attribute}

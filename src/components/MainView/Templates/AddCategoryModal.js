@@ -19,18 +19,35 @@ import arabicStyles from "./templateArabicStyles.module.css";
 function AddCategoryModal(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
+  const [catList, setCatList] = useState([]);
   const [nameInput, setNameInput] = useState("");
   const [descriptionInput, setDescriptionInput] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  // code added on 7 Sep 2022 for BugId 110830 and BugId 115256
+  useEffect(() => {
+    setCatList(props.categoryList);
+  }, []);
+
+  // code added on 7 Sep 2022 for BugId 110830 and BugId 115256
+  useEffect(() => {
+    props.setCategoryList(catList);
+  }, [catList]);
+
   const addCategoryFunc = (type) => {
     let maxId = 0;
     let categoryNameArr = [];
-    props.categoryList?.forEach((category) => {
-      if (category.CategoryId > maxId) {
+    catList?.forEach((category) => {
+      if (+category.CategoryId > +maxId) {
         maxId = category.CategoryId;
       }
-      categoryNameArr.push(category.CategoryName.toLowerCase());
+      /*****************************************************************************************
+       * @author asloob_ali Bug id: 112894 - Templates -: Categories -: on modifying the description only getting error message
+       *  Resolution : excluding the name of the category currently being edited.
+       *  Date : 29/08/2022             *******************/
+      if (props.categoryToBeEdited?.CategoryId !== category.CategoryId) {
+        categoryNameArr.push(category.CategoryName.toLowerCase());
+      }
     });
     if (categoryNameArr.includes(nameInput.toLowerCase())) {
       setErrorMessage(
@@ -40,17 +57,17 @@ function AddCategoryModal(props) {
       if (type === BTN_TYPE_EDIT_CLOSE) {
         let editCategoryJSON = {
           categoryName: nameInput,
-          categoryId: props.categoryToBeEdited.CategoryId,
+          categoryId: props.categoryToBeEdited?.CategoryId,
           description: descriptionInput,
         };
         axios
           .post(SERVER_URL + ENDPOINT_EDIT_CATEGORY, editCategoryJSON)
           .then((response) => {
             if (response.data.Status === 0) {
-              let tempList = [...props.categoryList];
+              let tempList = [...catList];
               tempList?.forEach((category) => {
                 if (
-                  category.CategoryId === props.categoryToBeEdited.CategoryId
+                  category.CategoryId === props.categoryToBeEdited?.CategoryId
                 ) {
                   category.CategoryName = nameInput;
                   category.Description = descriptionInput;
@@ -70,20 +87,22 @@ function AddCategoryModal(props) {
           .post(SERVER_URL + ENDPOINT_ADD_CATEGORY, addCategoryJSON)
           .then((response) => {
             if (response.data.Status === 0) {
-              let tempList = [...props.categoryList];
+              let tempList = JSON.parse(JSON.stringify(catList));
               tempList?.push({
-                CategoryId: maxId + 1,
+                CategoryId: +maxId + 1,
                 CategoryName: nameInput,
                 // code edited on 20 June 2022 for BugId 110848
                 Description: descriptionInput,
                 Templates: [],
               });
-              props.setCategoryList(tempList);
               if (type === BTN_TYPE_ADD_ANOTHER) {
                 setNameInput("");
                 setDescriptionInput("");
+                // code added on 7 Sep 2022 for BugId 110830 and BugId 115256
+                setCatList(tempList);
               } else if (type === BTN_TYPE_ADD_CLOSE) {
                 props.setModalClosed();
+                props.setCategoryList(tempList);
               }
             }
           });
@@ -175,8 +194,8 @@ function AddCategoryModal(props) {
               nameInput.trim() === "" ||
               !nameInput ||
               errorMessage ||
-              (nameInput === props.categoryToBeEdited.CategoryName &&
-                descriptionInput === props.categoryToBeEdited.Description)
+              (nameInput === props.categoryToBeEdited?.CategoryName &&
+                descriptionInput === props.categoryToBeEdited?.Description)
                 ? styles.disabledCategoryButton
                 : styles.addCategoryButton
             }
@@ -187,8 +206,8 @@ function AddCategoryModal(props) {
               nameInput.trim() === "" ||
               !nameInput ||
               errorMessage ||
-              (nameInput === props.categoryToBeEdited.CategoryName &&
-                descriptionInput === props.categoryToBeEdited.Description)
+              (nameInput === props.categoryToBeEdited?.CategoryName &&
+                descriptionInput === props.categoryToBeEdited?.Description)
             }
           >
             {t("save")} {t("changes")}

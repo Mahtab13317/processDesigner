@@ -23,58 +23,78 @@ import {
   SEVEN,
   FIFTEEN,
   THIRTY,
+  ENDPOINT_GETPROJECTLIST_DRAFTS,
+  ENDPOINT_GETPROJECTLIST_DEPLOYED,
+  ENDPOINT_PROCESSLIST,
 } from "../../../Constants/appConstants";
 import axios from "axios";
 import { tileProcess } from "../../../utility/HomeProcessView/tileProcess";
 import EventIcon from "@material-ui/icons/Event";
 import { useDispatch } from "react-redux";
 import { setToastDataFunc } from "../../../redux-store/slices/ToastDataHandlerSlice";
+import { store, useGlobalState } from "state-pool";
 
-function AuditLogs() {
+function AuditLogs({ readOnly }) {
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
+
   let { t } = useTranslation();
   const dispatch = useDispatch();
   const [fromDate, setfromDate] = useState("");
   const [toDate, settoDate] = useState("");
   const [selectedDateRangeOption, setselectedDateRangeOption] = useState(SEVEN);
   const [allProcessList, setallProcessList] = useState([]);
-  const [selectedProcessId, setselectedProcessId] = useState();
-  const [filterBy, setfilterBy] = useState("B");
+  const [selectedProcessId, setselectedProcessId] = useState("");
+  const [filterBy, setfilterBy] = useState("");
   const [auditLogData, setauditLogData] = useState([]);
   const [generateButtonClicked, setgenerateButtonClicked] = useState(false);
   const [showNoAuditLogScreen, setshowNoAuditLogScreen] = useState(false);
-  const [versionList, setversionList] = useState([
-    { ProcessDefId: "All", VersionNo: t("all") },
-  ]);
-  const [versionNoSelected, setversionNoSelected] = useState(t("all"));
+  const [versionList, setversionList] = useState([]);
+  const [projectList, setprojectList] = useState([]);
+  const [selectedVersion, setselectedVersion] = useState("");
+  const [selectedProject, setselectedProject] = useState("");
   useEffect(() => {
     if (t("HTML_DIR") !== "rtl") moment.locale("en");
-    async function fetchProcessList() {
-      const response = await axios.get(
-        SERVER_URL + ENDPOINT_GET_ALLPROCESSLIST
-      );
+  }, []);
 
-      if (filterBy === "B") setallProcessList(response.data.Processes);
-      else if (filterBy === "L") {
-        let temp = [];
-        response.data.Processes.forEach((item) => {
-          if (item.ProcessType === "L") {
-            temp.push(item);
-          }
-        });
-        setallProcessList(temp);
-      } else {
-        let temp = [];
-        response.data.Processes.forEach((item) => {
-          if (item.ProcessType === "R") {
-            temp.push(item);
-          }
-        });
-        setallProcessList(temp);
+  useEffect(() => {
+    const dataForProcessSpecific = async () => {
+      if (!!readOnly && localLoadedProcessData !== null) {
+        console.log("mmmmmmmmmmmmm");
+        setfilterBy(localLoadedProcessData.ProcessType);
+        let endpoint =
+          localLoadedProcessData.ProcessType === "L"
+            ? ENDPOINT_GETPROJECTLIST_DRAFTS
+            : ENDPOINT_GETPROJECTLIST_DEPLOYED;
+        const projList = await axios.get(SERVER_URL + endpoint);
+        if (projList.status === 200) {
+          setprojectList(projList.data?.Projects);
+          setselectedProject(localLoadedProcessData.ProjectId);
+        }
+        const res = await axios.get(
+          SERVER_URL +
+            ENDPOINT_PROCESSLIST +
+            "/" +
+            localLoadedProcessData.ProcessType +
+            "/" +
+            localLoadedProcessData.ProjectId
+        );
+        if (res.status === 200) {
+          setallProcessList(res.data?.Processes);
+          setselectedProcessId(localLoadedProcessData.ProcessDefId);
+        }
+        const versionRes = await axios.get(
+          SERVER_URL +
+            `${ENDPOINT_GETALLVERSIONS}/${localLoadedProcessData.ProcessName}/${localLoadedProcessData.ProcessType}`
+        );
+        if (versionRes.data.Status === 0) {
+          setversionList(versionRes.data.Versions);
+          setselectedVersion(localLoadedProcessData.VersionNo);
+        }
       }
-    }
-
-    fetchProcessList();
-  }, [filterBy]);
+    };
+    dataForProcessSpecific();
+  }, [readOnly, localLoadedProcessData]);
 
   useEffect(() => {
     if (moment(fromDate).diff(moment(toDate), "days") > 0) {
@@ -132,22 +152,33 @@ function AuditLogs() {
   };
 
   const filterByDropdownMenu = [
-    { value: "B", name: t("all") },
     { value: "L", name: t("draft") },
     { value: "R", name: t("deployed") },
   ];
 
-  const getProcessDetails = () => {
+  const getProcessDetails = (id) => {
     let data = {};
 
     allProcessList.forEach((item) => {
-      if (item.ProcessDefId === selectedProcessId) {
+      if (item.ProcessDefId === id) {
         data = {
           ProjectId: item.ProjectId,
           ProjectName: item.ProjectName,
           ProcessType: item.ProcessType,
           ProcessName: item.ProcessName,
         };
+      }
+    });
+
+    return data;
+  };
+
+  const getProjectName = (projId) => {
+    let data = "";
+
+    projectList.forEach((item) => {
+      if (item.ProjectId === projId) {
+        data = item.ProjectName;
       }
     });
 
@@ -166,13 +197,13 @@ function AuditLogs() {
       const data = await axios.get(
         SERVER_URL +
           ENDPOINT_GETAUDITLOG +
-          `/${ProcessName}/${ProjectId}/${ProjectName}/${ProcessType}/3/${moment(
-            fromDate
-          ).format("YYYY-MM-DD")}/${moment(toDate).format(
+          `/${
+            getProcessDetails(selectedProcessId).ProcessName
+          }/${selectedProject}/${getProjectName(selectedProject)}/${filterBy}/${
+            selectedProcessId === "" ? "0" : "3"
+          }/${moment(fromDate).format("YYYY-MM-DD")}/${moment(toDate).format(
             "YYYY-MM-DD"
-          )}/${lastAuditLog}/N/${
-            versionNoSelected === t("all") ? "0.0" : versionNoSelected
-          }`
+          )}/${lastAuditLog}/N/0.0`
       );
       if (data.data?.AuditLog?.Audit.length !== 0) {
         setshowNoAuditLogScreen(false);
@@ -214,20 +245,31 @@ function AuditLogs() {
         }/${getProcessInfoFromId(e.target.value).ProcessType}`
     );
     if (res.data.Status === 0) {
-      setversionList([{ ProcessDefId: "All", VersionNo: t("all") }]);
-      setversionList((prev) => prev.concat(res.data.Versions));
+      setversionList(res.data.Versions);
+      setselectedVersion(res.data?.Versions[0].VersionNo);
     } else return;
   };
 
-  const getVersionByDefId = (id) => {
-    let temp;
-    versionList.forEach((item) => {
-      if (item.ProcessDefId == id) {
-        temp = item.VersionNo;
-      }
-    });
+  const statusHandler = async (val) => {
+    setfilterBy(val);
+    let endpoint =
+      val === "L"
+        ? ENDPOINT_GETPROJECTLIST_DRAFTS
+        : ENDPOINT_GETPROJECTLIST_DEPLOYED;
+    const res = await axios.get(SERVER_URL + endpoint);
+    if (res.status === 200) {
+      setprojectList(res.data?.Projects);
+    }
+  };
 
-    return temp;
+  const projectHandler = async (val) => {
+    setselectedProject(val);
+    const res = await axios.get(
+      SERVER_URL + ENDPOINT_PROCESSLIST + "/" + filterBy + "/" + val
+    );
+    if (res.status === 200) {
+      setallProcessList(res.data?.Processes);
+    }
   };
 
   return (
@@ -235,10 +277,14 @@ function AuditLogs() {
       <div className={classes.heading}>
         <p className={classes.bold}>{t("auditLogs")}</p>
         <div className={classes.toolbox}>
+        {
+          /*code updated on 30 September 2022 for BugId 116351*/
+        }
           <div
             style={{
               display: "flex",
               flexDirection: "row",
+              flexWrap:"wrap"
             }}
           >
             <div
@@ -364,7 +410,77 @@ function AuditLogs() {
                 </div>
               </div>
             ) : null}
-            <div style={{ marginRight: "20px" }}>
+            <div style={{ marginInline: "1.5rem" }}>
+              <p className={classes.toolboxHeading}>{t("status")}</p>
+              <Select
+                IconComponent={ExpandMoreIcon}
+                style={{
+                  width: "180px",
+                  height: "30px",
+                }}
+                variant="outlined"
+                value={filterBy}
+                onChange={(e) => statusHandler(e.target.value)}
+                disabled={readOnly}
+              >
+                {filterByDropdownMenu.map((item) => {
+                  return (
+                    <MenuItem key={item.value} value={item.value}>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          alignItems: "center",
+                        }}
+                      >
+                        <p
+                          className={classes.iconForProcessType}
+                          style={{
+                            backgroundColor: tileProcess(item.value)[4],
+                          }}
+                        ></p>
+
+                        <p className={classes.tableCellBody}> {item.name} </p>
+                      </div>
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </div>
+            <div style={{ marginInline: "1.5rem" }}>
+              <p className={classes.toolboxHeading}>{t("project")}</p>
+              <Select
+                IconComponent={ExpandMoreIcon}
+                style={{
+                  width: "180px",
+                  height: "30px",
+                }}
+                variant="outlined"
+                value={selectedProject}
+                onChange={(e) => projectHandler(e.target.value)}
+                disabled={filterBy === "" || !!readOnly}
+              >
+                {projectList.map((item) => {
+                  return (
+                    <MenuItem key={item.ProjectId} value={item.ProjectId}>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          alignItems: "center",
+                        }}
+                      >
+                        <p className={classes.tableCellBody}>
+                          {" "}
+                          {item.ProjectName}{" "}
+                        </p>
+                      </div>
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </div>
+            <div style={{ marginInline: "1.5rem" }}>
               <p className={classes.toolboxHeading}>{t("processC")}</p>
               <Select
                 IconComponent={ExpandMoreIcon}
@@ -380,8 +496,22 @@ function AuditLogs() {
                   setauditLogData([]);
                   setgenerateButtonClicked(false);
                 }}
+                disabled={selectedProject === "" || !!readOnly}
               >
-                {allProcessList.map((item) => {
+                <MenuItem value="">
+                  {" "}
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      height: "1.2rem",
+                    }}
+                  >
+                    <p className={classes.tableCellBody}> </p>
+                  </div>
+                </MenuItem>
+                {allProcessList?.map((item) => {
                   return (
                     <MenuItem key={item.ProcessDefId} value={item.ProcessDefId}>
                       <div
@@ -389,6 +519,7 @@ function AuditLogs() {
                           display: "flex",
                           flexDirection: "row",
                           alignItems: "center",
+                          height: "1.2rem",
                         }}
                       >
                         <p
@@ -427,12 +558,13 @@ function AuditLogs() {
                   height: "30px",
                 }}
                 variant="outlined"
-                value={versionNoSelected}
+                value={selectedVersion}
                 onChange={(e) => {
-                  setversionNoSelected(e.target.value);
+                  setselectedVersion(e.target.value);
                   setauditLogData([]);
                   setshowNoAuditLogScreen(false);
                 }}
+                disabled={selectedProcessId === "" || !!readOnly}
               >
                 {versionList.map((item) => (
                   <MenuItem value={item.VersionNo}>
@@ -442,61 +574,29 @@ function AuditLogs() {
               </Select>
             </div>
             <div>
-              <p className={classes.toolboxHeading}>{t("status")}</p>
-              <Select
-                IconComponent={ExpandMoreIcon}
-                style={{
-                  width: "180px",
-                  height: "30px",
-                }}
-                variant="outlined"
-                value={filterBy}
-                onChange={(e) => setfilterBy(e.target.value)}
-              >
-                {filterByDropdownMenu.map((item) => {
-                  return (
-                    <MenuItem key={item.value} value={item.value}>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "row",
-                          alignItems: "center",
-                        }}
-                      >
-                        {item.value === "B" ? (
-                          "   "
-                        ) : (
-                          <p
-                            className={classes.iconForProcessType}
-                            style={{
-                              backgroundColor: tileProcess(item.value)[4],
-                            }}
-                          ></p>
-                        )}
-                        <p className={classes.tableCellBody}> {item.name} </p>
-                      </div>
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </div>
-          </div>
-
-          <button
+            <button
             onClick={() => {
               setauditLogData([]);
               fetchData();
               setgenerateButtonClicked(true);
             }}
             className={classes.generateButton}
+            disabled={filterBy === "" || selectedProject === ""}
           >
             <p className={classes.generateText}>{t("generateLogs")}</p>
           </button>
+            </div>
+          </div>
+
+          
         </div>
       </div>
       {!showNoAuditLogScreen ? (
         generateButtonClicked ? (
-          <div className={classes.tableContainer}>
+          <div
+            className={classes.tableContainer}
+            style={{ height: readOnly ? "70vh" : "100%" }}
+          >
             <TableContainer
               className={classes.queuetable}
               onScroll={handleScroll}
@@ -519,19 +619,13 @@ function AuditLogs() {
                     >
                       <p className={classes.tableCellText}>{t("action")}</p>
                     </TableCell>
+
                     <TableCell
                       width="25%"
                       style={{ paddingBottom: "0" }}
                       align="left"
                     >
                       <p className={classes.tableCellText}>{t("Version")}</p>
-                    </TableCell>
-                    <TableCell
-                      width="25%"
-                      style={{ paddingBottom: "0" }}
-                      align="left"
-                    >
-                      <p className={classes.tableCellText}>{t("comment")}</p>
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -558,11 +652,8 @@ function AuditLogs() {
                         </TableCell>
                         <TableCell width="25%" align="left">
                           <p className={classes.tableCellBody}>
-                            {getVersionByDefId(item.ProcessDefId)}
+                            {selectedVersion}
                           </p>
-                        </TableCell>
-                        <TableCell width="25%" align="left">
-                          <p className={classes.tableCellBody}>{item.Name2}</p>
                         </TableCell>
                       </TableRow>
                     );

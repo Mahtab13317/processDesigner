@@ -4,16 +4,13 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import "../../callActivity/commonCallActivity.css";
 import { store, useGlobalState } from "state-pool";
 import { connect } from "react-redux";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  ActivityPropertySaveCancelValue,
-  setSave,
-} from "../../../../../redux-store/slices/ActivityPropertySaveCancelClicked.js";
 
+/*code edited on 6 Sep 2022 for BugId 115378 */
 function ReusableInputs(props) {
-  const [loadedVariables] = useGlobalState("variableDefinition");
+  const { isReadOnly } = props;
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [selectedMappingField, setSelectedMappingField] = useState(null);
-  const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
 
   useEffect(() => {
     setSelectedMappingField(props.variable.mappedFieldName);
@@ -24,16 +21,16 @@ function ReusableInputs(props) {
       <p
         style={{
           fontSize: "11px",
-          position: "absolute",
-          left: props.isDrawerExpanded ? "12px" : "42px",
+          width: props.isDrawerExpanded ? "281px" : "136px",
+          padding: "0 8px",
         }}
       >
         {props.variable.VarName}
       </p>
       <span
         style={{
-          position: "absolute",
-          left: props.isDrawerExpanded ? "314px" : "188px",
+          width: props.isDrawerExpanded ? "61px" : "25px",
+          textAlign: "center",
         }}
       >
         =
@@ -45,12 +42,15 @@ function ReusableInputs(props) {
           props.handleFieldMapping(props.variable, e.target.value);
         }}
         style={{
-          position: "absolute",
-          right: props.isDrawerExpanded ? "26px" : "25px",
           width: props.isDrawerExpanded ? "280px" : "135px",
-          border: ( (!selectedMappingField || selectedMappingField.trim()=='') && props.showRedBorder )?'1px solid red': null
+          border:
+            (!selectedMappingField || selectedMappingField.trim() == "") &&
+            props.showRedBorder
+              ? "1px solid red"
+              : null,
         }}
         value={selectedMappingField}
+        disabled={isReadOnly}
         MenuProps={{
           anchorOrigin: {
             vertical: "bottom",
@@ -63,7 +63,11 @@ function ReusableInputs(props) {
           getContentAnchorEl: null,
         }}
       >
-        {loadedVariables.map((loadedVar) => {
+        {localLoadedProcessData?.Variable?.filter((el) => {
+          if (+el.VariableType === +props.variable.VarType) {
+            return el;
+          }
+        })?.map((loadedVar) => {
           return (
             <MenuItem
               className="InputPairDiv_CommonList"
@@ -74,14 +78,16 @@ function ReusableInputs(props) {
           );
         })}
       </Select>
-      <DeleteIcon
-        style={{
-          cursor: "pointer",
-          position: "absolute",
-          right: props.isDrawerExpanded ? "-5px" : "1px",
-        }}
-        onClick={() => props.deleteVariablesFromList(props.variable)}
-      />
+      {!isReadOnly && (
+        <DeleteIcon
+          style={{
+            cursor: "pointer",
+            width: props.isDrawerExpanded ? "3rem" : "2rem",
+            height: "1.5rem",
+          }}
+          onClick={() => props.deleteVariablesFromList(props.variable)}
+        />
+      )}
     </div>
   );
 }

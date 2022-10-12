@@ -183,6 +183,14 @@ export function getTypedropdown(valueSelected) {
     label = "DISTRIBUTE TO";
   } else if (valueSelected === "39") {
     label = "REMINDER";
+  } else if (valueSelected === "101") {
+    label = "SET STATE: READY";
+  } else if (valueSelected === "102") {
+    label = "MAKE MANDATORY";
+  } else if (valueSelected === "103") {
+    label = "MAKE OPTIONAL";
+  } else if (valueSelected === "104") {
+    label = "AUTO INITIATE";
   } else if (valueSelected === "") {
     label = "";
   }
@@ -207,6 +215,10 @@ export const operationTypeOptions = [
   { label: "AUDIT", value: "25" },
   { label: "DISTRIBUTE TO", value: "21" },
   { label: "REMINDER", value: "39" },
+  { label: "SET STATE: READY", value: "101" },
+  { label: "MAKE MANDATORY", value: "102" },
+  { label: "MAKE OPTIONAL", value: "103" },
+  { label: "AUTO INITIATE", value: "104" },
 ];
 
 export const operationFieldKeys = {
@@ -244,8 +256,8 @@ export const operationFieldKeys = {
     "durationInfo.paramHours",
     "durationInfo.paramMinutes",
     "durationInfo.paramSeconds",
-
   ],
+  104: ["param1"],
 };
 
 export const databaseExclusiveOperations = [
@@ -303,3 +315,5 @@ export const replyOperations = [
   "22",
   "23",
 ];
+
+export const caseWorkdeskTaskOperations = ["1", "101", "102", "103", "104"];

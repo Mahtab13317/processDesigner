@@ -8,6 +8,7 @@ import { RTL_DIRECTION } from "../../../../Constants/appConstants";
 
 function AddGroup(props) {
   let { t } = useTranslation();
+  const direction = `${t("HTML_DIR")}`;
   const [nameInput, setNameInput] = useState("");
   const setNameFunc = (e) => {
     setNameInput(e.target.value);

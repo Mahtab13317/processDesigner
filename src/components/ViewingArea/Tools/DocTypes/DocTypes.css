@@ -4,7 +4,7 @@
 }
 
 .DocTypes .MuiSvgIcon-root {
-  font-size: 1rem !important;
+  font-size: 1.25rem !important;
 }
 
 /*.DocTypes .MuiFormControlLabel-root span {
@@ -20,7 +20,7 @@
 }*/
 
 .DocTypes #searchBoxId {
-  width: 12.8125rem !important;
+  width: 100% !important;
 }
 
 /*code changes on 3 August 2022 for BugId 112560*/
@@ -114,7 +114,7 @@
 .screenHeading {
   margin-right: 1.875rem;
   font-size: 1rem;
-  font: normal normal 600 16px/22px Open Sans;
+  font: normal normal 600 var(--title_text_font_size) / 22px var(--font_family);
 }
 .actvitySearchDiv {
   display: flex;
@@ -128,7 +128,7 @@
 .activityNameDiv {
   display: flex;
   justify-content: start;
-  width: 60%;
+  width: 45%;
 }
 .checkBoxesStyling {
   margin-top: -0.625rem;
@@ -144,14 +144,15 @@
 .docName {
   font-size: var(--base_text_font_size);
   font-weight: 700;
-  width: 75%;
+  width: 100%;
   display: flex;
+  word-break: break-all;
 }
 
 /*code changes on 3 August 2022 for BugId 112560*/
 .oneDocDiv {
   height: 100%;
-  width: 23.4375rem;
+  width: 22.2rem;
   background-color: white;
   margin-top: 0.625rem;
   display: flex;
@@ -177,7 +178,6 @@
   height: 80vh;
   width: 80%;
   background-color: white;
-  margin-top: 0.625rem;
   margin-left: 0.1875rem;
   border-left: 1px solid rgb(218, 208, 194);
 }

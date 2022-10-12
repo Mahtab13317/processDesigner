@@ -23,6 +23,7 @@ import {
   RTL_DIRECTION,
 } from "../../Constants/appConstants.js";
 import * as actionCreators_template from "../../redux-store/actions/Template";
+import newgenFooterLogo from "../../assets/HomePage/newgenNavIcon.svg";
 
 const useStyles = makeStyles((theme) => ({
   drawerClose: {
@@ -122,6 +123,22 @@ const useStyles = makeStyles((theme) => ({
     paddingTop: "0",
     paddingBottom: "0",
   },
+  navBarFooter: {
+    position: "absolute",
+    bottom: "4rem",
+    width: "100%",
+    background: "#222222 0% 0% no-repeat padding-box",
+    boxShadow: "0px 3px 6px #ffffffa3",
+    padding: "0.5rem 0",
+    fontSize: "var(--title_text_font_size)",
+    textAlign:"center"
+  },
+  poweredStr: {
+    textAlign: "center",
+    font: "normal normal normal var(--sub_text_font_size)/var(--subtitle_text_font_size) Open Sans",
+    letterSpacing: "0px",
+    color: "#C4C4C4",
+  },
 }));
 
 function NavigationPanel(props) {
@@ -218,6 +235,14 @@ function NavigationPanel(props) {
         }}
       >
         <List className={classes.drawerList}>{iconDisplay}</List>
+        <div className={classes.navBarFooter}>
+          <p className={classes.poweredStr}>{t("PoweredBy")}</p>
+          <img
+            src={newgenFooterLogo}
+            alt={t("Newgen")}
+            style={{ width: "80%" }}
+          />
+        </div>
       </Drawer>
       {showPopup ? (
         <div className={classes.popup}>

@@ -58,10 +58,9 @@ const makeFieldInputs = (value) => {
 };
 
 const PreviewHtmlModal = (props) => {
-  console.log(props);
   let { t } = useTranslation();
 
-  const { taskVariablesList } = props;
+  const { taskVariablesList, isReadOnly } = props;
   const [open, setOpen] = useState(props.isOpen ? true : false);
 
   const handleClose = () => {
@@ -73,7 +72,12 @@ const PreviewHtmlModal = (props) => {
     <ModalForm
       isOpen={open}
       title={`${t("HTML")} ${t("Form")} ${t("Preview")}`}
-      Content={<Content taskVariablesList={taskVariablesList} />}
+      Content={
+        <Content
+          taskVariablesList={taskVariablesList}
+          isReadOnly={isReadOnly}
+        />
+      }
       headerCloseBtn={true}
       onClickHeaderCloseBtn={handleClose}
       closeModal={handleClose}
@@ -89,11 +93,11 @@ export default PreviewHtmlModal;
 {
   /*Fields, content of the modal */
 }
-const Content = ({ taskVariablesList }) => {
+const Content = ({ taskVariablesList, isReadOnly }) => {
   const classes = useStyles();
+  console.log(taskVariablesList);
 
   return (
-    /*<div className={classes.root}>*/
     <Grid
       container
       direction="column"
@@ -104,21 +108,20 @@ const Content = ({ taskVariablesList }) => {
         <Grid item>
           <Field
             type={
-              taskVar.VariableType === 8
+              taskVar.m_strVariableType === 8
                 ? "date"
-                : taskVar.ControlType === "2"
+                : taskVar.m_iControlType == "2"
                 ? "textArea"
                 : "text"
             }
-            dropdown={taskVar.ControlType === "3"}
-            multiline={taskVar.ControlType === "2"}
-            name={taskVar.VariableName}
-            label={taskVar.DisplayName}
-            //disabled={true}
+            dropdown={taskVar.m_iControlType == "3"}
+            multiline={taskVar.m_iControlType == "2"}
+            name={taskVar.m_strVariableName}
+            label={taskVar.m_strDisplayName}
+            disabled={isReadOnly}
           />
         </Grid>
       ))}
     </Grid>
-    /* </div>*/
   );
 };

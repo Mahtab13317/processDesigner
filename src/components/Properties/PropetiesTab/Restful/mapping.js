@@ -16,7 +16,7 @@ function Mapping(props) {
   const dispatch = useDispatch();
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
-  const [value, setValue] = useState(0); // Function to handle tab change.
+  const { value, setValue, isReadOnly } = props;
   const [forwardMappingList, setForwardMappingList] = useState([]);
   const [reverseMappingList, setReverseMappingList] = useState([]);
   const [reverseDropdownOptions, setReverseDropdownOptions] = useState([]);
@@ -572,6 +572,7 @@ function Mapping(props) {
         </p>
         <TextInput
           type="number"
+          readOnlyCondition={isReadOnly}
           inputValue={timeOutValue}
           idTag="timeOutWebservice"
           onChangeEvent={(e) => handleTimeOutChange(e)}
@@ -652,6 +653,7 @@ function Mapping(props) {
                     handleFieldMapping={(val) =>
                       handleForwardFieldMapping(val, list)
                     }
+                    isReadOnly={isReadOnly}
                   />
                 );
               })}
@@ -712,6 +714,7 @@ function Mapping(props) {
                     handleFieldMapping={(val) =>
                       handleReverseFieldMapping(val, list, index)
                     }
+                    isReadOnly={isReadOnly}
                   />
                 );
               })}

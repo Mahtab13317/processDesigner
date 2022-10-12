@@ -3,43 +3,57 @@ import React, { useState, useEffect } from "react";
 import SearchComponent from "../../../../../UI/Search Component/index.js";
 import "../../callActivity/commonCallActivity.css";
 import Button from "@material-ui/core/Button";
-import { VARDOC_LIST, SERVER_URL } from "../../../../../Constants/appConstants";
+import {
+  VARDOC_LIST,
+  SERVER_URL,
+  propertiesLabel,
+} from "../../../../../Constants/appConstants";
 import axios from "axios";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
+import { store, useGlobalState } from "state-pool";
+import { getVariableType } from "../../../../../utility/ProcessSettings/Triggers/getVariableType.js";
+import { setActivityPropertyChange } from "../../../../../redux-store/slices/ActivityPropertyChangeSlice.js";
 
+/*code edited on 6 Sep 2022 for BugId 115378 */
 function VariableList(props) {
+  const { isReadOnly } = props;
+  const dispatch = useDispatch();
   let [queueVariablesList, setQueueVariablesList] = useState([]);
   let [searchTerm, setSearchTerm] = useState("");
   let [externalVariablesList, setExternalVariablesList] = useState([]);
   const [varDefinition, setVarDefinition] = useState([]);
   const [selectedVariables, setSelectedVariables] = useState([]);
   const [selectedVariableType, setSelectedVariableType] = useState(0);
-  const [registeredProcessID, setRegisteredProcessID] = useState("2148");
-  useEffect(() => {
-    setSelectedVariables(props.selectedVariableList);
-  }, [props.selectedVariableList]);
+  const loadedActivityPropertyData = store.getState("activityPropertyData");
+  const [localLoadedActivityPropertyData] = useGlobalState(
+    loadedActivityPropertyData
+  );
 
   const handleCheckChange = (selectedVariable) => {
     let temp = [...varDefinition];
-    temp &&
-      temp.map((v) => {
-        if (v.VarName === selectedVariable.VarName) {
-          v.isChecked = !v.isChecked;
-        }
-      });
+    temp?.map((v) => {
+      if (v.VarName === selectedVariable.VarName) {
+        v.isChecked = !v.isChecked;
+      }
+    });
     setVarDefinition(temp);
+
     if (selectedVariable.isChecked) {
       setSelectedVariables((prev) => {
         return [...prev, selectedVariable];
       });
+    } else {
+      setSelectedVariables((prev) => {
+        let teList = [...prev];
+        teList.map((el, idx) => {
+          if (el.VarName === selectedVariable.VarName) {
+            teList.splice(idx, 1);
+          }
+        });
+        return teList;
+      });
     }
   };
-
-  // useEffect(() => {
-  //   localStorage.getItem("selectedTargetProcessID") == null
-  //     ? "2148"
-  //     : setRegisteredProcessID(localStorage.getItem("selectedTargetProcessID"));
-  // }, [localStorage, registeredProcessID]);
 
   const addVariablesToList = () => {
     props.selectedVariables(selectedVariables);
@@ -54,62 +68,70 @@ function VariableList(props) {
     selectedVariableType == 0
       ? setQueueVariablesList(newJson)
       : setExternalVariablesList(newJson);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel[props.propLabel]]: {
+          isModified: true,
+          hasError: true,
+        },
+      })
+    );
   };
 
   useEffect(() => {
-    let jsonBody = {
-      processDefId: registeredProcessID,
-      extTableDataFlag: "Y",
-      docReq: "Y",
-      omniService: "Y",
-    };
-    axios.post(SERVER_URL + VARDOC_LIST, jsonBody).then((res) => {
-      if (res.data.Status === 0) {
-        let tempQueueVars = [];
-        let tempExternalVars = [];
-        res.data.VarDefinition.forEach((variable) => {
-          if (variable.ExtObjID == 0) {
-            tempQueueVars.push(variable);
-          } else if (variable.ExtObjID == 1) {
-            tempExternalVars.push(variable);
-          }
-        });
-        // setQueueVariablesList(tempQueueVars);
-        filterData(tempQueueVars, tempExternalVars);
-        setExternalVariablesList(tempExternalVars);
-      }
-    });
-  }, []);
-
-  useEffect(() => {
-    filterData(queueVariablesList, externalVariablesList);
-  }, [props.selectedVariableList]);
+    if (
+      localLoadedActivityPropertyData?.ActivityProperty?.SubProcess?.importedProcessDefId?.trim() !==
+      ""
+    ) {
+      let jsonBody = {
+        processDefId:
+          localLoadedActivityPropertyData?.ActivityProperty?.SubProcess
+            ?.importedProcessDefId,
+        extTableDataFlag: "Y",
+        docReq: "Y",
+        omniService: "Y",
+      };
+      axios.post(SERVER_URL + VARDOC_LIST, jsonBody).then((res) => {
+        if (res.data.Status === 0) {
+          let tempQueueVars = [];
+          let tempExternalVars = [];
+          res.data.VarDefinition.forEach((variable) => {
+            if (+variable.ExtObjID === 0) {
+              tempQueueVars.push(variable);
+            } else if (+variable.ExtObjID === 1) {
+              tempExternalVars.push(variable);
+            }
+          });
+          filterData(tempQueueVars, tempExternalVars);
+        }
+      });
+      setSelectedVariables(props.selectedVariableList);
+    }
+  }, [selectedVariableType, props.selectedVariableList]);
 
   const filterData = (queueList, extList) => {
     let newQueueList = [];
     let newExtList = [];
-    queueList.forEach((list) => {
+    queueList?.forEach((list) => {
       let tempVariable = false;
-      props.selectedVariableList &&
-        props.selectedVariableList.forEach((variable) => {
-          if (variable.VarName == list.VarName) {
-            tempVariable = true;
-          }
-        });
+      props.selectedVariableList?.forEach((variable) => {
+        if (variable.VarName === list.VarName) {
+          tempVariable = true;
+        }
+      });
       if (!tempVariable) {
         newQueueList.push(list);
       }
     });
     setQueueVariablesList(newQueueList);
 
-    newExtList.forEach((list) => {
+    extList?.forEach((list) => {
       let tempVariable = false;
-      props.selectedVariableList &&
-        props.selectedVariableList.forEach((variable) => {
-          if (variable.VarName == list.VarName) {
-            tempVariable = true;
-          }
-        });
+      props.selectedVariableList?.forEach((variable) => {
+        if (variable.VarName === list.VarName) {
+          tempVariable = true;
+        }
+      });
       if (!tempVariable) {
         newExtList.push(list);
       }
@@ -120,25 +142,19 @@ function VariableList(props) {
   useEffect(() => {
     setVarDefinition(
       selectedVariableType == 0
-        ? queueVariablesList &&
-            queueVariablesList.map((x) => {
-              return { ...x, isChecked: false };
-            })
-        : externalVariablesList &&
-            externalVariablesList.map((x) => {
-              return { ...x, isChecked: false };
-            })
+        ? queueVariablesList?.map((x) => {
+            return { ...x, isChecked: false };
+          })
+        : externalVariablesList?.map((x) => {
+            return { ...x, isChecked: false };
+          })
     );
   }, [queueVariablesList, externalVariablesList, selectedVariableType]);
 
   let filteredRows = varDefinition.filter((row) => {
     if (searchTerm == "") {
       return row;
-    } else if (
-      row.VarName
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-    ) {
+    } else if (row.VarName.toLowerCase().includes(searchTerm.toLowerCase())) {
       return row;
     }
   });
@@ -153,7 +169,7 @@ function VariableList(props) {
       }}
     >
       <SearchComponent
-        style={{ width: "237px", height: "20px", margin: "10px 10px 5px 10px" }}
+        style={{ width: "237px", margin: "5px 10px 0" }}
         setSearchTerm={setSearchTerm}
       />
       <div
@@ -169,7 +185,10 @@ function VariableList(props) {
           style={{
             fontSize: "12px",
             paddingBottom: "5px",
-            borderBottom: selectedVariableType == 0 ? "3px solid var(--selected_tab_color)" : null,
+            borderBottom:
+              selectedVariableType == 0
+                ? "3px solid var(--selected_tab_color)"
+                : null,
           }}
         >
           Queue Variables
@@ -180,7 +199,10 @@ function VariableList(props) {
             fontSize: "12px",
             marginLeft: "25px",
             paddingBottom: "5px",
-            borderBottom: selectedVariableType == 1 ? "3px solid var(--selected_tab_color)" : null,
+            borderBottom:
+              selectedVariableType == 1
+                ? "3px solid var(--selected_tab_color)"
+                : null,
           }}
         >
           External Variables
@@ -198,9 +220,9 @@ function VariableList(props) {
         <Checkbox
           style={{
             borderRadius: "1px",
-            height: "11px",
-            width: "11px",
+            padding: "0",
           }}
+          disabled={isReadOnly}
         />
         <div
           style={{
@@ -218,56 +240,10 @@ function VariableList(props) {
       <div
         style={{
           overflowY: "scroll",
-          height: "57.5vh",
+          height: "31rem",
         }}
       >
-        {varDefinition && searchTerm==''?
-          varDefinition.map((variable) => {
-            return (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  borderBottom: "1px solid #D6D6D6",
-                  padding: "5px 10px 5px 10px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <Checkbox
-                    onChange={() => handleCheckChange(variable)}
-                    checked={variable.isChecked}
-                    style={{
-                      borderRadius: "1px",
-                      height: "11px",
-                      width: "11px",
-                    }}
-                  />
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      marginLeft: "15px",
-                    }}
-                  >
-                    <p style={{ fontSize: "11px", color: "black" }}>
-                      {variable.VarName}
-                    </p>
-                    <span style={{ fontSize: "10px", color: "#B2B1B9" }}>
-                      {variable.SysName}
-                    </span>
-                  </div>
-                </div>
-                <p style={{ fontSize: "10px", color: "black" }}>STRING</p>
-              </div>
-            );
-          })
-        :filteredRows.map((variable) => {
+        {filteredRows.map((variable) => {
           return (
             <div
               style={{
@@ -289,9 +265,9 @@ function VariableList(props) {
                   checked={variable.isChecked}
                   style={{
                     borderRadius: "1px",
-                    height: "11px",
-                    width: "11px",
+                    padding: "0",
                   }}
+                  disabled={isReadOnly}
                 />
                 <div
                   style={{
@@ -308,7 +284,15 @@ function VariableList(props) {
                   </span>
                 </div>
               </div>
-              <p style={{ fontSize: "10px", color: "black" }}>STRING</p>
+              <p
+                style={{
+                  fontSize: "10px",
+                  color: "black",
+                  textTransform: "uppercase",
+                }}
+              >
+                {getVariableType(variable.VarType)}
+              </p>
             </div>
           );
         })}
@@ -326,6 +310,7 @@ function VariableList(props) {
           variant="outlined"
           onClick={() => props.setShowVariablesModal(false)}
           id="close_AddVariableModal_CallActivity"
+          disabled={isReadOnly}
         >
           Cancel
         </Button>
@@ -334,6 +319,7 @@ function VariableList(props) {
           onClick={() => addVariablesToList()}
           variant="contained"
           color="primary"
+          disabled={isReadOnly}
         >
           Add
         </Button>

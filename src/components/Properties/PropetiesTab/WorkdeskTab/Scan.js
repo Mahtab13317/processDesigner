@@ -9,10 +9,16 @@ import { propertiesLabel } from "../../../../Constants/appConstants";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./todo.module.css";
 import { OpenProcessSliceValue } from "../../../../redux-store/slices/OpenProcessSlice";
+import {
+  isProcessDeployedFunc,
+  isReadOnlyFunc,
+} from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function Scan(props) {
   let { t } = useTranslation();
   const dispatch = useDispatch();
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
@@ -21,6 +27,8 @@ function Scan(props) {
   const [allDocType, setAllDocType] = useState([]);
   const [allChecked, setAllChecked] = useState(false);
   const openProcessData = useSelector(OpenProcessSliceValue);
+  /*code updated on 21 September 2022 for BugId 115467*/
+  const isReadOnly = isProcessDeployedFunc(localLoadedProcessData);
 
   useEffect(() => {
     let scan = {
@@ -29,14 +37,8 @@ function Scan(props) {
     };
     let temp = JSON.parse(JSON.stringify(openProcessData.loadedData));
     let docList = [];
-    let localDocs = {
-      ...localLoadedActivityPropertyData?.ActivityProperty?.wdeskInfo
-        ?.objPMWdeskDocuments?.documentMap,
-    };
     temp?.DocumentTypeList?.forEach((doc) => {
-      if (localDocs[doc.DocName]?.isAdd === true) {
-        docList.push(doc);
-      }
+      docList.push(doc);
     });
     setAllDocType(docList);
     Object.keys(scan).forEach((el) => {
@@ -71,7 +73,7 @@ function Scan(props) {
       val = !prev;
       return !prev;
     });
-    let temp = { ...localLoadedActivityPropertyData };
+    let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
     if (temp?.ActivityProperty?.wdeskInfo) {
       if (temp?.ActivityProperty?.wdeskInfo?.objPMWdeskScanTool) {
         let valTemp =
@@ -94,7 +96,7 @@ function Scan(props) {
       }
     } else {
       temp.ActivityProperty = {
-        ...temp.ActivityProperty,
+        ...temp?.ActivityProperty,
         wdeskInfo: {
           objPMWdeskScanTool: {
             scanRendered: val,
@@ -110,6 +112,7 @@ function Scan(props) {
     );
   };
 
+  // code edited on 21 Sep 2022 for BugId 114226
   const selectedCheck = (val, index) => {
     let tempDoc = [...allDocType];
     tempDoc[index].checked = val;
@@ -118,15 +121,19 @@ function Scan(props) {
       return el.checked === true;
     });
     setAllChecked(allCheck);
-    let temp = { ...localLoadedActivityPropertyData };
+    let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
     let tempVal = {
       ...temp?.ActivityProperty?.wdeskInfo?.objPMWdeskScanTool?.scanToolMap,
     };
+    let tempDocProp = {
+      ...temp?.ActivityProperty?.wdeskInfo?.objPMWdeskDocuments?.documentMap,
+    };
     let docMap = {};
     if (val) {
-      tempVal = {
+      docMap = {
         ...tempVal,
         [tempDoc[index].DocTypeId]: {
+          isAdd: true,
           scanActionList: [],
           scanToolInfo: {
             docTypeId: tempDoc[index].DocTypeId,
@@ -134,7 +141,6 @@ function Scan(props) {
           },
         },
       };
-      docMap = { ...tempVal };
     } else {
       Object.keys(tempVal)?.forEach((el) => {
         if (el !== tempDoc[index].DocTypeId) {
@@ -142,6 +148,48 @@ function Scan(props) {
         }
       });
     }
+
+    if (tempDocProp[tempDoc[index].DocName]) {
+      tempDocProp[tempDoc[index].DocName] = {
+        ...tempDocProp[tempDoc[index].DocName],
+        isAdd: val,
+      };
+    } else {
+      tempDocProp = {
+        ...tempDocProp,
+        [tempDoc[index].DocName]: {
+          documentType: {
+            docTypeId: tempDoc[index].DocTypeId,
+            docTypeName: tempDoc[index].DocName,
+            sDocType: "D",
+          },
+          isDelete: false,
+          isDownlaod: false,
+          isView: false,
+          isAdd: val,
+          isPrint: false,
+          isModify: false,
+        },
+      };
+    }
+
+    let docFinalMap = {};
+    Object.keys(tempDocProp)?.forEach((el) => {
+      if (
+        tempDocProp[el].isDelete ||
+        tempDocProp[el].isDownlaod ||
+        tempDocProp[el].isView ||
+        tempDocProp[el].isPrint ||
+        tempDocProp[el].isModify ||
+        tempDocProp[el].isAdd
+      ) {
+        docFinalMap = {
+          ...docFinalMap,
+          [el]: tempDocProp[el],
+        };
+      }
+    });
+
     if (temp?.ActivityProperty?.wdeskInfo?.objPMWdeskScanTool?.scanToolMap) {
       temp.ActivityProperty.wdeskInfo.objPMWdeskScanTool.scanToolMap = {
         ...docMap,
@@ -152,6 +200,16 @@ function Scan(props) {
         scanToolMap: { ...docMap },
       };
     }
+    if (temp?.ActivityProperty?.wdeskInfo?.objPMWdeskDocuments?.documentMap) {
+      temp.ActivityProperty.wdeskInfo.objPMWdeskDocuments.documentMap = {
+        ...docFinalMap,
+      };
+    } else {
+      temp.ActivityProperty.wdeskInfo.objPMWdeskDocuments = {
+        ...temp.ActivityProperty.wdeskInfo.objPMWdeskDocuments,
+        documentMap: { ...docFinalMap },
+      };
+    }
     setlocalLoadedActivityPropertyData(temp);
     dispatch(
       setActivityPropertyChange({
@@ -160,6 +218,7 @@ function Scan(props) {
     );
   };
 
+  // code edited on 21 Sep 2022 for BugId 114226
   const allCheckHandler = () => {
     let allCheck = !allChecked;
     setAllChecked(allCheck);
@@ -170,13 +229,17 @@ function Scan(props) {
     });
     setAllDocType(tempDoc);
 
-    let temp = { ...localLoadedActivityPropertyData };
+    let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
+    let tempDocProp = {
+      ...temp?.ActivityProperty?.wdeskInfo?.objPMWdeskDocuments?.documentMap,
+    };
     if (allCheck) {
       let tempList = {};
       tempDoc?.forEach((val) => {
         tempList = {
           ...tempList,
           [val.DocTypeId]: {
+            isAdd: true,
             scanActionList: [],
             scanToolInfo: {
               docTypeId: val.DocTypeId,
@@ -186,8 +249,62 @@ function Scan(props) {
         };
       });
       temp.ActivityProperty.wdeskInfo.objPMWdeskScanTool.scanToolMap = tempList;
+      tempDoc?.forEach((el) => {
+        if (tempDocProp[el.DocName]) {
+          tempDocProp[el.DocName] = {
+            ...tempDocProp[el.DocName],
+            isAdd: allCheck,
+          };
+        } else {
+          tempDocProp = {
+            ...tempDocProp,
+            [el.DocName]: {
+              documentType: {
+                docTypeId: el.DocTypeId,
+                docTypeName: el.DocName,
+                sDocType: "D",
+              },
+              isDelete: false,
+              isDownlaod: false,
+              isView: false,
+              isAdd: allCheck,
+              isPrint: false,
+              isModify: false,
+            },
+          };
+        }
+      });
     } else {
       temp.ActivityProperty.wdeskInfo.objPMWdeskScanTool.scanToolMap = {};
+      Object.keys(tempDocProp)?.forEach((el) => {
+        tempDocProp[el] = { ...tempDocProp[el], isAdd: false };
+      });
+    }
+    let docFinalMap = {};
+    Object.keys(tempDocProp)?.forEach((el) => {
+      if (
+        tempDocProp[el].isDelete ||
+        tempDocProp[el].isDownlaod ||
+        tempDocProp[el].isView ||
+        tempDocProp[el].isPrint ||
+        tempDocProp[el].isModify ||
+        tempDocProp[el].isAdd
+      ) {
+        docFinalMap = {
+          ...docFinalMap,
+          [el]: tempDocProp[el],
+        };
+      }
+    });
+    if (temp?.ActivityProperty?.wdeskInfo?.objPMWdeskDocuments?.documentMap) {
+      temp.ActivityProperty.wdeskInfo.objPMWdeskDocuments.documentMap = {
+        ...docFinalMap,
+      };
+    } else {
+      temp.ActivityProperty.wdeskInfo.objPMWdeskDocuments = {
+        ...temp.ActivityProperty.wdeskInfo.objPMWdeskDocuments,
+        documentMap: { ...docFinalMap },
+      };
     }
     setlocalLoadedActivityPropertyData(temp);
     dispatch(
@@ -201,7 +318,7 @@ function Scan(props) {
     setopenModal(index);
   };
 
-  const selectedScanActionHandler = (data) => {
+  const selectedScanActionHandler = (data, isEdited) => {
     let selectedArr = [];
     var selectedvalue;
     data?.forEach((val) => {
@@ -219,11 +336,12 @@ function Scan(props) {
     setAllDocType(tempDoc);
 
     setopenModal(null);
-    let temp = { ...localLoadedActivityPropertyData };
+    let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
     let tempVal = {
       ...temp?.ActivityProperty?.wdeskInfo?.objPMWdeskScanTool?.scanToolMap,
     };
-    let newList = [...tempVal[tempDoc[openModal].DocTypeId].scanActionList];
+    // code edited on 15 Sep 2022 for BugId 115561
+    let newList = [];
     data?.forEach((val) => {
       newList.push({
         ScanActionLabel:
@@ -232,10 +350,14 @@ function Scan(props) {
         extObjID2: val.value.ExtObjectId,
         param1: val.field.VariableName,
         param2: val.value.VariableName,
-        type1: "",
-        type2: "",
+        type1: val.field.VariableType,
+        type2:
+          val.value.VariableScope === "C"
+            ? val.field.VariableType
+            : val.value.VariableType,
         varFieldId_1: val.field.VarFieldId,
-        varFieldId_2: val.value.VarFieldId,
+        varFieldId_2:
+          val.value.VariableScope === "C" ? "0" : val.value.VarFieldId,
         varScope1: val.field.VariableScope,
         varScope2: val.value.VariableScope,
         variableId_1: val.field.VariableId,
@@ -243,15 +365,21 @@ function Scan(props) {
       });
     });
     tempVal[tempDoc[openModal].DocTypeId].scanActionList = [...newList];
+    tempVal[tempDoc[openModal].DocTypeId] = {
+      ...tempVal[tempDoc[openModal].DocTypeId],
+      isAdd: true,
+    };
     temp.ActivityProperty.wdeskInfo.objPMWdeskScanTool.scanToolMap = {
       ...tempVal,
     };
     setlocalLoadedActivityPropertyData(temp);
-    dispatch(
-      setActivityPropertyChange({
-        [propertiesLabel.workdesk]: { isModified: true, hasError: false },
-      })
-    );
+    if (isEdited) {
+      dispatch(
+        setActivityPropertyChange({
+          [propertiesLabel.workdesk]: { isModified: true, hasError: false },
+        })
+      );
+    }
   };
 
   return (
@@ -264,33 +392,40 @@ function Scan(props) {
             className={styles.mainCheckbox}
             data-testid="CheckScanId"
             type="checkbox"
+            disabled={isReadOnly}
           />
-          {t("scan")}
+          {t("scan")} {t("Tool")}
         </div>
         <div className={styles.todoDocTextarea} style={{ marginTop: "1rem" }}>
           {allDocType?.length > 0 ? (
             <React.Fragment>
               <div className={`row ${styles.docTableHeader}`}>
                 <div className={styles.docTypes}>{t("docTypes")}</div>
-                <div className={styles.view}>
+                <div className={styles.checkboxScan}>
                   <Checkbox
                     className={styles.mainCheckbox}
                     checked={allChecked}
-                    disabled={!checkScan}
+                    disabled={!checkScan || isReadOnly}
                     onChange={(e) => allCheckHandler()}
                   />
                 </div>
-                <div className={styles.view}>{t("allowAddition")}</div>
-                <div className={styles.checkboxHeader}>{t("scanActions")}</div>
+                <div className={styles.allowAddition}>{t("allowAddition")}</div>
+                <div className={styles.docTypes}>{t("scanActions")}</div>
               </div>
               <div className={styles.docTextarea}>
                 {checkScan &&
                   allDocType?.map((el, index) => {
                     return (
-                      <div className="row">
+                      <div
+                        className="row"
+                        style={{
+                          minHeight: "var(--line_height)",
+                          margin: "0.25rem 0",
+                        }}
+                      >
                         <React.Fragment>
                           <div className={styles.docTypes}>{el.DocName}</div>
-                          <div className={styles.view}>
+                          <div className={styles.checkboxScan}>
                             <Checkbox
                               className={styles.mainCheckbox}
                               onChange={(e) =>
@@ -298,12 +433,13 @@ function Scan(props) {
                               }
                               checked={el.checked ? true : false}
                               id="checkBox"
+                              disabled={isReadOnly}
                             />
                           </div>
-                          <div className={styles.view}>
+                          <div className={styles.allowAddition}>
                             {el.checked ? (
                               <button
-                                className={styles.addBtn}
+                                className={styles.allowAddBtn}
                                 onClick={() => scanHandler(index)}
                                 data-testid="scanBtn"
                               >
@@ -311,11 +447,11 @@ function Scan(props) {
                               </button>
                             ) : null}
                           </div>
-                          <div className={styles.checkboxHeader}>
+                          <div className={styles.docTypes}>
                             {el.checked ? (
                               <input
                                 value={el.scanInputStr}
-                                className={styles.inputField}
+                                className={styles.scanInputField}
                                 disabled={true}
                               />
                             ) : null}
@@ -335,16 +471,15 @@ function Scan(props) {
           style={{
             padding: "0",
             width: "60vw",
-            height: "60vh",
             top: "20%",
             left: "20%",
           }}
-          modalClosed={() => setopenModal(null)}
           children={
             <ScanDefination
               selectedDoc={allDocType[openModal]}
               setopenModal={setopenModal}
               selectedScanActionHandler={selectedScanActionHandler}
+              modalClosed={() => setopenModal(null)}
             />
           }
         />

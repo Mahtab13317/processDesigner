@@ -1,6 +1,6 @@
 // Code changed to solve - Unable to deploy process if we validate it first - 111108 and
 // View Details link while Deploying not working - 110762
-
+// Changes made to solve Bug 115320 - Validate process: the output error window does not have scroll bar to view all the error/warning present in process
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import CloseIcon from "@material-ui/icons/Close";
@@ -27,9 +27,14 @@ import DeployProcess from "../../../../../components/DeployProcess/DeployProcess
 import ProcessDeployment from "../../ProcessValidation/ProcessDeployment/DeploySucessModal.js";
 import { UserRightsValue } from "../../../../../redux-store/slices/UserRightsSlice";
 import { getMenuNameFlag } from "../../../../../utility/UserRightsFunctions";
+import { useGlobalState, store } from "state-pool";
 
 function ProcessValidation(props) {
   let { t } = useTranslation();
+  const loadedProcessData = store.getState("loadedProcessData");
+
+  const [localLoadedProcessData, setLocalLoadedProcessData] =
+    useGlobalState(loadedProcessData);
   const direction = `${t("HTML_DIR")}`;
   const userRightsValue = useSelector(UserRightsValue);
   const registerProcessRightsFlag = getMenuNameFlag(
@@ -56,21 +61,22 @@ function ProcessValidation(props) {
     setErrorVariables,
     warningVariables,
     setWarningVariables,
+    isProcessCheckedOut,
   } = props;
   const [isDrawerMinimised, setIsDrawerMinimised] = useState(false);
   const [showDeployModal, setShowDeployModal] = useState(false);
+  const [showErrorTab, setShowErrorTab] = useState(false);
   const [action, setAction] = useState(null);
   const buttonFrom = "ValidationFooterDeploy";
 
   useEffect(() => {
     const obj = {
       processDefId: props.openProcessID,
-      action: "RE",
+      action: localLoadedProcessData?.CheckedOut === "Y" ? "CI" : "RE",
       processVariantType: "S",
     };
 
     axios.post(SERVER_URL + ENDPOINT_VALIDATEPROCESS, obj).then((res) => {
-      // if (res.status === 200) {
       let tempErrors = [];
       let tempWarnings = [];
       res &&
@@ -84,7 +90,7 @@ function ProcessValidation(props) {
         });
       setWarningVariables(tempWarnings);
       setErrorVariables(tempErrors);
-      // }
+      setShowErrorTab(tempErrors?.length > 0);
     });
   }, []);
 
@@ -111,18 +117,13 @@ function ProcessValidation(props) {
         <p style={{ fontSize: "12px", marginLeft: "25px" }}>{v.ErrorLabel}</p>
       </div>
     );
-    // });
   };
 
   const showWarnings = (v) => {
-    // warningVariables &&
-    //   warningVariables.map((v) => {
     return (
       <div
         style={{
           display: "flex",
-          width: "368px",
-          justifyContent: "space-between",
           marginBottom: "10px",
         }}
       >
@@ -134,13 +135,12 @@ function ProcessValidation(props) {
             color: "#F0A229",
           }}
         />
-        <p style={{ fontSize: "12px" }}>Process</p>
-        <p style={{ fontSize: "12px" }}>
-          Please eliminate this Warning to deploy the Process.
+        <p style={{ fontSize: "12px", marginLeft: "10px" }}>
+          {v.ValidationLevel}
         </p>
+        <p style={{ fontSize: "12px", marginLeft: "25px" }}>{v.ErrorLabel}</p>
       </div>
     );
-    // });
   };
 
   const validateProcessHandler = () => {
@@ -194,6 +194,9 @@ function ProcessValidation(props) {
           <p style={{ fontSize: "14px", fontWeight: "700" }}>Output</p>
           <p
             style={{ fontSize: "12px", display: "flex", alignItems: "center" }}
+            onClick={() => {
+              setShowErrorTab(true);
+            }}
           >
             Errors{" "}
             <CloseIcon
@@ -208,6 +211,9 @@ function ProcessValidation(props) {
           </p>
           <p
             style={{ fontSize: "12px", display: "flex", alignItems: "center" }}
+            onClick={() => {
+              setShowErrorTab(false);
+            }}
           >
             Warnings{" "}
             <WarningIcon
@@ -343,32 +349,36 @@ function ProcessValidation(props) {
             display: "flex",
             justifyContent: "space-between",
             padding: "10px",
-            height: "100%",
+            height: "10rem",
             overflow: "scroll",
           }}
         >
           <div>
-            {warningVariables &&
+            {!showErrorTab &&
+              warningVariables &&
               warningVariables.map((v) => {
                 return showWarnings(v);
               })}
-            {errorVariables &&
+            {showErrorTab &&
+              errorVariables &&
               errorVariables.map((v) => {
                 return showErrors(v);
               })}
           </div>
-          <p
-            style={{
-              color: "var(--link_color)",
-              fontSize: "12px",
-              position: "absolute",
-              right: "25%",
-              cursor: "pointer",
-            }}
-            onClick={() => setAction(MENUOPTION_DEPLOY)}
-          >
-            Fill Deploy Process
-          </p>
+          {localLoadedProcessData?.CheckedOut === "Y" ? null : (
+            <p
+              style={{
+                color: "var(--link_color)",
+                fontSize: "12px",
+                position: "absolute",
+                right: "25%",
+                cursor: "pointer",
+              }}
+              onClick={() => setAction(MENUOPTION_DEPLOY)}
+            >
+              Fill Deploy Process
+            </p>
+          )}
         </div>
       )}
 

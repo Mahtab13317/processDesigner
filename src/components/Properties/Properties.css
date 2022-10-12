@@ -79,16 +79,22 @@
   align-items: center; */
   flex-direction: column;
   font-size: 0.875rem;
+  background-color: white;
 }
 
 .basicDetails-addIcon {
-  color: white;
-
   background: var(--button_color);
-  height: 2.5rem !important;
-  width: 2.5rem !important;
- 
+  height: 2.4rem;
+  width: 2.8rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
+.basicDetails-addIconSvg {
+  color: white !important;
+  height: 2rem !important;
+  width: 2rem !important;
 }
 
 .basicDetails-webService {
@@ -99,14 +105,10 @@
 }
 
 .basicDetails-peopleAndSysHeading {
-
   color: var(--link_color);
-
-
-  margin-top: 1rem;
-  margin-bottom: 0.7rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
   font-size: var(--subtitle_text_font_size);
- 
 }
 
 .MuiDrawer-paper {
@@ -146,35 +148,22 @@
   height: 100%;
 }
 
-#archieve_dataClass {
-  font-size: 14px;
-  margin-left: 5px;
-}
-
 .dropDownSelect_expanded {
-  width: 138px;
-  height: 28px;
+  width: 57.5%;
+  height: var(--line_height);
   background: #ffffff 0% 0% no-repeat padding-box;
   font: normal normal normal 12px/17px Open Sans;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
-  opacity: 1;
-  margin-right: 10px;
-  margin-top: 10px;
-  position: absolute;
-  left: 45%;
 }
 
 .dropDownSelect {
-  width: 138px;
-  height: 28px;
+  width: 95%;
+  height: var(--line_height);
   background: #ffffff 0% 0% no-repeat padding-box;
   font: normal normal normal 12px/17px Open Sans;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
-  opacity: 1;
-  /* margin-right: 10px; */
-  margin-top: 10px;
 }
 
 .dropDownSelectLabel {
@@ -229,7 +218,7 @@
   letter-spacing: 0px !important;
   color: #606060 !important;
   text-transform: none !important;
-  margin-right: 0.5rem !important;
+  margin: 0 0.5rem 0 0 !important;
   padding: 0.25rem 1rem !important;
   cursor: pointer !important;
 }
@@ -243,9 +232,8 @@
   border: 1px solid var(--button_color) !important;
   font: normal normal 600 12px/17px Open Sans !important;
   letter-spacing: 0px !important;
-
+  margin: 0 0.5rem 0 0 !important;
   text-transform: none !important;
-  margin-right: 0.5rem !important;
   padding: 0.25rem 0.75rem !important;
   cursor: pointer !important;
 }
@@ -306,29 +294,29 @@
   color: #606060;
 }
 
-#add_description{
+#add_description {
   font-size: var(--subtitle_text_font_size);
 }
 
-#targetWorkStep_basicDetails{
+#targetWorkStep_basicDetails {
   font-size: var(--base_text_font_size);
 }
 
-#cost_basicDetails{
+#cost_basicDetails {
   font-size: var(--base_text_font_size);
 }
 
-#routingCriteriaCount_basicDetails{
+#routingCriteriaCount_basicDetails {
   font-size: var(--base_text_font_size);
   margin-top: var(--spacing_v);
 }
 
-.disCount_basicDetails{
+.disCount_basicDetails {
   font-size: var(--base_text_font_size);
   margin-top: 1rem;
 }
 
-.calender_basicDetails{
+.calender_basicDetails {
   font-size: var(--base_text_font_size);
   margin-top: 1rem;
 }

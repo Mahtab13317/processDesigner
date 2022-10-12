@@ -34,12 +34,13 @@ function CreateProcessByTemplate(props) {
   const [categoryList, setCategoryList] = useState([]);
 
   useEffect(() => {
-    if (
-      props.getTemplatePage === PREVIOUS_PAGE_CREATE_FROM_PROCESS ||
-      props.getTemplatePage === PREVIOUS_PAGE_CREATE_FROM_PROCESSES
-    ) {
-      setModalClicked(true);
-    }
+    // code commented on 12 Sep 2022 for BugId 115566
+    // if (
+    //   props.getTemplatePage === PREVIOUS_PAGE_CREATE_FROM_PROCESS ||
+    //   props.getTemplatePage === PREVIOUS_PAGE_CREATE_FROM_PROCESSES
+    // ) {
+    //   setModalClicked(true);
+    // }
     axios.get(SERVER_URL + ENDPOINT_FETCH_ALL_TEMPLATES).then((res) => {
       if (res.data.Status === 0) {
         setCategoryList(res.data.Category);
@@ -74,6 +75,8 @@ function CreateProcessByTemplate(props) {
       "aria-controls": `vertical-tabpanel-${index}`,
     };
   }
+
+  console.log("111","clicked modal",modalClicked)
 
   return (
     <React.Fragment>

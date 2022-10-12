@@ -1,3 +1,4 @@
+/* Changes made to solve Bug 115478 -> Template: on template selection screen, scrolling should be available for the listing of Templates to view entire listing  */
 .selectPrcocessTempHeading {
   text-align: left;
   font: normal normal 600 16px/22px Open Sans;
@@ -27,6 +28,7 @@
 .ProcessCreationLeftPannel {
   width: 14%;
   height: 78vh;
+  overflow: scroll;
   border-right: 1px solid #e4e4e4 !important;
 }
 

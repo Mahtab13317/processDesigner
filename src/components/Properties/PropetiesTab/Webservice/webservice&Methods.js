@@ -130,14 +130,16 @@ export default function CustomizedTables(props) {
                 />
               </StyledTableCell>
               <StyledTableCell align="right" style={{ width: "2.5vw" }}>
-                <DeleteIcon
-                  style={{
-                    width: "1.75rem",
-                    height: "1.75rem",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => props.handleAssociationDelete(row)}
-                />
+                {!props.isReadOnly && (
+                  <DeleteIcon
+                    style={{
+                      width: "1.75rem",
+                      height: "1.75rem",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => props.handleAssociationDelete(row)}
+                  />
+                )}
               </StyledTableCell>
             </StyledTableRow>
           ))}

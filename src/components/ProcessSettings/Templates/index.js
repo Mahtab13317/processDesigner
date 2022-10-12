@@ -82,14 +82,11 @@ function Templates(props) {
           {isModalOpen ? (
             <Modal
               show={isModalOpen}
-              modalClosed={() => setIsModalOpen(false)}
               style={{
                 width: "26%",
-                height: "84%",
                 left: "37%",
                 top: "11%",
-                padding: "1%",
-                paddingTop: 0,
+                padding: "0",
               }}
             >
               <TemplateModal

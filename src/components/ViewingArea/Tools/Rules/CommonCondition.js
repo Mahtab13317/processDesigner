@@ -28,7 +28,7 @@ function CommonCondition(props) {
     }
   }, [props.openProcessType]);
   return (
-    <div>
+    <div style={{marginLeft:'15px'}}>
       <div className="row">
         <p className={styles.mainHeading}>{t("rulesCondition")}</p>
         <div style={{ marginLeft: "auto" }}>

@@ -96,7 +96,7 @@
 .starIcon {
   color: red;
   margin-left: 0.25vw;
-  font-size: 0.75rem;
+  font-size: 1rem;
 }
 
 .saveNew_radioDiv {
@@ -305,7 +305,6 @@
 .errorMessage {
   font: normal normal normal 12px/17px Open Sans;
   font-size: var(--base_text_font_size);
-
   letter-spacing: 0px;
   text-align: left;
   color: red;

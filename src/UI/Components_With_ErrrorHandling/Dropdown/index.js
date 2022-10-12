@@ -113,7 +113,15 @@ function CustomizedDropdown(props) {
   const isValueEmpty = (valueSelected) => {
     if (!valueSelected && !isNotMandatory) {
       setShowError(true);
-    } else {
+    } 
+    // else if (
+    //   valueSelected === CONSTANT &&
+    //   constVal?.trim() === "" &&
+    //   !isNotMandatory
+    // ) {
+    //   setShowError(true);
+    // } 
+    else {
       setShowError(false);
     }
   };
@@ -131,26 +139,7 @@ function CustomizedDropdown(props) {
   const onChangeHandler = (event, type) => {
     if (showConstValue) {
       if (type === "C") {
-        if (constType === "6") {
-          setConstVal(event.target.value);
-        } else {
-          // console.log("333", "VALUE DOT", event.target.value.includes("."));
-          // if (!event.target.value.includes(".")) {
-          // console.log(
-          //   "999",
-          //   "DATE",
-          //   !Number.isNaN(Date.parse(event.target.value))
-          // );
-          // if (!Number.isNaN(Date.parse(event.target.value))) {
-          //   let convertedDate = "";
-          //   convertedDate = moment(event.target.value).format("DD-MM-YYYY");
-          //   console.log("999", "DATE", convertedDate);
-          //   setConstVal(convertedDate);
-          // } else {
-          //   setConstVal(event.target.value);
-          // }
-          setConstVal(event.target.value);
-        }
+        setConstVal(event.target.value);
         onChange(event, true);
         setIsConstant(true);
       } else {

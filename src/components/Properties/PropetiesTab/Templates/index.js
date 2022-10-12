@@ -1,3 +1,4 @@
+// Changes made to solve Bug 111948 - OMS Adapter -> should have validation if connection is not establishing
 import React, { useState, useEffect } from "react";
 import "../../Properties.css";
 import { useTranslation } from "react-i18next";
@@ -8,6 +9,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import styles from "./index.module.css";
 import arabicStyles from "./arabicStyles.module.css";
 import axios from "axios";
+import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 import MultiSelectWithSearchInput from "../../../../UI/MultiSelectWithSearchInput/index.js";
 import {
   ENDPOINT_CONNECT_CABINET,
@@ -36,7 +38,6 @@ import {
   ActivityPropertySaveCancelValue,
   setSave,
 } from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked";
-import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 import emptyStatePic from "../../../../assets/ProcessView/EmptyState.svg";
 import Tooltip from "@material-ui/core/Tooltip";
 import { withStyles } from "@material-ui/core/styles";
@@ -44,6 +45,9 @@ import "./index.css";
 import TemplatePropertiesScreen from "./TemplateProperties.js";
 import PropertiesModal from "./PropertiesModal.js";
 import TabsHeading from "../../../../UI/TabsHeading";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
+import { useRef } from "react";
+import { FieldValidations } from "../../../../utility/FieldValidations/fieldValidations";
 
 function TemplateProperties(props) {
   let { t } = useTranslation();
@@ -52,6 +56,8 @@ function TemplateProperties(props) {
   const localActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(localActivityPropertyData);
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
   const [spinner, setspinner] = useState(true);
   const [hideConnectBtn, setHideConnectBtn] = useState(true);
@@ -69,6 +75,9 @@ function TemplateProperties(props) {
   const [showMappingModal, setShowMappingModal] = useState(null);
   const [schemaList, setSchemaList] = useState([]);
   const [error, setError] = useState({});
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
+  const ipRef = useRef();
+  const portRef=useRef();
 
   const TemplateTooltip = withStyles(() => ({
     tooltip: {
@@ -324,6 +333,15 @@ function TemplateProperties(props) {
                 isModified: true,
                 hasError: false,
               },
+            })
+          );
+        }
+        else{
+          dispatch(
+            setToastDataFunc({
+              message: res?.data?.Message,
+              severity: "error",
+              open: true,
             })
           );
         }
@@ -584,7 +602,7 @@ function TemplateProperties(props) {
                     getContentAnchorEl: null,
                   }}
                   inputProps={{
-                    readOnly: connected,
+                    readOnly: connected || isReadOnly,
                   }}
                   style={{ backgroundColor: connected ? "#f8f8f8" : "#fff" }}
                   name="protocolType"
@@ -622,22 +640,28 @@ function TemplateProperties(props) {
                   inputValue={connectData?.ipAddress}
                   classTag={styles.templatePropInput}
                   onChangeEvent={onChange}
-                  readOnlyCondition={connected}
+                  readOnlyCondition={connected || isReadOnly}
                   name="ipAddress"
                   idTag="oms_ipAddress"
                   errorStatement={error?.ipAddress?.statement}
                   errorSeverity={error?.ipAddress?.severity}
                   errorType={error?.ipAddress?.errorType}
                   inlineError={true}
+                  inputRef={ipRef}
+                  onKeyPress={(e) => FieldValidations(e, 10, ipRef.current, 100)}
                 />
+
                 <label className={styles.templatePropLabel}>
                   {t("PortId")}
                 </label>
+                {
+  /*code updated on 15 September 2022 for BugId 112903*/
+}
                 <TextInput
                   inputValue={connectData?.portId}
                   classTag={styles.templatePropInput}
                   onChangeEvent={onChange}
-                  readOnlyCondition={connected}
+                  readOnlyCondition={connected || isReadOnly}
                   type="number"
                   name="portId"
                   idTag="oms_portId"
@@ -646,6 +670,8 @@ function TemplateProperties(props) {
                   errorSeverity={error?.portId?.severity}
                   errorType={error?.portId?.errorType}
                   inlineError={true}
+                  inputRef={portRef}
+                  onKeyPress={(e) => FieldValidations(e, 131, portRef.current, 5)}
                 />
                 {hideConnectBtn ? (
                   <button
@@ -653,8 +679,11 @@ function TemplateProperties(props) {
                     className={
                       direction === RTL_DIRECTION
                         ? arabicStyles.getCabinetBtn
+                        : isReadOnly
+                        ? styles.disabledBtn
                         : styles.getCabinetBtn
                     }
+                    disabled={isReadOnly}
                   >
                     {t("GetCabinets")}
                   </button>
@@ -677,7 +706,7 @@ function TemplateProperties(props) {
                         getContentAnchorEl: null,
                       }}
                       inputProps={{
-                        readOnly: connected,
+                        readOnly: connected || isReadOnly,
                       }}
                       style={{
                         backgroundColor: connected ? "#f8f8f8" : "#fff",
@@ -717,7 +746,7 @@ function TemplateProperties(props) {
                       inputValue={connectData?.username}
                       classTag={styles.templatePropInput}
                       onChangeEvent={onChange}
-                      readOnlyCondition={connected}
+                      readOnlyCondition={connected || isReadOnly}
                       name="username"
                       idTag="oms_username"
                       errorStatement={error?.username?.statement}
@@ -741,7 +770,7 @@ function TemplateProperties(props) {
                       inputValue={connectData?.password}
                       classTag={styles.templatePropInput}
                       onChangeEvent={onChange}
-                      readOnlyCondition={connected}
+                      readOnlyCondition={connected || isReadOnly}
                       name="password"
                       type="password"
                       idTag="oms_password"
@@ -767,8 +796,11 @@ function TemplateProperties(props) {
                         className={
                           direction === RTL_DIRECTION
                             ? arabicStyles.getCabinetBtn
+                            : isReadOnly
+                            ? styles.disabledBtn
                             : styles.getCabinetBtn
                         }
+                        disabled={isReadOnly}
                       >
                         {t("Connect")}
                       </button>
@@ -802,7 +834,7 @@ function TemplateProperties(props) {
                   getContentAnchorEl: null,
                 }}
                 inputProps={{
-                  readOnly: !connected,
+                  readOnly: !connected || isReadOnly,
                 }}
                 style={{ backgroundColor: !connected ? "#f8f8f8" : "#fff" }}
                 name="cabinet"
@@ -845,7 +877,7 @@ function TemplateProperties(props) {
                 optionRenderKey="ProductName"
                 showTags={false}
                 getSelectedItems={setAssociatedTemplateListFunc}
-                isDisabled={!connected}
+                isDisabled={!connected || isReadOnly}
               />
               {associatedTemplateList?.length > 0 ? (
                 <React.Fragment>
@@ -909,10 +941,14 @@ function TemplateProperties(props) {
                                 }}
                               />
                             </TemplateTooltip>
-                            <DeleteIcon
-                              className={styles.downloadIcon}
-                              onClick={() => removeTemplateFromList(index, el)}
-                            />
+                            {!isReadOnly && (
+                              <DeleteIcon
+                                className={styles.downloadIcon}
+                                onClick={() =>
+                                  removeTemplateFromList(index, el)
+                                }
+                              />
+                            )}
                           </span>
                         </div>
                       );
@@ -951,12 +987,14 @@ function TemplateProperties(props) {
                             onClick={() => downloadTemplate(selectedTemplate)}
                           />
                         </TemplateTooltip>
-                        <DeleteIcon
-                          className={styles.expandViewIcon}
-                          onClick={() =>
-                            removeTemplateFromList(null, selectedTemplate)
-                          }
-                        />
+                        {!isReadOnly && (
+                          <DeleteIcon
+                            className={styles.expandViewIcon}
+                            onClick={() =>
+                              removeTemplateFromList(null, selectedTemplate)
+                            }
+                          />
+                        )}
                         <CloseIcon
                           className={styles.expandViewIcon}
                           onClick={() => setSelectedTemplate(null)}
@@ -988,13 +1026,13 @@ function TemplateProperties(props) {
               top: "20%",
               padding: "0",
             }}
-            modalClosed={() => setShowMappingModal(null)}
             children={
               <MappingModal
                 schemaList={schemaList}
                 template={showMappingModal}
                 cancelFunc={() => setShowMappingModal(null)}
                 okFunc={saveMappingDetailsFunc}
+                isReadOnly={isReadOnly}
               />
             }
           />
@@ -1029,6 +1067,7 @@ const mapStateToProps = (state) => {
     cellActivityType: state.selectedCellReducer.selectedActivityType,
     cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 export default connect(mapStateToProps, null)(TemplateProperties);

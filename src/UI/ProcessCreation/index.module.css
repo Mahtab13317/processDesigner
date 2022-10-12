@@ -193,3 +193,9 @@
   border-radius: 2px;
   margin: 0 0.25rem;
 }
+
+.starIcon {
+  color: red;
+  margin-left: 0.25vw;
+  font-size: 0.75rem;
+}

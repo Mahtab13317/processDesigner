@@ -65,9 +65,9 @@ const FormBuilderModal = (props) => {
 
   const handleClose = () => {
     setOpen(false);
-
     props.handleClose();
   };
+
   return (
     <ModalForm
       isOpen={open}
@@ -91,6 +91,7 @@ const FormBuilderModal = (props) => {
 export default FormBuilderModal;
 
 const Content = (props) => {
+
   const launchForm = () => {
     if (props.cellType === getSelectedCellType("TASK")) {
       let newPassedDataTF = {
@@ -122,6 +123,7 @@ const Content = (props) => {
       window.loadFormBuilder("mf_forms_int_des", newPassedDataTF);
     }
   };
+
   useEffect(() => {
     launchForm();
   }, []);

@@ -22,6 +22,7 @@ function FilterString(props) {
     listOfComplexTables,
     setFilterStringValue,
     multiSelectedTableNames,
+    isReadOnly,
   } = props;
   const disabled = filterStrDataExchgTable === "" || filterStringValue === "";
 
@@ -39,7 +40,7 @@ function FilterString(props) {
             <span className={styles.asterisk}>*</span>
           </div>
           <CustomizedDropdown
-            //   disabled={isProcessReadOnly}
+            disabled={isReadOnly}
             id="FS_Data_Exchg_Dropdown"
             className={styles.dropdown}
             value={filterStrDataExchgTable}
@@ -76,7 +77,7 @@ function FilterString(props) {
         <textarea
           id="FS_Textarea"
           value={filterStringValue}
-          // disabled={readOnlyProcess}
+          disabled={isReadOnly}
           onBlur={(event) => {
             filterStringHandler(event.target.value);
           }}
@@ -91,17 +92,24 @@ function FilterString(props) {
             <button
               id="FS_Cancel_Filter_string_data"
               onClick={cancelFilterStringHandler}
-              className={styles.cancelBtn}
+              className={clsx(
+            clsx(
+            styles.cancelBtn,
+            isReadOnly && styles.disabledBtnStyles
+          ),
+            isReadOnly && styles.disabledBtnStyles
+          )}
+              disabled={isReadOnly}
             >
               {t("cancel")}
             </button>
             <button
               id="FS_Add_Filter_string_data"
-              disabled={disabled}
+              disabled={isReadOnly || disabled}
               onClick={addFilterStringHandler}
               className={clsx(
                 styles.addBtn,
-                disabled && styles.disabledBtnStyles
+                (disabled || isReadOnly) && styles.disabledBtnStyles
               )}
             >
               {t("add")}
@@ -169,11 +177,13 @@ function FilterString(props) {
                         >
                           {element.m_sFilterStrImpNested}
                         </p>
-                        <DeleteOutlinedIcon
-                          id="FS_Delete_Filter_String_Data"
-                          onClick={() => deleteFilterStringHandler(index)}
-                          className={styles.deleteIcon}
-                        />
+                        {!isReadOnly && (
+                          <DeleteOutlinedIcon
+                            id="FS_Delete_Filter_String_Data"
+                            onClick={() => deleteFilterStringHandler(index)}
+                            className={styles.deleteIcon}
+                          />
+                        )}
                       </div>
                     </div>
                   );

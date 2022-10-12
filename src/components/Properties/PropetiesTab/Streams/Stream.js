@@ -1,3 +1,4 @@
+// Changes made to solve Bug Bug 116922 - Workstep streams: while opening the property window and clicking on streams tab the blank screen appears
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { store, useGlobalState } from "state-pool";
@@ -31,6 +32,7 @@ import * as actionCreators from "../../../../redux-store/actions/Properties/show
 import { REGEX, validateRegex } from "../../../../validators/validator";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 import TabsHeading from "../../../../UI/TabsHeading";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function RuleStatement(props) {
   const {
@@ -43,9 +45,7 @@ function RuleStatement(props) {
     isSelected,
   } = props;
   return (
-    <>
-   
-      <div
+    <div
       className="flex"
       style={{
         marginTop: "0.5rem",
@@ -89,7 +89,6 @@ function RuleStatement(props) {
         </p>
       </div>
     </div>
-    </>
   );
 }
 
@@ -99,6 +98,8 @@ function Stream(props) {
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
+  const loadedProcessData = store.getState("loadedProcessData"); //current processdata clicked
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [streamName, setStreamName] = useState("");
   const [workList, setWorkList] = useState("A");
   const [selectedStream, setSelectedStream] = useState(0);
@@ -111,6 +112,7 @@ function Stream(props) {
   const [searchTerm, setSearchTerm] = useState(null);
   const [searchedStreamData, setSearchedStreamData] = useState([]);
   const [validateError, setValidateError] = useState(false);
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   const streamNameHandler = (e) => {
     setStreamName(e.target.value);
@@ -175,7 +177,7 @@ function Stream(props) {
     } else if (
       localLoadedActivityPropertyData?.ActivityProperty?.streamInfo?.esRuleList[
         index
-      ]?.ruleCondList[0].param1?.trim() === ""
+      ]?.ruleCondList[0]?.param1?.trim() === ""
     ) {
       setWorkList("A");
       setdisable(true);
@@ -188,6 +190,9 @@ function Stream(props) {
     setValidateError(false);
   };
 
+  console.log(
+    localLoadedActivityPropertyData?.ActivityProperty?.streamInfo?.esRuleList
+  );
   const addNewStreamHandler = () => {
     let maxRuleId = 0;
     localLoadedActivityPropertyData?.ActivityProperty?.streamInfo?.esRuleList?.forEach(
@@ -212,12 +217,23 @@ function Stream(props) {
         isTempAvailable = true;
       }
     });
+    //console.log(newRule);
     if (isTempAvailable) {
+      //  const len = temp?.ActivityProperty?.streamInfo?.esRuleList?.length || 1;
+      //temp.ActivityProperty.streamInfo.esRuleList[len - 1] = { ...newRule };
       temp.ActivityProperty.streamInfo.esRuleList[0] = { ...newRule };
+      //console.log(temp.ActivityProperty.streamInfo.esRuleList);
     } else {
+      /*  const len =
+        temp?.ActivityProperty?.streamInfo?.esRuleList?.length - 1 || 1;
+      temp.ActivityProperty.streamInfo.esRuleList.splice(len - 1, 0, newRule);
+
+      let ruleOrderId = 1;*/
       temp?.ActivityProperty?.streamInfo?.esRuleList?.forEach((element) => {
         element.ruleOrderId = +element.ruleOrderId + 1;
+        // ruleOrderId++;
       });
+      //  console.log(temp.ActivityProperty.streamInfo.esRuleList);
       temp.ActivityProperty.streamInfo.esRuleList.splice(0, 0, newRule);
     }
     setlocalLoadedActivityPropertyData(temp);
@@ -276,7 +292,7 @@ function Stream(props) {
         }
       });
       let ConOrderID = { condOrderId: +maxId + 1 + "" };
-      let newRow = { ...ConOrderID, ...blankObjectCondition };
+      let newRow = { ...ConOrderID, ...blankObjectCondition, isNew: true };
       let temp = { ...streamsData };
       temp.ActivityProperty.streamInfo.esRuleList[index].ruleCondList.push(
         newRow
@@ -287,6 +303,15 @@ function Stream(props) {
 
   const addStreamHandler = () => {
     //code edited on 5 August 2022 for Bug 112847
+    let tempStream = { ...streamsData };
+    tempStream?.ActivityProperty?.streamInfo?.esRuleList[
+      selectedStream
+    ]?.ruleCondList?.forEach((element) => {
+      if (element.isNew) {
+        delete element.isNew;
+      }
+    });
+    setStreamData(tempStream);
     setValidateError(true);
     if (streamName == null || streamName.trim() === "") {
       setError({
@@ -337,7 +362,7 @@ function Stream(props) {
         //code edited on 5 August 2022 for Bug 112847
         let isValid = true;
         if (workList === "O") {
-          streamsData?.ActivityProperty?.streamInfo?.esRuleList[
+          tempStream?.ActivityProperty?.streamInfo?.esRuleList[
             selectedStream
           ]?.ruleCondList?.forEach((el) => {
             if (
@@ -358,7 +383,7 @@ function Stream(props) {
             ruleCondList:
               workList == "A"
                 ? [streamCondListAll]
-                : streamsData?.ActivityProperty?.streamInfo?.esRuleList[
+                : tempStream?.ActivityProperty?.streamInfo?.esRuleList[
                     selectedStream
                   ]?.ruleCondList,
             ruleId: temp.ActivityProperty.streamInfo.esRuleList[0].ruleId,
@@ -375,6 +400,15 @@ function Stream(props) {
 
   const modifyStreamHandler = () => {
     //code edited on 5 August 2022 for Bug 112847
+    let tempStream = { ...streamsData };
+    tempStream?.ActivityProperty?.streamInfo?.esRuleList[
+      selectedStream
+    ]?.ruleCondList?.forEach((element) => {
+      if (element.isNew) {
+        delete element.isNew;
+      }
+    });
+    setStreamData(tempStream);
     setValidateError(true);
     if (streamName == null || streamName.trim() === "") {
       setError({
@@ -521,50 +555,55 @@ function Stream(props) {
 
   // code added on 28 July 2022 for BugId 111553
   const clearResult = () => {
-    setSearchedStreamData(streamsData);
+    setSearchedStreamData(streamsData ? streamsData : []);
   };
 
   useEffect(() => {
-    let sentence = [];
-    let tempData = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
-    let tempStreamData = [
-      ...tempData?.ActivityProperty?.streamInfo?.esRuleList,
-    ];
-    tempStreamData?.forEach((val, index) => {
-      let ruleStatement = "";
-      val.ruleCondList &&
-        val.ruleCondList.forEach((element) => {
-          if (element.param1?.trim() !== "") {
-            const concatenatedString = ruleStatement.concat(
-              " ",
-              element.param1,
-              " ",
-              element.param1 == "" ? "" : t("is"),
-              " ",
-              getConditionalOperatorLabel(element.operator),
-              " ",
-              element.param2,
-              " ",
-              getLogicalOperator(element.logicalOp)
-            );
-            ruleStatement = concatenatedString;
-          }
-        });
-      sentence.push(ruleStatement);
-      if (
-        tempData?.ActivityProperty?.streamInfo?.esRuleList[index]?.status !==
-        "temporary"
-      ) {
-        tempData.ActivityProperty.streamInfo.esRuleList[index] = {
-          ...tempData?.ActivityProperty?.streamInfo?.esRuleList[index],
-          status: "added",
-        };
-      }
-    });
-    setStreamData(tempData);
-    setSearchedStreamData(tempData);
-    setstreamStatement(sentence);
-    streamSelectHandler(0);
+    // code added on 7 Sep 2022 for BugId 115470
+    if (localLoadedActivityPropertyData?.Status === 0) {
+      let sentence = [];
+      let tempData = JSON.parse(
+        JSON.stringify(localLoadedActivityPropertyData)
+      );
+      let tempStreamData = tempData?.ActivityProperty?.streamInfo?.esRuleList
+        ? [...tempData?.ActivityProperty?.streamInfo?.esRuleList]
+        : [];
+      tempStreamData?.forEach((val, index) => {
+        let ruleStatement = "";
+        val.ruleCondList &&
+          val.ruleCondList.forEach((element) => {
+            if (element.param1?.trim() !== "") {
+              const concatenatedString = ruleStatement.concat(
+                " ",
+                element.param1,
+                " ",
+                element.param1 == "" ? "" : t("is"),
+                " ",
+                getConditionalOperatorLabel(element.operator),
+                " ",
+                element.param2,
+                " ",
+                getLogicalOperator(element.logicalOp)
+              );
+              ruleStatement = concatenatedString;
+            }
+          });
+        sentence.push(ruleStatement);
+        if (
+          tempData?.ActivityProperty?.streamInfo?.esRuleList[index]?.status !==
+          "temporary"
+        ) {
+          tempData.ActivityProperty.streamInfo.esRuleList[index] = {
+            ...tempData?.ActivityProperty?.streamInfo?.esRuleList[index],
+            status: "added",
+          };
+        }
+      });
+      setStreamData(tempData);
+      setSearchedStreamData(tempData);
+      setstreamStatement(sentence);
+      streamSelectHandler(0);
+    }
   }, [localLoadedActivityPropertyData]);
 
   const onDragEnd = (result) => {
@@ -614,22 +653,22 @@ function Stream(props) {
 
   return (
     <React.Fragment>
-    <TabsHeading heading={props.heading} />
       <div className={styles.streamScreen}>
-      
         <div className={styles.leftPanel}>
           <div className="row" style={{ padding: "0 1vw" }}>
-            {/* <h5 style={{ fontSize: "var(--subtitle_text_font_size)" }}>
+            <h5 style={{ fontSize: "var(--subtitle_text_font_size)" }}>
               {t("streams")}
-            </h5> */}
-            <button
-              className={styles.addButton}
-              id="AddStream"
-              data-testid="addNewStreamBtn"
-              onClick={addNewStreamHandler}
-            >
-              {t("addNewStream")}
-            </button>
+            </h5>
+            {!isReadOnly && (
+              <button
+                className={styles.addButton}
+                id="AddStream"
+                data-testid="addNewStreamBtn"
+                onClick={addNewStreamHandler}
+              >
+                {t("addNewStream")}
+              </button>
+            )}
           </div>
           <div style={{ padding: "0 1vw", marginTop: "0.5rem" }}>
             <SearchBox
@@ -656,7 +695,11 @@ function Stream(props) {
                     ref={provided.innerRef}
                   >
                     <div
-                      onMouseOver={() => setshowDragIcon(true)}
+                      onMouseOver={() => {
+                        if (!isReadOnly) {
+                          setshowDragIcon(true);
+                        }
+                      }}
                       onMouseLeave={() => setshowDragIcon(false)}
                     >
                       {searchedStreamData?.ActivityProperty?.streamInfo?.esRuleList?.map(
@@ -666,6 +709,7 @@ function Stream(props) {
                               draggableId={`${index}`}
                               key={`${index}`}
                               index={index}
+                              isDragDisabled={isReadOnly}
                             >
                               {(provided) => (
                                 <div
@@ -708,7 +752,7 @@ function Stream(props) {
               name="ruleName"
               onChangeEvent={(e) => streamNameHandler(e)}
               idTag="StreamNameInput"
-              readOnlyCondition={streamName?.trim() === "Default"}
+              readOnlyCondition={streamName?.trim() === "Default" || isReadOnly}
               errorStatement={error?.streamName?.statement}
               rangeVal={{ start: 0, end: 30 }}
               regexStr={REGEX.StartWithAlphaThenAlphaNumAndOnlyUs}
@@ -733,14 +777,14 @@ function Stream(props) {
                 data-testid="First"
                 control={<Radio />}
                 label={t("all")}
-                disabled={streamName?.trim() === "Default"}
+                disabled={streamName?.trim() === "Default" || isReadOnly}
               />
               <FormControlLabel
                 value="O"
                 data-testid="Second"
                 control={<Radio />}
                 label={t("onFilter")}
-                disabled={streamName?.trim() === "Default"}
+                disabled={streamName?.trim() === "Default" || isReadOnly}
               />
             </RadioGroup>
             {/*code added on 28 July 2022 for BugId 111555 */}
@@ -762,14 +806,15 @@ function Stream(props) {
                     parentIndex={selectedStream}
                     newRow={newRow}
                     showDelIcon={index > 0}
-                    disabled={disable}
+                    disabled={disable || isReadOnly}
                     validateError={validateError} //code edited on 5 August 2022 for Bug 112847
+                    isReadOnly={isReadOnly}
                   />
                 );
               })}
             </div>
             {/*code edited on 28 July 2022 for BugId 111552 */}
-            {streamName?.trim() !== "Default" ? (
+            {streamName?.trim() === "Default" || isReadOnly ?null: (
               <div
                 className={
                   direction === RTL_DIRECTION
@@ -822,7 +867,7 @@ function Stream(props) {
                   </button>
                 ) : null}
               </div>
-            ) : null}
+            )}
           </div>
         )}
       </div>
@@ -842,6 +887,7 @@ const mapStateToProps = (state) => {
     openProcessName: state.openProcessClick.selectedProcessName,
     openProcessType: state.openProcessClick.selectedType,
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

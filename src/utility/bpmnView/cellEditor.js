@@ -5,7 +5,10 @@ import { renameActivity } from "../CommonAPICall/RenameActivity";
 import { maxLabelCharacter, style } from "../../Constants/bpmnView";
 import { renameTask } from "../CommonAPICall/RenameTask";
 import { getRenameActivityQueueObj } from "../abstarctView/getRenameActQueueObj";
-
+import {
+  setQueueRenameModalOpen,
+  setRenameActivityData,
+} from "../../redux-store/actions/Properties/activityAction";
 const mxgraphobj = require("mxgraph")({
   mxImageBasePath: "mxgraph/javascript/src/images",
   mxBasePath: "mxgraph/javascript/src",
@@ -36,7 +39,13 @@ function enableInplaceEditing(graph, cellEditor, bds) {
   }
 }
 
-export function cellEditor(graph, displayMessage, setProcessData, translation) {
+export function cellEditor(
+  graph,
+  displayMessage,
+  setProcessData,
+  translation,
+  dispatch
+) {
   //overwrites resize function to enable inplace editting for swimlane
   graph.cellEditor.resize = function () {
     var state = this.graph.getView().getState(this.editingCell);
@@ -523,7 +532,11 @@ export function cellEditor(graph, displayMessage, setProcessData, translation) {
               state.cell.getStyle() !== style.processTask
             ) {
               //cell edited is activity
-              let oldActName, queueId, processDefId, processName;
+              let oldActName,
+                queueId,
+                processDefId,
+                processName,
+                isSwimlaneQueue;
               let queueInfo = {};
               // code added on 22 July 2022 for BugId 113305
               setProcessData((prevProcessData) => {
@@ -559,21 +572,56 @@ export function cellEditor(graph, displayMessage, setProcessData, translation) {
                     }
                   });
                 }
+                const index = newProcessData.Lanes?.findIndex(
+                  (swimlane) => swimlane.QueueId === queueId
+                );
+                isSwimlaneQueue = index !== -1;
                 processDefId = prevProcessData.ProcessDefId;
                 processName = prevProcessData.ProcessName;
                 return newProcessData;
               });
-              renameActivity(
-                id,
-                oldActName,
-                value,
-                setProcessData,
-                processDefId,
-                processName,
-                queueId,
-                queueInfo,
-                true
-              );
+              //logic for asking queue rename
+
+              /*  const isSwimlaneQueue = (qId) => {
+                const index = props.processData.Lanes?.findIndex(
+                  (swimlane) => swimlane.QueueId === qId
+                );
+            
+                return index !== -1;
+              };*/
+              console.log(queueId, isSwimlaneQueue);
+              if (queueId && queueId < 0) {
+                if (isSwimlaneQueue) {
+                  renameActivity(
+                    id,
+                    oldActName,
+                    value,
+                    setProcessData,
+                    processDefId,
+                    processName,
+                    queueId,
+                    queueInfo,
+                    true,
+                    false, //queue rename will be false because it is swimlane queue
+                    dispatch
+                  );
+                } else if (!isSwimlaneQueue) {
+                  dispatch(
+                    setRenameActivityData({
+                      actId: id,
+                      oldActName,
+                      newActivityName: value,
+                      setProcessData,
+                      processDefId,
+                      processName,
+                      queueId,
+                      queueInfo,
+                      isBpmn: true,
+                    })
+                  );
+                  dispatch(setQueueRenameModalOpen(true));
+                }
+              }
             }
           }
         }

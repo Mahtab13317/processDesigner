@@ -57,14 +57,14 @@ import textAnnotationIcon from "../../assets/bpmnView/artefactsIcon/Text Annotat
 
 export const newTask = {
   icon: taskTemplateIcon,
-  title: taskType_label.newTask_label,
+  title: taskType_label.newTask,
   styleName: style.newTask,
   activitySubType: TaskType.globalTask,
 };
 
 export const processTask = {
   icon: taskTemplateIcon,
-  title: taskType_label.processTask_label,
+  title: taskType_label.processTask,
   styleName: style.processTask,
   activitySubType: TaskType.processTask,
 };
@@ -75,7 +75,7 @@ export const taskTemplate = {
 
 export const startEvent = {
   icon: startEventIcon,
-  title: activityType_label.startEvent_label,
+  title: activityType_label.startEvent,
   description: "toolbox.description.startEvent",
   styleName: style.startEvent,
   activitySubType: activityType.startEvent,
@@ -85,7 +85,7 @@ export const startEvent = {
 
 export const conditionalEvents = {
   icon: conditionalStartIcon,
-  title: activityType_label.conditionalStart_label,
+  title: activityType_label.conditionalStart,
   description: "toolbox.description.conditionalStart",
   styleName: style.conditionalStart,
   activitySubType: activityType.conditionalStart,
@@ -95,7 +95,7 @@ export const conditionalEvents = {
 
 export const messageStart = {
   icon: messageStartIcon,
-  title: activityType_label.messageStart_label,
+  title: activityType_label.messageStart,
   description: "toolbox.description.messageStart",
   styleName: style.messageStart,
   activitySubType: activityType.messageStart,
@@ -105,7 +105,7 @@ export const messageStart = {
 
 export const timerStart = {
   icon: timerStartIcon,
-  title: activityType_label.timerStart_label,
+  title: activityType_label.timerStart,
   description: "toolbox.description.timerStart",
   styleName: style.timerStart,
   activitySubType: activityType.timerStart,
@@ -115,7 +115,7 @@ export const timerStart = {
 
 export const subProcess = {
   icon: subProcessIcon,
-  title: activityType_label.subProcess_label,
+  title: activityType_label.subProcess,
   description: "toolbox.description.embeddedSubprocess",
   styleName: style.subProcess,
   activitySubType: activityType.subProcess,
@@ -125,7 +125,7 @@ export const subProcess = {
 
 export const callActivity = {
   icon: callActivityIcon,
-  title: activityType_label.callActivity_label,
+  title: activityType_label.callActivity,
   description: "toolbox.description.callActivity",
   styleName: style.callActivity,
   activitySubType: activityType.callActivity,
@@ -135,7 +135,7 @@ export const callActivity = {
 
 export const workdesk = {
   icon: workdeskIcon,
-  title: activityType_label.workdesk_label,
+  title: activityType_label.workdesk,
   description: "toolbox.description.workDesk",
   styleName: style.workdesk,
   activitySubType: activityType.workdesk,
@@ -145,7 +145,7 @@ export const workdesk = {
 
 export const robotWorkdesk = {
   icon: robotWorkdeskIcon,
-  title: activityType_label.robotWorkdesk_label,
+  title: activityType_label.robotWorkdesk,
   description: "toolbox.description.robotWorkdesk",
   styleName: style.robotWorkdesk,
   activitySubType: activityType.robotWorkdesk,
@@ -155,7 +155,7 @@ export const robotWorkdesk = {
 
 export const caseWorkdesk = {
   icon: caseWorkdeskIcon,
-  title: activityType_label.caseWorkdesk_label,
+  title: activityType_label.caseWorkdesk,
   description: "toolbox.description.caseWorkdesk",
   styleName: style.caseWorkdesk,
   activitySubType: activityType.caseWorkdesk,
@@ -165,7 +165,7 @@ export const caseWorkdesk = {
 
 export const email = {
   icon: emailIcon,
-  title: activityType_label.email_label,
+  title: activityType_label.email,
   description: "toolbox.description.email",
   styleName: style.email,
   activitySubType: activityType.email,
@@ -175,7 +175,7 @@ export const email = {
 
 export const exportActivity = {
   icon: exportIcon,
-  title: activityType_label.export_label,
+  title: activityType_label.export,
   description: "toolbox.description.export",
   styleName: style.export,
   activitySubType: activityType.export,
@@ -185,7 +185,7 @@ export const exportActivity = {
 
 export const query = {
   icon: queryIcon,
-  title: activityType_label.query_label,
+  title: activityType_label.query,
   description: "toolbox.description.query",
   styleName: style.query,
   activitySubType: activityType.query,
@@ -195,7 +195,7 @@ export const query = {
 
 export const sapAdapter = {
   icon: sapAdapterIcon,
-  title: activityType_label.sapAdapter_label,
+  title: activityType_label.sapAdapter,
   description: "toolbox.description.sapAdapter",
   styleName: style.sapAdapter,
   activitySubType: activityType.sapAdapter,
@@ -205,7 +205,7 @@ export const sapAdapter = {
 
 export const webService = {
   icon: webServiceIcon,
-  title: activityType_label.webService_label,
+  title: activityType_label.webService,
   description: "toolbox.description.webService",
   styleName: style.webService,
   activitySubType: activityType.webService,
@@ -215,7 +215,7 @@ export const webService = {
 
 export const responseConsumerJMS = {
   icon: webServiceIcon,
-  title: activityType_label.responseConsumerJMS_label,
+  title: activityType_label.responseConsumerJMS,
   description: "toolbox.description.webService",
   styleName: style.webService,
   activitySubType: activityType.webService,
@@ -225,7 +225,7 @@ export const responseConsumerJMS = {
 
 export const responseConsumerSOAP = {
   icon: webServiceIcon,
-  title: activityType_label.responseConsumerSOAP_label,
+  title: activityType_label.responseConsumerSOAP,
   description: "toolbox.description.webService",
   styleName: style.webService,
   activitySubType: activityType.webService,
@@ -235,7 +235,7 @@ export const responseConsumerSOAP = {
 
 export const requestConsumerSOAP = {
   icon: webServiceIcon,
-  title: activityType_label.requestConsumerSOAP_label,
+  title: activityType_label.requestConsumerSOAP,
   description: "toolbox.description.webService",
   styleName: style.webService,
   activitySubType: activityType.webService,
@@ -245,7 +245,7 @@ export const requestConsumerSOAP = {
 
 export const restful = {
   icon: webServiceIcon,
-  title: activityType_label.restful_label,
+  title: activityType_label.restful,
   description: "toolbox.description.webService",
   styleName: style.webService,
   activitySubType: activityType.webService,
@@ -255,7 +255,7 @@ export const restful = {
 
 export const businessRule = {
   icon: businessRuleIcon,
-  title: activityType_label.businessRule_label,
+  title: activityType_label.businessRule,
   description: "toolbox.description.businessRule",
   styleName: style.businessRule,
   activitySubType: activityType.businessRule,
@@ -265,7 +265,7 @@ export const businessRule = {
 
 export const dmsAdapter = {
   icon: dmsAdapterIcon,
-  title: activityType_label.dmsAdapter_label,
+  title: activityType_label.dmsAdapter,
   description: "toolbox.description.dmsAdapter",
   styleName: style.dmsAdapter,
   activitySubType: activityType.dmsAdapter,
@@ -275,7 +275,7 @@ export const dmsAdapter = {
 
 export const sharePoint = {
   icon: sharePointIcon,
-  title: activityType_label.sharePoint_label,
+  title: activityType_label.sharePoint,
   description: "toolbox.description.sharePoint",
   styleName: style.sharePoint,
   activitySubType: activityType.sharePoint,
@@ -285,7 +285,7 @@ export const sharePoint = {
 
 export const receive = {
   icon: receiveIcon,
-  title: activityType_label.receive_label,
+  title: activityType_label.receive,
   description: "toolbox.description.receive",
   styleName: style.receive,
   activitySubType: activityType.receive,
@@ -295,7 +295,7 @@ export const receive = {
 
 export const reply = {
   icon: replyIcon,
-  title: activityType_label.reply_label,
+  title: activityType_label.reply,
   description: "toolbox.description.reply",
   styleName: style.reply,
   activitySubType: activityType.reply,
@@ -305,7 +305,7 @@ export const reply = {
 
 export const omsAdapter = {
   icon: omsAdapterIcon,
-  title: activityType_label.ccm_label,
+  title: activityType_label.ccm,
   description: "toolbox.description.omsAdapter",
   styleName: style.omsAdapter,
   activitySubType: activityType.omsAdapter,
@@ -315,7 +315,7 @@ export const omsAdapter = {
 
 export const event = {
   icon: eventIcon,
-  title: activityType_label.event_label,
+  title: activityType_label.event,
   description: "toolbox.description.eventWorkstep",
   styleName: style.event,
   activitySubType: activityType.event,
@@ -325,7 +325,7 @@ export const event = {
 
 export const jmsProducer = {
   icon: jmsProducerIcon,
-  title: activityType_label.jmsProducer_label,
+  title: activityType_label.jmsProducer,
   description: "toolbox.description.jmsProducer",
   styleName: style.jmsProducer,
   activitySubType: activityType.jmsProducer,
@@ -335,7 +335,7 @@ export const jmsProducer = {
 
 export const jmsConsumer = {
   icon: jmsConsumerIcon,
-  title: activityType_label.jmsConsumer_label,
+  title: activityType_label.jmsConsumer,
   description: "toolbox.description.jmsConsumer",
   styleName: style.jmsConsumer,
   activitySubType: activityType.jmsConsumer,
@@ -345,7 +345,7 @@ export const jmsConsumer = {
 
 export const timerEvents = {
   icon: timerEventIcon,
-  title: activityType_label.timerEvents_label,
+  title: activityType_label.timerEvents,
   description: "toolbox.description.timerEventWorkstep",
   styleName: style.timerEvents,
   activitySubType: activityType.timerEvents,
@@ -355,7 +355,7 @@ export const timerEvents = {
 
 export const inclusiveDistribute = {
   icon: inclusiveGatewayIcon,
-  title: activityType_label.inclusiveDistribute_label,
+  title: activityType_label.inclusiveDistribute,
   description: "toolbox.description.inclusiveDistribute",
   styleName: style.inclusiveDistribute,
   activitySubType: activityType.inclusiveDistribute,
@@ -365,7 +365,7 @@ export const inclusiveDistribute = {
 
 export const parallelDistribute = {
   icon: parallelGatewayIcon,
-  title: activityType_label.parallelDistribute_label,
+  title: activityType_label.parallelDistribute,
   description: "toolbox.description.parallelDistribute",
   styleName: style.parallelDistribute,
   activitySubType: activityType.parallelDistribute,
@@ -375,7 +375,7 @@ export const parallelDistribute = {
 
 export const parallelCollect = {
   icon: parallelCollectIcon,
-  title: activityType_label.parallelCollect_label,
+  title: activityType_label.parallelCollect,
   description: "toolbox.description.parallelCollect",
   styleName: style.parallelCollect,
   activitySubType: activityType.parallelCollect,
@@ -385,7 +385,7 @@ export const parallelCollect = {
 
 export const dataBasedExclusive = {
   icon: exclusiveGatewayIcon,
-  title: activityType_label.dataBasedExclusive_label,
+  title: activityType_label.dataBasedExclusive,
   description: "toolbox.description.dataBasedExclusive",
   styleName: style.dataBasedExclusive,
   activitySubType: activityType.dataBasedExclusive,
@@ -395,7 +395,7 @@ export const dataBasedExclusive = {
 
 export const inclusiveCollect = {
   icon: inclusiveCollectIcon,
-  title: activityType_label.inclusiveCollect_label,
+  title: activityType_label.inclusiveCollect,
   description: "toolbox.description.inclusiveCollect",
   styleName: style.inclusiveCollect,
   activitySubType: activityType.inclusiveCollect,
@@ -405,7 +405,7 @@ export const inclusiveCollect = {
 
 export const endEvent = {
   icon: endEventIcon,
-  title: activityType_label.endEvent_label,
+  title: activityType_label.endEvent,
   description: "toolbox.description.endEvent",
   styleName: style.endEvent,
   activitySubType: activityType.endEvent,
@@ -415,7 +415,7 @@ export const endEvent = {
 
 export const terminate = {
   icon: terminateIcon,
-  title: activityType_label.terminate_label,
+  title: activityType_label.terminate,
   description: "toolbox.description.terminateEvent",
   styleName: style.terminate,
   activitySubType: activityType.terminate,
@@ -425,7 +425,7 @@ export const terminate = {
 
 export const messageEnd = {
   icon: messageEndIcon,
-  title: activityType_label.messageEnd_label,
+  title: activityType_label.messageEnd,
   description: "toolbox.description.messageEnd",
   styleName: style.messageEnd,
   activitySubType: activityType.messageEnd,
@@ -435,7 +435,7 @@ export const messageEnd = {
 
 export const dataExchange = {
   icon: dataExchangeIcon,
-  title: activityType_label.dataExchange_label,
+  title: activityType_label.dataExchange,
   description: "toolbox.description.dataExchange",
   styleName: style.dataExchange,
   activitySubType: activityType.dataExchange,

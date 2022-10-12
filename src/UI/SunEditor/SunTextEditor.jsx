@@ -21,9 +21,18 @@ import {
 import "suneditor/dist/css/suneditor.min.css";
 import "./suneditor-custom.css";
 import TextEditorToolbarJson from "./TextEditorToolbarJson";
+import {
+  isProcessDeployedFunc,
+  isReadOnlyFunc,
+} from "../../utility/CommonFunctionCall/CommonFunctionCall";
+import { store, useGlobalState } from "state-pool";
 
 export default function SunTextEditor(props) {
-  const { autoFocus, width } = props;
+  const { autoFocus, width, disabled } = props;
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
+  let isReadOnly = isProcessDeployedFunc(localLoadedProcessData);
+
   var toolbarOptions = [];
   Object.keys(TextEditorToolbarJson).map((key) => {
     if (Array.isArray(TextEditorToolbarJson[key])) {
@@ -40,17 +49,24 @@ export default function SunTextEditor(props) {
   const toolbarOptionsArray =
     props.previewmode === true ? emptyButtonList : toolbarOptions;
   const [content, setContent] = useState(
-    props.paragraphText && props.paragraphText.length > 0
-      ? props.paragraphText
-      : ""
+    props.value && props.value.length > 0 ? props.value : ""
   );
+  const [addStyle, setaddStyle] = useState(false);
+
+  useEffect(() => {
+    if (props.hasOwnProperty("width") && props.hasOwnProperty("customHeight"))
+      setaddStyle(true);
+  }, []);
+
+  useEffect(() => {
+    if (props.value && props.value?.trim() !== "") {
+      setContent(props.value);
+    }
+  }, [props.value]);
 
   const handleContent = (content) => {
     if (props.descriptionInputcallBack) {
       props.descriptionInputcallBack(content, props.name);
-    }
-    if (props.paragraphText) {
-      props.paragraphText = content;
     }
   };
 
@@ -61,11 +77,7 @@ export default function SunTextEditor(props) {
   const handleDrop = (event) => {
     return false;
   };
-  const [addStyle, setaddStyle] = useState(false);
-  React.useEffect(() => {
-    if (props.hasOwnProperty("width") && props.hasOwnProperty("customHeight"))
-      setaddStyle(true);
-  }, []);
+
   const handleKey = (e) => {
     props.getValue(e);
   };
@@ -106,7 +118,6 @@ export default function SunTextEditor(props) {
               font: ["Arial", "tahoma", "Courier New,Courier", "Verdana"],
               fontSize: [5, 8, 10, 14, 18, 24, 36],
               fontSizeUnit: "px",
-              value: props.value,
             }}
             id="sunEE"
             onInput={handleKey}
@@ -115,6 +126,7 @@ export default function SunTextEditor(props) {
             onPaste={handlePaste}
             onDrop={handleDrop}
             width={width ? width : "100%"}
+            disable={disabled || isReadOnly}
           />
         </form>
       </div>

@@ -16,6 +16,8 @@ import { showDrawer } from "../../../../redux-store/actions/Properties/showDrawe
 import { selectedTask } from "../../../../redux-store/actions/selectedCellActions";
 import { getSelectedCellType } from "../../../../utility/abstarctView/getSelectedCellType";
 import { setGlobalTaskTemplates } from "../../../../redux-store/actions/Properties/globalTaskTemplateAction";
+import { useRef } from "react";
+import { FieldValidations } from "../../../../utility/FieldValidations/fieldValidations";
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -236,6 +238,8 @@ export default CreateGlobalTaskTemplateModal;
 }
 const Content = (props) => {
   const { templateName, handleChange } = props;
+  const templateNameRef = useRef();
+
   return (
     <>
       <div>
@@ -246,6 +250,10 @@ const Content = (props) => {
           required={true}
           width={442}
           onChange={handleChange}
+          inputRef={templateNameRef}
+          onKeyPress={(e) =>
+            FieldValidations(e, 150, templateNameRef.current, 255)
+          }
         />
       </div>
     </>

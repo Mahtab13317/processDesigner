@@ -11,6 +11,8 @@ import {
   STATE_EDITED,
 } from "../../../Constants/appConstants";
 import "./commonTrigger.css";
+import { useRef } from "react";
+import { FieldValidations } from "../../../utility/FieldValidations/fieldValidations";
 
 function TriggerMainFormView(props) {
   let { t } = useTranslation();
@@ -27,6 +29,8 @@ function TriggerMainFormView(props) {
     setSelectedField,
   } = props;
   let readOnlyProcess = props.processType !== PROCESSTYPE_LOCAL;
+  const triggerNameRef = useRef();
+
 
   return (
     <div className={styles.triggerFormView}>
@@ -77,6 +81,10 @@ function TriggerMainFormView(props) {
                 : `${styles.triggerFormInput} ${styles.nameFormInput}`
             }
             disabled={readOnlyProcess}
+            ref={triggerNameRef}
+            onKeyPress={(e) =>
+              FieldValidations(e, 150, triggerNameRef.current, 50)
+            }
           />
         </div>
         <div className="flex">
@@ -129,9 +137,12 @@ function TriggerMainFormView(props) {
                 });
               }
             }}
+
             id={`trigger_type_list`}
+            
           >
-            {triggerTypeOptionList.map((option) => {
+            {
+              triggerTypeOptionList.map((option) => {
               return (
                 <MenuItem
                   className={

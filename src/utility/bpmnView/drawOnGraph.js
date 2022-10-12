@@ -15,8 +15,11 @@ import {
   expandedViewWidth,
   expandedViewHeight,
   milestoneTitleWidth,
+  smallIconSize,
 } from "../../Constants/bpmnView";
 import { getActivityById } from "./getActivity";
+import ActivityCheckedOutLogo from "../../assets/bpmnViewIcons/ActivityCheckedOut.svg";
+import { listOfImages } from "../iconLibrary";
 
 const mxgraphobj = require("mxgraph")({
   mxImageBasePath: "mxgraph/javascript/src/images",
@@ -26,6 +29,9 @@ const mxgraphobj = require("mxgraph")({
 const mxCell = mxgraphobj.mxCell;
 const mxGeometry = mxgraphobj.mxGeometry;
 const mxPoint = mxgraphobj.mxPoint;
+const mxUtils = mxgraphobj.mxUtils;
+const mxEvent = mxgraphobj.mxEvent;
+const mxConstants = mxgraphobj.mxConstants;
 
 export function dimensionInMultipleOfGridSize(length) {
   return Math.ceil(length / graphGridSize) * graphGridSize;
@@ -51,6 +57,9 @@ export function cleanTheGraph(graph, swimlaneLayer, milestoneLayer, rootLayer) {
   let grpChild = graph.view.graph.container.children;
   [...grpChild].forEach((child) => {
     if (child.getAttribute("class") === "collapsed_view") {
+      graph.view.graph.container.removeChild(child);
+    }
+    if (child.getAttribute("class") === "checkIcon") {
       graph.view.graph.container.removeChild(child);
     }
   });
@@ -172,6 +181,7 @@ export function drawOnGraph(
 
     //draw activities
     milestone.Activities?.forEach((activity) => {
+      let isDefault = !activity.ImageName || activity.ImageName?.trim() === "";
       let x = dimensionInMultipleOfGridSize(parseInt(activity.xLeftLoc));
       let y = dimensionInMultipleOfGridSize(
         parseInt(activity.yTopLoc) - milestoneTitleWidth
@@ -180,11 +190,18 @@ export function drawOnGraph(
         activity.ActivityType,
         activity.ActivitySubType
       );
-      var vertex;
+      var vertex, iconSrc;
       let extraHeight = showTasklane ? tasklaneHeight : 0;
       let laneIdx = indexByLaneId.get(activity.LaneId);
       for (let i = showTasklane ? 1 : 0; i < laneIdx; i++) {
         extraHeight = extraHeight + laneIdxByHeight.get(i);
+      }
+      if (!isDefault) {
+        listOfImages?.names?.forEach((el, index) => {
+          if (el === activity.ImageName) {
+            iconSrc = listOfImages?.images[index]?.default;
+          }
+        });
       }
       if (activityObj && defaultShapeVertex.includes(activityObj.styleName)) {
         vertex = new mxCell(
@@ -203,7 +220,11 @@ export function drawOnGraph(
                 heightForDefaultVertex
               ),
           activity.hide && activityObj.styleName === style.subProcess
-            ? `${activityObj.styleName};opacity=0;noLabel=true`
+            ? !isDefault
+              ? `${activityObj.styleName};image=${iconSrc};opacity=0;noLabel=true`
+              : `${activityObj.styleName};opacity=0;noLabel=true`
+            : !isDefault
+            ? `${activityObj.styleName};image=${iconSrc}`
             : activityObj.styleName
         );
       } else if (activityObj) {
@@ -215,7 +236,9 @@ export function drawOnGraph(
             cellSize.w,
             cellSize.h
           ),
-          activityObj.styleName
+          !isDefault
+            ? `${activityObj.styleName};image=${iconSrc}`
+            : activityObj.styleName
         );
       }
       if (vertex) {
@@ -280,6 +303,49 @@ export function drawOnGraph(
               vertex12.setId(act.ActivityId);
               expandEmbeddedAct.insert(vertex12);
             });
+        }
+
+        if (activity.CheckedOut === "Y") {
+          let isIconPresent = false;
+          let grpChild = graph.view.graph.container.children;
+          [...grpChild].forEach((child) => {
+            if (child.getAttribute("id") === `act_${activity.ActivityId}`) {
+              isIconPresent = true;
+            }
+          });
+          if (!isIconPresent) {
+            lanes.get(activity.LaneId).isChecked = true;
+            let div = document.createElement("div");
+            div.setAttribute(
+              "style",
+              "position:absolute;cursor:pointer;display:flex;flex-direction:column;z-index:10"
+            );
+            div.setAttribute("class", `lane_${activity.LaneId} checkIcon`);
+            div.setAttribute("id", `act_${activity.ActivityId}`);
+            if (
+              activityObj &&
+              defaultShapeVertex.includes(activityObj.styleName)
+            ) {
+              div.style.left = x + milestoneWidth + gridSize * 0.8 + "px";
+              div.style.top = y - gridSize * 2.2 + "px";
+            } else if (activityObj) {
+              div.style.left = x + milestoneWidth + gridSize + "px";
+              div.style.top = y - gridSize * 2 + "px";
+            }
+            var img1 = mxUtils.createImage(ActivityCheckedOutLogo);
+            img1.setAttribute("title", "Checked-out");
+            img1.style.width = smallIconSize.w * 1.25 + "px";
+            img1.style.height = smallIconSize.h * 1.25 + "px";
+            mxEvent.addGestureListeners(
+              img1,
+              mxUtils.bind(this, function (evt) {
+                // Disables dragging the image
+                mxEvent.consume(evt);
+              })
+            );
+            div.appendChild(img1);
+            graph.view.graph.container.appendChild(div);
+          }
         }
       }
     });

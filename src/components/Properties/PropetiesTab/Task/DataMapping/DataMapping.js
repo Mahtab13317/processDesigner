@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Select, MenuItem, Checkbox } from "@material-ui/core";
 import { store, useGlobalState } from "state-pool";
 import classes from "../Task.module.css";
@@ -10,160 +10,321 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { useTranslation } from "react-i18next";
+import { setActivityPropertyChange } from "../../../../../redux-store/slices/ActivityPropertyChangeSlice";
+import { useDispatch } from "react-redux";
+import { getTypeByVariable } from "../../../../../utility/ProcessSettings/Triggers/getVariableType";
+import { propertiesLabel } from "../../../../../Constants/appConstants";
 
-function DataMapping(props) {
+function DataMapping({ taskInfo, ...props }) {
+  const dispatch = useDispatch();
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
-  const [taskVariables, settaskVariables] = React.useState([]);
-  const varDef = store.getState("variableDefinition");
   const actProperty = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(actProperty);
-  const [localVarDef] = useGlobalState(varDef);
-  const [dataMapping, setdataMapping] = useState();
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
 
-  useEffect(() => {
-    settaskVariables(props.taskInfo.TaskTemplateVar);
-  }, [props.taskInfo?.TaskTemplateVar]);
+  const getVariableDetails = (id) => {
+    let temp;
+    localLoadedProcessData.Variable.forEach((_var) => {
+      if (_var.VariableId == id) {
+        temp = _var;
+      }
+    });
+    return temp;
+  };
 
-  useEffect(() => {
-    localLoadedActivityPropertyData.ActivityProperty.Interfaces?.TaskTypes?.forEach(
-      (task) => {
-        if (task.TaskId === props.taskInfo.TaskId) {
-          setdataMapping(task);
+  const changeDataMapping = (e, taskVar) => {
+    let temp = global.structuredClone(localLoadedActivityPropertyData);
+    Object.values(
+      temp.ActivityProperty?.wdeskInfo?.objPMWdeskTasks?.taskMap
+    ).forEach((task) => {
+      if (e.target.value === "selectVar") {
+        Object.entries(task.m_hMapFieldsMapping).forEach((taskVariable) => {
+          if (taskVariable[1].m_strMappedTaskVarName === taskVar.VariableName) {
+            delete temp.ActivityProperty.wdeskInfo.objPMWdeskTasks.taskMap[
+              taskInfo.taskTypeInfo.taskName
+            ].m_hMapFieldsMapping[taskVariable[0]];
+          }
+        });
+      } else {
+        if (+task?.taskTypeInfo?.taskId === +taskInfo?.taskTypeInfo?.taskId) {
+          let fieldMapping = {};
+          fieldMapping = {
+            [`${taskVar.TemplateVariableId}`]: {
+              m_strMappedTaskVarName: taskVar.VariableName,
+              m_strTaskReadOnlyVar: "N",
+              varName: getVariableDetails(e.target.value).VariableName,
+              variableId: getVariableDetails(e.target.value).VariableId,
+              varTypeFieldId: getVariableDetails(e.target.value).VarFieldId,
+            },
+          };
+          temp.ActivityProperty.wdeskInfo.objPMWdeskTasks.taskMap[
+            taskInfo.taskTypeInfo.taskName
+          ].m_hMapFieldsMapping = {
+            ...task.m_hMapFieldsMapping,
+            ...fieldMapping,
+          };
+        }
+      }
+    });
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.task]: { isModified: true, hasError: false },
+      })
+    );
+  };
+
+  const getChecked = (varName) => {
+    let temp = false;
+    Object.values(
+      localLoadedActivityPropertyData.ActivityProperty?.wdeskInfo
+        ?.objPMWdeskTasks?.taskMap
+    ).forEach((task) => {
+      if (task.taskTypeInfo.taskId == taskInfo.taskTypeInfo.taskId) {
+        Object.values(task?.m_hMapFieldsMapping).forEach((taskVar) => {
+          if (taskVar.m_strMappedTaskVarName === varName) {
+            temp = taskVar?.m_strTaskReadOnlyVar === "Y" ? true : false;
+          }
+        });
+      }
+    });
+    return temp;
+  };
+
+  const getValue = (name) => {
+    let temp = {};
+    Object.values(
+      localLoadedActivityPropertyData.ActivityProperty?.wdeskInfo
+        ?.objPMWdeskTasks?.taskMap
+    ).forEach((task) => {
+      if (task.taskTypeInfo.taskId == taskInfo.taskTypeInfo.taskId) {
+        Object.values(task?.m_hMapFieldsMapping).forEach((taskVar) => {
+          if (taskVar.m_strMappedTaskVarName === name) {
+            temp = taskVar;
+          }
+        });
+      }
+    });
+    return temp;
+  };
+
+  const changeDataMappingCheck = (e, taskData) => {
+    let temp = global.structuredClone(localLoadedActivityPropertyData);
+    Object.values(
+      temp.ActivityProperty?.wdeskInfo?.objPMWdeskTasks?.taskMap
+    ).forEach((task) => {
+      if (task.taskTypeInfo.taskId === taskInfo.taskTypeInfo.taskId) {
+        Object.keys(task?.m_hMapFieldsMapping).forEach((taskVar, idx) => {
+          if (
+            task?.m_hMapFieldsMapping[taskVar].m_strMappedTaskVarName ===
+            taskData.VariableName
+          ) {
+            temp.ActivityProperty.wdeskInfo.objPMWdeskTasks.taskMap[
+              taskInfo.taskTypeInfo.taskName
+            ].m_hMapFieldsMapping[taskVar].m_strTaskReadOnlyVar = e.target
+              .checked
+              ? "Y"
+              : "N";
+          }
+        });
+      }
+    });
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.task]: { isModified: true, hasError: false },
+      })
+    );
+  };
+
+  const checkForVarRights = (data) => {
+    let temp = false;
+    localLoadedActivityPropertyData?.ActivityProperty?.m_objDataVarMappingInfo?.dataVarList?.forEach(
+      (item, i) => {
+        if (item?.processVarInfo?.variableId === data.VariableId) {
+          if (
+            item?.m_strFetchedRights === "O" ||
+            item?.m_strFetchedRights === "R"
+          ) {
+            temp = true;
+          }
         }
       }
     );
-  }, [localLoadedActivityPropertyData.ActivityProperty?.Interfaces]);
-
-  const changeDataMapping = (e, task) => {
-    let temp = JSON.parse(JSON.stringify(dataMapping));
-    temp?.VariableMappings?.forEach((data) => {
-      if (data.TaskVariableName === task.TaskVariableName) {
-        data.VariableId = e.target.value + "";
-      }
-    });
-    setdataMapping(temp);
+    return temp;
   };
 
   return (
     <div
       style={{
         width: "100%",
-        height: "40vh",
-        fontFamily: "Open Sans",
-        padding: "0.5rem",
+        height: "100%",
+        fontFamily: "var(--font_family)",
+        padding: "1rem 1vw",
         direction: direction,
       }}
     >
-      <TableContainer
-        className={classes.queuetable}
-        style={{ direction: direction }}
-        //   component={Paper}
-      >
-        <Table style={{ width: "100%" }}>
-          <TableHead className={classes.tableHead}>
-            <TableRow style={{ maxHeight: "2rem" }}>
-              <TableCell
-                width="33%"
-                style={{ paddingBottom: "0" }}
-                align={direction === "rtl" ? "right" : "left"}
-              >
-                <p className={classes.tableCellText}>Task Variable</p>
-              </TableCell>
-              <TableCell
-                width="47%"
-                style={{ paddingBottom: "0" }}
-                align={direction === "rtl" ? "right" : "left"}
-              >
-                <p className={classes.tableCellText}>Process Variable(s)</p>
-              </TableCell>
-              <TableCell
-                width="20%"
-                style={{ paddingBottom: "0" }}
-                align={direction === "rtl" ? "right" : "left"}
-              >
-                <p className={classes.tableCellText}>Read Only</p>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {dataMapping &&
-              dataMapping.VariableMappings.length > 0 &&
-              dataMapping.VariableMappings.map((task) => (
-                <TableRow className={classes.tableRow}>
-                  <TableCell
-                    width="33%"
-                    align={direction === "rtl" ? "right" : "left"}
-                    component="th"
-                    scope="row"
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        width: "100%",
-                        justifyContent: "space-between",
-                      }}
+      {localLoadedProcessData?.Tasks?.filter(
+        (task) => task.TaskId === taskInfo?.taskTypeInfo?.taskId
+      )[0]?.TaskTemplateVar?.length > 0 ? (
+        <TableContainer
+          className={classes.queuetable}
+          style={{ direction: direction }}
+        >
+          <Table style={{ width: "100%", border: "1px solid #cecece" }}>
+            <TableHead className={classes.tableHead}>
+              <TableRow style={{ height: "var(--line_height)" }}>
+                <TableCell
+                  width="45%"
+                  style={{ padding: "0.75rem 1vw" }}
+                  align={direction === "rtl" ? "right" : "left"}
+                >
+                  <p className={classes.tableCellText}>Task Variable</p>
+                </TableCell>
+                <TableCell
+                  width="35%"
+                  style={{ padding: "0.75rem 1vw" }}
+                  align={direction === "rtl" ? "right" : "left"}
+                >
+                  <p className={classes.tableCellText}>Process Variable(s)</p>
+                </TableCell>
+                <TableCell
+                  width="20%"
+                  style={{ padding: "0.75rem 1vw" }}
+                  align={direction === "rtl" ? "right" : "left"}
+                >
+                  <p className={classes.tableCellText}>Read Only</p>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {localLoadedProcessData?.Tasks?.filter(
+                (task) => task.TaskId === taskInfo?.taskTypeInfo?.taskId
+              )[0]?.TaskTemplateVar?.map((task) => {
+                return (
+                  <TableRow className={classes.tableRow}>
+                    <TableCell
+                      width="45%"
+                      style={{ padding: "0.5rem 1vw" }}
+                      align={direction === "rtl" ? "right" : "left"}
+                      component="th"
+                      scope="row"
                     >
-                      <p
+                      <div
                         style={{
-                          fontSize: "0.8rem",
-                          fontWeight: "500",
-                          color: "#000000",
+                          display: "flex",
+                          flexDirection: "row",
+                          width: "80%",
+                          gap: "3vw",
+                          justifyContent: "space-between",
                         }}
                       >
-                        {task.TaskVariableName}
-                      </p>
-                      <p
-                        style={{ marginRight: "-1rem", paddingTop: "0.25rem" }}
-                      >
-                        =
-                      </p>
-                    </div>
-                  </TableCell>
-                  <TableCell
-                    width="47%"
-                    align={direction === "rtl" ? "right" : "left"}
-                  >
-                    <Select
-                      IconComponent={ExpandMoreIcon}
-                      style={{
-                        width: "75%",
-                        height: "30px",
-                      }}
-                      // variant="outlined"
-                      value={task.VariableId}
-                      onChange={(e) => changeDataMapping(e, task)}
+                        <p
+                          style={{
+                            fontSize: "var(--base_text_font_size)",
+                            fontWeight: "500",
+                            color: "#000000",
+                            flex: "1",
+                          }}
+                        >
+                          {task.VariableName}
+                        </p>
+                        <p
+                          style={{
+                            fontSize: "var(--base_text_font_size)",
+                          }}
+                        >
+                          =
+                        </p>
+                      </div>
+                    </TableCell>
+                    <TableCell
+                      width="35%"
+                      align={direction === "rtl" ? "right" : "left"}
+                      style={{ padding: "0.5rem 1vw" }}
                     >
-                      <MenuItem value="selectVar">
-                        <p className={classes.tableCellBody}>Select Variable</p>
-                      </MenuItem>
-                      {localVarDef.map((item) => {
-                        return (
-                          <MenuItem
-                            key={item.VariableId}
-                            value={item.VariableId}
-                          >
-                            <p className={classes.tableCellBody}>
-                              {item.VariableName}
-                            </p>
-                          </MenuItem>
-                        );
-                      })}
-                    </Select>
-                  </TableCell>
-                  <TableCell
-                    width="20%"
-                    align={direction === "rtl" ? "right" : "left"}
-                  >
-                    <Checkbox checked={task.ReadOnly === "Y" ? true : false} />
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                      <Select
+                        IconComponent={ExpandMoreIcon}
+                        style={{
+                          width: "70%",
+                          height: "var(--line_height)",
+                          border: "1px solid #cecece",
+                        }}
+                        MenuProps={{
+                          anchorOrigin: {
+                            vertical: "bottom",
+                            horizontal: "left",
+                          },
+                          transformOrigin: {
+                            vertical: "top",
+                            horizontal: "left",
+                          },
+                          getContentAnchorEl: null,
+                          PaperProps: {
+                            style: {
+                              maxHeight: "15rem",
+                            },
+                          },
+                        }}
+                        value={
+                          getValue(task.VariableName)?.variableId
+                            ? getValue(task.VariableName)?.variableId
+                            : "selectVar"
+                        }
+                        onChange={(e) => changeDataMapping(e, task)}
+                      >
+                        <MenuItem value="selectVar">
+                          <p className={classes.tableCellBody}>
+                            Select Variable
+                          </p>
+                        </MenuItem>
+                        {localLoadedProcessData?.Variable?.filter(
+                          (data) =>
+                            (data.VariableScope === "S" ||
+                              data.VariableScope === "M" ||
+                              (data.VariableScope === "U" &&
+                                checkForVarRights(data)) ||
+                              (data.VariableScope === "I" &&
+                                checkForVarRights(data))) &&
+                            +getTypeByVariable(task.VariableType) ===
+                              +data.VariableType
+                        )?.map((item) => {
+                          return (
+                            <MenuItem
+                              key={item.VariableId}
+                              value={item.VariableId}
+                            >
+                              <p className={classes.tableCellBody}>
+                                {item.VariableName}
+                              </p>
+                            </MenuItem>
+                          );
+                        })}
+                      </Select>
+                    </TableCell>
+                    <TableCell
+                      width="20%"
+                      align={direction === "rtl" ? "right" : "left"}
+                      style={{ padding: "0.5rem 1vw" }}
+                    >
+                      <Checkbox
+                        checked={getChecked(task.VariableName)}
+                        disabled={!getValue(task.VariableName)?.variableId}
+                        onChange={(e) => changeDataMappingCheck(e, task)}
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      ) : (
+        "No Data"
+      )}
     </div>
   );
 }

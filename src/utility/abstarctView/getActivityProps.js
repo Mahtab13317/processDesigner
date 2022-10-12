@@ -48,7 +48,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "startActivityCard";
     color = "#448047";
     backgroundColor = "#f5fff5";
-    activityTypeName = activityType_label.startEvent_label;
+    activityTypeName = activityType_label.startEvent;
     activityName = activityType.startEvent;
   } else if (+activityTypeInt === 1 && +activitySubTypeInt === 3) {
     //conditional start
@@ -56,7 +56,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "startActivityCard";
     color = "#448047";
     backgroundColor = "#f5fff5";
-    activityTypeName = activityType_label.conditionalStart_label;
+    activityTypeName = activityType_label.conditionalStart;
     activityName = activityType.conditionalStart;
   } else if (+activityTypeInt === 1 && +activitySubTypeInt === 7) {
     //message start
@@ -64,7 +64,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "startActivityCard";
     color = "#448047";
     backgroundColor = "#f5fff5";
-    activityTypeName = activityType_label.messageStart_label;
+    activityTypeName = activityType_label.messageStart;
     activityName = activityType.messageStart;
   } else if (+activityTypeInt === 1 && +activitySubTypeInt === 6) {
     //timer start
@@ -72,7 +72,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "startActivityCard";
     color = "#448047";
     backgroundColor = "#f5fff5";
-    activityTypeName = activityType_label.timerStart_label;
+    activityTypeName = activityType_label.timerStart;
     activityName = activityType.timerStart;
   } else if (+activityTypeInt === 41 && +activitySubTypeInt === 1) {
     //subprocess or embedded subprocess
@@ -80,7 +80,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.subProcess_label;
+    activityTypeName = activityType_label.subProcess;
     activityName = activityType.subProcess;
   } else if (+activityTypeInt === 18 && +activitySubTypeInt === 1) {
     //call activity
@@ -88,7 +88,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.callActivity_label;
+    activityTypeName = activityType_label.callActivity;
     activityName = activityType.callActivity;
   } else if (+activityTypeInt === 10 && +activitySubTypeInt === 3) {
     // workdesk
@@ -96,7 +96,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.workdesk_label;
+    activityTypeName = activityType_label.workdesk;
     activityName = activityType.workdesk;
   } else if (+activityTypeInt === 32 && +activitySubTypeInt === 1) {
     //case workdesk
@@ -104,7 +104,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.caseWorkdesk_label;
+    activityTypeName = activityType_label.caseWorkdesk;
     activityName = activityType.caseWorkdesk;
   } else if (+activityTypeInt === 10 && +activitySubTypeInt === 7) {
     //robot workdesk
@@ -112,7 +112,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.robotWorkdesk_label;
+    activityTypeName = activityType_label.robotWorkdesk;
     activityName = activityType.robotWorkdesk;
   } else if (+activityTypeInt === 1 && +activitySubTypeInt === 2) {
     //receive
@@ -120,7 +120,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.receive_label;
+    activityTypeName = activityType_label.receive;
     activityName = activityType.receive;
   } else if (+activityTypeInt === 26 && +activitySubTypeInt === 1) {
     //reply
@@ -128,7 +128,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.reply_label;
+    activityTypeName = activityType_label.reply;
     activityName = activityType.reply;
   } else if (+activityTypeInt === 10 && +activitySubTypeInt === 1) {
     //email
@@ -136,7 +136,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.email_label;
+    activityTypeName = activityType_label.email;
     activityName = activityType.email;
   } else if (+activityTypeInt === 20 && +activitySubTypeInt === 1) {
     //export
@@ -144,7 +144,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.export_label;
+    activityTypeName = activityType_label.export;
     activityName = activityType.export;
   } else if (+activityTypeInt === 11 && +activitySubTypeInt === 1) {
     //query
@@ -152,7 +152,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.query_label;
+    activityTypeName = activityType_label.query;
     activityName = activityType.query;
   } else if (+activityTypeInt === 22 && +activitySubTypeInt === 1) {
     //webservice
@@ -160,7 +160,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.webService_label;
+    activityTypeName = activityType_label.webService;
     activityName = activityType.webService;
   } else if (+activityTypeInt === 23 && +activitySubTypeInt === 1) {
     //response Consumer JMS
@@ -168,7 +168,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.responseConsumerJMS_label;
+    activityTypeName = activityType_label.responseConsumerJMS;
     activityName = activityType.responseConsumerJMS;
   } else if (+activityTypeInt === 25 && +activitySubTypeInt === 1) {
     //response Consumer SOAP
@@ -176,7 +176,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.responseConsumerSOAP_label;
+    activityTypeName = activityType_label.responseConsumerSOAP;
     activityName = activityType.responseConsumerSOAP;
   } else if (+activityTypeInt === 24 && +activitySubTypeInt === 1) {
     //request Consumer SOAP
@@ -184,7 +184,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.requestConsumerSOAP_label;
+    activityTypeName = activityType_label.requestConsumerSOAP;
     activityName = activityType.requestConsumerSOAP;
   } else if (+activityTypeInt === 40 && +activitySubTypeInt === 1) {
     //REST
@@ -192,7 +192,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.restful_label;
+    activityTypeName = activityType_label.restful;
     activityName = activityType.restful;
   } else if (+activityTypeInt === 31 && +activitySubTypeInt === 1) {
     //businessRule
@@ -200,7 +200,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.businessRule_label;
+    activityTypeName = activityType_label.businessRule;
     activityName = activityType.businessRule;
   } else if (+activityTypeInt === 10 && +activitySubTypeInt === 4) {
     //dms adapter
@@ -208,7 +208,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.dmsAdapter_label;
+    activityTypeName = activityType_label.dmsAdapter;
     activityName = activityType.dmsAdapter;
   } else if (+activityTypeInt === 33 && +activitySubTypeInt === 1) {
     //oms adapter
@@ -216,7 +216,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.ccm_label;
+    activityTypeName = activityType_label.ccm;
     activityName = activityType.omsAdapter;
   } else if (+activityTypeInt === 30 && +activitySubTypeInt === 1) {
     //share point
@@ -224,7 +224,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.sharePoint_label;
+    activityTypeName = activityType_label.sharePoint;
     activityName = activityType.sharePoint;
   } else if (+activityTypeInt === 29 && +activitySubTypeInt === 1) {
     //sap adapter
@@ -232,7 +232,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.sapAdapter_label;
+    activityTypeName = activityType_label.sapAdapter;
     activityName = activityType.sapAdapter;
   } else if (+activityTypeInt === 27 && +activitySubTypeInt === 1) {
     //event
@@ -240,7 +240,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "EventActivityCard";
     color = "#767676";
     backgroundColor = "#FFCE4434";
-    activityTypeName = activityType_label.event_label;
+    activityTypeName = activityType_label.event;
     activityName = activityType.event;
   } else if (+activityTypeInt === 19 && +activitySubTypeInt === 1) {
     //jms producer
@@ -248,7 +248,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "EventActivityCard";
     color = "#767676";
     backgroundColor = "#FFCE4434";
-    activityTypeName = activityType_label.jmsProducer_label;
+    activityTypeName = activityType_label.jmsProducer;
     activityName = activityType.jmsProducer;
   } else if (+activityTypeInt === 21 && +activitySubTypeInt === 1) {
     //jms consumer
@@ -256,7 +256,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "EventActivityCard";
     color = "#767676";
     backgroundColor = "#FFCE4434";
-    activityTypeName = activityType_label.jmsConsumer_label;
+    activityTypeName = activityType_label.jmsConsumer;
     activityName = activityType.jmsConsumer;
   } else if (+activityTypeInt === 4 && +activitySubTypeInt === 1) {
     //timer event
@@ -264,7 +264,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "EventActivityCard";
     color = "#767676";
     backgroundColor = "#FFCE4434";
-    activityTypeName = activityType_label.timerEvents_label;
+    activityTypeName = activityType_label.timerEvents;
     activityName = activityType.timerEvents;
   } else if (+activityTypeInt === 5 && +activitySubTypeInt === 1) {
     //inclusive distribute
@@ -272,7 +272,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "gatewayActivityCard";
     color = "#767676";
     backgroundColor = "#FFCE4434";
-    activityTypeName = activityType_label.inclusiveDistribute_label;
+    activityTypeName = activityType_label.inclusiveDistribute;
     activityName = activityType.inclusiveDistribute;
   } else if (+activityTypeInt === 5 && +activitySubTypeInt === 2) {
     //parallel distribute
@@ -280,7 +280,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "gatewayActivityCard";
     color = "#767676";
     backgroundColor = "#FFCE4434";
-    activityTypeName = activityType_label.parallelDistribute_label;
+    activityTypeName = activityType_label.parallelDistribute;
     activityName = activityType.parallelDistribute;
   } else if (+activityTypeInt === 6 && +activitySubTypeInt === 1) {
     //inclusive collect
@@ -288,7 +288,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "gatewayActivityCard";
     color = "#767676";
     backgroundColor = "#FFCE4434";
-    activityTypeName = activityType_label.inclusiveCollect_label;
+    activityTypeName = activityType_label.inclusiveCollect;
     activityName = activityType.inclusiveCollect;
   } else if (+activityTypeInt === 6 && +activitySubTypeInt === 2) {
     //parallel collect
@@ -296,7 +296,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "gatewayActivityCard";
     color = "#767676";
     backgroundColor = "#FFCE4434";
-    activityTypeName = activityType_label.parallelCollect_label;
+    activityTypeName = activityType_label.parallelCollect;
     activityName = activityType.parallelCollect;
   } else if (+activityTypeInt === 7 && +activitySubTypeInt === 1) {
     //data based exclusive
@@ -304,7 +304,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "gatewayActivityCard";
     color = "#767676";
     backgroundColor = "#FFCE4434";
-    activityTypeName = activityType_label.dataBasedExclusive_label;
+    activityTypeName = activityType_label.dataBasedExclusive;
     activityName = activityType.dataBasedExclusive;
   } else if (+activityTypeInt === 2 && +activitySubTypeInt === 1) {
     //end event
@@ -312,7 +312,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "endActivityCard";
     color = "#d30814";
     backgroundColor = "rgba(211,8,20,0.1)";
-    activityTypeName = activityType_label.endEvent_label;
+    activityTypeName = activityType_label.endEvent;
     activityName = activityType.endEvent;
   } else if (+activityTypeInt === 3 && +activitySubTypeInt === 1) {
     //terminate event
@@ -320,7 +320,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "endActivityCard";
     color = "#d30814";
     backgroundColor = "rgba(211,8,20,0.1)";
-    activityTypeName = activityType_label.terminate_label;
+    activityTypeName = activityType_label.terminate;
     activityName = activityType.terminate;
   } else if (+activityTypeInt === 2 && +activitySubTypeInt === 2) {
     //message end
@@ -328,7 +328,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "endActivityCard";
     color = "#d30814";
     backgroundColor = "rgba(211,8,20,0.1)";
-    activityTypeName = activityType_label.messageEnd_label;
+    activityTypeName = activityType_label.messageEnd;
     activityName = activityType.messageEnd;
   } else if (+activityTypeInt === 34 && +activitySubTypeInt === 1) {
     //data exchange
@@ -336,7 +336,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "artefactActivityCard";
     color = "#6E6E6E";
     backgroundColor = "#f2f2f2";
-    activityTypeName = activityType_label.dataExchange_label;
+    activityTypeName = activityType_label.dataExchange;
     activityName = activityType.dataExchange;
   } else {
     //default activity
@@ -344,7 +344,7 @@ export function getActivityProps(activityTypeInt, activitySubTypeInt) {
     classForActivity = "workdeskActivityCard";
     color = "#7642a7";
     backgroundColor = "#f5f1f9";
-    activityTypeName = activityType_label.workdesk_label;
+    activityTypeName = activityType_label.workdesk;
     activityName = activityType.workdesk;
   }
 

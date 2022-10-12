@@ -34,8 +34,8 @@ function CategoryListView(props) {
       background: "#FFFFFF 0% 0% no-repeat padding-box",
       boxShadow: "0px 3px 6px #00000029",
       border: "1px solid #70707075",
-      fontSize:"var(--base_text_font_size)",
-      fontWeight:"400 !important",
+      fontSize: "var(--base_text_font_size)",
+      fontWeight: "400 !important",
       letterSpacing: "0px",
       color: "#000000",
       transform: "translate3d(0px, -0.25rem, 0px) !important",
@@ -53,10 +53,10 @@ function CategoryListView(props) {
     tooltip: {
       background: "#FFFFFF 0% 0% no-repeat padding-box",
       boxShadow: "0px 3px 6px #00000029",
-      fontSize:"var(--base_text_font_size)",
+      fontSize: "var(--base_text_font_size)",
       border: "1px solid #70707075",
       letterSpacing: "0px",
-      fontWeight:"400 !important",
+      fontWeight: "400 !important",
       color: "#000000",
       transform: "translate3d(0px, -0.25rem, 0px) !important",
       width: "11vw",
@@ -202,6 +202,12 @@ function CategoryListView(props) {
         </div>
       </TemplateCountTooltip>
     ),
+    /*****************************************************************************************
+     * @author asloob_ali BUG ID: 114663  Templates- categories - rename not working if in the same session
+     * Reason:duplicate/similar functionalities edit and rename .
+     * Resolution : removed rename option.
+     * Date : 30/09/2022
+     ****************/
     categoryExtras:
       category.CategoryScope === SYSTEM_DEFINED_SCOPE ? null : (
         <MortVertModal
@@ -213,7 +219,7 @@ function CategoryListView(props) {
           sortByDiv_arabic="sortByDiv_arabicActivity"
           oneSortOption={styles.moreVertModalOption}
           showTickIcon={false}
-          sortSectionOne={[t("edit"), t("Rename"), t("delete")]}
+          sortSectionOne={[t("edit"), t("delete")]}
           buttonToOpenModal={
             <MoreVertOutlined className={styles.moreVertIcon} />
           }
@@ -353,7 +359,7 @@ function CategoryListView(props) {
               setCategoryList={props.setCategoryList}
               setModalClosed={() => setAction(null)}
               category={true}
-              elemToBeDeleted={selectedCategory}
+              elemToBeRenamed={selectedCategory}
             />
           }
         />

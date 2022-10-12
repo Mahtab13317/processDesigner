@@ -69,6 +69,8 @@ function TextInput(props) {
         }`}
         style={showMsg && props.inlineError ? { marginBottom: "0" } : {}}
         type={props.type}
+        ref={props.inputRef}
+        onKeyPress={props.onKeyPress}
       />
       {props.inlineError && showMsg ? (
         <p

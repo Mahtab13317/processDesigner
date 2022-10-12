@@ -11,8 +11,9 @@ import {
 import { setActivityPropertyChange } from "../../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import { useDispatch } from "react-redux";
 
-function Document() {
+function Document(props) {
   let { t } = useTranslation();
+  const { isReadOnly } = props;
   const dispatch = useDispatch();
   const direction = `${t("HTML_DIR")}`;
   const loadedActivityPropertyData = store.getState("activityPropertyData");
@@ -132,6 +133,7 @@ function Document() {
                   : styles.mainCheckbox
               }
               checked={allChecked}
+              disabled={isReadOnly}
               onChange={() => allCheckHandler()}
               style={{ flex: "0.125", justifyContent: "left" }}
             />
@@ -147,6 +149,7 @@ function Document() {
                         ? arabicStyles.mainCheckbox
                         : styles.mainCheckbox
                     }
+                    disabled={isReadOnly}
                     checked={checked[val]}
                     onChange={() => CheckDocHandler(val)}
                     style={{ flex: "0.125", justifyContent: "left" }}

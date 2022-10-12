@@ -12,14 +12,17 @@
   color: grey;
   cursor: pointer;
   margin-bottom: 0.5rem;
-  height: 1.5rem;
-  width: 1.5rem;
+  height: 1.75rem;
+  width: 1.75rem;
 }
 
 .deleteIcon {
   color: grey;
   margin-top: 2.2rem;
   cursor: pointer;
+  height: 1.75rem;
+  width: 1.75rem;
+  margin-bottom: 6px;
 }
 
 .dropdownMargin {
@@ -27,7 +30,8 @@
 }
 
 .operationsLabel {
-  font: normal normal normal 12px/17px Open Sans;
+  font: normal normal normal var(--base_text_font_size) / 1.0625rem
+    var(--font_family) !important;
   display: flex;
   align-items: center;
   margin-bottom: 0.25rem;
@@ -35,7 +39,7 @@
 
 .operationsLabelMid {
   margin-right: 0.25vw;
-  font: normal normal normal var(--base_text_font_size) / 17px
+  font: normal normal normal var(--base_text_font_size) / 1.0625rem
     var(--font_family);
   display: flex;
   align-items: center;
@@ -43,9 +47,9 @@
 
 .typeDropdown {
   width: 13vw;
-  height: 28px;
+  height: var(--line_height);
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal var(--base_text_font_size) / 17px
+  font: normal normal normal var(--base_text_font_size) / 1.0625rem
     var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
@@ -55,9 +59,9 @@
 
 .fieldDropdown {
   width: 110px;
-  height: 28px;
+  height: var(--line_height);
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal var(--base_text_font_size) / 17px
+  font: normal normal normal var(--base_text_font_size) / 1.0625rem
     var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
@@ -67,9 +71,9 @@
 
 .valueDropdown {
   width: 130px;
-  height: 28px;
+  height: var(--line_height);
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal var(--base_text_font_size) / 17px
+  font: normal normal normal var(--base_text_font_size) / 1.0625rem
     var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
@@ -79,9 +83,9 @@
 
 .operatorDropdown {
   width: 60px;
-  height: 28px;
+  height: var(--line_height);
   background: #ffffff 0% 0% no-repeat padding-box;
-  font: normal normal normal var(--base_text_font_size) / 17px
+  font: normal normal normal var(--base_text_font_size) / 1.0625rem
     var(--font_family) !important;
   border: 1px solid #c4c4c4;
   border-radius: 2px;
@@ -91,11 +95,23 @@
 
 .menuItemStyles {
   text-align: left;
-  font: normal normal normal 12px/17px Open Sans !important;
+  font: normal normal normal var(--base_text_font_size) / 1.0625rem
+    var(--font_family) !important;
   letter-spacing: 0px;
   color: #000000;
   padding: 0.5rem 0.5vw;
   width: 100%;
+}
+
+.menuItemStylesDisabled {
+  text-align: left;
+  font: normal normal normal var(--base_text_font_size) / 1.0625rem
+    var(--font_family) !important;
+  letter-spacing: 0px;
+  color: #606060;
+  padding: 0.5rem 0.5vw;
+  width: 100%;
+  opacity: 0.4;
 }
 
 .equals {
@@ -134,7 +150,7 @@
 
 .operandDropdown {
   width: 160px;
-  height: 28px;
+  height: var(--line_height);
   background: #ffffff 0% 0% no-repeat padding-box;
   font: normal normal normal var(--base_text_font_size) / 17px
     var(--font_family) !important;
@@ -146,7 +162,7 @@
 
 .calendarTypeDropdown {
   width: 160px;
-  height: 28px;
+  height: var(--line_height);
   background: #ffffff 0% 0% no-repeat padding-box;
   font: normal normal normal var(--base_text_font_size) / 17px
     var(--font_family) !important;
@@ -165,7 +181,7 @@
 
 .assignedToVariableDropdown {
   width: 160px;
-  height: 28px;
+  height: var(--line_height);
   background: #ffffff 0% 0% no-repeat padding-box;
   font: normal normal normal var(--base_text_font_size) / 17px
     var(--font_family) !important;
@@ -177,7 +193,7 @@
 
 .triggerDropdown {
   width: 160px;
-  height: 28px;
+  height: var(--line_height);
   background: #ffffff 0% 0% no-repeat padding-box;
   font: normal normal normal var(--base_text_font_size) / 17px
     var(--font_family) !important;
@@ -224,7 +240,7 @@
 
 .inputVariableDropdown {
   width: 160px;
-  height: 28px;
+  height: var(--line_height);
   background: #ffffff 0% 0% no-repeat padding-box;
   font: normal normal normal var(--base_text_font_size) / 17px
     var(--font_family) !important;
@@ -238,7 +254,7 @@
 
 .escalateToVariableDropdown {
   width: 160px;
-  height: 28px;
+  height: var(--line_height);
   background: #ffffff 0% 0% no-repeat padding-box;
   font: normal normal normal var(--base_text_font_size) / 17px
     var(--font_family) !important;
@@ -250,7 +266,7 @@
 
 .escalateToFieldsDropdown {
   width: 100px;
-  height: 28px;
+  height: var(--line_height);
   background: #ffffff 0% 0% no-repeat padding-box;
   font: normal normal normal var(--base_text_font_size) / 17px
     var(--font_family) !important;
@@ -321,7 +337,6 @@
   margin-left: 5px;
 }
 
-
 /* mahtab code */
 .mainContainer {
   max-height: 420px;
@@ -331,8 +346,8 @@
   /* font-size: 12px; */
   min-width: 500px;
 }
-.emailModal{
-  margin-top:3rem;
+.emailModal {
+  margin-top: 3rem;
 }
 .modalHeader {
   height: 50px;
@@ -424,17 +439,15 @@
   justify-content: space-between;
 }
 .fldLabel {
- 
-    font: normal normal normal 14px/17px Open Sans;
-    align-items: center;
+  font: normal normal normal 14px/17px Open Sans;
+  align-items: center;
 }
 .fldElement {
   width: 25rem;
- 
 }
 .txtField {
   width: 25rem;
-  height: 28px;
+  height: 2.5rem;
   background: #ffffff 0% 0% no-repeat padding-box;
   font: normal normal normal var(--base_text_font_size) / 17px
     var(--font_family) !important;
@@ -443,9 +456,9 @@
   opacity: 1;
   margin-right: 10px;
 }
-.escalateToEmailDropdown{
+.escalateToEmailDropdown {
   width: 25rem;
-  height: 28px;
+  height: 2.5rem;
   background: #ffffff 0% 0% no-repeat padding-box;
   font: normal normal normal var(--base_text_font_size) / 17px
     var(--font_family) !important;
@@ -453,9 +466,8 @@
   border-radius: 2px;
   opacity: 1;
   margin-right: 10px;
-
 }
-.txtAreaField{
+.txtAreaField {
   width: 25rem;
   height: 1.5rem;
   background: #ffffff 0% 0% no-repeat padding-box;
@@ -467,9 +479,9 @@
   margin-right: 10px;
 }
 
-.addBtn{
+.addBtn {
   margin-top: 0px !important;
 }
-.error{
+.error {
   color: red;
 }

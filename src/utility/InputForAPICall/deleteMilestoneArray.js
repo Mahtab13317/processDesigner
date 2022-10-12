@@ -42,3 +42,20 @@ export const deleteMilestoneArray = (processData, id) => {
     index: indexVal,
   };
 };
+
+export const deleteMilestoneActivity = (processData, id) => {
+  let activityIdList = [],
+    activityNameList = [];
+  processData.MileStones?.map((item, index) => {
+    if (item.iMileStoneId === id) {
+      item.Activities?.map((activity) => {
+        activityIdList.push(activity.ActivityId);
+        activityNameList.push(activity.ActivityName);
+      });
+    }
+  });
+  return {
+    activityIdList: activityIdList.join(","),
+    activityNameList: activityNameList.join(":"),
+  };
+};

@@ -13,7 +13,8 @@ export function addSwimLane(
   setNewId,
   view,
   milestoneIndex,
-  activityindex
+  activityindex,
+  onSuccessFunc
 ) {
   let queueId;
   setNewId((oldIds) => {
@@ -28,7 +29,7 @@ export function addSwimLane(
     laneSeqId: lanes.length + 1,
     xLeftLoc: "0",
     yTopLoc: +lastLane.yTopLoc + +lastLane.Height,
-    height: "140",
+    height: "150", // code edited on 11 Oct 2022 for BugId 116379
     width: "1009",
     queueInfo: {
       queueId: queueId,
@@ -80,15 +81,12 @@ export function addSwimLane(
             processObject.MileStones[milestoneIndex].Activities[
               activityindex
             ].LaneId = LaneJson.LaneId;
-            processObject.MileStones[milestoneIndex].Activities[
-              activityindex
-            ].xLeftLoc = "10";
-            processObject.MileStones[milestoneIndex].Activities[
-              activityindex
-            ].yTopLoc = +LaneJson.yTopLoc + +20;
           }
           return processObject;
         });
+        if (onSuccessFunc) {
+          onSuccessFunc();
+        }
       }
     })
     .catch((err) => {

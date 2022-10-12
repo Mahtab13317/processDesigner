@@ -91,50 +91,62 @@ function ResponseConsumerJMS(props) {
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData, setlocalLoadedProcessData] =
     useGlobalState(loadedProcessData);
+  const [destinationName, setDestinationName] = useState("");
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
 
+  useEffect(() => {
+    if (localLoadedActivityPropertyData?.Status === 0) {
+      setDestinationName(
+        localLoadedActivityPropertyData?.ActivityProperty?.consumerInfo
+          ?.destinationName
+      );
+    }
+  }, [localLoadedActivityPropertyData]);
+
   return (
     <div>
-      <TabsHeading heading={props?.heading} />
-      <div style={{ padding: "0px 10px 10px 10px" }}>
-        <p className="requestConsumerHead">Response Consumer JMS</p>
+      <div style={{ padding: "var(--spacing_v) 0.5vw" }}>
+        <p className="requestConsumerHead">{t("resConsumerJms")}</p>
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            marginBottom: "10px",
+            margin: "1rem 0",
           }}
         >
           <p
             style={{
-              fontSize: "12px",
+              fontSize: "var(--base_text_font_size)",
               color: "#606060",
               fontWeight: "500",
-              marginLeft: "5px",
             }}
           >
-            Destination Name
+            {t("destinationName")}
           </p>
-          <div>
-            <input className="webserviceLocation" />
+          <div style={{ display: "flex", gap: "1vw", alignItems: "center" }}>
+            <input
+              className="webserviceLocation"
+              disabled
+              value={destinationName}
+            />
             <button
               style={{
-                width: "80px",
-                height: "30px",
-                color: "#0472C6",
-                border: "1px solid #0472C6",
+                minWidth: "5vw",
                 cursor: "pointer",
               }}
+              disabled
               onClick={() => setShowXMLModal(true)}
             >
-              Input XML
+              {t("InputXML")}
             </button>
           </div>
         </div>
       </div>
-      <TableResponseConsumer />
+      <div style={{ padding: "0.5rem 0.5vw" }}>
+        <TableResponseConsumer />
+      </div>
 
       {showXMLModal ? (
         <Modal

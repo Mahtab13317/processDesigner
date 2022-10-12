@@ -25,30 +25,23 @@
 }
 
 .webserviceLocation {
-  width: 290px;
-  height: 28px;
-  border: 1px solid #cecece;
-  border-radius: 1px;
-  opacity: 1;
-  font-size: 12px;
-  background-color: #F8F8F8;
-  padding-left: 6px;
+  width: 22vw;
+  height: var(--line_height);
 }
 
-.requestConsumerHead{
-    margin-top: 10px;
-    margin-bottom: 20px;
-    font-weight: 600;
-    font-size: 14px;
+.requestConsumerHead {
+  font-size: var(--subtitle_text_font_size);
+  margin: 0.5rem 0;
+  font-weight: 600;
 }
 
-.xmlButtons{
-    background-color: #F5F5F5;
-    position: absolute;
-    bottom: 0px;
-    padding: 10px 3px 10px 10px;
-    width: 100%;
-    text-align: right;
+.xmlButtons {
+  background-color: #f5f5f5;
+  position: absolute;
+  bottom: 0px;
+  padding: 10px 3px 10px 10px;
+  width: 100%;
+  text-align: right;
 }
 /* ------------- */
 .selectTwo_callActivity {

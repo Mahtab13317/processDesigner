@@ -1,199 +1,178 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import classes from "../Task.module.css";
-import { Checkbox } from "@material-ui/core";
 import Modal from "../../../../../UI/Modal/Modal";
 import AddUserGroup from "./AddUserGroup";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import RedDelete from "../../../../../assets/abstractView/RedDelete.svg";
 import Search from "../../../../../UI/Search Component/index";
 import { store, useGlobalState } from "state-pool";
 import { useTranslation } from "react-i18next";
+import { setActivityPropertyChange } from "../../../../../redux-store/slices/ActivityPropertyChangeSlice";
+import { propertiesLabel } from "../../../../../Constants/appConstants";
+import Users from "../../../../../assets/users.svg";
+import { containsText } from "../../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
-function AssociateUsers(props) {
+function AssociateUsers({ taskInfo, ...props }) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
+  const dispatch = useDispatch();
   const [openAddUserModal, setopenAddUserModal] = useState(false);
-  const [userListing, setuserListing] = useState([]);
-  const [groupListing, setgroupListing] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const actProperty = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(actProperty);
-  const [allCheckedBool, setallCheckedBool] = useState(false);
+
   const userGroupListHandler = (val) => {
-    //let users,groups;
-    val.selectedUsers.forEach((user) => {
-      user["isChecked"] = false;
-    });
-
-    val.selectedGroups.forEach((group) => {
-      group["isChecked"] = false;
-    });
-    setuserListing(val.selectedUsers);
-    setgroupListing(val.selectedGroups);
-  };
-  const deleteUser = (data) => {
-    let temp = JSON.parse(JSON.stringify(userListing));
-    temp.splice(
-      temp.findIndex(function (i) {
-        return i.id === data.id;
-      }),
-      1
+    let temp = global.structuredClone(localLoadedActivityPropertyData);
+    temp.ActivityProperty.wdeskInfo.objPMWdeskTasks.taskMap[
+      taskInfo.taskTypeInfo.taskName
+    ] = {
+      ...temp.ActivityProperty.wdeskInfo.objPMWdeskTasks.taskMap[
+        taskInfo.taskTypeInfo.taskName
+      ],
+      m_arrUGInfoList: [...val],
+    };
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.task]: { isModified: true, hasError: false },
+      })
     );
-
-    setuserListing(temp);
-  };
-  const deleteGroup = (data) => {
-    let temp = JSON.parse(JSON.stringify(groupListing));
-    temp.splice(
-      temp.findIndex(function (i) {
-        return i.id === data.id;
-      }),
-      1
-    );
-    setgroupListing(temp);
   };
 
-  React.useEffect(() => {
-    let newUser = {};
-    localLoadedActivityPropertyData.ActivityProperty?.Interfaces?.TaskTypes?.forEach(
-      (task) => {
-        if (task.TaskId === props.taskInfo.TaskId) {
-          task.Users.forEach((user) => {
-            newUser = {
-              id: user.UserId,
-              name: user.UserName,
-              username: "",
-              isChecked: false,
-            };
-            if (user.AssociationType === "G") {
-              let temp = JSON.parse(JSON.stringify(groupListing));
-              temp.push({ AssociationType: "G", ...newUser });
-              setgroupListing(temp);
-            } else {
-              let temp = JSON.parse(JSON.stringify(userListing));
-              temp.push({ AssociationType: "U", ...newUser });
-              setuserListing(temp);
-            }
-          });
-        }
+  const closeHandler = () => {
+    setopenAddUserModal(false);
+    var elem = document.getElementById("oapweb_assetManifest");
+    elem.parentNode.removeChild(elem);
+  };
+
+  const deleteUserGroup = (id, type) => {
+    let temp = global.structuredClone(localLoadedActivityPropertyData);
+    Object.values(
+      temp.ActivityProperty?.wdeskInfo?.objPMWdeskTasks?.taskMap
+    ).forEach((task) => {
+      if (task.taskTypeInfo.taskId == taskInfo.taskTypeInfo.taskId) {
+        temp.ActivityProperty.wdeskInfo.objPMWdeskTasks.taskMap[
+          taskInfo.taskTypeInfo.taskName
+        ].m_arrUGInfoList = task.m_arrUGInfoList.filter(
+          (usergroup) =>
+            !(usergroup.m_strID === id && usergroup.m_strType === type)
+        );
       }
+    });
+    setlocalLoadedActivityPropertyData(temp);
+    dispatch(
+      setActivityPropertyChange({
+        [propertiesLabel.task]: { isModified: true, hasError: false },
+      })
     );
-  }, [props.taskInfo.TaskId]);
-
-  useEffect(() => {
-    let allUser = true,
-      allGroup = true;
-    let temp = JSON.parse(JSON.stringify(groupListing));
-    let temp2 = JSON.parse(JSON.stringify(userListing));
-    temp2.forEach((user) => {
-      if (user.isChecked === false) allUser = false;
-    });
-    temp.forEach((group) => {
-      if (group.isChecked === false) allGroup = false;
-    });
-
-    if (allUser && allGroup) setallCheckedBool(true);
-    else setallCheckedBool(false);
-  }, [groupListing, userListing]);
-
-  useEffect(() => {
-    let temp = JSON.parse(JSON.stringify(groupListing));
-    let temp2 = JSON.parse(JSON.stringify(userListing));
-    if (allCheckedBool === true) {
-      temp2.forEach((user) => {
-        user.isChecked = true;
-      });
-      temp.forEach((group) => {
-        group.isChecked = true;
-      });
-      setuserListing(temp2);
-      setgroupListing(temp);
-    }
-  }, [allCheckedBool]);
-
-  const handleUserCheckInList = (data) => {
-    if (data.AssociationType === "G") {
-      let temp = JSON.parse(JSON.stringify(groupListing));
-      temp.forEach((group) => {
-        if (group.id === data.id) {
-          group.isChecked = !group.isChecked;
-        }
-      });
-      setgroupListing(temp);
-    } else {
-      let temp = JSON.parse(JSON.stringify(userListing));
-      temp.forEach((user) => {
-        if (user.id === data.id) {
-          user.isChecked = !user.isChecked;
-        }
-      });
-      setuserListing(temp);
-    }
   };
+
+  const filteredRows = taskInfo?.m_arrUGInfoList?.filter((arr) =>
+    containsText(arr.m_strName, searchTerm)
+  );
 
   return (
     <div
       style={{
         width: "100%",
         height: "100%",
-        fontFamily: "Open Sans",
-        padding: "0.5rem",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
+        fontFamily: "var(--font_family)",
+        padding: "1rem 1vw",
         direction: direction,
       }}
     >
-      {userListing.length === 0 && groupListing.length === 0 ? (
-        <button onClick={() => setopenAddUserModal(true)}>
-          {t("addUserHere")}
-        </button>
+      {!taskInfo?.m_arrUGInfoList || taskInfo?.m_arrUGInfoList?.length === 0 ? (
+        <div className={classes.emptyStateMainDiv}>
+          <img
+            className={classes.emptyStateImage}
+            src={Users}
+            alt=""
+            style={{
+              marginTop: "6rem",
+              marginBottom: "0",
+            }}
+          />
+          <p
+            className={classes.emptyStateText}
+            style={{ marginBottom: "0.5rem", marginTop: "0" }}
+          >
+            {t("noUserAssociated")}
+          </p>
+          <button
+            style={{
+              border: "1px solid var(--button_color)",
+              color: "var(--button_color)",
+              background: "white",
+              fontFamily: "var(--font_family)",
+              cursor: "pointer",
+            }}
+            onClick={() => setopenAddUserModal(true)}
+          >
+            <p
+              style={{
+                fontWeight: "600",
+                fontSize: "var(--base_text_font_size)",
+              }}
+            >
+              {t("AssociateUsers/Groups")}
+            </p>
+          </button>
+        </div>
+      ) : null}
+      {openAddUserModal ? (
+        <Modal
+          show={openAddUserModal}
+          backDropStyle={{ backgroundColor: "transparent" }}
+          style={{
+            width: "70%",
+            top: "28%",
+            left: "18%",
+            padding: "0",
+            boxShadow: "none",
+          }}
+          children={
+            <AddUserGroup
+              taskInfo={taskInfo.taskTypeInfo}
+              getUserGroupList={(val) => userGroupListHandler(val)}
+              closeModal={() => closeHandler()}
+            />
+          }
+        />
       ) : null}
 
-      <Modal
-        show={openAddUserModal}
-        backDropStyle={{ backgroundColor: "transparent" }}
-        style={{
-          width: "70%",
-          height: "55%",
-          // left: props.isDrawerExpanded ? "23%" : "53%",
-          top: "19%",
-          left: "18%",
-          padding: "0",
-          boxShadow: "none",
-        }}
-        modalClosed={() => setopenAddUserModal(false)}
-        children={
-          <AddUserGroup
-            getUserGroupList={(val) => userGroupListHandler(val)}
-            closeModal={() => setopenAddUserModal(false)}
-          />
-        }
-      />
-      {userListing.length > 0 || groupListing.length > 0 ? (
+      {taskInfo?.m_arrUGInfoList?.length > 0 ? (
         <div
           style={{ width: "100%", display: "flex", flexDirection: "column" }}
         >
-          <div style={{ display: "flex", flexDirection: "row" }}>
-            <Search placeholder={t("Search Users or Groups")} />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: "2vw",
+            }}
+          >
+            <Search
+              placeholder={t("Search Users or Groups")}
+              width="21vw"
+              onSearchChange={(val) => setSearchTerm(val)}
+              clearSearchResult={() => setSearchTerm("")}
+            />
             <button
               style={{
-                width: "10.625rem",
-                height: "1.75rem",
-                border: "1px solid #0072C6",
-                color: "#0072C6",
+                border: "1px solid var(--button_color)",
+                color: "var(--button_color)",
                 background: "white",
-                marginLeft: "0.8rem",
+                fontFamily: "var(--font_family)",
+                cursor: "pointer",
               }}
               onClick={() => setopenAddUserModal(true)}
             >
               <p
                 style={{
                   fontWeight: "600",
-
-                  fontSize: "0.8rem",
-                  marginInline: "0.2rem",
+                  fontSize: "var(--base_text_font_size)",
                 }}
               >
                 {t("AssociateUsers/Groups")}
@@ -203,172 +182,156 @@ function AssociateUsers(props) {
           <p
             style={{
               fontWeight: "600",
-
-              fontSize: "0.85rem",
-              marginBlock: "0.5rem",
+              fontSize: "var(--base_text_font_size)",
+              marginBlock: "1rem",
             }}
           >
-            {userListing.length} {t("user(s)and")} {groupListing.length}{" "}
+            {
+              taskInfo.m_arrUGInfoList.filter((arr) => arr.m_strType === "U")
+                .length
+            }{" "}
+            {t("user(s)and")}{" "}
+            {
+              taskInfo.m_arrUGInfoList.filter((arr) => arr.m_strType === "G")
+                .length
+            }{" "}
             {t("group(s)associated")}
           </p>
-          <div
-            style={{
-              width: "80%",
-              display: "flex",
-              flexDirection: "row",
-              height: "2rem",
-              padding: "0.1rem",
-            }}
-          >
-            <Checkbox
-              checked={allCheckedBool}
-              onChange={() => setallCheckedBool((prev) => !prev)}
-              style={{ marginRight: "0.3rem" }}
-            />
-            <p
-              className={classes.tableCellText}
-              style={{
-                fontWeight: "600",
-                paddingTop: "0.25rem",
-                fontSize: "0.8rem",
-              }}
-            >
-              {t("selectAll")}
-            </p>
+          <div style={{ height: "42vh", overflow: "auto" }}>
+            {filteredRows
+              ?.filter((arr) => arr.m_strType === "U")
+              ?.map((user) => {
+                return (
+                  <div
+                    style={{
+                      width: "60%",
+                      display: "flex",
+                      flexDirection: "row",
+                      background: "#FFFFFF",
+                      border: "1px solid #F0F0F0",
+                      height: "var(--line_height)",
+                      padding: "0.25rem 1vw",
+                      marginBlock: "0.25rem",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        width: "32rem",
+                      }}
+                    >
+                      <p
+                        className={classes.tableCellText}
+                        style={{
+                          fontWeight: "500",
+                          fontSize: "var(--base_text_font_size)",
+                        }}
+                      >
+                        {user.m_strName}
+                      </p>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        width: "50%",
+                        justifyContent: "left",
+                        marginLeft: "1vw",
+                      }}
+                    >
+                      <div style={{ minWidth: "100px", textAlign: "left" }}>
+                        <p
+                          className={classes.tableCellText}
+                          style={{
+                            fontWeight: "500",
+                            fontSize: "var(--base_text_font_size)",
+                          }}
+                        >
+                          {t("User")}
+                        </p>
+                      </div>
+                    </div>
+                    {/* <p className={classes.tableCellText} style={{fontWeight: "600"}}>-</p> */}
+                    <img
+                      src={RedDelete}
+                      style={{ cursor: "pointer" }}
+                      alt="del"
+                      onClick={() =>
+                        deleteUserGroup(user.m_strID, user.m_strType)
+                      }
+                    />
+                  </div>
+                );
+              })}
+            {filteredRows
+              ?.filter((arr) => arr.m_strType === "G")
+              ?.map((group) => {
+                return (
+                  <div
+                    style={{
+                      width: "60%",
+                      display: "flex",
+                      flexDirection: "row",
+                      background: "#FFFFFF",
+                      border: "1px solid #F0F0F0",
+                      height: "var(--line_height)",
+                      padding: "0.25rem 1vw",
+                      marginBlock: "0.25rem",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        width: "32rem",
+                      }}
+                    >
+                      <p
+                        className={classes.tableCellText}
+                        style={{
+                          fontWeight: "500",
+                          fontSize: "var(--base_text_font_size)",
+                        }}
+                      >
+                        {group.m_strName}
+                      </p>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        width: "50%",
+                        justifyContent: "left",
+                        marginLeft: "1vw",
+                      }}
+                    >
+                      <div style={{ minWidth: "100px", textAlign: "left" }}>
+                        <p
+                          className={classes.tableCellText}
+                          style={{
+                            fontWeight: "500",
+                            fontSize: "var(--base_text_font_size)",
+                          }}
+                        >
+                          {t("group")}
+                        </p>
+                      </div>
+                    </div>
+                    <img
+                      src={RedDelete}
+                      style={{ cursor: "pointer" }}
+                      alt="del"
+                      onClick={() =>
+                        deleteUserGroup(group.m_strID, group.m_strType)
+                      }
+                    />
+                  </div>
+                );
+              })}
           </div>
-          {userListing.map((user) => {
-            return (
-              <div
-                style={{
-                  width: "80%",
-                  display: "flex",
-                  flexDirection: "row",
-                  background: "#FFFFFF",
-                  border: "1px solid #F0F0F0",
-                  height: "2rem",
-                  padding: "0.1rem",
-                  marginBlock: "0.2rem",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    width: "17rem",
-                  }}
-                >
-                  <Checkbox
-                    checked={user.isChecked}
-                    onChange={() => handleUserCheckInList(user)}
-                    style={{ marginRight: "0.3rem" }}
-                  />
-                  <p
-                    className={classes.tableCellText}
-                    style={{
-                      fontWeight: "600",
-                      paddingTop: "0.25rem",
-                      fontSize: "0.8rem",
-                    }}
-                  >
-                    {user.name} {user.username}
-                  </p>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    width: "100%",
-                    justifyContent: "center",
-                  }}
-                >
-                  <div style={{ width: "100px", textAlign: "left" }}>
-                    <p
-                      className={classes.tableCellText}
-                      style={{
-                        fontWeight: "600",
-                        paddingTop: "0.25rem",
-                        fontSize: "0.8rem",
-                      }}
-                    >
-                      {t("user")}
-                    </p>
-                  </div>
-                </div>
-                {/* <p className={classes.tableCellText} style={{fontWeight: "600"}}>-</p> */}
-                <img
-                  src={RedDelete}
-                  alt="del"
-                  onClick={() => deleteUser(user)}
-                />
-              </div>
-            );
-          })}
-          {groupListing.map((group) => {
-            return (
-              <div
-                style={{
-                  width: "80%",
-                  display: "flex",
-                  flexDirection: "row",
-                  background: "#FFFFFF",
-                  border: "1px solid #F0F0F0",
-                  height: "2rem",
-                  padding: "0.1rem",
-                  marginBlock: "0.2rem",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    width: "17rem",
-                  }}
-                >
-                  <Checkbox
-                    checked={group.isChecked}
-                    onChange={() => handleUserCheckInList(group)}
-                    style={{ marginRight: "0.3rem" }}
-                  />
-                  <p
-                    className={classes.tableCellText}
-                    style={{
-                      fontWeight: "600",
-                      paddingTop: "0.25rem",
-                      fontSize: "0.8rem",
-                    }}
-                  >
-                    {group.name}
-                  </p>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    width: "100%",
-                    justifyContent: "center",
-                  }}
-                >
-                  <div style={{ width: "100px", textAlign: "left" }}>
-                    <p
-                      className={classes.tableCellText}
-                      style={{
-                        fontWeight: "600",
-                        paddingTop: "0.25rem",
-                        fontSize: "0.8rem",
-                      }}
-                    >
-                      {t("group")}
-                    </p>
-                  </div>
-                </div>
-                <img
-                  src={RedDelete}
-                  alt="del"
-                  onClick={() => deleteGroup(group)}
-                />
-              </div>
-            );
-          })}
         </div>
       ) : null}
     </div>

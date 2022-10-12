@@ -1,7 +1,11 @@
 // Made changes to solve bug ID 109967 and 109970
 // 1. Exceptions are added without adding all the mandatory fields -ID 109967
 // 2. Delete button pop up not disappearing after Exception is deleted - ID 109970
-
+// 3. Changes made to solve Todo Screen distorts when the count increases  ID 112558
+// #BugID - 109977
+// #BugDescription - validation for exception duplicate name has been added.
+// #BugID - 112559
+// #BugDescription - With theme integration this issue has been resolved.
 import React, { useEffect, useState } from "react";
 import "../Interfaces.css";
 import { useTranslation } from "react-i18next";
@@ -19,12 +23,13 @@ import {
   ENDPOINT_MODIFY_EXCEPTION,
   ENDPOINT_MOVETO_OTHERGROUP,
   SCREENTYPE_EXCEPTION,
+  RTL_DIRECTION,
 } from "../../../../Constants/appConstants";
 import axios from "axios";
 import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 import ActivityModal from "./ActivityModal.js";
 import { giveCompleteRights } from "../../../../utility/Tools/giveCompleteRights_exception";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import DeleteModal from "../../../../UI/ActivityModal/Modal";
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
 import AddException from "./AddExceptions";
@@ -32,7 +37,12 @@ import CommonInterface from "../CommonInterface";
 import { fullRightsOneActivity } from "../CommonInterfaceFuncs";
 import Backdrop from "../../../../UI/Backdrop/Backdrop";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { BATCH_COUNT } from "../../../../Constants/appConstants";
+import { EXP_BATCH_COUNT } from "../../../../Constants/appConstants";
+import { Box, Button } from "@material-ui/core";
+import CloseIcon from "@material-ui/icons/Close";
+import DeletePopup from "../DeletePopup";
+import DefaultModal from "../../../../UI/Modal/Modal";
+import ObjectDependencies from "../../../../UI/ObjectDependencyModal";
 
 function Exception(props) {
   const loadedProcessData = store.getState("loadedProcessData");
@@ -41,7 +51,11 @@ function Exception(props) {
   const [loadedMileStones, setLoadedMileStones] = useState(
     localLoadedProcessData?.MileStones
   );
+
   let { t } = useTranslation();
+  const direction = `${t("HTML_DIR")}`;
+  let dispatch = useDispatch();
+
   const [isLoading, setIsLoading] = useState(true);
   let [activitySearchTerm, setActivitySearchTerm] = useState("");
   const [addGroupModal, setAddGroupModal] = React.useState(false);
@@ -73,6 +87,12 @@ function Exception(props) {
   const [splicedColumns, setSplicedColumns] = useState([]);
   const [expName, setExpName] = useState(null);
   const [showExpDelete, setShowExpDelete] = useState(null);
+  const [addAnotherExp, setAddAnotherExp] = useState(false);
+
+  //mahtab code
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [showDependencyModal, setShowDependencyModal] = useState(false);
+  const [taskAssociation, setTaskAssociation] = useState([]);
 
   useEffect(() => {
     let arr = [];
@@ -98,7 +118,9 @@ function Exception(props) {
           !(activity.ActivityType === 5 && activity.ActivitySubType === 2) &&
           !(activity.ActivityType === 6 && activity.ActivitySubType === 2) &&
           !(activity.ActivityType === 7 && activity.ActivitySubType === 1) &&
-          !(activity.ActivityType === 34 && activity.ActivitySubType === 1)
+          !(activity.ActivityType === 34 && activity.ActivitySubType === 1) &&
+          // code added on 11 Oct 2022 for BugId 116576
+          !(activity.ActivityType === 30 && activity.ActivitySubType === 1)
         ) {
           arr.push(activity);
           activityIdString = activityIdString + activity.ActivityId + ",";
@@ -107,7 +129,8 @@ function Exception(props) {
     });
     MapAllActivities(activityIdString);
     setSubColumns(arr);
-    setSplicedColumns(arr.slice(0, BATCH_COUNT));
+    //code edited on 19 Sep 2022 for BugId 115547
+    setSplicedColumns(arr.slice(0, EXP_BATCH_COUNT));
   }, [loadedMileStones]);
 
   useEffect(() => {
@@ -115,8 +138,9 @@ function Exception(props) {
       document.getElementById("oneBoxMatrix").onscroll = function (event) {
         if (this.scrollLeft >= this.scrollWidth - this.clientWidth) {
           const timeout = setTimeout(() => {
+            //code edited on 19 Sep 2022 for BugId 115547
             setSplicedColumns((prev) =>
-              subColumns.slice(0, prev.length + BATCH_COUNT)
+              subColumns.slice(0, prev.length + EXP_BATCH_COUNT)
             );
           }, 500);
           return () => clearTimeout(timeout);
@@ -257,7 +281,8 @@ function Exception(props) {
     expData.ExceptionGroups.map((group) => {
       group.ExceptionList.map((exception) => {
         if (
-          exception.ExceptionName.toLowerCase() == ExceptionToAdd.toLowerCase()
+          exception.ExceptionName.trim().toLowerCase() ==
+          ExceptionToAdd.trim().toLowerCase()
         ) {
           setbExpExists(true);
           exist = true;
@@ -318,12 +343,10 @@ function Exception(props) {
             setExpData(tempData);
             if (button_type != "addAnother") {
               handleExpClose();
+              setAddAnotherExp(false);
             }
             if (button_type == "addAnother") {
-              document.getElementById("ExceptionNameInput").value = "";
-              document.getElementById("ExceptionNameInput").focus();
-              setExpName("");
-              setExceptionDesc("");
+              setAddAnotherExp(true);
             }
 
             //code added on 3 June 2022 for BugId 110101
@@ -419,6 +442,8 @@ function Exception(props) {
   };
 
   const deleteExpType = (expName, expId) => {
+    //return false
+
     axios
       .post(SERVER_URL + ENDPOINT_DELETE_EXCEPTION, {
         processDefId: props.openProcessID,
@@ -428,46 +453,52 @@ function Exception(props) {
       })
       .then((res) => {
         if (res.data.Status == 0) {
-          let tempData = { ...expData };
-          let exceptionToDeleteIndex, parentIndex;
-          tempData.ExceptionGroups?.forEach((group, groupIndex) => {
-            group.ExceptionList?.forEach((exception, exceptionIndex) => {
-              if (exception.ExceptionId == expId) {
-                exceptionToDeleteIndex = exceptionIndex;
-                parentIndex = groupIndex;
+          setTaskAssociation(res?.data?.Validations);
+          if (res?.data?.Validations?.length > 0) {
+            //setIsDeleteModalOpen(true);
+            setShowDependencyModal(true);
+          } else {
+            let tempData = { ...expData };
+            let exceptionToDeleteIndex, parentIndex;
+            tempData.ExceptionGroups?.forEach((group, groupIndex) => {
+              group.ExceptionList?.forEach((exception, exceptionIndex) => {
+                if (exception.ExceptionId == expId) {
+                  exceptionToDeleteIndex = exceptionIndex;
+                  parentIndex = groupIndex;
+                }
+              });
+            });
+            tempData.ExceptionGroups[parentIndex].ExceptionList.splice(
+              exceptionToDeleteIndex,
+              1
+            );
+            setExpData(tempData);
+            setShowExpDelete(null);
+            //code added on 3 June 2022 for BugId 110096
+            //Updating RuleDataArray
+            let tempRule = [...ruleDataArray];
+            let idx = null;
+            tempRule.forEach((exp, index) => {
+              if (exp.NameId === expId) {
+                idx = index;
               }
             });
-          });
-          tempData.ExceptionGroups[parentIndex].ExceptionList.splice(
-            exceptionToDeleteIndex,
-            1
-          );
-          setExpData(tempData);
-          setShowExpDelete(null);
-          //code added on 3 June 2022 for BugId 110096
-          //Updating RuleDataArray
-          let tempRule = [...ruleDataArray];
-          let idx = null;
-          tempRule.forEach((exp, index) => {
-            if (exp.NameId === expId) {
-              idx = index;
-            }
-          });
-          tempRule.splice(idx, 1);
-          setRuleDataArray(tempRule);
+            tempRule.splice(idx, 1);
+            setRuleDataArray(tempRule);
 
-          // Updating processData on deleting Exception
-          let newProcessData = JSON.parse(
-            JSON.stringify(localLoadedProcessData)
-          );
-          let indexValue;
-          newProcessData.ExceptionList.forEach((exception, index) => {
-            if (exception.ExceptionId == expId) {
-              indexValue = index;
-            }
-          });
-          newProcessData.ExceptionList.splice(indexValue, 1);
-          setLocalLoadedProcessData(newProcessData);
+            // Updating processData on deleting Exception
+            let newProcessData = JSON.parse(
+              JSON.stringify(localLoadedProcessData)
+            );
+            let indexValue;
+            newProcessData.ExceptionList.forEach((exception, index) => {
+              if (exception.ExceptionId == expId) {
+                indexValue = index;
+              }
+            });
+            newProcessData.ExceptionList.splice(indexValue, 1);
+            setLocalLoadedProcessData(newProcessData);
+          }
         }
       });
   };
@@ -1383,7 +1414,7 @@ function Exception(props) {
       let data = [];
       expData.ExceptionGroups &&
         expData.ExceptionGroups.map((group, groupIndex) => {
-          data.push(<p style={{ height: "34px" }}></p>);
+          data.push(<p style={{ height: "40px" }}></p>);
           group.ExceptionList.map((exception, expIndex) => {
             data.push(
               <div
@@ -1473,7 +1504,7 @@ function Exception(props) {
       expData.ExceptionGroups.map((group, groupIndex) => {
         arrExceptions.push(
           <React.Fragment>
-            <div className="groupNamesDiv" style={{height:'34px'}}>
+            <div className="groupNamesDiv" style={{ height: "40px" }}>
               <p className="groupNameExp">
                 {/*code added on 2 August for BugId 110100*/}
                 <span title={group.GroupName}>{group.GroupName}</span>
@@ -1551,6 +1582,8 @@ function Exception(props) {
                 setShowNameError={setShowNameError}
                 showDescError={showDescError}
                 setShowDescError={setShowDescError}
+                addAnotherExp={addAnotherExp}
+                setAddAnotherExp={setAddAnotherExp}
               />
             </Modal>
           </React.Fragment>
@@ -1630,7 +1663,10 @@ function Exception(props) {
                           >
                             {t("modify")}
                           </p>,
-                          <p id="moveExp_To_OtherGroup">
+                          <p
+                            id="moveTodo_To_OtherGroup"
+                            style={{ display: "flex", height: "20px" }}
+                          >
                             {t("moveTo")}
                             <DeleteModal
                               addNewGroupFunc={() => {
@@ -1652,22 +1688,18 @@ function Exception(props) {
                               }
                               backDrop={false}
                               modalPaper="modalPaperActivity exceptionMoveTo"
-                              sortByDiv="sortByDivActivity"
-                              oneSortOption="oneSortOptionActivity"
+                              // sortByDiv="sortByDivActivity"
+                              // oneSortOption="oneSortOptionActivity"
                               docIndex={expIndex}
                               buttonToOpenModal={
-                                <button
-                                  className="threeDotsButton"
-                                  type="button"
-                                >
-                                  <ArrowForwardIosIcon
-                                    style={{
-                                      color: "#606060",
-                                      height: "12px",
-                                      width: "12px",
-                                    }}
-                                  />
-                                </button>
+                                <ArrowForwardIosIcon
+                                  style={{
+                                    color: "#606060",
+                                    height: "12px",
+                                    width: "12px",
+                                    margin: "3px 8px",
+                                  }}
+                                />
                               }
                               modalWidth="180"
                               sortSectionOne={[
@@ -1689,37 +1721,87 @@ function Exception(props) {
     return arrExceptions;
   };
 
+  //mahtab code here
+
+  /*   function checkExpRight(expData) {
+    let tempArr = [];
+    expData?.ExceptionGroups?.forEach((data, i) => {
+      data?.ExceptionList?.forEach((item, j) => {
+        item?.Activities?.forEach((dt, x) => {
+          if (
+            dt.Clear == true ||
+            dt.View == true ||
+            dt.Raise == true ||
+            dt.Respond == true
+          ) {
+            tempArr.push(dt);
+          }
+        });
+      });
+    });
+
+    return tempArr;
+  }
+
+  const showRight = checkExpRight(expData); */
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+  };
+
   if (isLoading) {
     return <CircularProgress className="circular-progress" />;
   } else
     return (
-      <CommonInterface
-        newGroupToMove={newGroupToMove}
-        screenHeading={t("navigationPanel.exceptions")}
-        bGroupExists={bGroupExists}
-        showGroupNameError={showGroupNameError}
-        setbGroupExists={setbGroupExists}
-        addGroupToList={addGroupToList}
-        addGroupModal={addGroupModal}
-        setActivitySearchTerm={setActivitySearchTerm}
-        handleOpen={handleOpen}
-        handleClose={handleClose}
-        compact={compact}
-        GetActivities={GetActivities}
-        GetList={GetDocList}
-        ruleDataType={ruleDataArray}
-        exceptionAllRules={exceptionRules}
-        screenType={SCREENTYPE_EXCEPTION}
-        ruleType="E"
-        onSearchChange={onSearchChange}
-        clearSearchResult={clearSearchResult}
-        setSearchTerm={setExpSearchTerm}
-        openProcessType={props.openProcessType}
-        onActivitySearchChange={onActivitySearchChange}
-        clearActivitySearchResult={clearActivitySearchResult}
-        groupName={groupName}
-        setGroupName={setGroupName}
-      />
+      <>
+        <CommonInterface
+          newGroupToMove={newGroupToMove}
+          screenHeading={t("navigationPanel.exceptions")}
+          bGroupExists={bGroupExists}
+          showGroupNameError={showGroupNameError}
+          setbGroupExists={setbGroupExists}
+          addGroupToList={addGroupToList}
+          addGroupModal={addGroupModal}
+          setActivitySearchTerm={setActivitySearchTerm}
+          handleOpen={handleOpen}
+          handleClose={handleClose}
+          compact={compact}
+          GetActivities={GetActivities}
+          GetList={GetDocList}
+          ruleDataType={ruleDataArray}
+          exceptionAllRules={exceptionRules}
+          screenType={SCREENTYPE_EXCEPTION}
+          ruleType="E"
+          onSearchChange={onSearchChange}
+          clearSearchResult={clearSearchResult}
+          setSearchTerm={setExpSearchTerm}
+          openProcessType={props.openProcessType}
+          onActivitySearchChange={onActivitySearchChange}
+          clearActivitySearchResult={clearActivitySearchResult}
+          groupName={groupName}
+          setGroupName={setGroupName}
+        />
+
+        {showDependencyModal ? (
+          <DefaultModal
+            show={showDependencyModal}
+            style={{
+              width: "45vw",
+              left: "28%",
+              top: "21.5%",
+              padding: "0",
+            }}
+            modalClosed={() => setShowDependencyModal(false)}
+            children={
+              <ObjectDependencies
+                {...props}
+                processAssociation={taskAssociation}
+                cancelFunc={() => setShowDependencyModal(false)}
+              />
+            }
+          />
+        ) : null}
+      </>
     );
 }
 

@@ -1,7 +1,7 @@
 // #BugID - 113913
 // #BugDescription - handled the checks for redirecting to blank page on click version
-import { useState, useEffect } from "react";
-import React from "react";
+// Bug 116266 - Checkin: Checkin and other options are not available when draft checked out process opened from Recent Listing
+import React, { useState, useEffect } from "react";
 import styles from "./index.module.css";
 import MenuIcon from "@material-ui/icons/Menu";
 import CloseIcon from "@material-ui/icons/Close";
@@ -118,30 +118,26 @@ function Header(props) {
   const [showVersionCard, setshowVersionCard] = useState(false);
   //code edited on 26 July 2022 for BugId 110024
   const { processData, setProcessData } = props;
-  const [isDisable, setIsDisable] = useState(false);
   const buttonFrom = "DeployHeader";
   const [showProcessReport, setshowProcessReport] = useState(false);
   const dispatch = useDispatch();
   const [showDeployModal, setShowDeployModal] = useState(false);
   const [showDeployFailModal, setShowDeployFailModal] = useState(false);
-  const [isDrawerMinimised, setIsDrawerMinimised] = useState(false);
   const [errorVariables, setErrorVariables] = useState([]);
   const [warningVariables, setWarningVariables] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const checkIfCheckedOutProcess = () => {
-    let temp = false;
-    localLoadedProcessData?.CheckedOut === "Y" ? (temp = true) : (temp = false);
-    return temp;
-  };
-
-  useEffect(() => {
-    if (props.openProcessType === PROCESSTYPE_LOCAL) {
-      setIsDisable(true);
-    } else {
-      setIsDisable(false);
-    }
-  }, [props.openProcessType]);
+  const [pinnedProcessDefIdArr, setpinnedProcessDefIdArr] = useState([]);
+  const [showPinBoolean, setshowPinBoolean] = useState(true);
+  const [versionListSelected, setversionListSelected] = useState([]);
+  const [showVersionHistory, setshowVersionHistory] = useState(false);
+  const [version, setVersion] = useState(null);
+  const [processType, setProcessType] = useState(null);
+  const [state, setState] = useState({
+    top: false,
+    left: false,
+    bottom: false,
+    right: false,
+  });
 
   const closeHandler = () => {
     localArrProcessesData.forEach((element) => {
@@ -161,8 +157,6 @@ function Header(props) {
     setlocalLoadedProcessData(null);
     history.push("/");
   };
-  const [pinnedProcessDefIdArr, setpinnedProcessDefIdArr] = useState([]);
-  const [showPinBoolean, setshowPinBoolean] = useState(true);
 
   useEffect(() => {
     async function getPinned() {
@@ -245,14 +239,7 @@ function Header(props) {
   const versionHandler = () => {
     setshowVersionCard(true);
   };
-  const [versionListSelected, setversionListSelected] = useState([]);
-  const [showVersionHistory, setshowVersionHistory] = useState(false);
-  const [state, setState] = useState({
-    top: false,
-    left: false,
-    bottom: false,
-    right: false,
-  });
+  
   useEffect(() => {
     props.processData?.Versions?.forEach((element) => {
       if (element.VersionNo == props.openProcessVersion) {
@@ -289,6 +276,14 @@ function Header(props) {
     </Box>
   );
 
+  useEffect(() => {
+    /*code edited on 29 August 2022 for BugId 114894 */
+    if (localLoadedProcessData) {
+      setVersion(localLoadedProcessData.VersionNo);
+      setProcessType(localLoadedProcessData.ProcessType);
+    }
+  }, [localLoadedProcessData]);
+
   return (
     <div className="header_processes" style={{ direction: `${t("HTML_DIR")}` }}>
       <div className="leftHeader">
@@ -298,25 +293,31 @@ function Header(props) {
         <p class="processName">
           {props.openTemplateFlag ? props.templateName : props.openProcessName}
         </p>
+        {/*code edited on 29 August 2022 for BugId 114894 */}
         {props.openTemplateFlag ? null : (
           <span class="versionName" onClick={versionHandler}>
-            {t("V")}
-            {props.openProcessVersion}
+            {version !== null ? t("v") + version : ""}
           </span>
         )}
         <span class="processType">
-          {props.openTemplateFlag ? null : (
-            <img
-              src={tileProcess(props.openProcessType)[0]}
-              style={{ height: "1rem", width: "1rem", marginTop: "1px" }}
-              alt=""
-            />
-          )}
+          {/*code edited on 29 August 2022 for BugId 114894 */}
+          {props.openTemplateFlag
+            ? null
+            : processType !== null && (
+                <img
+                  src={tileProcess(processType)[0]}
+                  style={{ height: "1rem", width: "1rem", marginTop: "1px" }}
+                  alt=""
+                />
+              )}
           <span class="processTypeName">
             {props.openTemplateFlag
               ? t("Template")
-              : `${tileProcess(props.openProcessType)[1]} ${
-                  checkIfCheckedOutProcess() ? "(Checked-Out)" : ""
+              : processType !== null &&
+                `${tileProcess(processType)[1]} ${
+                  localLoadedProcessData?.CheckedOut === "Y"
+                    ? "(Checked-Out)"
+                    : ""
                 }`}
           </span>
         </span>
@@ -342,18 +343,21 @@ function Header(props) {
                   ) : null}
                 </div>
               </div>
+              {/*code updated on 12 August 2022 for BugId 115525  */}
               <p className="versionCardLabel">{t("createdBy")}</p>
               <p className="versionCardVal">
-                {versionListSelected[0]?.CreatedBy} {t("on")}
-                {versionListSelected[0]?.CreatedOn}
+                {props?.processData?.Versions[0]?.CreatedBy} {t("on")}{" "}
+                {props?.processData?.Versions[0]?.CreatedOn}
               </p>
               <p className="versionCardLabel">{t("lastModifiedBy")}</p>
               <p className="versionCardVal">
-                {versionListSelected[0]?.LastModifiedBy} {t("on")}{" "}
-                {versionListSelected[0]?.LastModifiedOn}
+                {props?.processData?.Versions[0]?.LastModifiedBy} {t("on")}{" "}
+                {props?.processData?.Versions[0]?.LastModifiedOn}
               </p>
               <p className="versionCardLabel">{t("project")}</p>
-              <p className="versionCardVal">{props?.processData?.ProjectName}</p>
+              <p className="versionCardVal">
+                {props?.processData?.ProjectName}
+              </p>
             </CardContent>
           </Card>
         </ClickAwayListener>
@@ -366,7 +370,13 @@ function Header(props) {
               onClick={() => setShowMore(true)}
               id="header_more_btn"
             >
-              <MoreHorizIcon style={{ color: "#727272" }} />
+              <MoreHorizIcon
+                style={{
+                  color: "#727272",
+                  width: "1.5rem",
+                  height: "1.5rem",
+                }}
+              />
               <span className="moreText">{t("More")}</span>
             </button>
           </ClickAwayListener>
@@ -428,7 +438,7 @@ function Header(props) {
                     onClick={() => handleProcessAction(MENUOPTION_CHECKIN)}
                     style={{
                       display:
-                        props.openProcessType === PROCESSTYPE_LOCAL &&
+                        (props.openProcessType === PROCESSTYPE_LOCAL || props.openProcessType=='LC')&&
                         processData.CheckedOut === PROCESS_CHECKOUT
                           ? ""
                           : "none",
@@ -472,7 +482,7 @@ function Header(props) {
                     className="moreOptions"
                     style={{
                       display:
-                        props.openProcessType === PROCESSTYPE_LOCAL
+                        (props.openProcessType === PROCESSTYPE_LOCAL || props.openProcessType=='LC')
                           ? ""
                           : "none",
                     }}
@@ -514,7 +524,7 @@ function Header(props) {
                       onClick={() => handleProcessAction(MENUOPTION_IMPORT)}
                       style={{
                         display:
-                          props.openProcessType === PROCESSTYPE_LOCAL
+                          (props.openProcessType === PROCESSTYPE_LOCAL || props.openProcessType=='LC')
                             ? ""
                             : "none",
                       }}
@@ -622,6 +632,7 @@ function Header(props) {
             }}
             onClick={() => setAction(MENUOPTION_DEPLOY)}
             id="header_deploy_btn"
+            disabled={processData?.CheckedOut === "Y"}
           >
             <img
               src={deploy}
@@ -665,7 +676,12 @@ function Header(props) {
       {isModalOpen ? (
         <Modal
           show={isModalOpen}
-          modalClosed={() => setIsModalOpen(false)}
+          modalClosed={() => {
+            setIsModalOpen(false);
+            var elem = document.getElementById("oapweb_assetManifest");
+
+            elem.parentNode.removeChild(elem);
+          }}
           style={{
             width: "67%",
             height: "91%",
@@ -677,7 +693,12 @@ function Header(props) {
         >
           <div>
             <CloseIcon
-              onClick={() => setIsModalOpen(false)}
+              onClick={() => {
+                setIsModalOpen(false);
+                var elem = document.getElementById("oapweb_assetManifest");
+
+                elem.parentNode.removeChild(elem);
+              }}
               className={styles.closeIcon}
               // style={{ opacity: "0.2", marginBottom: "2px" }}
               fontSize="medium"
@@ -767,6 +788,7 @@ function Header(props) {
               setModalClosed={() => setAction(null)}
               existingVersion={props.openProcessVersion}
               processDefId={props.openProcessID}
+              toggleDrawer={() => toggleDrawer("bottom", true)}
             />
           }
         />

@@ -1,29 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { store, useGlobalState } from "state-pool";
-import * as actionCreators from "../../../../redux-store/actions/selectedCellActions";
 import { connect } from "react-redux";
-import { getActivityProps } from "../../../../utility/abstarctView/getActivityProps";
 import styles from "./index.module.css";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  setSave,
-  ActivityPropertySaveCancelValue,
-} from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked.js";
+import { useDispatch } from "react-redux";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
-import TextInput from "../../../../UI/Components_With_ErrrorHandling/InputField/index.js";
 import { Checkbox } from "@material-ui/core";
 import DragIndicatorOutlinedIcon from "@material-ui/icons/DragIndicatorOutlined";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import arabicStyles from "./ArabicStyles.module.css";
-import { RTL_DIRECTION } from "../../../../Constants/appConstants.js";
+import {
+  propertiesLabel,
+  RTL_DIRECTION,
+} from "../../../../Constants/appConstants.js";
 import TabsHeading from "../../../../UI/TabsHeading";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function SearchVariable(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcess] = useGlobalState("variableDefinition");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
@@ -31,6 +27,7 @@ function SearchVariable(props) {
   const [check, setCheck] = useState({});
   const [query, setQuery] = useState("");
   const [allVariable, setallVariable] = useState([]);
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
   const dispatch = useDispatch();
 
   function createData(VariableName, VariableId) {
@@ -108,7 +105,10 @@ function SearchVariable(props) {
     setQuery(e.target.value);
     dispatch(
       setActivityPropertyChange({
-        SearchVariable: { isModified: true, hasError: false },
+        [propertiesLabel.searchVariables]: {
+          isModified: true,
+          hasError: false,
+        },
       })
     );
     let temp = localLoadedActivityPropertyData;
@@ -153,7 +153,10 @@ function SearchVariable(props) {
 
     dispatch(
       setActivityPropertyChange({
-        SearchVariable: { isModified: true, hasError: false },
+        [propertiesLabel.searchVariables]: {
+          isModified: true,
+          hasError: false,
+        },
       })
     );
   };
@@ -169,14 +172,17 @@ function SearchVariable(props) {
 
     dispatch(
       setActivityPropertyChange({
-        SearchVariable: { isModified: true, hasError: false },
+        [propertiesLabel.searchVariables]: {
+          isModified: true,
+          hasError: false,
+        },
       })
     );
   };
 
   return (
     <React.Fragment>
-    <TabsHeading heading={props?.heading} />
+      <TabsHeading heading={props?.heading} />
       <div className={styles.SearchVariable} style={{ direction: direction }}>
         <div style={{ width: "50%" }}>
           <p
@@ -227,6 +233,7 @@ function SearchVariable(props) {
                               draggableId={`${index}`}
                               key={`${index}`}
                               index={index}
+                              isDragDisabled={isReadOnly}
                             >
                               {(provided) => (
                                 <div
@@ -270,6 +277,7 @@ function SearchVariable(props) {
                                         onChange={(e) =>
                                           checkboxHandler(row.VariableName, e)
                                         }
+                                        disabled={isReadOnly}
                                         style={{
                                           height: "14px",
                                           width: "14px",
@@ -316,6 +324,7 @@ function SearchVariable(props) {
           <textarea
             value={query}
             onChange={queryHandler}
+            disabled={isReadOnly}
             className={
               direction === RTL_DIRECTION
                 ? arabicStyles.textBox
@@ -330,16 +339,7 @@ function SearchVariable(props) {
 
 const mapStateToProps = (state) => {
   return {
-    showDrawer: state.showDrawerReducer.showDrawer,
-    cellID: state.selectedCellReducer.selectedId,
-    cellName: state.selectedCellReducer.selectedName,
-    cellType: state.selectedCellReducer.selectedType,
-    cellActivityType: state.selectedCellReducer.selectedActivityType,
-    cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
-    openProcessID: state.openProcessClick.selectedId,
-    openProcessName: state.openProcessClick.selectedProcessName,
-    openProcessType: state.openProcessClick.selectedType,
-    isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

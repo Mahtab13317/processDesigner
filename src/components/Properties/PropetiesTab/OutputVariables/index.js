@@ -13,6 +13,7 @@ import {
 } from "../../../../Constants/appConstants";
 import emptyStatePic from "../../../../assets/ProcessView/EmptyState.svg";
 import TabsHeading from "../../../../UI/TabsHeading";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function OutputVariables(props) {
   let { t } = useTranslation();
@@ -26,6 +27,7 @@ function OutputVariables(props) {
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   useEffect(() => {
     if (localLoadedActivityPropertyData?.Status === 0) {
@@ -137,124 +139,114 @@ function OutputVariables(props) {
   };
 
   return (
-   <>
-     <TabsHeading heading={props?.heading} />
-    <div className="flexColumn">
-      {spinner ? (
-        <CircularProgress
-          style={
-            direction === RTL_DIRECTION
-              ? { marginTop: "30vh", marginRight: "50%" }
-              : { marginTop: "30vh", marginLeft: "50%" }
-          }
-        />
-      ) : (
-        <React.Fragment>
-          {activityDetails?.length > 0 ? (
-            <div
-              className={`${styles.outputVariablesDiv} ${
-                props.isDrawerExpanded
-                  ? styles.expandedView
-                  : styles.collapsedView
-              }`}
-            >
-              <p
-                className={
-                  direction === RTL_DIRECTION
-                    ? arabicStyles.outputVariablesHeading
-                    : styles.outputVariablesHeading
-                }
+    <>
+      <TabsHeading heading={props?.heading} />
+      <div className="flexColumn">
+        {spinner ? (
+          <CircularProgress
+            style={
+              direction === RTL_DIRECTION
+                ? { marginTop: "30vh", marginRight: "50%" }
+                : { marginTop: "30vh", marginLeft: "50%" }
+            }
+          />
+        ) : (
+          <React.Fragment>
+            {activityDetails?.length > 0 ? (
+              <div
+                className={`${styles.outputVariablesDiv} ${
+                  props.isDrawerExpanded
+                    ? styles.expandedView
+                    : styles.collapsedView
+                }`}
               >
-                {t("outputVariables")}
-              </p>
-
-              <div className={styles.outputTableHeader}>
-                <span
-                  className={
-                    direction === RTL_DIRECTION
-                      ? `${arabicStyles.outputHeadDiv} ${styles.outputVarName}`
-                      : `${styles.outputHeadDiv} ${styles.outputVarName}`
-                  }
-                >
-                  {t("variableName")}
-                </span>
-                <span
-                  className={
-                    direction === RTL_DIRECTION
-                      ? `${arabicStyles.outputHeadDiv} ${styles.outputCheck} flex`
-                      : `${styles.outputHeadDiv} ${styles.outputCheck} flex`
-                  }
-                >
-                  <Checkbox
-                    checked={allChecked}
+                <div className={styles.outputTableHeader}>
+                  <span
                     className={
                       direction === RTL_DIRECTION
-                        ? arabicStyles.outputAllCheckbox
-                        : styles.outputAllCheckbox
+                        ? `${arabicStyles.outputHeadDiv} ${styles.outputVarName}`
+                        : `${styles.outputHeadDiv} ${styles.outputVarName}`
                     }
-                    name="bAllOrder"
-                    id={`bOutput_reply_allCheck`}
-                    onChange={(e) => changeDataFields(e, null)}
-                  />
-                  {t("output")}
-                </span>
+                  >
+                    {t("variableName")}
+                  </span>
+                  <span
+                    className={
+                      direction === RTL_DIRECTION
+                        ? `${arabicStyles.outputHeadDiv} ${styles.outputCheck} flex`
+                        : `${styles.outputHeadDiv} ${styles.outputCheck} flex`
+                    }
+                  >
+                    <Checkbox
+                      checked={allChecked}
+                      className={
+                        direction === RTL_DIRECTION
+                          ? arabicStyles.outputAllCheckbox
+                          : styles.outputAllCheckbox
+                      }
+                      disabled={isReadOnly}
+                      name="bAllOrder"
+                      id={`bOutput_reply_allCheck`}
+                      onChange={(e) => changeDataFields(e, null)}
+                    />
+                    {t("output")}
+                  </span>
+                </div>
+                <div className={styles.outputTableBody}>
+                  {activityDetails.map((item) => {
+                    return (
+                      <div className={`${styles.outputTableRow} flex`}>
+                        <span
+                          className={
+                            direction === RTL_DIRECTION
+                              ? `${arabicStyles.outputBodyDiv} ${styles.outputVarName}`
+                              : `${styles.outputBodyDiv} ${styles.outputVarName}`
+                          }
+                        >
+                          {item.name}
+                        </span>
+                        <Checkbox
+                          checked={item.bOrder}
+                          className={
+                            direction === RTL_DIRECTION
+                              ? `${arabicStyles.outputCheckbox} ${styles.outputCheck}`
+                              : `${styles.outputCheckbox} ${styles.outputCheck}`
+                          }
+                          disabled={isReadOnly}
+                          name="bOrder"
+                          id={`bOutput_${item.name}_check`}
+                          onChange={(e) => changeDataFields(e, item)}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-              <div className={styles.outputTableBody}>
-                {activityDetails.map((item) => {
-                  return (
-                    <div className={`${styles.outputTableRow} flex`}>
-                      <span
-                        className={
-                          direction === RTL_DIRECTION
-                            ? `${arabicStyles.outputBodyDiv} ${styles.outputVarName}`
-                            : `${styles.outputBodyDiv} ${styles.outputVarName}`
-                        }
-                      >
-                        {item.name}
-                      </span>
-                      <Checkbox
-                        checked={item.bOrder}
-                        className={
-                          direction === RTL_DIRECTION
-                            ? `${arabicStyles.outputCheckbox} ${styles.outputCheck}`
-                            : `${styles.outputCheckbox} ${styles.outputCheck}`
-                        }
-                        name="bOrder"
-                        id={`bOutput_${item.name}_check`}
-                        onChange={(e) => changeDataFields(e, item)}
-                      />
-                    </div>
-                  );
-                })}
+            ) : (
+              <div
+                className={`${
+                  props.isDrawerExpanded
+                    ? styles.noOutputVarExp
+                    : styles.noOutputVarColl
+                }`}
+              >
+                <img src={emptyStatePic} />
+                <p className={styles.noOutputVarAddedString}>
+                  {t("noOutputVarAdded")}
+                </p>
               </div>
-            </div>
-          ) : (
-            <div
-              className={`${
-                props.isDrawerExpanded
-                  ? styles.noOutputVarExp
-                  : styles.noOutputVarColl
-              }`}
-            >
-              <img src={emptyStatePic} />
-              <p className={styles.noOutputVarAddedString}>
-                {t("noOutputVarAdded")}
-              </p>
-            </div>
-          )}
-        </React.Fragment>
-      )}
-    </div>
-   </>
+            )}
+          </React.Fragment>
+        )}
+      </div>
+    </>
   );
 }
 
 const mapStateToProps = (state) => {
   return {
-    cellName: state.selectedCellReducer.selectedName,
-    cellActivityType: state.selectedCellReducer.selectedActivityType,
-    cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

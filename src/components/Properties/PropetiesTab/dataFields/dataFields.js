@@ -1,12 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Checkbox from "@material-ui/core/Checkbox";
-import Button from "@material-ui/core/Button";
 import { connect, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { store, useGlobalState } from "state-pool";
 import { getVariableType } from "../../../../utility/ProcessSettings/Triggers/getVariableType";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import { Tooltip } from "@material-ui/core";
+import {
+  PROCESSTYPE_DEPLOYED,
+  PROCESSTYPE_REGISTERED,
+} from "../../../../Constants/appConstants";
 
 function ExpenseInitiation(props) {
   let { t } = useTranslation();
@@ -21,6 +24,10 @@ function ExpenseInitiation(props) {
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [allReadBool, setallReadBool] = useState(false);
   const [allModifyBool, setallModifyBool] = useState(false);
+  const isReadOnly =
+    (props.openProcessType === PROCESSTYPE_DEPLOYED ||
+      props.openProcessType === PROCESSTYPE_REGISTERED) &&
+    props.cellCheckedOut === "N";
 
   const activitytHeadDetails = [
     {
@@ -31,18 +38,37 @@ function ExpenseInitiation(props) {
       modify: "Modify",
     },
   ];
-  let checkedCount = 0;
-  activityDetails.map((activity) => {
-    let checkedFound = false;
-    for (var prop in activity) {
-      if (activity[prop] === true) {
-        checkedFound = true;
-      }
+
+  useEffect(() => {
+    if (localLoadedActivityPropertyData) {
+      let tempArr = [];
+      localLoadedProcessData?.Variable.map((processVar) => {
+        if (
+          processVar.VariableScope === "U" ||
+          processVar.VariableScope === "I"
+        ) {
+          let temp = {
+            name: processVar.VariableName,
+            type: processVar.VariableType,
+            length: processVar.VariableLength,
+            bRead:
+              getVariableReadModifyData(processVar.VariableName) === "R" ||
+              getVariableReadModifyData(processVar.VariableName) === "O"
+                ? true
+                : false,
+            bModify:
+              getVariableReadModifyData(processVar.VariableName) === "O"
+                ? true
+                : false,
+            id: processVar.VariableId,
+          };
+          tempArr.push(temp);
+        }
+      });
+      setactivityDetails(tempArr);
+      checkAllReadModify(tempArr);
     }
-    if (checkedFound) {
-      checkedCount += 1;
-    }
-  });
+  }, [localLoadedActivityPropertyData?.Status]);
 
   const getVariableReadModifyType = (data) => {
     let temp = "";
@@ -149,44 +175,13 @@ function ExpenseInitiation(props) {
       modifyArr.push(act.bModify);
     });
 
-    if (readArr.includes(false)) setallReadBool(false);
+    if (readArr?.includes(false) || readArr?.length === 0)
+      setallReadBool(false);
     else setallReadBool(true);
-    if (modifyArr.includes(false)) setallModifyBool(false);
+    if (modifyArr.includes(false) || modifyArr?.length === 0)
+      setallModifyBool(false);
     else setallModifyBool(true);
   };
-
-  React.useEffect(() => {
-    if (localLoadedActivityPropertyData) {
-      let tempArr = [];
-
-      localLoadedProcessData?.Variable.map((processVar) => {
-        if (
-          processVar.VariableScope === "U" ||
-          processVar.VariableScope === "I"
-        ) {
-          let temp = {
-            name: processVar.VariableName,
-            type: processVar.VariableType,
-            length: processVar.VariableLength,
-            bRead:
-              getVariableReadModifyData(processVar.VariableName) === "R" ||
-              getVariableReadModifyData(processVar.VariableName) === "O"
-                ? true
-                : false,
-            bModify:
-              getVariableReadModifyData(processVar.VariableName) === "O"
-                ? true
-                : false,
-            id: processVar.VariableId,
-          };
-          tempArr.push(temp);
-        }
-      });
-
-      setactivityDetails(tempArr);
-      checkAllReadModify(tempArr);
-    }
-  }, [localLoadedActivityPropertyData?.Status]);
 
   const allChangeHandler = (e) => {
     let temp = JSON.parse(JSON.stringify(activityDetails));
@@ -278,7 +273,7 @@ function ExpenseInitiation(props) {
         //added by mahtab
         <div className="headingSectionTab">{<h4>{props?.heading}</h4>}</div>
       }
-      {showCreateSection ? (
+      {/* {showCreateSection ? (
         <div
           style={{
             backgroundColor: "#f8f8f8 ",
@@ -421,7 +416,7 @@ function ExpenseInitiation(props) {
             </div>
           </div>
         </div>
-      ) : null}
+      ) : null} */}
       <div
         className="modify"
         style={{
@@ -513,6 +508,7 @@ function ExpenseInitiation(props) {
                     name="allRead"
                     onChange={allChangeHandler}
                     size="medium"
+                    disabled={isReadOnly}
                   />
                   {item.read}
                 </span>
@@ -534,9 +530,12 @@ function ExpenseInitiation(props) {
                   <Checkbox
                     checked={allModifyBool}
                     disabled={
-                      props.cellActivityType === 2 &&
-                      props.cellActivitySubType === 1
-                    } //for endevent
+                      (props.cellActivityType === 2 &&
+                        props.cellActivitySubType === 1) ||
+                      (props.cellActivityType === 2 &&
+                        props.cellActivitySubType === 2) ||
+                      isReadOnly
+                    } //for endevent && messageend
                     name="allModify"
                     onChange={allChangeHandler}
                     size="medium"
@@ -637,6 +636,7 @@ function ExpenseInitiation(props) {
                   name="bRead"
                   inputProps={{ "aria-label": "secondary checkbox" }}
                   onChange={(e) => changeDataFields(e, item)}
+                  disabled={isReadOnly}
                 />
               </div>
               <div
@@ -644,16 +644,22 @@ function ExpenseInitiation(props) {
                   display: "flex",
                   flexDirection: "row",
                   width: "20%",
-                  // textAlign: direction === "rtl" ? "right" : "left",
                   alignItems: "flex-start",
                 }}
               >
+                {/*****************************************************************************************
+                 * @author asloob_ali BUG ID : 114898 Message End: modify data rights should not be allowed in the property of message end
+                 *  Resolution : disabled modify rights in case of message end activity.
+                 *  Date : 13/09/2022             ****************/}
                 <Checkbox
                   checked={item.bModify}
                   disabled={
-                    props.cellActivityType === 2 &&
-                    props.cellActivitySubType === 1
-                  } //for endevent
+                    (props.cellActivityType === 2 &&
+                      props.cellActivitySubType === 1) ||
+                    (props.cellActivityType === 2 &&
+                      props.cellActivitySubType === 2) ||
+                    isReadOnly
+                  } //for endevent && message end
                   size="medium"
                   name="bModify"
                   inputProps={{ "aria-label": "secondary checkbox" }}
@@ -676,6 +682,8 @@ const mapStateToProps = (state) => {
     cellType: state.selectedCellReducer.selectedType,
     cellActivityType: state.selectedCellReducer.selectedActivityType,
     cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
+    openProcessType: state.openProcessClick.selectedType,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

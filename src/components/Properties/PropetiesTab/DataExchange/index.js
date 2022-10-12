@@ -1,10 +1,13 @@
 // #BugID - 112517
 // #BugDescription - Added a condition for key that was not coming from backend in case of no rules.
+// #BugID - 112527
+// #BugDescription - Added new parameter to api to get all the tables.
 import React, { useState, useEffect } from "react";
 import styles from "./index.module.css";
 import { connect, useDispatch, useSelector } from "react-redux";
 import { store, useGlobalState } from "state-pool";
 import { Checkbox, InputBase, MenuItem } from "@material-ui/core";
+import * as actionCreators from "../../../../redux-store/actions/Properties/showDrawerAction.js";
 import CustomizedDropdown from "../../../../UI/Components_With_ErrrorHandling/Dropdown";
 import clsx from "clsx";
 import axios from "axios";
@@ -14,7 +17,6 @@ import {
   ENDPOINT_GET_EXISTING_TABLES,
   propertiesLabel,
   ENDPOINT_TEST_CONNECTION,
-  PROCESSTYPE_LOCAL,
   ENDPOINT_GET_CURRENT_CABINETNAME,
 } from "../../../../Constants/appConstants";
 import PropertyDetails from "./PropertyDetails";
@@ -32,13 +34,16 @@ import {
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 import TabsHeading from "../../../../UI/TabsHeading";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function DataExchange(props) {
   let { t } = useTranslation();
   const dispatch = useDispatch();
-  const { openProcessType, openProcessID } = props;
+  const { openProcessType, openProcessID, isDrawerExpanded, expandDrawer } =
+    props;
   const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
   const loadedProcessData = store.getState("loadedProcessData"); //current processdata clicked
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const globalActivityData = store.getState("activityPropertyData");
   const [localActivityPropertyData, setLocalActivityPropertyData] =
     useGlobalState(globalActivityData); // State that stores the activity property data for the current open properties saved in the global state.
@@ -54,7 +59,9 @@ function DataExchange(props) {
   const [filteredVariables, setFilteredVariables] = useState([]); // List of all filtered "U" and "I" scope variables.
   const [tableDetails, setTableDetails] = useState([]); // State that stores all the selected table name for both complex isNested and not isNested and not complex cases.
   const [activityOpType, setActivityOpType] = useState(""); // State that stores the selected data exchange existing activity operation type.
-  const [isProcessReadOnly, setIsProcessReadOnly] = useState(false); // State to store boolean for check if the process is readonly or not.
+
+  // to store boolean for check if the process is readonly or not.
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   const operationTypes = [
     { operationType: "2", operationLabel: t("export") },
@@ -76,14 +83,8 @@ function DataExchange(props) {
   // Function that runs when a rule is selected.
   const handleSelectedOp = (index) => {
     setSelectedOp(index);
+    expandDrawer(true);
   };
-
-  // Function that runs when the openProcessType prop changes.
-  useEffect(() => {
-    if (openProcessType !== PROCESSTYPE_LOCAL) {
-      setIsProcessReadOnly(true);
-    }
-  }, [openProcessType]);
 
   // Function that gets called when the activity property data changes.
   useEffect(() => {
@@ -121,7 +122,7 @@ function DataExchange(props) {
       );
       setTableDetails(temp);
     }
-  }, [localActivityPropertyData.ActivityProperty]);
+  }, [localActivityPropertyData?.ActivityProperty]);
 
   // Function that runs when the saveCancelStatus.SaveClicked, saveCancelStatus.CancelClicked values change and checks validation.
   useEffect(() => {
@@ -210,13 +211,13 @@ function DataExchange(props) {
 
   // Function that runs when the Variables in state pool changes.
   useEffect(() => {
-    setVariables(loadedProcessData?.value?.Variable);
-    const filteredVars = loadedProcessData?.value?.Variable.filter(
+    setVariables(localLoadedProcessData?.Variable);
+    const filteredVars = localLoadedProcessData?.Variable.filter(
       (element) =>
         element.VariableScope === "U" || element.VariableScope === "I"
     );
     setFilteredVariables(filteredVars);
-  }, [loadedProcessData.value.Variable]);
+  }, [localLoadedProcessData?.Variable]);
 
   // Function to test the connection of a cabinet.
   const testConnectionAPICall = () => {
@@ -247,7 +248,6 @@ function DataExchange(props) {
 
   // Function that runs when the component loads.
   useEffect(() => {
-    // getExistingTableData();
     getCurrentCabinetName();
   }, []);
 
@@ -255,7 +255,11 @@ function DataExchange(props) {
   const getExistingTableData = () => {
     if (cabinetName.trim() !== "") {
       if (loggedInCabinet) {
-        existingTableAPICall(`/${openProcessID}` + `/${openProcessType}`);
+        existingTableAPICall(
+          `/${openProcessID}` +
+            `/${openProcessType}` +
+            `?cabinetName=${cabinetName}`
+        );
       } else if (isCabinetConnected) {
         existingTableAPICall(
           `/${openProcessID}` +
@@ -311,6 +315,11 @@ function DataExchange(props) {
         if (res.status === 200) {
           setCurrentCabinetName(res.data);
           setCabinetName(res.data);
+          existingTableAPICall(
+            `/${openProcessID}` +
+              `/${openProcessType}` +
+              `?cabinetName=${res.data}`
+          );
         }
       })
       .catch((err) => console.log(err));
@@ -356,6 +365,7 @@ function DataExchange(props) {
   // Function that gets called when the add new button is clicked.
   const localOpHandler = () => {
     if (checkIfAddNewOpIsValid(operationType)) {
+      expandDrawer(true);
       let obj = getRuleJSON();
       let temp = [];
       if (opList?.length > 0) {
@@ -489,163 +499,170 @@ function DataExchange(props) {
   return (
     <>
       <TabsHeading heading={props?.heading} />
-    <div className={styles.flexRow} style={{ background: "#F8F8F8" }}>
       <div
-        className={clsx(
-          styles.flexColumn,
-          styles.cabinetDetailsDiv,
-          styles.cabinetDetailsWidth
-        )}
+        className={isDrawerExpanded ? styles.flexRow : styles.flexColumn}
+        style={{ background: "#F8F8F8" }}
       >
-        <p className={styles.heading}>{t("cabinetDetails")}</p>
-        <div className={styles.flexRow}>
-          <Checkbox
-            disabled={isProcessReadOnly}
-            id="DE_Logged_in_Cabinet_Checkbox"
-            checked={loggedInCabinet}
-            size="small"
-            onChange={() => {
-              setExistingTableData([]);
-              setLoggedInCabinet((prevState) => {
-                if (!prevState) {
-                  setCabinetName(currentCabinetName);
-                } else {
-                  setCabinetName("");
-                }
-                return !prevState;
-              });
-            }}
-          />
-          <p className={styles.loggedInCabinetText}>{t("loggedInCabinet")}</p>
-        </div>
-        <div className={clsx(styles.flexColumn, styles.cabinetNameDiv)}>
-          <p className={styles.fieldTitle}>{t("cabinetName")}</p>
-          <InputBase
-            id="DE_Cabinet_Name_Field"
-            variant="outlined"
-            className={clsx(
-              styles.cabinetNameInput,
-              loggedInCabinet && styles.cabinetNameDisabled
-            )}
-            onChange={(event) => {
-              setCabinetName(event.target.value);
-              setIsCabinetConnected(false);
-            }}
-            value={cabinetName}
-            disabled={loggedInCabinet || isProcessReadOnly}
-          />
-        </div>
-        {!isProcessReadOnly && (
-          <button
-            disabled={loggedInCabinet || cabinetName.trim() === ""}
-            className={clsx(
-              styles.blueButton,
-              styles.testConnectionBtn,
-              loggedInCabinet && styles.disabledTestConnectionBtn
-            )}
-            onClick={testConnectionAPICall}
-          >
-            {t("testConnection")}
-          </button>
-        )}
-        {isCabinetConnected && loggedInCabinet && (
-          <p className={styles.connectionStatusText}>{t("connected")}</p>
-        )}
-
-        <div className={clsx(styles.flexColumn, styles.cabinetNameDiv)}>
-          <p className={styles.fieldTitle}>{t("selectOperation")}</p>
-          <CustomizedDropdown
-            disabled={isProcessReadOnly}
-            id="DE_Operation_Type_Dropdown"
-            className={styles.dropdown}
-            value={operationType}
-            onChange={(event) => {
-              setOperationType(event.target.value);
-              if (opList?.length === 0) {
-                setActivityOpType(event.target.value);
-              }
-            }}
-            isNotMandatory={true}
-          >
-            {operationTypes?.map((element) => {
-              return (
-                <MenuItem
-                  className={styles.menuItemStyles}
-                  value={element.operationType}
-                >
-                  {element.operationLabel}
-                </MenuItem>
-              );
-            })}
-          </CustomizedDropdown>
-        </div>
-      </div>
-      <div
-        className={clsx(
-          styles.flexColumn,
-          styles.cabinetDetailsDiv,
-          styles.operationsWidth
-        )}
-      >
-        <div className={clsx(styles.flexRow, styles.operationSubDiv)}>
-          <p className={clsx(styles.heading, styles.listOfOpMargin)}>
-            {t("listOfOperations")}
-          </p>
-          {!isProcessReadOnly && (
+        <div
+          className={clsx(
+            styles.flexColumn,
+            styles.cabinetDetailsDiv,
+            isDrawerExpanded
+              ? styles.cabinetDetailsWidth
+              : styles.collapsedWidth
+          )}
+        >
+          <p className={styles.heading}>{t("cabinetDetails")}</p>
+          <div className={styles.flexRow}>
+            <Checkbox
+              disabled={isReadOnly}
+              id="DE_Logged_in_Cabinet_Checkbox"
+              checked={loggedInCabinet}
+              size="small"
+              onChange={() => {
+                setExistingTableData([]);
+                setLoggedInCabinet((prevState) => {
+                  if (!prevState) {
+                    setCabinetName(currentCabinetName);
+                  } else {
+                    setCabinetName("");
+                  }
+                  return !prevState;
+                });
+              }}
+            />
+            <p className={styles.loggedInCabinetText}>{t("loggedInCabinet")}</p>
+          </div>
+          <div className={clsx(styles.flexColumn, styles.cabinetNameDiv)}>
+            <p className={styles.fieldTitle}>{t("cabinetName")}</p>
+            <InputBase
+              id="DE_Cabinet_Name_Field"
+              variant="outlined"
+              className={clsx(
+                styles.cabinetNameInput,
+                loggedInCabinet && styles.cabinetNameDisabled
+              )}
+              onChange={(event) => {
+                setCabinetName(event.target.value);
+                setIsCabinetConnected(false);
+              }}
+              value={cabinetName}
+              disabled={loggedInCabinet || isReadOnly}
+            />
+          </div>
+          {!isReadOnly && (
             <button
-              onClick={localOpHandler}
-              className={clsx(styles.blueButton, styles.addNewOperationBtn)}
+              disabled={loggedInCabinet || cabinetName.trim() === ""}
+              className={clsx(
+                styles.blueButton,
+                styles.testConnectionBtn,
+                loggedInCabinet && styles.disabledTestConnectionBtn
+              )}
+              onClick={testConnectionAPICall}
             >
-              {t("addNew")}
+              {t("testConnection")}
             </button>
           )}
+          {isCabinetConnected && loggedInCabinet && (
+            <p className={styles.connectionStatusText}>{t("connected")}</p>
+          )}
+
+          <div className={clsx(styles.flexColumn, styles.cabinetNameDiv)}>
+            <p className={styles.fieldTitle}>{t("selectOperation")}</p>
+            <CustomizedDropdown
+              disabled={isReadOnly}
+              id="DE_Operation_Type_Dropdown"
+              className={styles.dropdown}
+              value={operationType}
+              onChange={(event) => {
+                setOperationType(event.target.value);
+                if (opList?.length === 0) {
+                  setActivityOpType(event.target.value);
+                }
+              }}
+              isNotMandatory={true}
+            >
+              {operationTypes?.map((element) => {
+                return (
+                  <MenuItem
+                    className={styles.menuItemStyles}
+                    value={element.operationType}
+                  >
+                    {element.operationLabel}
+                  </MenuItem>
+                );
+              })}
+            </CustomizedDropdown>
+          </div>
         </div>
         <div
-          id="operationDiv"
-          className={clsx(styles.flexColumn, styles.opScroll)}
+          className={clsx(
+            styles.flexColumn,
+            styles.cabinetDetailsDiv,
+            isDrawerExpanded ? styles.operationsWidth : styles.collapsedWidth
+          )}
         >
-          {opList?.map((element, index) => {
-            return (
-              <OperationStrip
-                index={index}
-                isNested={
-                  activityOpType === "1"
-                    ? element.m_bIsNested
-                    : element.m_bIsNestedExport
-                }
-                handleSelectedOp={handleSelectedOp}
-                selectedOp={selectedOp}
-                getOperationLabel={getOperationLabel}
-                opType={activityOpType}
-                deleteOpHandler={deleteOpHandler}
-                tableDetails={tableDetails}
-                isProcessReadOnly={isProcessReadOnly}
-              />
-            );
-          })}
+          <div className={clsx(styles.flexRow, styles.operationSubDiv)}>
+            <p className={clsx(styles.heading, styles.listOfOpMargin)}>
+              {t("listOfOperations")}
+            </p>
+            {!isReadOnly && (
+              <button
+                onClick={localOpHandler}
+                className={clsx(styles.blueButton, styles.addNewOperationBtn)}
+              >
+                {t("addNew")}
+              </button>
+            )}
+          </div>
+          <div
+            id="operationDiv"
+            className={clsx(styles.flexColumn, styles.opScroll)}
+          >
+            {opList?.map((element, index) => {
+              return (
+                <OperationStrip
+                  index={index}
+                  isNested={
+                    activityOpType === "1"
+                      ? element.m_bIsNested
+                      : element.m_bIsNestedExport
+                  }
+                  handleSelectedOp={handleSelectedOp}
+                  selectedOp={selectedOp}
+                  getOperationLabel={getOperationLabel}
+                  opType={activityOpType}
+                  deleteOpHandler={deleteOpHandler}
+                  tableDetails={tableDetails}
+                  isReadOnly={isReadOnly}
+                />
+              );
+            })}
+          </div>
         </div>
+        {isDrawerExpanded && (
+          <div className={styles.propertiesWidth}>
+            {opList?.length > 0 && (
+              <PropertyDetails
+                operationType={activityOpType}
+                openProcessType={openProcessType}
+                openProcessID={openProcessID}
+                isReadOnly={isReadOnly}
+                getFilteredVariableList={getFilteredVariableList}
+                existingTableData={existingTableData}
+                filteredVariables={filteredVariables}
+                selectedOp={selectedOp}
+                opList={opList}
+                setOpList={setOpList}
+                setGlobalData={setGlobalData}
+                tableDetails={tableDetails}
+                setTableDetails={setTableDetails}
+                getExistingTableData={getExistingTableData}
+              />
+            )}
+          </div>
+        )}
       </div>
-      <div className={styles.propertiesWidth}>
-        {opList?.length > 0 ? (
-          <PropertyDetails
-            operationType={activityOpType}
-            openProcessType={openProcessType}
-            openProcessID={openProcessID}
-            isProcessReadOnly={isProcessReadOnly}
-            getFilteredVariableList={getFilteredVariableList}
-            existingTableData={existingTableData}
-            filteredVariables={filteredVariables}
-            selectedOp={selectedOp}
-            opList={opList}
-            setOpList={setOpList}
-            setGlobalData={setGlobalData}
-            tableDetails={tableDetails}
-            setTableDetails={setTableDetails}
-            getExistingTableData={getExistingTableData}
-          />
-        ) : null}
-      </div>
-    </div>
     </>
   );
 }
@@ -654,7 +671,15 @@ const mapStateToProps = (state) => {
   return {
     openProcessType: state.openProcessClick.selectedType,
     openProcessID: state.openProcessClick.selectedId,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
+    isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
   };
 };
 
-export default connect(mapStateToProps, null)(DataExchange);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    expandDrawer: (flag) => dispatch(actionCreators.expandDrawer(flag)),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(DataExchange);

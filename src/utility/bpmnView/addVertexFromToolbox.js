@@ -264,10 +264,11 @@ function addToolbarItem(graph, toolbar, prototype, image, props, translation) {
           Repeatable: "N",
           TaskId: maxId + 1,
           TaskName: `${title}_${maxId + 1}`,
-          TaskType:
+          TaskType: prototype.getStyle() === style.processTask ? 2 : 1, // code edited on 3 Oct 2022 for BugId 116511
+          StrTaskType:
             prototype.getStyle() === style.processTask
               ? TaskType.processTask
-              : TaskType.globalTask,
+              : TaskType.globalTask, // code edited on 3 Oct 2022 for BugId 116511
           TemplateId: -1,
           isActive: "true",
           xLeftLoc: vertexX,

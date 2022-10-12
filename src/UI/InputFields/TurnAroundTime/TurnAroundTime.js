@@ -6,7 +6,10 @@ import { Remove } from "@material-ui/icons";
 import { useTranslation } from "react-i18next";
 import Field from "../TextField/Field";
 import { useSelector } from "react-redux";
-import { getVariablesBasedOnTypes } from "./../../../utility/CommonFunctionCall/CommonFunctionCall";
+import {
+  getVariablesBasedOnTypes,
+  getVariableBasedOnScopeAndTypes,
+} from "./../../../utility/CommonFunctionCall/CommonFunctionCall";
 import {
   TRIGGER_PRIORITY_LOW,
   TRIGGER_PRIORITY_MEDIUM,
@@ -71,9 +74,14 @@ const TurnAroundTime = ({
   inputClass,
   constantInputClass,
   selectWithInput,
+  disabled,
 }) => {
   const classes = useStyles();
-  const dropdownOptions = getVariablesBasedOnTypes({ types: [3, 4] });
+  //const dropdownOptions = getVariablesBasedOnTypes({ types: [3, 4] });
+  const dropdownOptions = getVariableBasedOnScopeAndTypes({
+    types: [3, 4],
+    scopes: ["U", "I"],
+  });
   let { t } = useTranslation();
 
   const isDrawerExpanded = useSelector(
@@ -136,7 +144,7 @@ const TurnAroundTime = ({
                     isConstant={isDaysConstant}
                     showEmptyString={false}
                     showConstValue={true}
-                    // disabled={readOnlyProcess}
+                    disabled={disabled}
                     id="days_select_input"
                     inputClass={inputClass}
                     constantInputClass={constantInputClass}
@@ -167,7 +175,7 @@ const TurnAroundTime = ({
                     isConstant={isHoursConstant}
                     showEmptyString={false}
                     showConstValue={true}
-                    // disabled={readOnlyProcess}
+                    disabled={disabled}
                     id="hours_select_input"
                     inputClass={inputClass}
                     constantInputClass={constantInputClass}
@@ -198,7 +206,7 @@ const TurnAroundTime = ({
                     isConstant={isMinutesConstant}
                     showEmptyString={false}
                     showConstValue={true}
-                    // disabled={readOnlyProcess}
+                    disabled={disabled}
                     id="minutes_select_input"
                     inputClass={inputClass}
                     constantInputClass={constantInputClass}
@@ -232,12 +240,13 @@ const TurnAroundTime = ({
                     // isConstant={isMinutesConstant}
                     //showEmptyString={false}
                     // showConstValue={true}
-                    // disabled={readOnlyProcess}
+                    // disabled={disabled}
                     id="calendar_type_select_input"
                   />*/}
                   <Field
                     dropdown={true}
                     label={calendarTypeLabel}
+                    disabled={disabled}
                     name="CalendarType"
                     value={calendarType}
                     onChange={(e) => {
@@ -274,6 +283,7 @@ const TurnAroundTime = ({
                     step={1}
                     min={0}
                     onChange={handleChange}
+                    disabled={disabled}
                   />
                 </Grid>
                 <Grid item>
@@ -294,6 +304,7 @@ const TurnAroundTime = ({
                     max={23}
                     value={hours}
                     onChange={handleChange}
+                    disabled={disabled}
                   />
                 </Grid>
                 <Grid item>
@@ -314,6 +325,7 @@ const TurnAroundTime = ({
                     max={59}
                     value={minutes}
                     onChange={handleChange}
+                    disabled={disabled}
                   />
                 </Grid>
                 <Grid item>
@@ -332,6 +344,7 @@ const TurnAroundTime = ({
                     name="CalendarType"
                     value={calendarType}
                     onChange={handleChange}
+                    disabled={disabled}
                     options={[
                       { name: "Working Days", value: "Y" },
                       { name: "Calender", value: "N" },

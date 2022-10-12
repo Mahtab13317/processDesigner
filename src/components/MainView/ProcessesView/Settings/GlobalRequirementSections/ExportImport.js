@@ -19,10 +19,15 @@ import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import Tooltip from "@material-ui/core/Tooltip";
 import axios from "axios";
 import FileUpload from "../../../../../UI/FileUpload";
-import { FILETYPE_ZIP } from "../../../../../Constants/appConstants";
+import {
+  ENDPOINT_IMPORT_SECTION,
+  FILETYPE_ZIP,
+} from "../../../../../Constants/appConstants";
 import { SERVER_URL } from "../../../../../Constants/appConstants";
 import { base64toBlob } from "../../../../../utility/Base64Operations/base64Operations";
 import { contextType } from "react-datetime";
+import { setToastDataFunc } from "../../../../../redux-store/slices/ToastDataHandlerSlice";
+import { useDispatch } from "react-redux";
 
 function ExportImport(props) {
   const useStyles = makeStyles({
@@ -114,6 +119,7 @@ function ExportImport(props) {
   });
   const styles = useStyles();
   let { t } = useTranslation();
+  const dispatch = useDispatch();
   const direction = `${t("HTML_DIR")}`;
   const [sectionsData, setsectionsData] = React.useState([]);
   const closeModalHandler = () => {
@@ -234,6 +240,60 @@ function ExportImport(props) {
         link.click();
       }
     });
+  };
+
+  /*****************************************************************************************
+   * @author asloob_ali BUG ID: 114893 Description-: global requirement section: not able to import requirements
+   * Reason:api was not integrated.
+   * Resolution :integrated the api for import.
+   * Date : 21/09/2022
+   ****************/
+  const handleImportRequirements = async (importType) => {
+    const sectionInfo = {
+      importedName: files[0]?.name.split(".").slice(0, -1).join("."),
+    };
+
+    sectionInfo["overwrite"] = importType === "override" ? true : false;
+
+    const bodyFormData = new FormData();
+    const selFile = files[0];
+    bodyFormData.append("file", selFile);
+    bodyFormData.append(
+      "sectionInfo",
+      new Blob([JSON.stringify(sectionInfo)], {
+        type: "application/json",
+      })
+    );
+    console.log(bodyFormData);
+    const config = {
+      headers: {
+        "content-type": "multipart/form-data",
+      },
+    };
+    try {
+      const res = await axios.post(
+        `${SERVER_URL}${ENDPOINT_IMPORT_SECTION}`,
+        bodyFormData,
+        config
+      );
+
+      if (res?.data?.Status === 0) {
+        closeModalHandler();
+        if (props.getSectionsDataAgain) {
+          props.getSectionsDataAgain();
+        }
+      } else if (res?.data?.Status === -2) {
+        dispatch(
+          setToastDataFunc({
+            message: res?.data?.Message,
+            severity: "error",
+            open: true,
+          })
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const setDropzonewithFileStyle = (data) => {
@@ -678,6 +738,7 @@ function ExportImport(props) {
                 containerStyle={newStyle ? { height: "9rem" } : null}
                 setFiles={setFiles}
                 dropString={t("dropFileHere")}
+                returnFileAsItIs={true}
               />
             </div>
           </div>
@@ -704,6 +765,7 @@ function ExportImport(props) {
                 size="medium"
                 color="primary"
                 className={styles.importButtons}
+                onClick={() => handleImportRequirements("merge")}
               >
                 {t("importAndMergeSections")}
               </Button>
@@ -712,6 +774,7 @@ function ExportImport(props) {
                 size="medium"
                 color="primary"
                 className={styles.importButtons}
+                onClick={() => handleImportRequirements("override")}
               >
                 {t("importAndOverrideSections")}
               </Button>

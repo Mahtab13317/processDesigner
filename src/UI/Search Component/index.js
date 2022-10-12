@@ -117,6 +117,7 @@ const SearchBox = (props) => {
     onSearchChange = null,
     onSearchSubmit = null,
     clearSearchResult = null,
+    onKeyDownEventFunc = null,
     haveSuggestions = false,
     haveRecents = false,
     onLoadSuggestions = null,
@@ -169,6 +170,9 @@ const SearchBox = (props) => {
   const onKeyDownEvent = (event) => {
     if (event.keyCode === 13) {
       searchHandler();
+    }
+    if (onKeyDownEventFunc) {
+      onKeyDownEventFunc(event);
     }
   };
 

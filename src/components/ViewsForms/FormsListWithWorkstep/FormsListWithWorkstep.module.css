@@ -12,9 +12,15 @@
   /* font-weight: 600;
   white-space: nowrap; */
 }
+.moreVertIcon {
+  color: #606060 !important;
+  cursor: pointer;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+}
 .multipleTableContainer {
   margin-right: 25px;
-  width: 10rem;
+  min-width: 12rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

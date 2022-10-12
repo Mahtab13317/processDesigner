@@ -89,7 +89,7 @@ return {
 
      
       <AttachmentReq ignoreSpinner={true} RAPayload={getPayload} />
-      <div style={{float:"right",margin:"1rem"}}><Button style={{background:"#0072c5",color:"#ffffff"}} variant="contained" onClick={saveData}>Save Attachment</Button></div>
+      <div style={{float:"right",margin:"1rem"}}><Button style={{background:"var(--button_color)",color:"#ffffff"}} variant="contained" onClick={saveData}>Save Attachment</Button></div>
     </>
   )
 }

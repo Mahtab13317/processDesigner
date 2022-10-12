@@ -1,16 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { store, useGlobalState } from "state-pool";
-import * as actionCreators from "../../../../redux-store/actions/selectedCellActions";
-import { connect } from "react-redux";
-import { getActivityProps } from "../../../../utility/abstarctView/getActivityProps";
 import styles from "./index.module.css";
 import { Select, MenuItem } from "@material-ui/core";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  setSave,
-  ActivityPropertySaveCancelValue,
-} from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked.js";
+import { useDispatch } from "react-redux";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import {
   propertiesLabel,
@@ -20,6 +13,7 @@ import arabicStyles from "./ArabicStyles.module.css";
 
 function Input(props) {
   let { t } = useTranslation();
+  const { isReadOnly } = props;
   const direction = `${t("HTML_DIR")}`;
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
@@ -35,7 +29,6 @@ function Input(props) {
   useEffect(() => {
     let temp = [];
     let selVar = [];
-
     props?.sapOutput[0]?.ParameterDetails.map((val) => {
       if (val.ParameterType === "I") {
         temp.push(val);
@@ -48,7 +41,6 @@ function Input(props) {
       temp.forEach((data, i) => {
         for (var obj in mappedData) {
           if (mappedData[obj].paramName == data.Name) {
-
             selVar[i].name = mappedData[obj].selectedVar;
             selVar[i].paramName = mappedData[obj].paramName;
           }
@@ -97,7 +89,6 @@ function Input(props) {
 
     let tempProcessList = [...Subprocess, ...filterProcess];
 
-
     return tempProcessList;
   };
 
@@ -117,8 +108,6 @@ function Input(props) {
       changedVar?.map((data, i) => {
         inputList?.map((item, j) => {
           if (item.Name == data.paramName) {
-
-
             const tempVar = {
               bConstantVal: false,
               chkInputSelected: false,
@@ -158,7 +147,7 @@ function Input(props) {
 
     dispatch(
       setActivityPropertyChange({
-        SAPAdapter: { isModified: true, hasError: false },
+        [propertiesLabel.sap]: { isModified: true, hasError: false },
       })
     );
   };
@@ -166,7 +155,14 @@ function Input(props) {
   return (
     <React.Fragment>
       <div>
-        <div className="row" style={{ marginTop: "1rem", padding: "0.5rem 0", backgroundColor: "#F8F8F8" }}>
+        <div
+          className="row"
+          style={{
+            marginTop: "1rem",
+            padding: "0.5rem 0",
+            backgroundColor: "#F8F8F8",
+          }}
+        >
           <p className={styles.headerLabel1}>{t("importParameters")}</p>
           <p className={styles.headerLabel}>{t("parentName")}</p>
           <p className={styles.headerLabel}>{t("processvariable(s)")}</p>
@@ -195,7 +191,12 @@ function Input(props) {
                         },
                         getContentAnchorEl: null,
                       }}
-                      style={{ width: "8rem", border: ".5px solid #c4c4c4", background:"white" }}
+                      style={{
+                        width: "8rem",
+                        border: ".5px solid #c4c4c4",
+                        background: "white",
+                      }}
+                      disabled={isReadOnly}
                       key={i}
                       value={selectedVariable[i].name}
                       onChange={(e) => {
@@ -223,7 +224,6 @@ function Input(props) {
             })}
         </div>
       </div>
-
     </React.Fragment>
   );
 }

@@ -1,4 +1,6 @@
 // Changes made to fix 113436 => Project Property: Project level property should be available even if the no process is created in the project like Properties, settings, requirements, audit trail
+// Changes made to solve bug with ID Bug 112353 - After Process importing the changes of imported process are reflecting only after the reopening of the process
+
 import React from "react";
 import "../Projects/projects.css";
 import ProcessesHeader from "../Processes/ProcessesHeader/ProcessesHeader";
@@ -12,6 +14,7 @@ import { RTL_DIRECTION } from "../../../../Constants/appConstants";
 import { CircularProgress } from "@material-ui/core";
 
 function Processes(props) {
+  console.log("222","enabled",props.processTypeList?.filter((d) => d.ProcessType == "E")[0].Count)
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   let processListToRender;
@@ -27,16 +30,17 @@ function Processes(props) {
     props.allProcessesPerProject?.filter((process) => {
       return process.ProcessType == "RP";
     })?.length,
-    props.allProcessesPerProject?.filter((process) => {
+    /*     props.allProcessesPerProject?.filter((process) => {
       return process.ProcessType == "E";
-    }).length,
+    }).length, */
+    props.processTypeList?.filter((d) => d.ProcessType == "E")[0].Count, //code updated on 28 September 2022 for BugId 112936	
     props.allProcessesPerProject?.filter((process) => {
       return process.ProcessType == "EP";
     }).length,
   ];
 
   if (
-    props.selectedProcessCount == 0 ||
+    // props.selectedProcessCount == 0 ||
     (props.clickedProcessTileAtHome &&
       props.clickedProcessTileAtHome.title == 0)
   ) {
@@ -59,27 +63,27 @@ function Processes(props) {
   }
 
   // if (props.allProcessesPerProject.length > 0) {
-    processListPerProjectToRender = (
-      <>
-        {props.spinnerProcess ? (
-          <CircularProgress style={{ marginTop: "40vh", marginLeft: "50%" }} />
-        ) : (
-          <MainTab
-            tabValue={props.tabValue}
-            pinnedProcessesPerProject={props.pinnedProcessesPerProject}
-            allProcessesPerProject={props.allProcessesPerProject}
-            processListLength={processListLength}
-            selectedProjectId={props.selectedProjectId}
-            selectedProject={props.selectedProject}
-            selectedProcessCode={props.selectedProcessCode}
-          />
-        )}
-      </>
-    );
+  processListPerProjectToRender = (
+    <>
+      {props.spinnerProcess ? (
+        <CircularProgress style={{ marginTop: "40vh", marginLeft: "50%" }} />
+      ) : (
+        <MainTab
+          tabValue={props.tabValue}
+          pinnedProcessesPerProject={props.pinnedProcessesPerProject}
+          allProcessesPerProject={props.allProcessesPerProject}
+          processListLength={processListLength}
+          selectedProjectId={props.selectedProjectId}
+          selectedProject={props.selectedProject}
+          selectedProcessCode={props.selectedProcessCode}
+        />
+      )}
+    </>
+  );
   // } else {
-    // processListPerProjectToRender = (
-    //   <NoprocessPerprojectScreen selectedProjectName={props.selectedProject} />
-    // );
+  // processListPerProjectToRender = (
+  //   <NoprocessPerprojectScreen selectedProjectName={props.selectedProject} />
+  // );
   // }
   return (
     <div

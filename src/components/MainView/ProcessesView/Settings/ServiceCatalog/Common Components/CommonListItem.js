@@ -34,6 +34,7 @@ function CommonListItem(props) {
               ? arabicStyles.webS_itemName
               : styles.webS_itemName
           }
+          title={itemName}
         >
           {itemName}
         </span>

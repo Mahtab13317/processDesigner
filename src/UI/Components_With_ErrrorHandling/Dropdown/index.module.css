@@ -12,9 +12,9 @@
 
 .selectConstInput {
   position: absolute;
-  width: 75%;
+  width: 65%;
   height: 2rem;
-  top: 1px;
+  top: 1px;  /*top set to 1px, for entry rule screen*/
   left: 13%;
   z-index: 100;
   font: normal normal normal var(--base_text_font_size) / 17px

@@ -38,7 +38,8 @@ function ProcessAssociation(props) {
               <span className={styles.assocDiv}>{t("Association")}</span>
             </div>
             <div className={styles.PA_tableBody}>
-              {processAssociation.map((item) => {
+              {/*code added on 14 Sep 2022 for BugId 111023 */}
+              {processAssociation?.map((item) => {
                 return (
                   <div
                     className={

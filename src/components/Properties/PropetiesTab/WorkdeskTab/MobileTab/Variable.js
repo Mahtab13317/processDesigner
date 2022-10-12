@@ -11,10 +11,11 @@ import {
 import { useDispatch } from "react-redux";
 import { setActivityPropertyChange } from "../../../../../redux-store/slices/ActivityPropertyChangeSlice";
 
-function Variable() {
+function Variable(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const dispatch = useDispatch();
+  const { isReadOnly } = props;
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
@@ -133,6 +134,7 @@ function Variable() {
                     : styles.mainCheckbox
                 }
                 checked={allChecked}
+                disabled={isReadOnly}
                 onChange={() => allCheckHandler()}
               />
               <h5>{t("Mobility")}</h5>
@@ -153,6 +155,7 @@ function Variable() {
                           : styles.mainCheckbox
                       }
                       checked={checked[val]}
+                      disabled={isReadOnly}
                       onChange={(e) => CheckVarHandler(val, e.target.checked)}
                     />
                   </div>

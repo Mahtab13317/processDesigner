@@ -1,3 +1,8 @@
+// #BugID - 114853
+// #BugDescription - Discard button funtionality added.
+// #BugID - 115259
+// #BugDescription - save functionality issue for data rights has been resolved.
+
 import React, { useEffect, useState } from "react";
 import styles from "./rights.module.css";
 import arabicStyles from "./rightArabic.module.css";
@@ -76,6 +81,7 @@ function DataRights() {
   const [searchVar, setSearchVar] = useState(""); // for variable search filter
   const [searchAct, setSearchAct] = useState(""); // for activities search filter
   const [btnDisable, setBtnDisable] = useState(true);
+  const [btnDiscard, setBtnDiscard] = useState(true);
 
   //array list for filter the activities which have data rights tab in properties else activity will not shown in matrix
   const actTypeArr = [
@@ -107,7 +113,7 @@ function DataRights() {
     //getting activities list from process
     localLoadedProcessData?.MileStones?.map((mileStone) => {
       mileStone.Activities?.filter((d) =>
-        actTypeArr.includes(d.ActivityType)
+        actTypeArr?.includes(d?.ActivityType)
       )?.map((activity, index) => {
         arr.push({
           id: activity.ActivityId,
@@ -122,45 +128,13 @@ function DataRights() {
     });
 
     setActivities(arr);
-    setTotalAct(arr.length);
+    setTotalAct(arr?.length);
 
     let tempList = [...varActRights];
     let tempVar = [...temp];
     let tempAct = [...arr];
     let newArr = [];
-
-    //setting activities and variable both list in an array to give rights for read and modify
-    tempAct?.map((data, i) => {
-      newArr[i] = {
-        id: data.id,
-        actName: data.actName,
-        type: data.type,
-        subType: data.subType,
-        modStatus: false,
-        varDetail: tempVar?.map((item, j) => {
-          return {
-            varId: item.id,
-            varName: item.name,
-            actName: data.actName,
-            read: false,
-            modify: false,
-            varScope: item.varScope,
-            varType: item.varType,
-            mStatus: null,
-            fetchedRights: "",
-          };
-        }),
-      };
-      tempVar?.map((item, j) => {
-        newArr[i][j] = {
-          varId: item.id,
-          varName: item.name,
-          actName: data.actName,
-          read: false,
-          modify: false,
-        };
-      });
-    });
+    let resetArr = [];
 
     //code for getting existing rights using get api call and set to the above array which have both list activity and variables
 
@@ -192,6 +166,47 @@ function DataRights() {
       "&actId=" +
       urlData.id;
     const response = await getRightsAPICall(url);
+    const actArr = response?.data?.actVarRightsDetails?.map((data) => {
+      return data?.actName;
+    });
+
+    setActivities(arr?.filter((d) => actArr?.includes(d?.actName)));
+
+    //setting activities and variable both list in an array to give rights for read and modify
+    tempAct
+      ?.filter((d) => actArr?.includes(d?.actName))
+      ?.map((data, i) => {
+        newArr[i] = {
+          id: data.id,
+          actName: data.actName,
+          type: data.type,
+          subType: data.subType,
+          modStatus: false,
+          varDetail: tempVar?.map((item, j) => {
+            return {
+              varId: item.id,
+              varName: item.name,
+              actName: data.actName,
+              read: false,
+              modify: false,
+              varScope: item.varScope,
+              varType: item.varType,
+              mStatus: null,
+              fetchedRights: "",
+            };
+          }),
+        };
+        tempVar?.map((item, j) => {
+          newArr[i][j] = {
+            varId: item.id,
+            varName: item.name,
+            actName: data.actName,
+            read: false,
+            modify: false,
+          };
+        });
+      });
+
     setFetchedRights(response?.data?.actVarRightsDetails);
 
     response?.data?.actVarRightsDetails?.forEach((data, i) => {
@@ -217,6 +232,30 @@ function DataRights() {
     });
 
     setVarActRights(newArr);
+
+    // code added on 11 October 2022 for BugId 116289
+
+    temp.forEach((data, i) => {
+      let tempCount = [];
+      let modifyCount = [];
+      newArr.forEach((item, j) => {
+        if (item.varDetail[i].read) {
+          tempCount.push(j);
+        }
+        if (item.varDetail[i].modify) {
+          modifyCount.push(j);
+        }
+      });
+
+      if (tempCount?.length === arr.length - 1) {
+        data.read = true;
+      }
+      if (modifyCount?.length === arr.length - 1) {
+        data.modify = true;
+      }
+    });
+
+    setVariables(temp);
   }, []);
 
   const getRightsAPICall = async (url) => {
@@ -263,6 +302,7 @@ function DataRights() {
     setActivities(tempAct);
     setVarActRights(tempVarAct);
     setBtnDisable(false);
+    setBtnDiscard(false);
   };
 
   //function to give read rights to the particular variable in all activities
@@ -300,6 +340,7 @@ function DataRights() {
 
     setVarActRights(tempVarAct);
     setBtnDisable(false);
+    setBtnDiscard(false);
   };
 
   //function to give modify rights to the particular variable in all activities
@@ -336,6 +377,7 @@ function DataRights() {
     setVariables(tempVar);
     setVarActRights(tempVarAct);
     setBtnDisable(false);
+    setBtnDiscard(false);
   };
 
   //give read rights to particular variable in an activity
@@ -360,8 +402,39 @@ function DataRights() {
         });
       });
 
+    // code added on 11 October 2022 for BugId 116289
+
+    let count = 0;
+    tempVarAct?.forEach((el, i) => {
+      el.varDetail?.forEach((itm, j) => {
+        if (itm.varName == varData) {
+          if (itm.read === true) {
+            ++count;
+          }
+        }
+      });
+    });
+
+    let tempVar = [...variables];
+    tempVar?.forEach((el, z) => {
+      if (el.name === varData) {
+        // el.read = e.target.checked;
+        if (e.target.checked === false) {
+          el.read = e.target.checked;
+          el.modify = e.target.checked;
+        } else {
+          if (activities.length === count) {
+            el.read = e.target.checked;
+          }
+        }
+      }
+    });
+
+    setVariables(tempVar);
+
     setVarActRights(tempVarAct);
     setBtnDisable(false);
+    setBtnDiscard(false);
   };
 
   //give modify rights to particular variable in an activity
@@ -373,20 +446,51 @@ function DataRights() {
         el.modStatus = true;
         el.varDetail?.forEach((itm, j) => {
           if (itm.varName == varData) {
-            itm.read = e.target.checked;
             itm.modify = e.target.checked;
             tempVarAct[i][j].modify = e.target.checked;
             if (e.target.checked === false) {
               itm.mStatus = "D";
             } else {
               itm.mStatus = "A";
+              itm.read = e.target.checked;
             }
           }
         });
       });
 
+    // code added on 11 October 2022 for BugId 116289
+
+    let count = 0;
+    tempVarAct?.forEach((el, i) => {
+      el.varDetail?.forEach((itm, j) => {
+        if (itm.varName == varData) {
+          if (itm.read === true) {
+            ++count;
+          }
+        }
+      });
+    });
+
+    let tempVar = [...variables];
+    tempVar?.forEach((el, z) => {
+      if (el.name === varData) {
+        // el.read = e.target.checked;
+        if (e.target.checked === false) {
+          el.modify = e.target.checked;
+        } else {
+          if (activities.length === count) {
+            el.modify = e.target.checked;
+            el.read = e.target.checked;
+          }
+        }
+      }
+    });
+
+    setVariables(tempVar);
+
     setVarActRights(tempVarAct);
     setBtnDisable(false);
+    setBtnDiscard(false);
   };
 
   //function for pagination for activities
@@ -507,11 +611,161 @@ function DataRights() {
               open: true,
             })
           );
+          setBtnDisable(true);
+          setBtnDiscard(true);
         }
       })
       .catch((err) => {
         console.log(err);
       });
+  };
+
+  const discard = async () => {
+    /*code updated on 12 August 2022 for BugId 114853 */
+
+    let temp = [];
+    localLoadedProcessData?.Variable?.filter(
+      (d) => d.VariableScope === "U" || d.VariableScope === "I"
+    )?.map((data, i) => {
+      temp.push({
+        id: data.VariableId,
+        name: data.VariableName,
+        varScope: data.VariableScope,
+        varType: data.VariableType,
+        read: false,
+        modify: false,
+      });
+    });
+
+    setVariables(temp);
+    setActVar(temp);
+    setTotalVar(temp?.length);
+
+    let arr = [];
+
+    //getting activities list from process
+    localLoadedProcessData?.MileStones?.map((mileStone) => {
+      mileStone.Activities?.filter((d) =>
+        actTypeArr?.includes(d?.ActivityType)
+      )?.map((activity, index) => {
+        arr.push({
+          id: activity.ActivityId,
+          type: activity.ActivityType,
+          subType: activity.ActivitySubType,
+          actName: activity.ActivityName,
+          read: false,
+          modify: false,
+          isChecked: false,
+        });
+      });
+    });
+
+    setActivities(arr);
+    setTotalAct(arr?.length);
+
+    let tempList = [...varActRights];
+    let tempVar = [...temp];
+    let tempAct = [...arr];
+    let newArr = [];
+
+    //code for getting existing rights using get api call and set to the above array which have both list activity and variables
+
+    let ids = arr?.map((elem) => {
+      return elem.id;
+    });
+    ids = ids.toString();
+    const urlData = {
+      pid: localLoadedProcessData.ProcessDefId,
+      repoType: localLoadedProcessData.ProcessType,
+      version: localLoadedProcessData.VersionNo,
+      name: localLoadedProcessData.ProcessName,
+      type: localLoadedProcessData.ProcessVariantType,
+      id: ids,
+    };
+    const url =
+      SERVER_URL +
+      ENDPOINT_GET_DATA_ASSOCIATE +
+      "?pDefId=" +
+      urlData.pid +
+      "&repoType=" +
+      urlData.repoType +
+      "&versionNo=" +
+      urlData.version +
+      "&pName=" +
+      urlData.name +
+      "&pVariantType=" +
+      urlData.type +
+      "&actId=" +
+      urlData.id;
+    const response = await getRightsAPICall(url);
+    const actArr = response?.data?.actVarRightsDetails?.map((data) => {
+      return data.actName;
+    });
+
+    setActivities(arr?.filter((d) => actArr?.includes(d?.actName)));
+
+    //setting activities and variable both list in an array to give rights for read and modify
+    tempAct
+      ?.filter((d) => actArr?.includes(d?.actName))
+      ?.map((data, i) => {
+        newArr[i] = {
+          id: data.id,
+          actName: data.actName,
+          type: data.type,
+          subType: data.subType,
+          modStatus: false,
+          varDetail: tempVar?.map((item, j) => {
+            return {
+              varId: item.id,
+              varName: item.name,
+              actName: data.actName,
+              read: false,
+              modify: false,
+              varScope: item.varScope,
+              varType: item.varType,
+              mStatus: null,
+              fetchedRights: "",
+            };
+          }),
+        };
+        tempVar?.map((item, j) => {
+          newArr[i][j] = {
+            varId: item.id,
+            varName: item.name,
+            actName: data.actName,
+            read: false,
+            modify: false,
+          };
+        });
+      });
+
+    setFetchedRights(response?.data?.actVarRightsDetails);
+
+    response?.data?.actVarRightsDetails?.forEach((data, i) => {
+      if (data?.varDetails && data?.varDetails?.length > 0) {
+        data?.varDetails?.forEach((item, j) => {
+          //finding index of matrix from variables array which was defined above in temp variable
+          const varIndex = temp.findIndex((x) => x.name === item.varName);
+
+          if (item.varType === "O") {
+            newArr[i][varIndex].read = true;
+            newArr[i][varIndex].modify = true;
+            newArr[i].varDetail[varIndex].read = true;
+            newArr[i].varDetail[varIndex].modify = true;
+          } else {
+            newArr[i][varIndex].read = true;
+            newArr[i].varDetail[varIndex].read = true;
+          }
+          newArr[i].varDetail[varIndex].fetchedRights = item.varType;
+        });
+      } else {
+        newArr = [...newArr];
+      }
+    });
+
+    setVarActRights(newArr);
+    setBtnDisable(true);
+    setBtnDiscard(true);
   };
 
   return (
@@ -611,7 +865,7 @@ function DataRights() {
                       }}
                     />
                   </div>
-                  <div className="switch">
+                  <div className="pmweb_switch">
                     <FormControl>
                       <FormControlLabel
                         control={
@@ -706,6 +960,26 @@ function DataRights() {
                                         }
                                         label="Modify"
                                       />
+                                      <FormControlLabel
+                                        className={styles.rightsCheck}
+                                        control={
+                                          <Checkbox
+                                          // checked={getModifyVal.call(
+                                          //   this,
+                                          //   elem?.actName,
+                                          //   item?.name
+                                          // )}
+                                          // onChange={(e) => {
+                                          //   modifyVar(
+                                          //     e,
+                                          //     elem?.actName,
+                                          //     item?.name
+                                          //   );
+                                          // }}
+                                          />
+                                        }
+                                        label="Bulk"
+                                      />
                                     </FormGroup>
                                   </p>
                                 </div>
@@ -719,15 +993,19 @@ function DataRights() {
                 <div className={styles.btnList}>
                   <Button
                     id="cancel"
-                    color="primary"
+                    className="tertiary"
                     variant="outlined"
                     size="small"
+                    disabled={btnDiscard}
+                    onClick={discard}
                   >
                     {t("toolbox.dataRights.discard")}
                   </Button>
                   <Button
                     id="save"
-                    className={btnDisable ? "btnDisable" : "btnSave"}
+                    className={
+                      btnDisable ? "btnDisable primary" : "btnSave primary"
+                    }
                     variant="contained"
                     size="small"
                     onClick={saveData}

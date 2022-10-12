@@ -19,6 +19,7 @@ import ProjectCreation from "./ProjectCreation.js";
 import { getMenuNameFlag } from "../../../../utility/UserRightsFunctions";
 import { userRightsMenuNames } from "../../../../Constants/appConstants";
 import { UserRightsValue } from "../../../../redux-store/slices/UserRightsSlice";
+import SortingModal from "../../../MainView/ProcessesView/Processes/ProcessesListByProject/sortByModal.js";
 
 let useStyles = makeStyles({
   root: {
@@ -40,10 +41,11 @@ function Projects(props) {
   const classes = useStyles();
   let projectHeadRef = useRef(null);
   let parentRef = useRef(null);
+  const [selectionOne, setSelectionOne] = useState(2);
+  const [selectionTwo, setSelectionTwo] = useState(0);
+  const [showSortingModal, setShowSortingModal] = useState(false);
   const [showProcessList, setShowProcessList] = useState(-1);
   let [topButton, setTopButton] = useState(false);
-  let [selectionOne, setSelectionOne] = useState(0);
-  let [selectionTwo, setSelectionTwo] = useState(0);
   let [processType, setProcessType] = useState(null);
   let [searchTerm, setSearchTerm] = useState("");
   // let [processType, setProcessType]= useState((tileProcess(props.processTypeList[props.defaultProcessTileIndex].ProcessType)[1]));
@@ -89,11 +91,7 @@ function Projects(props) {
       transform: "translate3d(0px, -10px, 0px) !important",
     },
   }))(Tooltip);
-
-  let sortSelectionFunc = (sortSelectionOne, sortSelectionTwo) => {
-    setSelectionOne(sortSelectionOne);
-    setSelectionTwo(sortSelectionTwo);
-  };
+  // ==================================================
 
   // Sorting of Project List by Name
   // let compareObjectsToAscend=(object1, object2, key)=> {
@@ -121,16 +119,62 @@ function Projects(props) {
   //   return new Date(a.LastModifiedOn) - new Date(b.LastModifiedOn);
   // });
 
+  /*****************************************************************************************
+   * @author asloob_ali BUG ID:110128 Blank screen opens when clicked on name option of Sort By
+   * Reason:wrong assigned values while sorting project list.
+   * Resolution : now removed wrong assignation.
+   * Date : 20/09/2022
+   ****************/
+  const handleSort = (a, b) => {
+    return a.ProjectName.localeCompare(b.ProjectName);
+  };
   let projectList = props.projectList ? [...props.projectList] : [];
-  if (selectionOne == "2" && selectionTwo == "0") {
-    projectList = props.projectList.sort((a, b) =>
-      a.ProjectName < b.ProjectName ? -1 : 1
-    );
-  } else if (selectionOne == "2" && selectionTwo == "1") {
-    projectList = props.projectList.sort((a, b) =>
-      a.ProjectName > b.ProjectName ? -1 : 1
-    );
+
+  // ==========================
+  if (selectionOne == 2) {
+    if (selectionOne == 2 && selectionTwo == 0) {
+      projectList.sort(handleSort);
+    } else if (selectionOne == "2" && selectionTwo == "1") {
+      projectList.sort(handleSort).reverse();
+    }
+  } else if (selectionOne == "0" || selectionOne == "1") {
+    let temp = [...projectList];
+    if (selectionOne == "0") {
+      temp = [
+        ...projectList.filter((el) => {
+          return el.LastModifiedBy == localStorage.getItem("username");
+        }),
+      ];
+    }
+    const newTemp = temp.map((obj) => {
+      return {
+        ...obj,
+        LastModifiedOn: new Date(obj.LastModifiedOn).getTime(),
+      };
+    });
+    function compare(a, b) {
+      if (a.LastModifiedOn < b.LastModifiedOn) {
+        return -1;
+      }
+      if (a.LastModifiedOn > b.LastModifiedOn) {
+        return 1;
+      }
+      return 0;
+    }
+    const newTempAsc = newTemp.sort(compare);
+    if (
+      (selectionOne == "1" && selectionTwo == "0") ||
+      (selectionOne == "0" && selectionTwo == "0")
+    ) {
+      projectList = [...newTempAsc];
+    } else if (
+      (selectionOne == "1" && selectionTwo == "1") ||
+      (selectionOne == "0" && selectionTwo == "1")
+    ) {
+      projectList = [...newTempAsc.reverse()];
+    }
   }
+  // ========================================
 
   let rows = projectList.map((projectData, index) => ({
     rowId: projectData.ProjectId,
@@ -213,6 +257,12 @@ function Projects(props) {
     props.setSelectedProjectId(projectId);
   };
 
+  const GetSortingOptions = (selectedSortBy, selectedSortOrder) => {
+    console.log("OPTIONS", selectedSortBy, selectedSortOrder);
+    setSelectionOne(selectedSortBy);
+    setSelectionTwo(selectedSortOrder);
+  };
+
   return (
     <div
       id="prod"
@@ -253,31 +303,32 @@ function Projects(props) {
               style={{ marginRight: "6px" }}
             />
           </div>
-          <SortButton
-            backDrop={true}
-            buttonToOpenModal={
-              <div className="filterButton">
-                <img src={FilterImage} style={{ width: "100%" }} />
-              </div>
-            }
-            sortSelection={sortSelectionFunc}
-            showTickIcon={true}
-            modalFromTop="62"
-            modalFromLeft="33"
-            modalWidth="180"
-            sortSectionTwo={[t("NewToOld"), t("OldToNew")]}
-            sortOrderOptionsForName={[t("Ascending"), t("Descending")]}
-            indexToSwitchSortOptions="2"
-            sortBy={t("sortBy")}
-            sortOrder={t("sortOrder")}
-            sortSectionOne={[
-              t("LastModifiedByMe"),
-              t("LastModified"),
-              t("Name"),
-            ]}
-            modalPaper="modalPaperProjects"
-            isArabic={false}
-          />
+
+          <div
+            className="filterButton"
+            onClick={() => setShowSortingModal(true)}
+          >
+            <img src={FilterImage} style={{ width: "100%" }} />
+          </div>
+          {showSortingModal ? (
+            <Modal
+              show={showSortingModal}
+              backDropStyle={{ backgroundColor: "transparent" }}
+              style={{
+                top: "31%",
+                left: "21.5%",
+                width: "200px",
+                height: "195px",
+                padding: "5px",
+                zIndex: "1500",
+                boxShadow: "0px 3px 6px #00000029",
+                border: "1px solid #D6D6D6",
+                borderRadius: "3px",
+              }}
+              modalClosed={() => setShowSortingModal(false)}
+              children={<SortingModal getSortingOptions={GetSortingOptions} />}
+            />
+          ) : null}
         </div>
       </div>
       <div className="table">

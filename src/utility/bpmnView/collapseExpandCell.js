@@ -38,10 +38,18 @@ export const collapseExpandCell = (
             cell.setCollapsed(true);
             cell.setConnectable(false);
             let indexVal;
+            let grpChild = graph.view.graph.container.children;
             //handle top of sibling cells of selected cell
             cell.parent.children.forEach((child, index) => {
               if (child.id === cell.id) {
                 indexVal = index;
+                [...grpChild].map((child1) => {
+                  if (
+                    child1.getAttribute("class") === `lane_${cell.id} checkIcon`
+                  ) {
+                    child1.style.display = `none`;
+                  }
+                });
               }
               if (indexVal < index) {
                 child.geometry.y =
@@ -54,6 +62,18 @@ export const collapseExpandCell = (
                     cell.geometry.height +
                     "px";
                 }
+                [...grpChild].map((child1) => {
+                  if (
+                    child1.getAttribute("class") ===
+                    `lane_${child.id} checkIcon`
+                  ) {
+                    let newTop =
+                      parseInt(child1.style.top.replace("px", "")) -
+                      cell.previousHeight +
+                      cell.geometry.height;
+                    child1.style.top = `${newTop}px`;
+                  }
+                });
               }
             });
 
@@ -136,9 +156,17 @@ export const collapseExpandCell = (
             cell.geometry.height = cell.previousHeight;
             cell.setCollapsed(false);
             let indexVal;
+            let grpChild = graph.view.graph.container.children;
             cell.parent.children.forEach((child, index) => {
               if (child.id === cell.id) {
                 indexVal = index;
+                [...grpChild].map((child1) => {
+                  if (
+                    child1.getAttribute("class") === `lane_${cell.id} checkIcon`
+                  ) {
+                    child1.style.display = `block`;
+                  }
+                });
               }
               if (indexVal < index) {
                 child.geometry.y =
@@ -150,6 +178,18 @@ export const collapseExpandCell = (
                     gridSize +
                     "px";
                 }
+                [...grpChild].map((child1) => {
+                  if (
+                    child1.getAttribute("class") ===
+                    `lane_${child.id} checkIcon`
+                  ) {
+                    let newTop =
+                      parseInt(child1.style.top.replace("px", "")) +
+                      cell.previousHeight -
+                      gridSize;
+                    child1.style.top = `${newTop}px`;
+                  }
+                });
               }
             });
             //get name span and delete it from graph when cell is expanded
@@ -216,10 +256,25 @@ export const collapseExpandCell = (
                   milestone.geometry.y - cell.previousHeight + gridSize;
               }
             });
+            let grpChild = graph.view.graph.container.children;
             swimlaneLayer.children?.forEach((swimlane) => {
               if (graph.isSwimlane(swimlane)) {
                 swimlane.geometry.y =
                   swimlane.geometry.y - cell.previousHeight + gridSize;
+                [...grpChild].map((child) => {
+                  if (
+                    child.getAttribute("class") ===
+                    `lane_${swimlane.id} checkIcon`
+                  ) {
+                    let newTop =
+                      parseInt(child.style.top.replace("px", "")) -
+                      cell.previousHeight +
+                      gridSize;
+                    if (newTop >= swimlane.geometry.y && newTop >= 0) {
+                      child.style.top = `${newTop}px`;
+                    }
+                  }
+                });
               }
             });
             rootLayer.children?.forEach((el) => {
@@ -260,10 +315,23 @@ export const collapseExpandCell = (
                   milestone.geometry.y + cell.previousHeight - gridSize;
               }
             });
+            let grpChild = graph.view.graph.container.children;
             swimlaneLayer.children?.forEach((swimlane) => {
               if (graph.isSwimlane(swimlane)) {
                 swimlane.geometry.y =
                   swimlane.geometry.y + cell.previousHeight - gridSize;
+                [...grpChild].forEach((child) => {
+                  if (
+                    child.getAttribute("class") ===
+                    `lane_${swimlane.id} checkIcon`
+                  ) {
+                    child.style.top = `${
+                      parseInt(child.style.top.replace("px", "")) +
+                      cell.previousHeight -
+                      gridSize
+                    }px`;
+                  }
+                });
               }
             });
             rootLayer.children?.forEach((el) => {
@@ -277,6 +345,7 @@ export const collapseExpandCell = (
                 });
               }
             });
+
             let new_height = dimensionInMultipleOfGridSize(cell.previousHeight);
             buttons.addMilestone.style.top =
               parseInt(buttons.addMilestone.style.top) +

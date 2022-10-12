@@ -3,23 +3,18 @@
 // #BugDescription - Handled check to prevent the archive tab blank redirection.
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { connect, useDispatch, useSelector } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import { store, useGlobalState } from "state-pool";
 import {
-  activityType,
-  activityType_label,
   ENDPOINT_GET_LIBRARY_LIST,
   RTL_DIRECTION,
   SERVER_URL,
 } from "../../../../Constants/appConstants";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import CustomizedDropdown from "../../../../UI/Components_With_ErrrorHandling/Dropdown";
-import { getActivityProps } from "../../../../utility/abstarctView/getActivityProps";
-import commonTabHeader from "../commonTabHeader";
 import axios from "axios";
 import { addConstantsToString } from "../../../../utility/ProcessSettings/Triggers/triggerCommonFunctions";
 import {
-  Container,
   Box,
   FormHelperText,
   TextField,
@@ -29,15 +24,13 @@ import {
   FormControlLabel,
   Checkbox,
   Modal,
-  Typography,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
-import styles from "./index.module.css";
 import "./index.css";
-import { style } from "../../../../Constants/bpmnView";
 import * as actionCreators from "../../../../redux-store/actions/Properties/showDrawerAction.js";
 import Toast from "../../../../UI/ErrorToast";
 import TabsHeading from "../../../../UI/TabsHeading";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 const styleModal = {
   position: "absolute",
@@ -53,32 +46,16 @@ const styleModal = {
 
 function SharePointArchive(props) {
   let { t } = useTranslation();
-
   const direction = `${t("HTML_DIR")}`;
   let dispatch = useDispatch();
-
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
-
   const loadedProcessData = store.getState("loadedProcessData");
-  const [localLoadedProcessData, setLocalLoadedProcessData] =
-    useGlobalState(loadedProcessData);
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
-  const [selectedActivityIcon, setSelectedActivityIcon] = useState();
-
-  useEffect(() => {
-    let activityProps = getActivityProps(
-      props.cellActivityType,
-      props.cellActivitySubType
-    );
-    setSelectedActivityIcon(activityProps[0]);
-  }, [props.cellActivityType, props.cellActivitySubType, props.cellID]);
-
-  {
-    /*code updated on 28 June 2022 for BugId 111522*/
-  }
-
+  /*code updated on 28 June 2022 for BugId 111522*/
   const tempLoc = localLoadedActivityPropertyData?.ActivityProperty
     ?.sharePointArchiveInfo.diffFolderLoc
     ? false
@@ -92,9 +69,7 @@ function SharePointArchive(props) {
   const [archiveVariables, setArchiveVariables] = useState([]);
   const [associateList, setAssociateList] = useState([]);
 
-  {
-    /*code updated on 28 June 2022 for BugId 111522*/
-  }
+  /*code updated on 28 June 2022 for BugId 111522*/
   const [serviceUrl, setServiceUrl] = useState(
     localLoadedActivityPropertyData?.ActivityProperty?.sharePointArchiveInfo
       ?.serviceURL
@@ -104,25 +79,19 @@ function SharePointArchive(props) {
       ?.url
   );
 
-  {
-    /*code updated on 28 June 2022 for BugId 111522*/
-  }
+  /*code updated on 28 June 2022 for BugId 111522*/
   const [docLibrary, setDocLibrary] = useState(
     localLoadedActivityPropertyData?.ActivityProperty?.sharePointArchiveInfo
       ?.docLibrary
   );
 
-  {
-    /*code updated on 28 June 2022 for BugId 111522*/
-  }
+  /*code updated on 28 June 2022 for BugId 111522*/
   const [domain, setDomain] = useState(
     localLoadedActivityPropertyData?.ActivityProperty?.sharePointArchiveInfo
       ?.domainName
   );
 
-  {
-    /*code updated on 28 June 2022 for BugId 111522*/
-  }
+  /*code updated on 28 June 2022 for BugId 111522*/
   const [siteUrl, setSiteUrl] = useState(
     localLoadedActivityPropertyData?.ActivityProperty?.sharePointArchiveInfo
       ?.site
@@ -458,8 +427,8 @@ function SharePointArchive(props) {
       axios
         .post(
           SERVER_URL +
-          ENDPOINT_GET_LIBRARY_LIST +
-          localLoadedActivityPropertyData?.ActivityProperty?.actId,
+            ENDPOINT_GET_LIBRARY_LIST +
+            localLoadedActivityPropertyData?.ActivityProperty?.actId,
           postData
         )
         .then((res) => {
@@ -926,7 +895,7 @@ function SharePointArchive(props) {
             </div>
           </Box>
         </Modal>
-       {/*  <div className="labels">
+        {/*  <div className="labels">
           <h4> {t("toolbox.sharePointArchive.archive")}</h4>
         </div> */}
         <TabsHeading heading={props?.heading} />
@@ -960,6 +929,7 @@ function SharePointArchive(props) {
                 onKeyUp={() => {
                   handleChange("serviceURL", serviceUrl);
                 }}
+                disabled={isReadOnly}
               />
             </p>
           </div>
@@ -985,6 +955,7 @@ function SharePointArchive(props) {
                   isNotMandatory={true}
                   value={urlVar}
                   onChange={getVariableURL}
+                  disabled={isReadOnly}
                 >
                   <MenuItem value="0">
                     {t("toolbox.sharePointArchive.selectItem")}
@@ -996,15 +967,17 @@ function SharePointArchive(props) {
                     </MenuItem>
                   ))}
                 </CustomizedDropdown>
-                <Button
-                  className="btn-archive addBtn"
-                  color="primary"
-                  variant="outlined"
-                  size="small"
-                  onClick={addURL}
-                >
-                  {t("toolbox.sharePointArchive.add")}
-                </Button>
+                {!isReadOnly && (
+                  <Button
+                    className="btn-archive addBtn"
+                    color="primary"
+                    variant="outlined"
+                    size="small"
+                    onClick={addURL}
+                  >
+                    {t("toolbox.sharePointArchive.add")}
+                  </Button>
+                )}
               </div>
 
               <div
@@ -1020,6 +993,7 @@ function SharePointArchive(props) {
                   onKeyUp={() => {
                     handleChange("url", url);
                   }}
+                  disabled={isReadOnly}
                 />
               </div>
             </p>
@@ -1049,6 +1023,7 @@ function SharePointArchive(props) {
                 onKeyUp={() => {
                   handleChange("siteUrl", siteUrl);
                 }}
+                disabled={isReadOnly}
               />
             </p>
           </div>
@@ -1077,6 +1052,7 @@ function SharePointArchive(props) {
                   isNotMandatory={true}
                   value={docVar}
                   onChange={getDocVar}
+                  disabled={isReadOnly}
                 >
                   <MenuItem value="0">
                     {t("toolbox.sharePointArchive.selectItem")}
@@ -1088,15 +1064,17 @@ function SharePointArchive(props) {
                     </MenuItem>
                   ))}
                 </CustomizedDropdown>
-                <Button
-                  className="btn-archive addBtn"
-                  color="primary"
-                  variant="outlined"
-                  size="small"
-                  onClick={addDocVar}
-                >
-                  {t("toolbox.sharePointArchive.add")}
-                </Button>
+                {!isReadOnly && (
+                  <Button
+                    className="btn-archive addBtn"
+                    color="primary"
+                    variant="outlined"
+                    size="small"
+                    onClick={addDocVar}
+                  >
+                    {t("toolbox.sharePointArchive.add")}
+                  </Button>
+                )}
               </div>
 
               <div
@@ -1112,6 +1090,7 @@ function SharePointArchive(props) {
                   onKeyUp={() => {
                     handleChange("doclibrary", docLibrary);
                   }}
+                  disabled={isReadOnly}
                 />
               </div>
             </p>
@@ -1141,6 +1120,7 @@ function SharePointArchive(props) {
                 onKeyUp={() => {
                   handleChange("domain", domain);
                 }}
+                disabled={isReadOnly}
               />
             </p>
           </div>
@@ -1149,16 +1129,18 @@ function SharePointArchive(props) {
               props.isDrawerExpanded ? "formControl" : "formControlCollapse"
             }
           >
-            <Button
-              id={props.isDrawerExpanded ? "mapData" : ""}
-              className="btn-archive"
-              color="primary"
-              variant="outlined"
-              size="small"
-              onClick={openMapModal}
-            >
-              {t("toolbox.sharePointArchive.mapData")}
-            </Button>
+            {!isReadOnly && (
+              <Button
+                id={props.isDrawerExpanded ? "mapData" : ""}
+                className="btn-archive"
+                color="primary"
+                variant="outlined"
+                size="small"
+                onClick={openMapModal}
+              >
+                {t("toolbox.sharePointArchive.mapData")}
+              </Button>
+            )}
           </div>
           {
             //this modal open when click on map data
@@ -1446,6 +1428,7 @@ function SharePointArchive(props) {
                         size="small"
                         checked={location}
                         onChange={showLocation}
+                        disabled={isReadOnly}
                       />
                     }
                     label={t("toolbox.sharePointArchive.folderLocation")}
@@ -1471,6 +1454,7 @@ function SharePointArchive(props) {
                             isNotMandatory={true}
                             value={locVar}
                             onChange={getLocVar}
+                            disabled={isReadOnly}
                           >
                             <MenuItem value="0">
                               {t("toolbox.sharePointArchive.selectItem")}
@@ -1482,15 +1466,17 @@ function SharePointArchive(props) {
                               </MenuItem>
                             ))}
                           </CustomizedDropdown>
-                          <Button
-                            className="btn-archive addBtn"
-                            color="primary"
-                            variant="outlined"
-                            size="small"
-                            onClick={addLocVar}
-                          >
-                            {t("toolbox.sharePointArchive.add")}
-                          </Button>
+                          {!isReadOnly && (
+                            <Button
+                              className="btn-archive addBtn"
+                              color="primary"
+                              variant="outlined"
+                              size="small"
+                              onClick={addLocVar}
+                            >
+                              {t("toolbox.sharePointArchive.add")}
+                            </Button>
+                          )}
                         </p>
                       </div>
                       <div className="formControl">
@@ -1515,6 +1501,7 @@ function SharePointArchive(props) {
                             onKeyUp={() => {
                               handleChange("location", sameLocation);
                             }}
+                            disabled={isReadOnly}
                             variant="outlined"
                           />
                         </p>
@@ -1535,6 +1522,7 @@ function SharePointArchive(props) {
                         size="small"
                         checked={assign}
                         onChange={showAssignment}
+                        disabled={isReadOnly}
                       />
                     }
                     label={t("toolbox.sharePointArchive.fieldLocation")}
@@ -1542,16 +1530,18 @@ function SharePointArchive(props) {
                   {assign ? (
                     <Box className="flexRow">
                       <div className="formControl">
-                        <Button
-                          id="rights"
-                          className="btn-archive"
-                          color="primary"
-                          variant="outlined"
-                          size="small"
-                          onClick={openAssignModal}
-                        >
-                          {t("toolbox.sharePointArchive.assignRight")}
-                        </Button>
+                        {!isReadOnly && (
+                          <Button
+                            id="rights"
+                            className="btn-archive"
+                            color="primary"
+                            variant="outlined"
+                            size="small"
+                            onClick={openAssignModal}
+                          >
+                            {t("toolbox.sharePointArchive.assignRight")}
+                          </Button>
+                        )}
                       </div>
                     </Box>
                   ) : (
@@ -1719,6 +1709,7 @@ function SharePointArchive(props) {
                                 onChange={(e) => {
                                   checkedAssocList(e, i);
                                 }}
+                                disabled={isReadOnly}
                               />
                             }
                             label={data.docTypeName}
@@ -1739,6 +1730,7 @@ function SharePointArchive(props) {
                               onChange={(e) => {
                                 getArchiveVar(e, i);
                               }}
+                              disabled={isReadOnly}
                             >
                               <MenuItem value="0">
                                 {t("toolbox.sharePointArchive.selectItem")}
@@ -1752,17 +1744,19 @@ function SharePointArchive(props) {
                             </CustomizedDropdown>
                           </div>
                           <div>
-                            <Button
-                              className="btn-archive addBtn"
-                              color="primary"
-                              variant="outlined"
-                              size="small"
-                              onClick={() => {
-                                addArchiveVar(i);
-                              }}
-                            >
-                              {t("toolbox.sharePointArchive.add")}
-                            </Button>
+                            {!isReadOnly && (
+                              <Button
+                                className="btn-archive addBtn"
+                                color="primary"
+                                variant="outlined"
+                                size="small"
+                                onClick={() => {
+                                  addArchiveVar(i);
+                                }}
+                              >
+                                {t("toolbox.sharePointArchive.add")}
+                              </Button>
+                            )}
                           </div>
                           <div>
                             <TextField
@@ -1772,6 +1766,7 @@ function SharePointArchive(props) {
                               onChange={(e) => {
                                 changeArchiveAsList(e, i);
                               }}
+                              disabled={isReadOnly}
                             />
                           </div>
                         </div>
@@ -1793,6 +1788,7 @@ function SharePointArchive(props) {
                                 onChange={(e) => {
                                   changeLocation(e, i);
                                 }}
+                                disabled={isReadOnly}
                               >
                                 <MenuItem value="0">
                                   {t("toolbox.sharePointArchive.selectItem")}
@@ -1803,17 +1799,19 @@ function SharePointArchive(props) {
                                   </MenuItem>
                                 ))}
                               </CustomizedDropdown>
-                              <Button
-                                className="btn-archive addBtn"
-                                color="primary"
-                                variant="outlined"
-                                size="small"
-                                onClick={() => {
-                                  addArchiveLocation(i);
-                                }}
-                              >
-                                {t("toolbox.sharePointArchive.add")}
-                              </Button>
+                              {!isReadOnly && (
+                                <Button
+                                  className="btn-archive addBtn"
+                                  color="primary"
+                                  variant="outlined"
+                                  size="small"
+                                  onClick={() => {
+                                    addArchiveLocation(i);
+                                  }}
+                                >
+                                  {t("toolbox.sharePointArchive.add")}
+                                </Button>
+                              )}
                               <TextField
                                 className="outlinedBasic"
                                 value={archiveLocList[i]}
@@ -1821,6 +1819,7 @@ function SharePointArchive(props) {
                                 onChange={(e) => {
                                   changeArchiveLocList(e, i);
                                 }}
+                                disabled={isReadOnly}
                               />
                             </div>
                           )}
@@ -1829,18 +1828,20 @@ function SharePointArchive(props) {
                             ""
                           ) : (
                             <div>
-                              <Button
-                                className="btn-archive"
-                                color="primary"
-                                variant="outlined"
-                                size="small"
-                                id=""
-                                onClick={() => {
-                                  openIndivAssignModal(i);
-                                }}
-                              >
-                                {t("toolbox.sharePointArchive.assignRight")}
-                              </Button>
+                              {!isReadOnly && (
+                                <Button
+                                  className="btn-archive"
+                                  color="primary"
+                                  variant="outlined"
+                                  size="small"
+                                  id=""
+                                  onClick={() => {
+                                    openIndivAssignModal(i);
+                                  }}
+                                >
+                                  {t("toolbox.sharePointArchive.assignRight")}
+                                </Button>
+                              )}
                             </div>
                           )}
                         </div>
@@ -1991,12 +1992,8 @@ function SharePointArchive(props) {
 const mapStateToProps = (state) => {
   return {
     showDrawer: state.showDrawerReducer.showDrawer,
-    cellID: state.selectedCellReducer.selectedId,
-    cellName: state.selectedCellReducer.selectedName,
-    cellType: state.selectedCellReducer.selectedType,
-    cellActivityType: state.selectedCellReducer.selectedActivityType,
-    cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

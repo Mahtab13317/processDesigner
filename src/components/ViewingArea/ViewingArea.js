@@ -15,7 +15,7 @@ import SubHeader from "./SubHeader/SubHeader";
 import { useTranslation } from "react-i18next";
 import classes from "./ViewingArea.module.css";
 import Milestones from "./AbstractView/Milestones/Milestones";
-import { connect, useSelector } from "react-redux";
+import { connect, useDispatch, useSelector } from "react-redux";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import StopIcon from "@material-ui/icons/Stop";
 import {
@@ -41,7 +41,19 @@ import { store, useGlobalState } from "state-pool";
 import { getSelectedCellType } from "../../utility/abstarctView/getSelectedCellType";
 import { UserRightsValue } from "../../redux-store/slices/UserRightsSlice";
 import { getMenuNameFlag } from "../../utility/UserRightsFunctions";
-
+import Modal from "../../UI/Modal/Modal";
+import ObjectDependencies from "../../UI/ObjectDependencyModal";
+import {
+  setActivityDependencies,
+  setShowDependencyModal,
+  setWorkitemFlag,
+  setDependencyErrorMsg,
+  setQueueRenameModalOpen,
+  setRenameActivityData,
+} from "../../redux-store/actions/Properties/activityAction";
+import ModalForm from "../../UI/ModalForm/modalForm";
+import { renameActivity } from "../../utility/CommonAPICall/RenameActivity";
+import { Typography } from "@material-ui/core";
 function ViewingArea(props) {
   let { t } = useTranslation();
   const userRightsValue = useSelector(UserRightsValue);
@@ -81,6 +93,22 @@ function ViewingArea(props) {
     userRightsValue?.menuRightsList,
     userRightsMenuNames.createMilestone
   );
+
+  const showDependencyModal = useSelector(
+    (state) => state.activityReducer.showDependencyModal
+  );
+  const activityDependencies = useSelector(
+    (state) => state.activityReducer.activityDependencies
+  );
+
+  const isQueueRenameModalOpen = useSelector(
+    (state) => state.activityReducer.isQueueRenameModalOpen
+  );
+  const renameActivityData = useSelector(
+    (state) => state.activityReducer.renameActivityData
+  );
+
+  const dispatch = useDispatch();
 
   //function to add mile at the end
   const addNewMile = () => {
@@ -127,12 +155,13 @@ function ViewingArea(props) {
         obj.ActivitySubType,
         null,
         obj.QueueId,
-        getSelectedCellType("ACTIVITY")
+        getSelectedCellType("ACTIVITY"),
+        obj.CheckedOut
       );
     } else if (obj === null) {
       setSelectedActivity(null);
       if (!props.showDrawer) {
-        props.selectedCell(null, null, null, null, null, null, null);
+        props.selectedCell(null, null, null, null, null, null, null, null);
       }
     }
   };
@@ -147,12 +176,13 @@ function ViewingArea(props) {
         null,
         obj.SequenceId,
         null,
-        getSelectedCellType("MILE")
+        getSelectedCellType("MILE"),
+        false
       );
     } else if (obj === null) {
       setSelectedMile(null);
       if (!props.showDrawer) {
-        props.selectedCell(null, null, null, null, null, null, null);
+        props.selectedCell(null, null, null, null, null, null, null, null);
       }
     }
   };
@@ -340,6 +370,52 @@ function ViewingArea(props) {
     }
   };
 
+  const closeDependencyModal = () => {
+    dispatch(setShowDependencyModal(false));
+    dispatch(setActivityDependencies(null));
+    dispatch(setDependencyErrorMsg(null));
+    dispatch(setWorkitemFlag(false));
+  };
+
+  const closeQueueRenameModal = () => {
+    dispatch(setQueueRenameModalOpen(false));
+    dispatch(setRenameActivityData(null));
+  };
+
+  const renameActWithoutQueueName = () => {
+    renameActivityFunc(false);
+  };
+
+  const renameActWithQueueName = () => {
+    renameActivityFunc(true);
+  };
+
+  const renameActivityFunc = (queueRename) => {
+    const actId = renameActivityData?.actId;
+    const oldActName = renameActivityData?.oldActName;
+    const newActivityName = renameActivityData?.newActivityName;
+    const setProcessData = renameActivityData?.setProcessData;
+    const processDefId = renameActivityData?.processDefId;
+    const processName = renameActivityData?.processName;
+    const queueId = renameActivityData?.queueId;
+    const queueInfo = renameActivityData?.queueInfo;
+    const isBpmn = renameActivityData?.isBpmn;
+
+    renameActivity(
+      actId,
+      oldActName,
+      newActivityName,
+      setProcessData,
+      processDefId,
+      processName,
+      queueId,
+      queueInfo,
+      isBpmn,
+      queueRename,
+      dispatch
+    );
+  };
+
   return spinner ? (
     <CircularProgress
       style={
@@ -392,7 +468,7 @@ function ViewingArea(props) {
                       : " " + classes.hiddenView)
                   }
                   style={
-                    processType === PROCESSTYPE_LOCAL ? {} : { width: "100vw" }
+                    processType === PROCESSTYPE_LOCAL ? {} : { width: "99.5vw" }
                   }
                 >
                   <Milestones
@@ -438,7 +514,7 @@ function ViewingArea(props) {
               (expandedView ? classes.bpmnViewExpanded : classes.bpmnView) +
               (viewType === view.bpmn.langKey ? "" : " " + classes.hiddenView)
             }
-            style={processType === PROCESSTYPE_LOCAL ? {} : { width: "100vw" }}
+            style={processType === PROCESSTYPE_LOCAL ? {} : { width: "99.5vw" }}
           >
             <Graph
               caseEnabled={caseEnabled}
@@ -460,11 +536,26 @@ function ViewingArea(props) {
           position: "relative",
         }}
       >
+        {/*****************************************************************************************
+         * @author asloob_ali BUG ID: 113220 Getting blank properties when just the process is created
+         * Reason:in case of there is no activity selected it was allowing to open the properties drawer and nothing was visible on that drawr.
+         * Resolution :disabled the properties btn in case of there is not any selected activity.
+         * Date : 20/09/2022
+         ****************/}
         <button
-          onClick={() => props.showDrawer(true)}
-          className="propertiesButton_abstract"
+          onClick={() => {
+            if (props.cellID) {
+              props.showDrawer(true);
+            }
+          }}
+          className={`propertiesButton_abstract ${
+            !props.cellID ? " disabledPropertiesBtn" : ""
+          }`}
         >
-          <div className="stopIcon">
+          <div
+            className="stopIcon"
+            style={{ cursor: !props.cellID ? "default" : "pointer" }}
+          >
             <StopIcon />
             {t("Properties")}
           </div>
@@ -472,6 +563,45 @@ function ViewingArea(props) {
         <PropertiesTab processData={processData} direction={direction} />
         {/*<ZoomInOut />*/}
       </div>
+
+      {showDependencyModal && activityDependencies?.length > 0 ? (
+        <Modal
+          show={showDependencyModal}
+          style={{
+            width: "45vw",
+            left: "28%",
+            top: "26.5%",
+            padding: "0",
+          }}
+          children={
+            <ObjectDependencies
+              {...props}
+              processAssociation={activityDependencies}
+              cancelFunc={() => closeDependencyModal()}
+            />
+          }
+        />
+      ) : null}
+
+      {isQueueRenameModalOpen && (
+        <ModalForm
+          title="Rename Queue"
+          containerHeight={180}
+          isOpen={isQueueRenameModalOpen ? true : false}
+          closeModal={closeQueueRenameModal}
+          Content={
+            <Typography style={{ fontSize: "var(--base_text_font_size)" }}>
+              Do you want to rename the queue with activity rename as well?
+            </Typography>
+          }
+          btn1Title="No"
+          onClick1={renameActWithoutQueueName}
+          headerCloseBtn={true}
+          onClickHeaderCloseBtn={closeQueueRenameModal}
+          btn2Title="Yes"
+          onClick2={renameActWithQueueName}
+        />
+      )}
     </div>
   );
 }
@@ -486,7 +616,8 @@ const mapDispatchToProps = (dispatch) => {
       activitySubType,
       seqId,
       queueId,
-      type
+      type,
+      checkedOut
     ) =>
       dispatch(
         actionCreators.selectedCell(
@@ -496,7 +627,8 @@ const mapDispatchToProps = (dispatch) => {
           activitySubType,
           seqId,
           queueId,
-          type
+          type,
+          checkedOut
         )
       ),
     setExpandedTask: (taskExpanded) =>
@@ -507,6 +639,7 @@ const mapStateToProps = (state) => {
   return {
     showDrawer: state.showDrawerReducer.showDrawer,
     taskExpanded: state.taskReducer.taskExpanded,
+    cellID: state.selectedCellReducer.selectedId,
   };
 };
 

@@ -5,7 +5,6 @@ import arabicStyles from "./arabicStyles.module.css";
 import "./index.css";
 import "../index.css";
 import { MenuItem, Select } from "@material-ui/core";
-import { useGlobalState, store } from "state-pool";
 import { RTL_DIRECTION } from "../../../../../Constants/appConstants";
 import { useSelector } from "react-redux";
 import { OpenProcessSliceValue } from "../../../../../redux-store/slices/OpenProcessSlice";
@@ -13,7 +12,7 @@ import { OpenProcessSliceValue } from "../../../../../redux-store/slices/OpenPro
 function DocumentTemplateMapping(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
-  let { template, setUpdatedTemplate } = props;
+  let { template, setUpdatedTemplate, isReadOnly } = props;
   const openProcessData = useSelector(OpenProcessSliceValue);
   const [document, setDocument] = useState(null);
   const [docListOptions, setDocListOptions] = useState([]);
@@ -97,6 +96,9 @@ function DocumentTemplateMapping(props) {
                   horizontal: "left",
                 },
                 getContentAnchorEl: null,
+              }}
+              inputProps={{
+                readOnly: isReadOnly,
               }}
               value={document}
               id={`ccm_document_select`}

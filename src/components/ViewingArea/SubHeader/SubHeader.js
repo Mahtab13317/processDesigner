@@ -226,6 +226,9 @@ const SubHeader = (props) => {
                 type: props.cellType,
                 setProcessData: props.setProcessData,
                 processData: props.processData,
+                 isPrimaryAct:props.processData.MileStones[props.milestoneIndex]?.Activities[
+          props.activityindex
+        ]?.PrimaryAct==='Y'?true:false;
               });
             }}
           >
@@ -258,7 +261,12 @@ const SubHeader = (props) => {
           <button className="subProcessBtn" onClick={subProcessHandler}>
             {t("subprocess")} ({subProcessCount})
             <button class="icon-button buttonImg">
-              <img src={dropdown} width="5px" height="15px" style={{margin:"0 0.25vw"}}/>
+              <img
+                src={dropdown}
+                width="5px"
+                height="15px"
+                style={{ margin: "0 0.25vw" }}
+              />
             </button>
           </button>
           {showSubprocessModal ? (

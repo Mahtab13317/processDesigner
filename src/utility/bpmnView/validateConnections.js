@@ -1,3 +1,4 @@
+import { activityType_label } from "../../Constants/appConstants";
 import {
   startVertex,
   endVertex,
@@ -5,7 +6,7 @@ import {
   limitIncomingEdges,
 } from "../../Constants/bpmnView";
 
-export const validateConnections = (source, target, displayMessage) => {
+export const validateConnections = (source, target, t) => {
   if (!target || !source) {
     return false;
   } else {
@@ -18,29 +19,57 @@ export const validateConnections = (source, target, displayMessage) => {
 
     //to check if incoming edges are allowed on target
     if (startVertex.includes(target.style)) {
-      console.log("errorMessage.noIncomingConnection");
-      return false;
+      return {
+        isValid: false,
+        msg: `${
+          t(activityType_label[target.style]) +
+          " " +
+          t("errorMessage.noIncomingConnection")
+        }`,
+      };
     }
     //to check if outgoing edges are allowed on source
     else if (endVertex.includes(source.style)) {
-      console.log("errorMessage.noOutgoingConnection");
-      return false;
+      return {
+        isValid: false,
+        msg: `${
+          t(activityType_label[source.style]) +
+          " " +
+          t("errorMessage.noOutgoingConnection")
+        }`,
+      };
     }
     //to check the limit on outgoing edges of source
     else if (
       limitOutgoingEdges.includes(source.style) &&
       outgoingEdges.length === 1
     ) {
-      console.log("errorMessage.limitOutgoingConnection");
-      return false;
+      return {
+        isValid: false,
+        msg: `${
+          t("errorMessage.limitOutgoingConnection") +
+          " " +
+          t(activityType_label[source.style])
+        }`,
+      };
     }
     //to check the limit on incoming edges of target
     else if (
       limitIncomingEdges.includes(target.style) &&
       incomingEdges.length === 1
     ) {
-      console.log("errorMessage.limitIncomingConnection");
-      return false;
-    } else return true;
+      return {
+        isValid: false,
+        msg: `${
+          t("errorMessage.limitIncomingConnection") +
+          " " +
+          t(activityType_label[target.style])
+        }`,
+      };
+    } else
+      return {
+        isValid: true,
+        msg: ``,
+      };
   }
 };

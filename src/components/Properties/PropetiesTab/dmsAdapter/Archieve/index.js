@@ -1,4 +1,5 @@
 // Made changes to solve bug ID - 111180, 112972 , 111162 and 111182
+// Changes made to solve Bug 112972 - DMS Adapter -> after connection established no success or failure message 
 import React, { useState, useEffect } from "react";
 import "./index.css";
 import axios from "axios";
@@ -28,7 +29,9 @@ import { connect } from "react-redux";
 import { ClickAwayListener } from "@material-ui/core";
 import ButtonDropdown from "../../../../../UI/ButtonDropdown/index";
 import { useDispatch, useSelector } from "react-redux";
-import TabsHeading from "../../../../../UI/TabsHeading";
+import { useRef } from "react";
+import { FieldValidations } from "../../../../../utility/FieldValidations/fieldValidations";
+import { isReadOnlyFunc } from "../../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function DMSAdapter(props) {
   let { t } = useTranslation();
@@ -45,6 +48,7 @@ function DMSAdapter(props) {
   const [associateDataClassList, setAssociateDataClassList] = useState([]);
   const [assDataClassMappingList, setAssDataClassMappingList] = useState([]);
   const [archieveDataClass, setArchieveDataClass] = useState();
+  const [isConnected, setIsConnected] = useState(false);
   const [archieveDataClassList, setArchieveDataClassList] = useState([]);
   const [workItemCheck, setWorkItemCheck] = useState(
     localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo
@@ -73,6 +77,10 @@ function DMSAdapter(props) {
   ];
   const [docList, setDocList] = useState(defaultDocList);
   const [disconnectBody, setDisconnectBody] = useState(null);
+  const usernameRef=useRef();
+  const folderRef=useRef();
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
+  
 
   useEffect(() => {
     if (saveCancelStatus.SaveClicked) {
@@ -174,6 +182,7 @@ function DMSAdapter(props) {
     setFolderNameInput((prev) => {
       return addConstantsToString(prev, value.VariableName);
     });
+    setShowDropdown(false);
     let temp = { ...localLoadedActivityPropertyData };
     temp.ActivityProperty.archiveInfo.folderInfo.folderName =
       addConstantsToString(folderNameInput, value.VariableName);
@@ -213,63 +222,63 @@ function DMSAdapter(props) {
     // });
   };
 
-  const handleConnectClick = () => {
-    let jsonBody = {
-      username: userName,
-      authcode: password,
-    };
+  // const handleConnectClick = () => {
+  //   let jsonBody = {
+  //     username: userName,
+  //     authcode: password,
+  //   };
 
-    axios.post(SERVER_URL + ARCHIEVE_CONNECT, jsonBody).then((res) => {
-      if (res.data.Status === 0) {
-        dispatch(
-          setToastDataFunc({
-            message: "Connected Sucessfully!",
-            severity: "success",
-            open: true,
-          })
-        );
-        setDisconnectBody({ DMSAuthentication: res.data.DMSAuthentication });
-        var x = document.getElementById("trigger_laInsert_Btn");
-        if (x.innerHTML === "Connect") {
-          x.innerHTML = "Disconnect";
-        } else {
-          x.innerHTML = "Connect";
-        }
-        let temp = { ...localLoadedActivityPropertyData };
-        temp.ActivityProperty.archiveInfo.dmsAuthentication =
-          res.data.DMSAuthentication;
-        setlocalLoadedActivityPropertyData(temp);
-        setDisabledBeforeConnect(false);
-        let arrList = [];
-        res?.data?.DataDefinitions?.map((data) => {
-          arrList.push({
-            dataDefName: data.DataDefName,
-            dataDefIndex: data.DataDefIndex,
-          });
-        });
-        setAssociateDataClassList(arrList);
-      }
-    });
-  };
+  //   axios.post(SERVER_URL + ARCHIEVE_CONNECT, jsonBody).then((res) => {
+  //     if (res.data.Status === 0) {
+  //       dispatch(
+  //         setToastDataFunc({
+  //           message: "Connected Sucessfully!",
+  //           severity: "success",
+  //           open: true,
+  //         })
+  //       );
+  //       setDisconnectBody({ DMSAuthentication: res.data.DMSAuthentication });
+  //       var x = document.getElementById("trigger_laInsert_Btn");
+  //       if (x.innerHTML === "Connect") {
+  //         x.innerHTML = "Disconnect";
+  //       } else {
+  //         x.innerHTML = "Connect";
+  //       }
+  //       let temp = { ...localLoadedActivityPropertyData };
+  //       temp.ActivityProperty.archiveInfo.dmsAuthentication =
+  //         res.data.DMSAuthentication;
+  //       setlocalLoadedActivityPropertyData(temp);
+  //       setDisabledBeforeConnect(false);
+  //       let arrList = [];
+  //       res?.data?.DataDefinitions?.map((data) => {
+  //         arrList.push({
+  //           dataDefName: data.DataDefName,
+  //           dataDefIndex: data.DataDefIndex,
+  //         });
+  //       });
+  //       setAssociateDataClassList(arrList);
+  //     }
+  //   });
+  // };
 
-  const handleDisconnectClick = () => {
-    axios.post(SERVER_URL + ARCHIEVE_DISCONNECT, disconnectBody).then(() => {
-      dispatch(
-        setToastDataFunc({
-          message: "Disconnected Sucessfully!",
-          severity: "success",
-          open: true,
-        })
-      );
-      var x = document.getElementById("trigger_laInsert_Btn");
-      if (x.innerHTML === "Connect") {
-        x.innerHTML = "Disconnect";
-      } else {
-        x.innerHTML = "Connect";
-      }
-      console.log("SUCCESS");
-    });
-  };
+  // const handleDisconnectClick = () => {
+  //   axios.post(SERVER_URL + ARCHIEVE_DISCONNECT, disconnectBody).then(() => {
+  //     dispatch(
+  //       setToastDataFunc({
+  //         message: "Disconnected Sucessfully!",
+  //         severity: "success",
+  //         open: true,
+  //       })
+  //     );
+  //     var x = document.getElementById("trigger_laInsert_Btn");
+  //     if (x.innerHTML === "Connect") {
+  //       x.innerHTML = "Disconnect";
+  //     } else {
+  //       x.innerHTML = "Connect";
+  //     }
+  //     console.log("SUCCESS");
+  //   });
+  // };
 
   const handleAssDataClassMapping = (associateDataClass, type, document) => {
     setMapType(type);
@@ -314,28 +323,29 @@ function DMSAdapter(props) {
   };
 
   const handleDocCheck = (id, index) => {
-    let tempCheck = { ...docCheck };
-    tempCheck[id].check = !tempCheck[id].check;
-    if (!tempCheck[id].check) {
-      tempCheck[id].selectedVal = null;
-      let temp = { ...localLoadedActivityPropertyData };
-      let tempDocList = [
-        ...temp?.ActivityProperty?.archiveInfo?.docTypeInfo?.docTypeDCMapList,
-      ];
-      let newIdx = null;
-      tempDocList?.forEach((doc, idx) => {
-        if (doc.docTypeId === id) {
-          newIdx = idx;
-        }
-      });
-      temp.ActivityProperty.archiveInfo.docTypeInfo.docTypeDCMapList.splice(
-        newIdx,
-        1
-      );
-      setlocalLoadedActivityPropertyData(temp);
-    }
-    setDocCheck(tempCheck);
-    setSelectedDocIndex(index);
+    console.log("CHECKED", id, index, docCheck);
+    // let tempCheck = { ...docCheck };
+    // tempCheck[id].check = !tempCheck[id].check;
+    // if (!tempCheck[id].check) {
+    //   tempCheck[id].selectedVal = null;
+    //   let temp = { ...localLoadedActivityPropertyData };
+    //   let tempDocList = [
+    //     ...temp?.ActivityProperty?.archiveInfo?.docTypeInfo?.docTypeDCMapList,
+    //   ];
+    //   let newIdx = null;
+    //   tempDocList?.forEach((doc, idx) => {
+    //     if (doc.docTypeId === id) {
+    //       newIdx = idx;
+    //     }
+    //   });
+    //   temp.ActivityProperty.archiveInfo.docTypeInfo.docTypeDCMapList.splice(
+    //     newIdx,
+    //     1
+    //   );
+    //   setlocalLoadedActivityPropertyData(temp);
+    // }
+    // setDocCheck(tempCheck);
+    // setSelectedDocIndex(index);
   };
 
   const handleCabinetChange = (value) => {
@@ -417,18 +427,69 @@ function DMSAdapter(props) {
     setlocalLoadedActivityPropertyData(temp);
   };
 
+  const handleConnectDisconnect = () => {
+    let jsonBody = {
+      username: userName,
+      authcode: password,
+    };
+    if (!isConnected) {
+      axios.post(SERVER_URL + ARCHIEVE_CONNECT, jsonBody).then((res) => {
+        if (res.data.Status === 0) {
+          dispatch(
+            setToastDataFunc({
+              message: "Connected Sucessfully!",
+              severity: "success",
+              open: true,
+            })
+          );
+          setDisconnectBody({ DMSAuthentication: res.data.DMSAuthentication });
+          setIsConnected(true);
+          let temp = { ...localLoadedActivityPropertyData };
+          temp.ActivityProperty.archiveInfo.dmsAuthentication =
+            res.data.DMSAuthentication;
+          setlocalLoadedActivityPropertyData(temp);
+          setDisabledBeforeConnect(false);
+          let arrList = [];
+          res?.data?.DataDefinitions?.map((data) => {
+            arrList.push({
+              dataDefName: data.DataDefName,
+              dataDefIndex: data.DataDefIndex,
+            });
+          });
+          setAssociateDataClassList(arrList);
+        }
+      });
+    } else {
+      axios.post(SERVER_URL + ARCHIEVE_DISCONNECT, disconnectBody).then(() => {
+        dispatch(
+          setToastDataFunc({
+            message: "Disconnected Sucessfully!",
+            severity: "success",
+            open: true,
+          })
+        );
+        setIsConnected(false);
+      });
+    }
+  };
+
   let collapseContent = () => {
     return (
       <div>
-      <TabsHeading heading={props?.heading} />
         <div className="dropDownSelectLabelDMS">
-          <p id="archieve_cabinet">Cabinet</p>
+          <p
+            id="archieve_cabinet"
+            style={{ marginLeft: props.isDrawerExpanded ? "0px" : "5px" }}
+          >
+            Cabinet
+          </p>
           <div>
             <Select
               className="dropDownSelect"
               style={{
                 marginRight: "10px",
-                marginLeft: null,
+                marginLeft: props.isDrawerExpanded ? "99px" : "94px",
+                width: "184px",
               }}
               MenuProps={{
                 anchorOrigin: {
@@ -443,6 +504,7 @@ function DMSAdapter(props) {
               }}
               value={cabinet}
               onChange={(event) => handleCabinetChange(event.target.value)}
+              disabled={isReadOnly}
             >
               {localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo?.m_strCabList?.map(
                 (el) => {
@@ -483,6 +545,7 @@ function DMSAdapter(props) {
                 border:
                   !userName && showRedBorder == true ? "1px solid red" : null,
               }}
+              disabled={isReadOnly}
             ></input>
             {!userName && showRedBorder == true ? (
               <span style={{ color: "red", fontSize: "10px" }}>
@@ -515,6 +578,7 @@ function DMSAdapter(props) {
                 border:
                   !password && showRedBorder == true ? "1px solid red" : null,
               }}
+              disabled={isReadOnly} //code updated on 26 September 2022 for BugId 115467
             ></input>
             {!password && showRedBorder == true ? (
               <span style={{ color: "red", fontSize: "10px" }}>
@@ -526,14 +590,11 @@ function DMSAdapter(props) {
         <button
           id="trigger_laInsert_Btn"
           className="triggerButton propertiesAddButton_connect"
-          onClick={
-            document.getElementById("trigger_laInsert_Btn")?.innerHTML ==
-            "Connect"
-              ? handleConnectClick
-              : handleDisconnectClick
-          }
+          onClick={()=>handleConnectDisconnect()}
+          disabled={isReadOnly} //code updated on 26 September 2022 for BugId 115467
         >
-          {"Connect"}
+         {isConnected? "Disconnect": "Connect"}
+         
         </button>
       </div>
     );
@@ -541,8 +602,66 @@ function DMSAdapter(props) {
 
   const expandedContent = () => {
     return (
-      <div>
-        <div style={{ display: "flex", flexDirection: "column" }}>
+      <div style={{ display: "flex", margin: "10px 0px 15px 5px" }}>
+        <div
+          className="dropDownSelectLabelDMS"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+          }}
+        >
+          <p id="archieve_cabinet">Cabinet</p>
+          <div>
+            <Select
+              style={{
+                marginRight: "20px",
+                width: "290px",
+                height: "28px",
+                border: "1px solid #CECECE",
+                borderRadius: "1px",
+                opacity: "1",
+                fontSize: "12px",
+              }}
+              MenuProps={{
+                anchorOrigin: {
+                  vertical: "bottom",
+                  horizontal: "left",
+                },
+                transformOrigin: {
+                  vertical: "top",
+                  horizontal: "left",
+                },
+                getContentAnchorEl: null,
+              }}
+              value={cabinet}
+              onChange={(event) => handleCabinetChange(event.target.value)}
+              disabled={isReadOnly}
+            >
+              {localLoadedActivityPropertyData?.ActivityProperty?.archiveInfo?.m_strCabList?.map(
+                (el) => {
+                  return (
+                    <MenuItem
+                      className="statusSelect"
+                      value={el}
+                      style={{ fontSize: "12px" }}
+                    >
+                      {el}
+                    </MenuItem>
+                  );
+                }
+              )}
+            </Select>
+          </div>
+        </div>
+        {/* ====================================== */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+          }}
+        >
           <p id="archieve_userName">
             UserName{" "}
             <span
@@ -559,7 +678,7 @@ function DMSAdapter(props) {
           <div>
             <input
               value={userName}
-              className="userNameInput"
+              className="userNameInputExp"
               onChange={(event) => {
                 handleUserChange(event);
               }}
@@ -571,8 +690,16 @@ function DMSAdapter(props) {
                   !userName && showRedBorder == true
                     ? "1px solid red"
                     : "1px solid #CECECE",
+                marginRight: "20px",
               }}
+              id="username"
+              ref={usernameRef}
+                  onKeyPress={(e) =>
+                    FieldValidations(e, 153, usernameRef.current, 30)
+                  }
+                  disabled={isReadOnly}
             ></input>
+            
             {!userName && showRedBorder == true ? (
               <span style={{ color: "red", fontSize: "10px" }}>
                 Please Enter UserName
@@ -580,6 +707,69 @@ function DMSAdapter(props) {
             ) : null}
           </div>
         </div>
+        {/* ====================================== */}
+        <div
+          className="dropDownSelectLabelDMS"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+          }}
+        >
+          <p id="archieve_password">
+            Password{" "}
+            <span
+              style={{
+                color: "red",
+                padding: "0.35rem",
+                marginLeft: "-0.375rem",
+                marginTop: "-0.4rem",
+              }}
+            >
+              *
+            </span>
+          </p>
+          <div>
+            <input
+              value={password}
+              className="passwordInputExp"
+              type="password"
+              onChange={(event) => {
+                handlePasswordChange(event);
+              }}
+              style={{
+                border:
+                  !password && showRedBorder == true ? "1px solid red" : null,
+                width: "290px",
+                height: "28px",
+              }}
+              disabled={isReadOnly}
+            ></input>
+            {!password && showRedBorder == true ? (
+              <span style={{ color: "red", fontSize: "10px" }}>
+                Please Enter Password
+              </span>
+            ) : null}
+          </div>
+        </div>
+        {/* ====================================== */}
+        <button
+          id="trigger_laInsert_Btn"
+          style={{
+            height: "28px",
+            width: "80px",
+            border: "1px solid #338ed1",
+            color: "#338ed1",
+            marginTop: "20px",
+            marginLeft: "10px",
+            backgroundColor: "white",
+            cursor: "pointer",
+          }}
+          onClick={()=>handleConnectDisconnect()}
+          disabled={isReadOnly}
+        >
+          {isConnected? "Disconnect": "Connect"}
+        </button>
       </div>
     );
   };
@@ -599,14 +789,15 @@ function DMSAdapter(props) {
         >
           *
         </span>
-        <div style={{ marginLeft: props.isDrawerExpanded ? "157px" : "36px" }}>
+        <div style={{ marginLeft: props.isDrawerExpanded ? "157px" : "48px" }}>
           <ClickAwayListener onClickAway={() => setShowDropdown(false)}>
             <div className="relative inlineBlock">
               <button
                 className="triggerButton propertiesAddButton"
                 onClick={() => setShowDropdown(true)}
                 // disabled={readOnlyProcess}
-                id="trigger_laInsert_Btn"
+                // id="trigger_laInsert_Btn"
+                disabled={isReadOnly}
               >
                 {"insertVariable"}
               </button>
@@ -617,6 +808,7 @@ function DMSAdapter(props) {
                 optionKey="VariableName"
                 style={{ top: "80%" }}
                 id="trigger_laInsert_Dropdown"
+                disabled={isReadOnly}
               />
             </div>
           </ClickAwayListener>
@@ -633,7 +825,13 @@ function DMSAdapter(props) {
                   !folderNameInput && showRedBorder == true
                     ? "1px solid red"
                     : null,
+                width: props.isDrawerExpanded ? "15vw" : "13.5vw",
               }}
+              ref={folderRef}
+                  onKeyPress={(e) =>
+                    FieldValidations(e, 116, folderRef.current, 2000)
+                  }
+                  disabled={isReadOnly}
             />
           </div>
         </div>
@@ -650,16 +848,9 @@ function DMSAdapter(props) {
           <Select
             className={
               props.isDrawerExpanded
-                ? "dropDownSelect_expandeddms"
-                : "dropDownSelect"
+                ? "dropDownSelectDataClass_expandeddms"
+                : "dropDownSelectDataClass"
             }
-            style={{ marginLeft: props.isDrawerExpanded ? "119px" : null }}
-            // style={{
-            //   border:
-            //     !associateDataClass && showRedBorder == true
-            //       ? "1px solid red"
-            //       : null,
-            // }}
             MenuProps={{
               anchorOrigin: {
                 vertical: "bottom",
@@ -671,9 +862,10 @@ function DMSAdapter(props) {
               },
               getContentAnchorEl: null,
             }}
-            disabled={disabledBeforeConnect}
+            disabled={disabledBeforeConnect || isReadOnly}
             value={associateDataClass}
             onChange={(e) => handleAssociateClassChange(e)}
+           
           >
             {associateDataClassList &&
               associateDataClassList.map((dataClass) => {
@@ -699,6 +891,7 @@ function DMSAdapter(props) {
           onClick={() =>
             handleAssDataClassMapping(associateDataClass, "associate")
           }
+          
         />
         {showAssDataClassMapping ? (
           <Modal
@@ -727,6 +920,7 @@ function DMSAdapter(props) {
                 assDataClassMappingList={assDataClassMappingList}
                 setShowAssDataClassMapping={setShowAssDataClassMapping}
                 docCheckList={docCheck}
+                isReadOnly={isReadOnly}  //code updated on 26 September 2022 for BugId 115467
               />
             }
           ></Modal>
@@ -750,6 +944,7 @@ function DMSAdapter(props) {
                 marginLeft: "8px",
                 marginTop: "8px",
               }}
+              disabled={isReadOnly} //code updated on 26 September 2022 for BugId 115467
             />
           }
         />
@@ -762,17 +957,25 @@ function DMSAdapter(props) {
           <tr>
             <th style={{ width: "10vw" }}>
               <Checkbox
+                style={{ marginLeft: props.isDrawerExpanded ? "-90px" : "0px" }}
                 size="small"
                 disabled={disabledBeforeConnect}
                 //   checked={props.docTypes.setAllCreate_Email}
               />
             </th>
             <th
-              style={{ display: "flex", alignItems: "center", width: "30vw" }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginTop: "6px",
+                fontSize: "14px",
+              }}
             >
               {"Document(s)"}
             </th>
-            <th style={{ width: "50vw" }}>{"Associated Class"}</th>
+            <th style={{ width: "50vw", fontSize: "14px" }}>
+              {"Associated Class"}
+            </th>
             <th style={{ width: "10vw" }}> </th>
           </tr>
           {docList?.map((value, index) => {
@@ -790,7 +993,9 @@ function DMSAdapter(props) {
                     disabled={disabledBeforeConnect}
                   />
                 </td>
-                <td style={{ width: "30vw" }}>{value.DocName}</td>
+                <td style={{ width: "30vw", fontSize: "0.85rem" }}>
+                  {value.DocName}
+                </td>
                 <td style={{ width: "50vw" }}>
                   <Select
                     className={
@@ -814,6 +1019,7 @@ function DMSAdapter(props) {
                         ? selectedDocIndex == index &&
                           !docCheck[value.DocTypeId]?.check
                         : !docCheck[value.DocTypeId]?.check
+                        || isReadOnly //code updated on 26 September 2022 for BugId 115467
                     }
                     value={
                       docCheck[value.DocTypeId]?.selectedVal
@@ -832,7 +1038,9 @@ function DMSAdapter(props) {
                         !archieveDataClass && showRedBorder == true
                           ? "1px solid red"
                           : null,
+                      width: props.isDrawerExpanded ? "184px" : "163px",
                     }}
+                   
                   >
                     {associateDataClassList?.map((dataClass) => {
                       return (
@@ -845,6 +1053,7 @@ function DMSAdapter(props) {
                         </MenuItem>
                       );
                     })}
+                    
                   </Select>
                 </td>
                 <td
@@ -856,6 +1065,7 @@ function DMSAdapter(props) {
                     )
                   }
                   style={{ width: "10vw" }}
+                  disabled={isReadOnly} //code updated on 26 September 2022 for BugId 115467
                 >
                   <CheckCircleIcon
                     style={{

@@ -12,6 +12,8 @@ import {
   PROCESSTYPE_LOCAL,
   RTL_DIRECTION,
 } from "../../../../Constants/appConstants";
+import { useRef } from "react";
+import { FieldValidations } from "../../../../utility/FieldValidations/fieldValidations";
 
 function ExecuteProperties(props) {
   const loadedProcessData = store.getState("loadedProcessData");
@@ -25,6 +27,10 @@ function ExecuteProperties(props) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [existingTrigger, setExistingTrigger] = useState(false);
   let readOnlyProcess = props.openProcessType !== PROCESSTYPE_LOCAL;
+
+  const funcNameRef=useRef();
+  const executeServerRef=useRef();
+  const executeArgRef=useRef();
 
   useEffect(() => {
     props.setExecuteProperties({});
@@ -111,7 +117,12 @@ function ExecuteProperties(props) {
                 ? arabicStyles.propertiesFormInput
                 : styles.propertiesFormInput
             }
+            ref={funcNameRef}
+							onKeyPress={(e) =>
+							FieldValidations(e, 165, funcNameRef.current, 255)
+							 }
           />
+          
         </div>
         <div className="flex">
           <div
@@ -151,6 +162,10 @@ function ExecuteProperties(props) {
                 ? arabicStyles.propertiesFormInput
                 : styles.propertiesFormInput
             }
+            ref={executeServerRef}
+							onKeyPress={(e) =>
+							FieldValidations(e, 150, executeServerRef.current, 255)
+							 }
           />
         </div>
       </div>
@@ -209,6 +224,10 @@ function ExecuteProperties(props) {
               }
             }}
             className={`${styles.triggerFormInput} ${styles.mailBodyInput}`}
+            ref={executeArgRef}
+							onKeyPress={(e) =>
+							FieldValidations(e, 142, executeArgRef.current, 255)
+							 }
           />
         </div>
       </div>

@@ -29,6 +29,7 @@ const filter = createFilterOptions();
     6.showConstValue -> whether constant should be added as option in select
     7.setIsConstant -> to know whether the selected value is from list of options or some constant value
     8.setValue -> get value of selected option or constant value entered
+    9. constType-> shows the type of constant i.e. text,number etc.
   }
   */
 
@@ -42,6 +43,8 @@ function SelectWithInput(props) {
   let constantOption = props.constantOptionStatement
     ? t(props.constantOptionStatement)
     : t(CONSTANT);
+
+  //const [constantType, setConstantType] = useState(null); // State that stores the variable type of the constant selected.
 
   useEffect(() => {
     if (
@@ -107,6 +110,31 @@ function SelectWithInput(props) {
     }
     setOptions(localDropdownArr);
   }, [props.dropdownOptions]);
+
+
+  // Function that runs when the constType prop changes.
+ /*  useEffect(() => {
+    if (props.constType !== "") {
+      let type = "";
+      switch (props.constType) {
+        case "10":
+          type = "text";
+          break;
+        case "3":
+        case "4":
+        case "6":
+          type = "number";
+          break;
+        case "8":
+          type = "date";
+          break;
+        default:
+          type = "text";
+          break;
+      }
+      setConstantType(type);
+    }
+  }, [props.constType]); */
 
   const Select = () => {
     return (
@@ -239,6 +267,7 @@ function SelectWithInput(props) {
                 : `${styles.selectWithInputTextField} selectWithInputTextField`
             }
             variant="outlined"
+           // type={constantType}
           />
         )}
       />
@@ -292,7 +321,7 @@ function SelectWithInput(props) {
           <input
             id={`input_with_select_${props.id ? props.id : null}`}
             autofocus
-            type={props.type ? props.type : "text"}
+           type={props.type ? props.type : "text"}
             value={constantValue}
             className={
               direction === RTL_DIRECTION
@@ -305,6 +334,7 @@ function SelectWithInput(props) {
             }
             disabled={props.disabled}
             onChange={(e) => setConstantValue(e.target.value)}
+          // type={constantType}
           />
           {Select()}
         </div>

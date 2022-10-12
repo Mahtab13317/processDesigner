@@ -126,7 +126,9 @@ function LayoutSelection(props) {
           activity: {
             actId: assocData.activity.actId + "",
             actName: assocData.activity.actName,
-            operationType: "A",
+            operationType: !!assocData.activity.operationType
+              ? assocData.activity.operationType
+              : "A",
           },
         });
       });
@@ -249,7 +251,7 @@ function LayoutSelection(props) {
               activeStep === 1 ? handleSaveChanges() : handleNextStep()
             }
           >
-            {t("next")}
+            {activeStep === 1 ? t("proceed") : t("next")}
           </Button>
         </div>
 

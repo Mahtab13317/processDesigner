@@ -1,7 +1,56 @@
-import { SERVER_URL, ENDPOINT_REMOVEMILE } from "../../Constants/appConstants";
+import {
+  SERVER_URL,
+  ENDPOINT_REMOVEMILE,
+  ENDPOINT_PROCESS_ASSOCIATION,
+} from "../../Constants/appConstants";
 import axios from "axios";
+import {
+  setActivityDependencies,
+  setShowDependencyModal,
+} from "../../redux-store/actions/Properties/activityAction";
 
 export const deleteMilestone = (
+  milestoneId,
+  setProcessData,
+  processDefId,
+  milestonesArray,
+  indexValue,
+  processType,
+  activityNameList,
+  activityIdList,
+  dispatch
+) => {
+  axios
+    .get(
+      SERVER_URL +
+        ENDPOINT_PROCESS_ASSOCIATION +
+        `/${processDefId}/${processType}` +
+        `${activityNameList.length > 0 ? `/${activityNameList}` : null}` +
+        `${activityIdList.length > 0 ? `/${activityIdList}` : null}` +
+        `/AC/D`
+    )
+    .then((res) => {
+      if (res.data.Status === 0) {
+        if (res.data.Validations?.length > 0) {
+          dispatch(setShowDependencyModal(true));
+          dispatch(setActivityDependencies(res.data.Validations));
+        } else {
+          deleteMileFunc(
+            milestoneId,
+            setProcessData,
+            processDefId,
+            milestonesArray,
+            indexValue
+          );
+        }
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+const deleteMileFunc = (
   milestoneId,
   setProcessData,
   processDefId,

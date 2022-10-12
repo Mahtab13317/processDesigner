@@ -1,9 +1,9 @@
-.switch{
+.pmweb_switch{
     font-size: 12px !important;
     color:#606060 !important;
     display:none !important;
 }
-.switch .MuiFormControlLabel-label{
+.pmweb_switch .MuiFormControlLabel-label{
     font-size: 12px !important;
     color:#606060 !important;
 }

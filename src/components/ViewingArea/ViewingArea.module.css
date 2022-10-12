@@ -1,3 +1,4 @@
+/*code edited on 6 Sep 2022 for BugId 114227*/
 .viewingArea {
   display: flex;
   height: inherit;
@@ -9,7 +10,7 @@
 }
 
 .abstractView {
-  height: 88%;
+  height: calc(100vh - 16rem);
   display: flex;
   flex-direction: row;
   width: 93.4vw;
@@ -17,31 +18,22 @@
   overflow: auto;
 }
 
+/*code edited on 29 Sep 2022 for BugId 116349*/
 .abstractView::-webkit-scrollbar,
 .abstractViewExpanded::-webkit-scrollbar {
   background-color: transparent;
-  width: 0.3125rem;
-  height: 0.3125rem;
+  width: 0.5rem;
+  height: 0.5rem;
 }
+/*code edited on 29 Sep 2022 for BugId 116349*/
 .abstractView::-webkit-scrollbar-thumb,
 .abstractViewExpanded::-webkit-scrollbar-thumb {
-  background-color: transparent;
-  border-radius: 0.125rem;
-}
-
-.abstractView:hover::-webkit-scrollbar,
-.abstractViewExpanded:hover::-webkit-scrollbar {
-  width: 0.3125rem;
-  height: 0.3125rem;
-}
-.abstractView:hover::-webkit-scrollbar-thumb,
-.abstractViewExpanded:hover::-webkit-scrollbar-thumb {
-  background: #8c8c8c 0% 0% no-repeat padding-box;
-  border-radius: 0.125rem;
+  background: #8c8c8c 0% 0% no-repeat padding-box !important;
+  border-radius: 0.313rem;
 }
 
 .abstractViewExpanded {
-  height: 88%;
+  height: calc(100vh - 16rem);
   display: flex;
   flex-direction: row;
   width: 80.1vw;
@@ -52,42 +44,37 @@
 .bpmnView {
   width: 93.6vw;
   margin-top: -10px;
-  height: 73vh;
+  height: calc(100vh - 14.5rem);
   overflow-x: auto;
   overflow-y: auto;
 }
 
 .bpmnViewExpanded {
-  height: 88%;
+  height: calc(100vh - 14.5rem);
   display: flex;
   margin-top: -10px;
   width: 80.1vw;
-  max-height: 73vh;
   overflow-y: auto;
   overflow-x: auto;
 }
 
+/*code edited on 29 Sep 2022 for BugId 116349*/
 .bpmnView::-webkit-scrollbar,
 .bpmnViewExpanded::-webkit-scrollbar {
-  background-color: transparent;
-  width: 0.3125rem;
-  height: 0.3125rem;
+  background-color: #eceff1;
+  width: 0.5rem;
+  height: 0.5rem;
 }
+
+/*code edited on 29 Sep 2022 for BugId 116349*/
 .bpmnView::-webkit-scrollbar-thumb,
 .bpmnViewExpanded::-webkit-scrollbar-thumb {
-  background-color: transparent;
-  border-radius: 0.125rem;
+  background: #8c8c8c 0% 0% no-repeat padding-box !important;
+  border-radius: 0.313rem;
 }
 .bpmnView:hover::-webkit-scrollbar,
 .bpmnViewExpanded:hover::-webkit-scrollbar {
   overflow-y: visible;
-  width: 0.3125rem;
-  height: 0.3125rem;
-}
-.bpmnView:hover::-webkit-scrollbar-thumb,
-.bpmnViewExpanded:hover::-webkit-scrollbar-thumb {
-  background: #8c8c8c 0% 0% no-repeat padding-box;
-  border-radius: 0.125rem;
 }
 
 .hiddenView {

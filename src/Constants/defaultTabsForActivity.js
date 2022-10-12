@@ -30,7 +30,7 @@ export const ActivityPropertyTabs = [
   },
   {
     name: activityType.conditionalStart,
-    components: [Tab(1), Tab(3), Tab(4), Tab(5), Tab(6), Tab(7), Tab(2)],
+    components: [Tab(1), Tab(3), Tab(4), Tab(5), Tab(6), Tab(2)],
   },
   {
     name: activityType.messageStart,
@@ -74,12 +74,12 @@ export const ActivityPropertyTabs = [
   },
   {
     name: activityType.receive,
-    components: [Tab(1), Tab(3), Tab(4), Tab(5), Tab(7), Tab(17), Tab(2)],
+    components: [Tab(1), Tab(3), Tab(4), Tab(5), Tab(17), Tab(2)],
   },
 
   {
     name: activityType.receive,
-    components: [Tab(1), Tab(3), Tab(4), Tab(5), Tab(7), Tab(17), Tab(2)],
+    components: [Tab(1), Tab(3), Tab(4), Tab(5), Tab(17), Tab(2)],
   },
   {
     name: activityType.reply,

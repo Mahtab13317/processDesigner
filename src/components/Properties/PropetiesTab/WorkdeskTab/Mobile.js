@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { store, useGlobalState } from "state-pool";
-import { connect } from "react-redux";
+import { connect, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import "./index.css";
 import Tabs from "../../../../UI/Tab/Tab.js";
@@ -14,18 +14,22 @@ import {
   propertiesLabel,
   RTL_DIRECTION,
 } from "../../../../Constants/appConstants";
-import { useDispatch } from "react-redux";
 import { setActivityPropertyChange } from "../../../../redux-store/slices/ActivityPropertyChangeSlice";
 import { Checkbox } from "@material-ui/core";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function Mobile(props) {
+  console.log("111","props",props)
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [checkMobile, setCheckMobile] = useState(false);
   const dispatch = useDispatch();
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   useEffect(() => {
     setCheckMobile(
@@ -85,6 +89,7 @@ function Mobile(props) {
         <Checkbox
           checked={checkMobile}
           onChange={() => CheckMobileHandler()}
+          disabled={isReadOnly}
           className={
             direction === RTL_DIRECTION
               ? arabicStyles.mainCheckbox
@@ -110,7 +115,12 @@ function Mobile(props) {
               t("document"),
               t("variable"),
             ]}
-            TabElement={[<Todo />, <Exception />, <Document />, <Variable />]}
+            TabElement={[
+              <Todo isReadOnly={isReadOnly} />,
+              <Exception isReadOnly={isReadOnly} />,
+              <Document isReadOnly={isReadOnly} />,
+              <Variable isReadOnly={isReadOnly} />,
+            ]}
           />
         </div>
       ) : null}
@@ -118,4 +128,13 @@ function Mobile(props) {
   );
 }
 
-export default Mobile;
+const mapStateToProps = (state) => {
+  return {
+    openProcessID: state.openProcessClick.selectedId,
+    openProcessName: state.openProcessClick.selectedProcessName,
+    openProcessType: state.openProcessClick.selectedType,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
+  };
+};
+
+export default connect(mapStateToProps, null)(Mobile);

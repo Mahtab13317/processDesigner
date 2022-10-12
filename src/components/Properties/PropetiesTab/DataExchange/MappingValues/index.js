@@ -30,6 +30,7 @@ function MappingValues(props) {
     filteredExptVarList,
     varListForComplex,
     multiSelectedTableNames,
+    isReadOnly,
   } = props;
   const disabled =
     selectedVariableName === "" ||
@@ -45,7 +46,7 @@ function MappingValues(props) {
           <span className={styles.asterisk}>*</span>
         </div>
         <CustomizedDropdown
-          //   disabled={isProcessReadOnly}
+          disabled={isReadOnly}
           id="MV_Variable_Dropdown"
           className={styles.dropdown}
           value={selectedVariableName}
@@ -104,7 +105,7 @@ function MappingValues(props) {
           {SPACE} {t("table")}
         </p>
         <CustomizedDropdown
-          //   disabled={isProcessReadOnly}
+          disabled={isReadOnly}
           id="MV_Data_Exchg_Table_Dropdown"
           className={styles.dropdown}
           value={mappingDataExchgTable}
@@ -148,7 +149,7 @@ function MappingValues(props) {
           <span className={styles.asterisk}>*</span>
         </div>
         <CustomizedDropdown
-          //   disabled={isProcessReadOnly}
+          disabled={isReadOnly}
           id="MV_Data_Exchg_Table_Column_Dropdown"
           className={styles.dropdown}
           value={selectedMappingColumn}
@@ -208,15 +209,22 @@ function MappingValues(props) {
         <button
           id="MV_Cancel_Mapping_Btn"
           onClick={cancelMappingHandler}
-          className={styles.cancelBtn}
+          className={clsx(
+            styles.cancelBtn,
+            isReadOnly && styles.disabledBtnStyles
+          )}
+          disabled={isReadOnly}
         >
           {t("cancel")}
         </button>
         <button
           id="MV_Add_Mapping_Btn"
           onClick={addMappingHandler}
-          disabled={disabled}
-          className={clsx(styles.addBtn, disabled && styles.disabledBtnStyles)}
+          disabled={disabled || isReadOnly}
+          className={clsx(
+            styles.addBtn,
+            (disabled || isReadOnly) && styles.disabledBtnStyles
+          )}
         >
           {t("add")}
         </button>
@@ -340,11 +348,13 @@ function MappingValues(props) {
                         )}
                       </div>
                     )}
-                    <DeleteOutlinedIcon
-                      id="MV_Delete_Mapping_Btn"
-                      onClick={() => deleteMappingHandler(index)}
-                      className={styles.deleteIcon}
-                    />
+                    {!isReadOnly && (
+                      <DeleteOutlinedIcon
+                        id="MV_Delete_Mapping_Btn"
+                        onClick={() => deleteMappingHandler(index)}
+                        className={styles.deleteIcon}
+                      />
+                    )}
                   </div>
                 </div>
               );

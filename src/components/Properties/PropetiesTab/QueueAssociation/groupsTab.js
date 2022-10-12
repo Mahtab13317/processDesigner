@@ -1,3 +1,5 @@
+// Changes made to solve Bug 116204 - Associated Queue: Selected Group title is grammatically incorrect 
+// Changes made to solve Bug 116179 - Associated Queue: Search is not working for Groups
 import React, { useState, useEffect } from "react";
 import styles from "../../../ProcessSettings/Trigger/Properties/properties.module.css";
 import arabicStyles from "../../../ProcessSettings/Trigger/Properties/propertiesArabicStyles.module.css";
@@ -18,15 +20,33 @@ function GroupsTab(props) {
   let { t } = useTranslation();
   const direction = `${t("HTML_DIR")}`;
   let readOnlyProcess = props.openProcessType !== PROCESSTYPE_LOCAL;
-  const [first, setfirst] = useState(null);
+  const [first, setfirst] = useState("0");
+  const [searchTerm, setSearchTerm] = useState("");
   const [showFilterScreen, setShowFilterScreen] = useState(false);
   useEffect(() => {
     setfirst(props.selectedGroupLength);
   }, [props.selectedGroupLength]);
 
-  const openFilterScreenHandler = () => {
+  const openFilterScreenHandler = (option) => {
     setShowFilterScreen(true);
+    console.log('option', option);
   };
+
+  const getTableHeader = () => {
+    if (first == 0 || first == 1) {
+      return `${first} Group Selected`;
+    } else {
+      return `${first} Groups Selected`;
+    }
+  };
+
+  let filteredRows = props?.tableContent?.filter((row) => {
+    if (searchTerm == "") {
+      return row;
+    } else if (row.GroupName.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return row;
+    }
+  });
 
   return (
     <React.Fragment>
@@ -68,6 +88,7 @@ function GroupsTab(props) {
               height: "28px",
               margin: "10px 10px 5px 10px",
             }}
+            setSearchTerm={setSearchTerm}
           />
           {!readOnlyProcess ? (
             <th className={styles.dataTableHeadCell_Buttons}>
@@ -104,7 +125,7 @@ function GroupsTab(props) {
               ? props.tableContent.length
               : "0"}{" "}
             Groups Selected */}
-            {first ? first : "0"} Groups Selected
+            {getTableHeader()}
           </p>
         ) : null}
         <tbody
@@ -116,7 +137,7 @@ function GroupsTab(props) {
           style={{ margin: "10px 0px 10px 10px" }}
         >
           {props.tableContent && props.tableContent.length > 0 ? (
-            props.tableContent.map((option, index) => {
+            filteredRows?.map((option, index) => {
               return (
                 <tr
                   className={styles.dataTableRow_Queue}
@@ -165,7 +186,7 @@ function GroupsTab(props) {
                           marginTop: "5px",
                           cursor: "pointer",
                         }}
-                        onClick={openFilterScreenHandler}
+                        onClick={()=>openFilterScreenHandler(option)}
                       />
                     ) : null}
                   </td>

@@ -24,7 +24,10 @@ import Mapping from "./mapping.js";
 import { setToastDataFunc } from "../../../../redux-store/slices/ToastDataHandlerSlice";
 import { useTranslation } from "react-i18next";
 import CatalogScreenModal from "./CatalogScreenModal";
-import TabsHeading from "../../../../UI/TabsHeading";
+import {
+  isProcessDeployedFunc,
+  isReadOnlyFunc,
+} from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function Webservice(props) {
   let { t } = useTranslation();
@@ -32,6 +35,8 @@ function Webservice(props) {
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
+  const loadedProcessData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const [webServicesList, setWebServicesList] = useState([]);
   const [serviceNameClicked, setServiceNameClicked] = useState(null);
   const [methodsList, setMethodsList] = useState([]);
@@ -45,6 +50,7 @@ function Webservice(props) {
   const [spinner, setspinner] = useState(true);
   //code added on 22 Aug 2022 for BugId 112019
   const [value, setValue] = useState(0); // Function to handle tab change.
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, props.cellCheckedOut);
 
   useEffect(() => {
     if (saveCancelStatus.SaveClicked) {
@@ -72,6 +78,14 @@ function Webservice(props) {
         );
       }
       dispatch(setSave({ SaveClicked: false }));
+    }
+    else if (saveCancelStatus.CancelClicked) {
+      // code added on 30 August 2022 for BugId 113881
+      setSelectedWebService(null);
+      setSelectedMethod(null);
+      setShowMapping(false);
+      setAssociateButtonClicked(false);
+      dispatch(setSave({ CancelClicked: false }));
     }
   }, [saveCancelStatus.SaveClicked, saveCancelStatus.CancelClicked]);
 
@@ -157,7 +171,8 @@ function Webservice(props) {
           }
         });
         // Saving Data
-        let temp = { ...localLoadedActivityPropertyData };
+        // code edited on 30 August 2022 for BugId 113881
+        let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
         if (temp?.ActivityProperty?.webserviceInfo) {
           if (temp.ActivityProperty.webserviceInfo?.objWebServiceDataInfo) {
             temp.ActivityProperty.webserviceInfo.objWebServiceDataInfo.push({
@@ -295,7 +310,8 @@ function Webservice(props) {
     }
     setAssociations(tempVariablesList_Filtered);
     // Delete association permanently from get Activity Call
-    let temp = { ...localLoadedActivityPropertyData };
+    // code edited on 30 August 2022 for BugId 113881
+    let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
     let idx = null;
     temp?.ActivityProperty?.webserviceInfo?.objWebServiceDataInfo?.forEach(
       (el, index) => {
@@ -316,8 +332,6 @@ function Webservice(props) {
   /*code changes on 21 June 2022 for BugId 110907 */
   return (
     <div>
-       
-       <TabsHeading heading={props?.heading} />
       {/*code edited on 22 July 2022 for BugId 111320 */}
       {spinner ? (
         <CircularProgress style={{ marginTop: "30vh", marginLeft: "40%" }} />
@@ -354,25 +368,29 @@ function Webservice(props) {
                     fontWeight: "700",
                   }}
                 >
-                 {/*  {t("webService")} */}
+                  {t("webService")}
                 </p>
-                <p
-                  style={{
-                    fontSize: "var(--base_text_font_size)",
-                    color: "var(--link_color)",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => LandOnCatelogHandler()}
-                >
-                  {/*code edited on 21 June 2022 for BugId 110908*/}
-                  {t("GoToCatalog")}
-                </p>
+                {!isProcessDeployedFunc(localLoadedProcessData) && (
+                  <p
+                    style={{
+                      fontSize: "var(--base_text_font_size)",
+                      color: "var(--link_color)",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      LandOnCatelogHandler();
+                    }}
+                  >
+                    {/*code edited on 21 June 2022 for BugId 110908*/}
+                    {t("GoToCatalog")}
+                  </p>
+                )}
               </div>
               <div
                 style={{
                   display: props.isDrawerExpanded ? "flex" : "block",
-                  alignItems: props.isDrawerExpanded ? "end" : "normal",
+                  alignItems: props.isDrawerExpanded ? "start" : "normal",
                   gap: "1vw",
                 }}
               >
@@ -394,12 +412,17 @@ function Webservice(props) {
                   </p>
                   <Select
                     className="select_webService"
-                    onChange={(e) => setSelectedWebService(e.target.value)}
+                    onChange={(e) => {
+                      // code edited on 30 August 2022 for BugId 113881
+                      setSelectedWebService(e.target.value);
+                      setAssociateButtonClicked(false);
+                    }}
                     style={{
                       fontSize: "var(--base_text_font_size)",
                       width: props.isDrawerExpanded ? "22vw" : "100%",
                     }}
                     value={selectedWebService}
+                    disabled={isReadOnly}
                     MenuProps={{
                       anchorOrigin: {
                         vertical: "bottom",
@@ -458,7 +481,7 @@ function Webservice(props) {
                       width: props.isDrawerExpanded ? "22vw" : "100%",
                     }}
                     value={selectedMethod}
-                    disabled={selectedWebService ? false : true}
+                    disabled={selectedWebService || !isReadOnly ? false : true}
                     MenuProps={{
                       anchorOrigin: {
                         vertical: "bottom",
@@ -498,13 +521,17 @@ function Webservice(props) {
                     display: "flex",
                     justifyContent: props.isDrawerExpanded ? "start" : "end",
                     flex: 2,
-                    marginBottom: "0.75rem",
+                    marginTop: "1rem",
                   }}
                 >
                   <button
-                    variant="outlined"
-                    className="associateButton_webSProp"
+                    className={
+                      isReadOnly
+                        ? "disabledButton_webSProp"
+                        : "associateButton_webSProp"
+                    }
                     onClick={() => associateServiceNMethod()}
+                    disabled={isReadOnly}
                   >
                     {t("associate")}
                   </button>
@@ -539,6 +566,7 @@ function Webservice(props) {
               isDrawerExpanded={props.isDrawerExpanded}
               setServiceNameClicked={setServiceNameClicked}
               handleAssociationDelete={handleAssociationDelete}
+              isReadOnly={isReadOnly}
             />
             {/* ----------------------------------- */}
           </div>
@@ -552,6 +580,7 @@ function Webservice(props) {
               completeList={webServicesList}
               value={value}
               setValue={setValue}
+              isReadOnly={isReadOnly}
             />
           ) : null}
         </div>
@@ -567,7 +596,6 @@ function Webservice(props) {
             boxShadow: "0px 3px 6px #00000029",
             padding: "0",
           }}
-          modalClosed={() => setShowCatelogScreen(false)}
           children={
             // code edited on 20 June 2022 for BugId 110910
             <CatalogScreenModal closeFunc={() => setShowCatelogScreen(false)} />
@@ -587,6 +615,7 @@ const mapStateToProps = (state) => {
     cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
     openProcessID: state.openProcessClick.selectedId,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

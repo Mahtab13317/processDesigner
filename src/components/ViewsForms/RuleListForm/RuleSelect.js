@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Select, MenuItem, Checkbox } from "@material-ui/core";
+import { Select, MenuItem, Checkbox, Menu } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import styles from "./RuleListForm.module.css";
@@ -9,7 +9,7 @@ import {
   logicalOperatorOptions,
 } from "../../Properties/PropetiesTab/ActivityRules/CommonFunctionCall";
 import AddIcon from "@material-ui/icons/Add";
-import { Add } from "@material-ui/icons";
+import CustomizedDropdown from "../../../UI/Components_With_ErrrorHandling/Dropdown";
 
 function RuleSelect({
   originalRulesListData,
@@ -19,9 +19,12 @@ function RuleSelect({
   setaddRuleApiBool,
   addRuleApiBool,
 }) {
-  const varDef = store.getState("variableDefinition"); //current processdata clicked
-
-  const [localVarDef, setlocalVarDef] = useGlobalState(varDef);
+  const processData = store.getState("loadedProcessData");
+  const [localLoadedProcessData] = useGlobalState(processData);
+  const [isCustomConstant, setisCustomConstant] = useState(false);
+  const [localVarDef, setlocalVarDef] = useState(
+    localLoadedProcessData.Variable
+  );
   const [pos, setpos] = useState(0);
 
   useEffect(() => {
@@ -53,19 +56,62 @@ function RuleSelect({
     return temp;
   };
 
+  const checkIfConstant = (constName) => {
+    let temp = false;
+    localLoadedProcessData?.DynamicConstant?.forEach((constant) => {
+      if (constant.ConstantName === constName) temp = true;
+    });
+    return temp;
+  };
+
   const handleRuleDataChange = (e, OrderId) => {
     let temp = JSON.parse(JSON.stringify(originalRulesListData));
+    let ruleId = temp[pos].RuleId;
     temp[pos]?.RuleCondition?.map((cond) => {
       if (cond.ConditionOrderId === OrderId) {
-        cond[e.target.name] = e.target.value;
+        cond[e.target.name] =
+          e.target.name === "Operator" ||
+          e.target.name === "LogicalOp" ||
+          e.target.name === "VariableId_1"
+            ? e.target.value
+            : "";
+
         if (e.target.name === "VariableId_1") {
-          cond.Param1 = getVariableNameFromId(e.target.value).SystemDefinedName;
+          // if (cond.Operator === "9" || cond.Operator === "10") {
+          //   cond.Param2 = "";
+          // }
+          cond.Param1 = getVariableNameFromId(e.target.value).VariableName;
           cond.Type1 = getVariableNameFromId(e.target.value).VariableScope;
           cond.VarFieldId_1 = getVariableNameFromId(e.target.value).VarFieldId;
         } else if (e.target.name === "VariableId_2") {
-          cond.Param2 = getVariableNameFromId(e.target.value).SystemDefinedName;
-          cond.Type2 = getVariableNameFromId(e.target.value).VariableScope;
-          cond.VarFieldId_2 = getVariableNameFromId(e.target.value).VarFieldId;
+          if (cond.Param1 === "ActivityName") {
+            cond.VariableId_2 = "0";
+            cond.Param2 = e.target.value;
+            cond.Type2 = "C";
+            cond.VarFieldId_2 = "0";
+          } else {
+            if (checkIfConstant(e.target.value) || isCustomConstant) {
+              cond.VariableId_2 = "0";
+              cond.Param2 = e.target.value;
+              cond.Type2 = "C";
+              cond.VarFieldId_2 = "0";
+            } else {
+              cond.Param2 = getVariableNameFromId(e.target.value).VariableName;
+              cond.Type2 = getVariableNameFromId(e.target.value).VariableScope;
+              cond.VarFieldId_2 = getVariableNameFromId(
+                e.target.value
+              ).VarFieldId;
+            }
+          }
+        }
+        if (
+          (e.target.name === "Operator" && e.target.value === "9") ||
+          e.target.value === "10"
+        ) {
+          cond.Param2 = "";
+          cond.Type2 = "V";
+          cond.VarFieldId_2 = "0";
+          cond.VariableId_2 = "0";
         }
       }
     });
@@ -128,6 +174,47 @@ function RuleSelect({
 
     setoriginalRulesListData(temp);
   };
+  const getParam2Option = (var1) => {
+    if (var1 !== "" && var1 == "49") {
+      let temp = [];
+      localLoadedProcessData.MileStones.forEach((mile) => {
+        mile.Activities.forEach((act) => {
+          temp.push(act);
+        });
+      });
+      return temp.map((_var) => {
+        return (
+          <MenuItem value={_var.ActivityName}>
+            <p style={{ fontSize: "12px" }}>{_var.ActivityName}</p>
+          </MenuItem>
+        );
+      });
+    } else if (var1 !== "" && var1 !== "49") {
+      return localVarDef
+        .filter(
+          (_var) =>
+            _var.VariableType === getVariableNameFromId(var1).VariableType
+        )
+        .concat(
+          localLoadedProcessData.DynamicConstant.map((constant) => {
+            return {
+              VariableName: constant.ConstantName,
+              VariableId: constant.ConstantName,
+            };
+          })
+        )
+        .map((_var) => {
+          return (
+            <MenuItem value={_var.VariableId}>
+              <p style={{ fontSize: "12px" }}>{_var.VariableName}</p>
+            </MenuItem>
+          );
+        });
+    }
+  };
+  // useEffect(() => {
+  //   originalRulesListData[pos]?.RuleCondition.fo
+  // }, [input]);
 
   if (pos === -1) return <></>;
   else
@@ -141,13 +228,16 @@ function RuleSelect({
               Operator,
               LogicalOp,
               ConditionOrderId,
+              Param2,
+              Param1,
+              Type2,
             },
             index
           ) => (
             <div
               style={{
                 width: "100%",
-                height: "30%",
+                height: "23%",
                 padding: "10px",
                 display: "flex",
                 flexDirection: "row",
@@ -166,9 +256,7 @@ function RuleSelect({
                 {localVarDef.map((_var) => {
                   return (
                     <MenuItem value={_var.VariableId}>
-                      <p style={{ fontSize: "12px" }}>
-                        {_var.SystemDefinedName}
-                      </p>
+                      <p style={{ fontSize: "12px" }}>{_var.VariableName}</p>
                     </MenuItem>
                   );
                 })}
@@ -189,31 +277,59 @@ function RuleSelect({
                   </MenuItem>
                 ))}
               </Select>
-              <Select
-                className={styles.select}
-                variant="outlined"
-                style={{ width: "30%" }}
-                IconComponent={ExpandMoreIcon}
-                value={VariableId_2}
-                name="VariableId_2"
-                onChange={(e) => handleRuleDataChange(e, ConditionOrderId)}
-              >
-                {localVarDef.map((_var) => {
-                  return (
-                    <MenuItem value={_var.VariableId}>
-                      <p style={{ fontSize: "12px" }}>
-                        {_var.SystemDefinedName}
-                      </p>
-                    </MenuItem>
-                  );
-                })}
-              </Select>
+              {Operator == "9" || Operator == "10" ? null : (
+                // <Select
+                //   className={styles.select}
+                //   variant="outlined"
+                //   style={{ width: "30%" }}
+                //   IconComponent={ExpandMoreIcon}
+                //   value={
+                //     checkIfConstant(Param2) || VariableId_1 === "49"
+                //       ? Param2
+                //       : VariableId_2
+                //   }
+                //   name="VariableId_2"
+                //   onChange={(e) => handleRuleDataChange(e, ConditionOrderId)}
+                // >
+                //   {getParam2Option(VariableId_1)}
+                // </Select>
+                <CustomizedDropdown
+                  id="AR_Rule_Condition_Dropdown"
+                  name="VariableId_2"
+                  //disabled={isReadOnly || disabled}
+                  className={styles.dropdown}
+                  value={
+                    checkIfConstant(Param2) ||
+                    VariableId_1 === "49" ||
+                    Type2 === "C"
+                      ? Param2
+                      : VariableId_2
+                  }
+                  isConstant={isCustomConstant || Type2 === "C"}
+                  setIsConstant={(val) => setisCustomConstant(val)}
+                  showConstValue={
+                    localVarDef?.length > 0 && Param1 !== "ActivityName"
+                  }
+                  // constType={variableType}
+                  onChange={(e) => handleRuleDataChange(e, ConditionOrderId)}
+                  validationBoolean={false}
+                  validationBooleanSetterFunc={null}
+                  constType={getVariableNameFromId(VariableId_1)?.VariableType}
+                  // showAllErrors={ruleConditionErrors}
+                  // showAllErrorsSetterFunc={setRuleConditionErrors}
+                  // isNotMandatory={isAlwaysRule}
+                  menuItemStyles={styles.menuItemStyles}
+                >
+                  {getParam2Option(VariableId_1)}
+                </CustomizedDropdown>
+              )}
+
               <Select
                 className={styles.select}
                 style={{ width: "10%" }}
                 variant="outlined"
                 IconComponent={ExpandMoreIcon}
-                value={LogicalOp}
+                value={LogicalOp === "0" ? "" : LogicalOp}
                 name="LogicalOp"
                 onChange={(e) => handleRuleDataChange(e, ConditionOrderId)}
               >
@@ -231,14 +347,22 @@ function RuleSelect({
                   flexDirection: "row",
                 }}
               >
-                <DeleteOutlineIcon
-                  style={{ opacity: "0.4" }}
-                  onClick={() => handleDelete(ConditionOrderId)}
-                />
+                {originalRulesListData[pos]?.RuleCondition.length ===
+                1 ? null : (
+                  <DeleteOutlineIcon
+                    classes={{
+                      root: styles.deleteIcon,
+                    }}
+                    onClick={() => handleDelete(ConditionOrderId)}
+                  />
+                )}
+
                 {index ===
                 originalRulesListData[pos]?.RuleCondition.length - 1 ? (
                   <AddIcon
-                    style={{ opacity: "0.4" }}
+                    classes={{
+                      root: styles.deleteIcon,
+                    }}
                     onClick={() => handleAdd(originalRulesListData[pos].RuleId)}
                   />
                 ) : null}

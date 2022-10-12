@@ -2,15 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Select, MenuItem } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 import "../../callActivity/commonCallActivity.css";
-import { store, useGlobalState } from "state-pool";
 import { connect } from "react-redux";
 
+/*code edited on 6 Sep 2022 for BugId 115378 */
 function ReusableInputs(props) {
-  const [loadedVariables, setLoadedVariables] = useState(null);
-  const loadedActivityPropertyData = store.getState("activityPropertyData");
-  const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
-    useGlobalState(loadedActivityPropertyData);
-
+  const { isReadOnly } = props;
+  const [loadedVariables, setLoadedVariables] = useState([]);
   const [selectedMappingField, setSelectedMappingField] = useState(null);
 
   useEffect(() => {
@@ -18,26 +15,24 @@ function ReusableInputs(props) {
   }, [props.variable]);
 
   useEffect(() => {
-    setLoadedVariables(
-      localLoadedActivityPropertyData.ActivityProperty.SubProcess.revVarMapping
-    );
-  }, []);
+    setLoadedVariables(props.targetProcessVarList);
+  }, [props.targetProcessVarList]);
 
   return (
     <div className="oneInputPairDiv_Common">
       <p
         style={{
           fontSize: "11px",
-          position: "absolute",
-          left: props.isDrawerExpanded ? "12px" : "42px",
+          width: props.isDrawerExpanded ? "281px" : "136px",
+          padding: "0 8px",
         }}
       >
-        {props.variable.VarName}
+        {props.variable.VariableName}
       </p>
       <span
         style={{
-          position: "absolute",
-          left: props.isDrawerExpanded ? "314px" : "188px",
+          width: props.isDrawerExpanded ? "61px" : "25px",
+          textAlign: "center",
         }}
       >
         =
@@ -49,12 +44,15 @@ function ReusableInputs(props) {
           props.handleFieldMapping(props.variable, e.target.value);
         }}
         style={{
-          position: "absolute",
-          right: props.isDrawerExpanded ? "26px" : "25px",
           width: props.isDrawerExpanded ? "280px" : "135px",
-          border: ( (!selectedMappingField || selectedMappingField.trim()=='') && props.showRedBorder )?'1px solid red': null
+          border:
+            (!selectedMappingField || selectedMappingField.trim() == "") &&
+            props.showRedBorder
+              ? "1px solid red"
+              : null,
         }}
         value={selectedMappingField}
+        disabled={isReadOnly}
         MenuProps={{
           anchorOrigin: {
             vertical: "bottom",
@@ -67,26 +65,33 @@ function ReusableInputs(props) {
           getContentAnchorEl: null,
         }}
       >
-        {loadedVariables &&
-          loadedVariables.map((loadedVar) => {
+        {props.targetProcessVarList
+          ?.filter((el) => {
+            if (+el.VarType === +props.variable.VariableType) {
+              return el;
+            }
+          })
+          ?.map((loadedVar) => {
             return (
               <MenuItem
                 className="InputPairDiv_CommonList"
-                value={loadedVar.importedFieldName}
+                value={loadedVar.VarName}
               >
-                {loadedVar.importedFieldName}
+                {loadedVar.VarName}
               </MenuItem>
             );
           })}
       </Select>
-      <DeleteIcon
-        style={{
-          cursor: "pointer",
-          position: "absolute",
-          right: props.isDrawerExpanded ? "-5px" : "1px",
-        }}
-        onClick={() => props.deleteVariablesFromList(props.variable)}
-      />
+      {!isReadOnly && (
+        <DeleteIcon
+          style={{
+            cursor: "pointer",
+            width: props.isDrawerExpanded ? "3rem" : "2rem",
+            height: "1.5rem",
+          }}
+          onClick={() => props.deleteVariablesFromList(props.variable)}
+        />
+      )}
     </div>
   );
 }

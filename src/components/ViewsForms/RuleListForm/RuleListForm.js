@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "./RuleListForm.module.css";
 import ClearOutlinedIcon from "@material-ui/icons/ClearOutlined";
@@ -53,6 +53,8 @@ function RuleListForm(props) {
   const [addRuleApiBool, setaddRuleApiBool] = useState(false);
   const [modifyApiBool, setmodifyApiBool] = useState(false);
   const [selectedRuleObject, setselectedRuleObject] = useState({});
+  const [searchText, setsearchText] = useState("");
+  const ruleConditionListRef = useRef(null);
   let { ProcessDefId, ProcessType, ProcessName } = localLoadedProcessData;
   const getFormRules = async () => {
     const response = await axios.get(
@@ -66,6 +68,7 @@ function RuleListForm(props) {
         setselectedRuleId(response.data?.FormRules?.Rules[0]?.RuleId);
         setoriginalRulesListData(response.data.FormRules?.Rules);
         updateRulesSentence(response.data.FormRules?.Rules);
+        setselectedRuleObject(response.data?.FormRules?.Rules[0]);
       }
     }
   };
@@ -76,6 +79,9 @@ function RuleListForm(props) {
   useEffect(() => {
     handleSelectedRuleObject();
   }, [selectedRuleId]);
+  useEffect(() => {
+    ruleConditionListRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [originalRulesListData]);
 
   const updateRulesSentence = (temp) => {
     setformRulesList([]);
@@ -181,7 +187,7 @@ function RuleListForm(props) {
               VariableId_1: "",
               VariableId_2: "",
               LogicalOp: "",
-              Param2: " ",
+              Param2: "",
               Param1: "",
               Type1: "",
               ConditionOrderId: 1,
@@ -215,6 +221,7 @@ function RuleListForm(props) {
   };
 
   const handleRuleAdd = async () => {
+    console.log("111","rule adding")
     let temp = {};
     originalRulesListData.map((rule) => {
       if (rule.RuleId == selectedRuleId) temp = rule;
@@ -235,7 +242,7 @@ function RuleListForm(props) {
           varFieldId_2: cond.VarFieldId_2,
           variableId_1: cond.VariableId_1,
           variableId_2: cond.VariableId_2,
-          logicalOp: cond.LogicalOp === "" ? "0" : cond.LogicalOp,
+          logicalOp: !!cond.LogicalOp ? cond.LogicalOp : "3",
           param2: cond.Param2,
           param1: cond.Param1,
           type1: cond.Type1,
@@ -465,16 +472,10 @@ function RuleListForm(props) {
         index == json.ruleCondList.length - 1 &&
         json.ruleCondList.length > 1
       ) {
-        if (
-          cond.variableId_1 === "" ||
-          cond.variableId_2 === "" ||
-          cond.operator === ""
-        )
-          flag = false;
+        if (cond.variableId_1 === "" || cond.operator === "") flag = false;
       } else {
         if (
           cond.variableId_1 === "" ||
-          cond.variableId_2 === "" ||
           cond.operator === "" ||
           cond.logicalOp === ""
         )
@@ -483,6 +484,12 @@ function RuleListForm(props) {
     });
 
     return json.ruleOpList[0].interfaceName != "" && flag;
+  };
+
+  const searchFormHandler = (formList) => {
+    return formList.filter((form) =>
+      form.formName.toLowerCase().includes(searchText.toLowerCase())
+    );
   };
 
   return (
@@ -499,9 +506,11 @@ function RuleListForm(props) {
       ) : (
         <div style={{ direction: direction }} className={styles.mainDiv}>
           <div className={styles.header}>
-            <p>{t("Rule List for Forms")}</p>
+            <p>{t("ruleListForForms")}</p>
             <ClearOutlinedIcon
-              fontSize="small"
+              classes={{
+                root: styles.deleteIcon,
+              }}
               onClick={() => props.closeModal()}
             />
           </div>
@@ -566,7 +575,12 @@ function RuleListForm(props) {
                     paddingInline: "10px",
                   }}
                 >
-                  <p style={{ fontSize: "15px", fontWeight: "600" }}>
+                  <p
+                    style={{
+                      fontSize: "var(--subtitle_text_font_size)",
+                      fontWeight: "600",
+                    }}
+                  >
                     {t("rulesConditions")}
                   </p>
                   <div
@@ -613,10 +627,10 @@ function RuleListForm(props) {
                               style={{
                                 width: "70px",
                                 height: "30px",
-                                background: "#FFFFF",
-                                border: "1px solid rgb(0,0,0,0.3)",
+                                background: "var(--button_color)",
+                                border: "none",
                                 borderRadius: "2px",
-                                color: "#606060",
+                                color: "white",
                               }}
                               onClick={handleRuleAdd}
                             >
@@ -645,10 +659,11 @@ function RuleListForm(props) {
                                   style={{
                                     width: "70px",
                                     height: "30px",
-                                    background: "#FFFFF",
-                                    border: "1px solid rgb(0,0,0,0.3)",
+                                    background: "var(--button_color)",
+                                    border: "none",
                                     borderRadius: "2px",
-                                    color: "#606060",
+                                    color: "white",
+                                    whiteSpace: "nowrap",
                                   }}
                                   onClick={handleRuleModify}
                                 >
@@ -669,6 +684,7 @@ function RuleListForm(props) {
                     display: "flex",
                     flexDirection: "column",
                     paddingInline: "10px",
+                    overflowY: "scroll",
                   }}
                 >
                   <p
@@ -678,7 +694,7 @@ function RuleListForm(props) {
                       fontWeight: "bold",
                     }}
                   >
-                    if
+                    {t("if")}
                   </p>
                   <RuleSelect
                     originalRulesListData={originalRulesListData}
@@ -688,6 +704,7 @@ function RuleListForm(props) {
                     setaddRuleApiBool={setaddRuleApiBool}
                     setmodifyApiBool={setmodifyApiBool}
                   />
+                  <div ref={ruleConditionListRef} />
                 </div>
                 <div style={{ width: "100%", height: "50%", padding: "10px" }}>
                   <div
@@ -740,6 +757,7 @@ function RuleListForm(props) {
                       height="28px"
                       width="100px"
                       placeholder={"Search Here"}
+                      setSearchTerm={(data) => setsearchText(data)}
                     />
                   </div>
 
@@ -783,7 +801,7 @@ function RuleListForm(props) {
                           }
                           onChange={handleFormChange}
                         >
-                          {allGlobalFormsList.map((form) => (
+                          {searchFormHandler(allGlobalFormsList).map((form) => (
                             <div
                               style={{
                                 width: "100%",

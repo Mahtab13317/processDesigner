@@ -1,6 +1,9 @@
 import { deleteSwimlane } from "../CommonAPICall/DeleteSwimlane";
 import { deleteMilestone } from "../CommonAPICall/DeleteMilestone";
-import { deleteMilestoneArray } from "../InputForAPICall/deleteMilestoneArray";
+import {
+  deleteMilestoneActivity,
+  deleteMilestoneArray,
+} from "../InputForAPICall/deleteMilestoneArray";
 import { deleteActivity } from "../CommonAPICall/DeleteActivity";
 import axios from "axios";
 import {
@@ -21,7 +24,9 @@ export function deleteCell(
   graph,
   setProcessData,
   setTaskAssociation,
-  setShowDependencyModal
+  setShowDependencyModal,
+  dispatch,
+  translation
 ) {
   let message = null;
   let anyDeletion = false;
@@ -75,19 +80,31 @@ export function deleteCell(
             cell.getStyle() !== style.newTask &&
             cell.getStyle() !== style.processTask
           ) {
-            let processDefId, activityName;
+            let processDefId, activityName, checkedOut, isPrimaryAct;
             setProcessData((prevProcessData) => {
               prevProcessData.MileStones.forEach((milestone) => {
                 milestone.Activities.forEach((activity) => {
                   if (activity.ActivityId === Number(id)) {
                     activityName = activity.ActivityName;
+                    isPrimaryAct =
+                      activity.PrimaryActivity === "Y" ? true : false;
                   }
                 });
               });
               processDefId = prevProcessData.ProcessDefId;
+              checkedOut = prevProcessData.CheckedOut;
               return prevProcessData;
             });
-            deleteActivity(id, activityName, processDefId, setProcessData);
+            deleteActivity(
+              id,
+              activityName,
+              processDefId,
+              setProcessData,
+              checkedOut,
+              dispatch,
+              translation,
+              isPrimaryAct
+            );
           }
         } else if (cell.isEdge()) {
           let processDefId, processMode;
@@ -145,10 +162,12 @@ export function deleteCell(
             .getCellStyle(cellItem.getStyle())[mxConstants.STYLE_HORIZONTAL];
           if (horizontal) {
             //cell to be deleted is milestone
-            let processDefId, mileArray;
+            let processDefId, mileArray, mileAct, processType;
             setProcessData((prevProcessData) => {
               mileArray = deleteMilestoneArray(prevProcessData, id);
+              mileAct = deleteMilestoneActivity(prevProcessData, id);
               processDefId = prevProcessData.ProcessDefId;
+              processType = prevProcessData.ProcessType;
               return prevProcessData;
             });
             deleteMilestone(
@@ -156,7 +175,11 @@ export function deleteCell(
               setProcessData,
               processDefId,
               mileArray.array,
-              mileArray.index
+              mileArray.index,
+              processType,
+              mileAct.activityNameList,
+              mileAct.activityIdList,
+              dispatch
             );
           } else {
             //cell to be deleted is swimlane

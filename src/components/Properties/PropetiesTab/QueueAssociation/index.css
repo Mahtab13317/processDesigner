@@ -76,7 +76,7 @@
   overflow: scroll;
 }
 
-.processSubTabBarStyle .MuiTabs-scroller.MuiTabs-fixed .MuiTabs-flexContainer{
+.processSubQueueBarStyle .MuiTabs-scroller.MuiTabs-fixed .MuiTabs-flexContainer{
   height: 30px !important;
 }
 

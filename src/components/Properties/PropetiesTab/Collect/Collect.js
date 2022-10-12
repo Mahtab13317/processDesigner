@@ -11,10 +11,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import StarRateSharpIcon from "@material-ui/icons/StarRateSharp";
 import SelectWithInput from "../../../../UI/SelectWithInput/index.js";
 import { useGlobalState, store } from "state-pool";
-import {
-  PROCESSTYPE_LOCAL,
-  propertiesLabel,
-} from "../../../../Constants/appConstants.js";
+import { propertiesLabel } from "../../../../Constants/appConstants.js";
 import MenuItem from "@material-ui/core/MenuItem";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -27,19 +24,28 @@ import {
   setSave,
 } from "../../../../redux-store/slices/ActivityPropertySaveCancelClicked.js";
 import TabsHeading from "../../../../UI/TabsHeading";
+import { isReadOnlyFunc } from "../../../../utility/CommonFunctionCall/CommonFunctionCall";
 
 function Collect(props) {
   let { t } = useTranslation();
   const dispatch = useDispatch();
+  const {
+    cellActivityType,
+    cellActivitySubType,
+    cellCheckedOut,
+    cellID,
+    heading,
+    isDrawerExpanded,
+  } = props;
   const loadedActivityPropertyData = store.getState("activityPropertyData");
   const [localLoadedActivityPropertyData, setlocalLoadedActivityPropertyData] =
     useGlobalState(loadedActivityPropertyData);
   const loadedProcessData = store.getState("loadedProcessData");
   const [localLoadedProcessData] = useGlobalState(loadedProcessData);
   const openProcessData = useSelector(OpenProcessSliceValue);
-  const [isDisableTab, setisDisableTab] = useState(false);
   const allTabStatus = useSelector(ActivityPropertyChangeValue);
   const saveCancelStatus = useSelector(ActivityPropertySaveCancelValue);
+  let isReadOnly = isReadOnlyFunc(localLoadedProcessData, cellCheckedOut);
 
   const [
     inclusiveDistributeActivitiesList,
@@ -70,12 +76,11 @@ function Collect(props) {
   useEffect(() => {
     // code edited on 12 August 2022 for BugId 114242
     function checkParallelCollectActivity() {
-      if (
-        +localLoadedActivityPropertyData?.ActivityProperty?.actType === 6 &&
-        +localLoadedActivityPropertyData?.ActivityProperty?.actSubType === 2
-      )
+      if (cellActivityType === 6 && cellActivitySubType === 2) {
         setisParallelCollect(true);
-      else setisParallelCollect(false);
+      } else {
+        setisParallelCollect(false);
+      }
     }
     checkParallelCollectActivity();
   }, [
@@ -131,7 +136,7 @@ function Collect(props) {
       );
 
       tempOpenProcess.Connections.forEach((conn) => {
-        if (conn.TargetId === props.cellID) {
+        if (conn.TargetId === cellID) {
           setPrimaryActivityList((prevState) => [
             ...prevState,
             getActivityDetailsFromId(conn.SourceId),
@@ -141,11 +146,6 @@ function Collect(props) {
     }
     createPrimaryWorkstepActivityList();
   }, [openProcessData.loadedData]);
-
-  useEffect(() => {
-    if (localLoadedProcessData.ProcessType !== PROCESSTYPE_LOCAL)
-      setisDisableTab(true);
-  }, [localLoadedProcessData?.ProcessType]);
 
   useEffect(() => {
     let tempList = [];
@@ -161,6 +161,9 @@ function Collect(props) {
 
   const collectChangeHandler = (e) => {
     let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
+    if (e.target.value !== "") {
+      setprimaryError(false);
+    }
     if (e.target.name === "primaryDistributeDropdown") {
       temp.ActivityProperty.collectInfo.primaryAct = e.target.value;
     } else if (e.target.name === "DistributeWorkstepDropdown") {
@@ -244,6 +247,18 @@ function Collect(props) {
     }
   };
 
+  // Function that gets the value of criteria type based on whether the activity is new or has been saved earlier.
+  const getInclusiveCollectCriteriaType = (value) => {
+    let type = value;
+    if (type === "N") {
+      type = "C";
+      let temp = JSON.parse(JSON.stringify(localLoadedActivityPropertyData));
+      temp.ActivityProperty.collectInfo.exOnPrimaryFlag = type;
+      setlocalLoadedActivityPropertyData(temp);
+    }
+    return type;
+  };
+
   useEffect(() => {
     // code edited on 12 August 2022 for BugId 114242
     if (
@@ -256,14 +271,14 @@ function Collect(props) {
 
   return (
     <div className={classes.mainDiv}>
-    <TabsHeading heading={props?.heading} />
+      <TabsHeading heading={heading} />
       <div
         className={classes.mainContent}
-        style={{ flexDirection: props.isDrawerExpanded ? "row" : "column" }}
+        style={{ flexDirection: isDrawerExpanded ? "row" : "column" }}
       >
         <div
           className={classes.firstContentBox}
-          style={{ width: props.isDrawerExpanded ? "50%" : "100%" }}
+          style={{ width: isDrawerExpanded ? "50%" : "100%" }}
         >
           {!isParallelCollect ? (
             <div style={{ marginBlock: "0.4rem" }}>
@@ -272,20 +287,20 @@ function Collect(props) {
                   color: "#727272",
                   fontWeight: "600",
                   marginBottom: "0.2rem",
-                  fontSize:'1rem'
+                  fontSize: "1rem",
                 }}
               >
                 {t("primaryWorkstep")}
               </p>
               <Select
                 disabled={
-                  isDisableTab ||
+                  isReadOnly ||
                   localLoadedActivityPropertyData?.ActivityProperty.collectInfo
                     ?.exOnPrimaryFlag === "C"
                 }
                 IconComponent={ExpandMoreIcon}
                 style={{
-                  width: props.isDrawerExpanded ? "50%" : "95%",
+                  width: isDrawerExpanded ? "50%" : "95%",
                   height: "2rem",
                   opacity:
                     localLoadedActivityPropertyData?.ActivityProperty
@@ -322,7 +337,7 @@ function Collect(props) {
               </Select>
               {primaryError ? (
                 <p style={{ fontSize: "12px", color: "red" }}>
-                  Please select Primary workstep
+                  {t("pleaseSelectPrimary")}
                 </p>
               ) : null}
             </div>
@@ -340,7 +355,7 @@ function Collect(props) {
                 style={{
                   color: "#727272",
                   fontWeight: "600",
-                  fontSize:'1rem'
+                  fontSize: "1rem",
                 }}
               >
                 {t("distributeWorkStep")}
@@ -356,82 +371,78 @@ function Collect(props) {
             </div>
 
             {!isParallelCollect ? (
-              <>
-                <Select
-                  disabled={isDisableTab}
-                  IconComponent={ExpandMoreIcon}
-                  style={{
-                    width: props.isDrawerExpanded ? "50%" : "95%",
-                    height: "2rem",
-                  }}
-                  variant="outlined"
-                  value={
-                    +localLoadedActivityPropertyData?.ActivityProperty
-                      ?.collectInfo?.assocActId
-                  }
-                  onChange={collectChangeHandler}
-                  name="DistributeWorkstepDropdown"
-                >
-                  {inclusiveDistributeActivitiesList?.map((item) => {
-                    return (
-                      <MenuItem
-                        style={{ width: "100%", marginBlock: "0.2rem" }}
-                        value={item.ActivityId}
-                        onClick={() => getSelectedActivity(item)}
+              <Select
+                disabled={isReadOnly}
+                IconComponent={ExpandMoreIcon}
+                style={{
+                  width: isDrawerExpanded ? "50%" : "95%",
+                  height: "2rem",
+                }}
+                variant="outlined"
+                value={
+                  +localLoadedActivityPropertyData?.ActivityProperty
+                    ?.collectInfo?.assocActId
+                }
+                onChange={collectChangeHandler}
+                name="DistributeWorkstepDropdown"
+              >
+                {inclusiveDistributeActivitiesList?.map((item) => {
+                  return (
+                    <MenuItem
+                      style={{ width: "100%", marginBlock: "0.2rem" }}
+                      value={item.ActivityId}
+                      onClick={() => getSelectedActivity(item)}
+                    >
+                      <p
+                        style={{
+                          font: "0.8rem Open Sans",
+                        }}
                       >
-                        <p
-                          style={{
-                            font: "0.8rem Open Sans",
-                          }}
-                        >
-                          {item.ActivityName}
-                        </p>
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </>
+                        {item.ActivityName}
+                      </p>
+                    </MenuItem>
+                  );
+                })}
+              </Select>
             ) : (
-              <>
-                <Select
-                  disabled={isDisableTab}
-                  IconComponent={ExpandMoreIcon}
-                  style={{
-                    width: props.isDrawerExpanded ? "50%" : "95%",
-                    height: "2rem",
-                  }}
-                  variant="outlined"
-                  value={
-                    +localLoadedActivityPropertyData?.ActivityProperty
-                      ?.collectInfo?.assocActId
-                  }
-                  onChange={collectChangeHandler}
-                  name="DistributeWorkstepDropdown"
-                >
-                  {parallelDistributeActivitiesList?.map((item) => {
-                    return (
-                      <MenuItem
-                        style={{ width: "100%", marginBlock: "0.2rem" }}
-                        value={+item.ActivityId}
-                        onClick={() => getSelectedActivity(item)}
+              <Select
+                disabled={isReadOnly}
+                IconComponent={ExpandMoreIcon}
+                style={{
+                  width: isDrawerExpanded ? "50%" : "95%",
+                  height: "2rem",
+                }}
+                variant="outlined"
+                value={
+                  +localLoadedActivityPropertyData?.ActivityProperty
+                    ?.collectInfo?.assocActId
+                }
+                onChange={collectChangeHandler}
+                name="DistributeWorkstepDropdown"
+              >
+                {parallelDistributeActivitiesList?.map((item) => {
+                  return (
+                    <MenuItem
+                      style={{ width: "100%", marginBlock: "0.2rem" }}
+                      value={+item.ActivityId}
+                      onClick={() => getSelectedActivity(item)}
+                    >
+                      <p
+                        style={{
+                          font: "0.8rem Open Sans",
+                        }}
                       >
-                        <p
-                          style={{
-                            font: "0.8rem Open Sans",
-                          }}
-                        >
-                          {item.ActivityName}
-                        </p>
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </>
+                        {item.ActivityName}
+                      </p>
+                    </MenuItem>
+                  );
+                })}
+              </Select>
             )}
 
             {distributeError ? (
               <p style={{ fontSize: "12px", color: "red" }}>
-                Please select Distribute workstep
+                {t("pleaseSelectDistribute")}
               </p>
             ) : null}
           </div>
@@ -442,12 +453,12 @@ function Collect(props) {
                 marginBlock: "0.4rem",
                 display: "flex",
                 flexDirection: "row",
-                alignItems:'center'
+                alignItems: "center",
               }}
             >
               <Checkbox
                 style={{ marginLeft: "-0.625rem" }}
-                disabled={isDisableTab}
+                disabled={isReadOnly}
                 checked={
                   localLoadedActivityPropertyData?.ActivityProperty.collectInfo
                     ?.deleteOnCollect === "Y"
@@ -462,30 +473,30 @@ function Collect(props) {
                 style={{
                   color: "#727272",
                   fontWeight: "600",
-                  fontSize:'1rem'
+                  fontSize: "1rem",
                 }}
               >
-                {t("deleteOnCount")}
+                {t("deleteOnCollect")}
               </p>
             </div>
           ) : null}
         </div>
         <hr
           style={{
-            width: props.isDrawerExpanded ? "0" : "100%",
-            height: props.isDrawerExpanded ? "100vh" : "0",
+            width: isDrawerExpanded ? "0" : "100%",
+            height: isDrawerExpanded ? "100vh" : "0",
           }}
         />
         <div
           className={classes.firstContentBox}
-          style={{ width: props.isDrawerExpanded ? "50%" : "100%" }}
+          style={{ width: isDrawerExpanded ? "50%" : "100%" }}
         >
           <p
             style={{
               color: "#727272",
               fontWeight: "600",
               paddingTop: "0.5rem",
-              fontSize:'1rem'
+              fontSize: "1rem",
             }}
           >
             {t("collectionCriteria")}
@@ -495,8 +506,10 @@ function Collect(props) {
             value={
               isParallelCollect
                 ? "C"
-                : localLoadedActivityPropertyData?.ActivityProperty?.collectInfo
-                    ?.exOnPrimaryFlag + ""
+                : getInclusiveCollectCriteriaType(
+                    localLoadedActivityPropertyData?.ActivityProperty
+                      ?.collectInfo?.exOnPrimaryFlag
+                  )
             } //code edited on 12 August 2022 for BugId 114242
             onChange={collectChangeHandler}
           >
@@ -506,7 +519,10 @@ function Collect(props) {
                   label: classes.radioButton,
                 }}
                 value="A"
-                control={<Radio size="small" style={{color:'var(--radio_color)'}}/>}
+                control={
+                  <Radio size="small" style={{ color: "var(--radio_color)" }} />
+                }
+                disabled={isReadOnly}
                 label={t("waitPrimary")}
               />
             ) : null}
@@ -517,7 +533,10 @@ function Collect(props) {
                   label: classes.radioButton,
                 }}
                 value="F"
-                control={<Radio size="small" style={{color:'var(--radio_color)'}}/>}
+                control={
+                  <Radio size="small" style={{ color: "var(--radio_color)" }} />
+                }
+                disabled={isReadOnly}
                 label={t("waitPrimaryAndInstances")}
               />
             ) : null}
@@ -526,9 +545,11 @@ function Collect(props) {
               classes={{
                 label: classes.radioButton,
               }}
-              disabled={isParallelCollect}
+              disabled={isParallelCollect || isReadOnly}
               value="C"
-              control={<Radio size="small" style={{color:'var(--radio_color)'}}/>}
+              control={
+                <Radio size="small" style={{ color: "var(--radio_color)" }} />
+              }
               label={t("waitInstances")}
             />
           </RadioGroup>
@@ -563,11 +584,12 @@ function Collect(props) {
                 showEmptyString={false}
                 showConstValue={true}
                 id="from_select_input"
+                disabled={isReadOnly}
               />
               {/* code edited on 12 August 2022 for BugId 114242*/}
               {comboBoxError ? (
                 <p style={{ fontSize: "12px", color: "red" }}>
-                  Please specify value for no. of Instances
+                  {t("pleaseSpecifyInstances")}
                 </p>
               ) : null}
             </div>
@@ -587,6 +609,7 @@ const mapStateToProps = (state) => {
     cellActivityType: state.selectedCellReducer.selectedActivityType,
     cellActivitySubType: state.selectedCellReducer.selectedActivitySubType,
     isDrawerExpanded: state.isDrawerExpanded.isDrawerExpanded,
+    cellCheckedOut: state.selectedCellReducer.selectedCheckedOut,
   };
 };
 

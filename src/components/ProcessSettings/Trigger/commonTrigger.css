@@ -35,3 +35,8 @@
   left: 0;
   right: unset;
 }
+
+#searchBoxDrop input:focus {
+  border: none !important;
+  box-shadow: none !important;
+}

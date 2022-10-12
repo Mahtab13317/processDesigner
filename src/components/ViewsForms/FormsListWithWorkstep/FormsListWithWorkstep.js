@@ -4,25 +4,34 @@ import { store, useGlobalState } from "state-pool";
 import { BASE_URL } from "../../../Constants/appConstants";
 import "./FormsListWithWorkstep.css";
 import { VisibilityOutlined, VisibilityOffOutlined } from "@material-ui/icons";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
 import {
   Button,
+  Checkbox,
+  Popover,
   Radio,
   Tab,
   Tabs,
   TextField,
   withStyles,
 } from "@material-ui/core";
+import editIcon from "../../../assets/icons/edit.svg";
+import deleteIcon from "../../../assets/icons/reddelete.svg";
 import styles from "./FormsListWithWorkstep.module.css";
 import moment from "moment";
 import { useTranslation } from "react-i18next";
 import Templates from "../Templates/Templates";
 import FormsOtherProcesses from "../FormsOtherProcesses/FormsOtherProcesses";
 import { LaunchpadTokenSliceValue } from "../../../redux-store/slices/LaunchpadTokenSlice";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { makeStyles } from "@material-ui/styles";
 import { CloseIcon } from "../../../utility/AllImages/AllImages";
+import { setToastDataFunc } from "../../../redux-store/slices/ToastDataHandlerSlice";
+import Modal from "../../../UI/Modal/Modal";
+import ViewChangeModal from "../ViewChangeModal";
 
 function FormsListWithWorkstep(props) {
+  const dispatch = useDispatch();
   let { t } = useTranslation();
   const { formAssociationType, setformAssociationType } = props;
   const loadedProcessData = store.getState("loadedProcessData"); //current processdata clicked
@@ -117,7 +126,7 @@ function FormsListWithWorkstep(props) {
     moment.locale("en");
   }, []);
   const handleViewForm = ({ formId }) => {
-    setshowViewFormMF((prev) => !prev);
+    setshowViewFormMF(true);
     setmfFormId(formId);
   };
   useEffect(() => {
@@ -180,9 +189,18 @@ function FormsListWithWorkstep(props) {
         Authorization: tokenValue,
       },
     });
-    let temp = JSON.parse(JSON.stringify(allFormsList));
-    temp.push(res?.data);
-    setallFormsList(temp);
+    if (res.status === 200 && res?.data?.statusCodeValue === 200) {
+      let temp = JSON.parse(JSON.stringify(allFormsList));
+      temp.push(res?.data?.body);
+      setallFormsList(temp);
+      dispatch(
+        setToastDataFunc({
+          message: t("formImported"),
+          severity: "error",
+          open: true,
+        })
+      );
+    }
   };
 
   const NewFormPopover = () => {
@@ -333,6 +351,7 @@ function FormsListWithWorkstep(props) {
           //formName: obj.value.formName,
           //formType: props.formType,
           //formPageType: formType,
+          processName: localLoadedProcessData.ProcessName,
           statusType: localLoadedProcessData.ProcessType,
           token: JSON.parse(localStorage.getItem("launchpadKey"))?.token,
         };
@@ -422,7 +441,24 @@ function FormsListWithWorkstep(props) {
 
       setformAssociationData(unique);
     };
+    const [open, setopen] = useState(false);
+    const handleClose = () => {
+      setAnchorElMF(null);
+      setopen(false);
+    };
+    const [selectedPopoverForm, setselectedPopoverForm] = useState("");
+    const [anchorElMF, setAnchorElMF] = React.useState(null);
+    const handleTypeChangeMF = (event, form) => {
+      setopen(true);
+      setAnchorElMF(event?.currentTarget);
+      setselectedPopoverForm(form);
+    };
 
+    const [viewChangeConfirmationBoolean, setviewChangeConfirmationBoolean] =
+      useState(false);
+    const viewChangeHandler = () => {
+      setviewChangeConfirmationBoolean(true);
+    };
     return (
       <>
         <div
@@ -434,6 +470,46 @@ function FormsListWithWorkstep(props) {
             flexDirection: "row",
           }}
         >
+          <Popover
+            open={open}
+            anchorEl={anchorElMF}
+            onClose={handleClose}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+          >
+            <div
+              style={{
+                width: "10rem",
+                height: "5rem",
+                display: "flex",
+                flexDirection: "column",
+                padding: "0.5rem",
+                fontSize: "var(--base_text_font_size)",
+                border: "1px solid #70707075",
+                cursor: "pointer",
+              }}
+            >
+              <div
+                style={{ marginBlock: "4px" }}
+                onClick={() => handleViewForm(selectedPopoverForm)}
+              >
+                <img src={editIcon} alt={t("edit")} />
+                <span style={{ marginInline: "10px" }}>{t("edit")}</span>
+              </div>
+              <div>
+                <img src={deleteIcon} alt={t("delete")} />
+                <span style={{ color: "red", marginInline: "10px" }}>
+                  {t("delete")}
+                </span>
+              </div>
+            </div>
+          </Popover>
           {openCustomiseForm && (
             <CustomiseFormPopover
               formId={mfFormId}
@@ -452,33 +528,47 @@ function FormsListWithWorkstep(props) {
             <AntTab label={t("templates")} />
           </AntTabs>
           <div>
-            {formAssociationType === "single" ? (
-              <p
-                style={{
-                  fontSize: "var(--subtitle_text_font_size)",
-                  fontWeight: "600",
-                  color: "var(--brand_color1)",
-                  cursor: "pointer",
-                }}
-                onClick={() => setformAssociationType("multiple")}
-              >
-                {t("Workstepwiseformassociation")}
-              </p>
-            ) : (
-              <p
-                style={{
-                  fontSize: "var(--subtitle_text_font_size)",
-                  fontWeight: "600",
-                  color: "var(--brand_color1)",
-                  cursor: "pointer",
-                }}
-                onClick={() => setformAssociationType("single")}
-              >
-                {t("singleFormCompleteProcess")}
-              </p>
-            )}
+            <p
+              style={{
+                fontSize: "var(--subtitle_text_font_size)",
+                fontWeight: "600",
+                color: "var(--link_color)",
+                cursor: "pointer",
+              }}
+              onClick={() => viewChangeHandler()}
+            >
+              {t("Workstepwiseformassociation")}
+            </p>
           </div>
         </div>
+        {viewChangeConfirmationBoolean ? (
+          <Modal
+            show={viewChangeConfirmationBoolean}
+            // backDropStyle={{ backgroundColor: "transparent" }}
+            style={{
+              top: "50%",
+              left: "50%",
+              width: "450px",
+              padding: "0",
+              zIndex: "1500",
+              transform: "translate(-50%,-50%)",
+              boxShadow: "0px 3px 6px #00000029",
+              border: "1px solid #D6D6D6",
+              borderRadius: "3px",
+            }}
+            modalClosed={() => setviewChangeConfirmationBoolean(false)}
+            children={
+              <ViewChangeModal
+                setformAssociationType={setformAssociationType}
+                setviewChangeConfirmationBoolean={
+                  setviewChangeConfirmationBoolean
+                }
+                formAssociationData={formAssociationData}
+                setformAssociationData={setformAssociationData}
+              />
+            }
+          />
+        ) : null}
 
         {tabValue === 0 ? (
           <div
@@ -647,6 +737,7 @@ function FormsListWithWorkstep(props) {
                         ) : null}
                       </>
                     ) : null}
+
                     {form.formId !== -1 ? (
                       <div
                         style={{
@@ -673,16 +764,22 @@ function FormsListWithWorkstep(props) {
                             }}
                           />
                         ) : (
-                          <VisibilityOutlined
-                            onClick={() => handleViewForm(form)}
-                            fontSize="medium"
-                            style={{
-                              color: "black",
-                              opacity: "0.5",
-                              width: "1.6rem",
-                              height: "1.6rem",
-                            }}
-                          />
+                          <>
+                            <VisibilityOutlined
+                              onClick={() => handleViewForm(form)}
+                              fontSize="medium"
+                              style={{
+                                color: "black",
+                                opacity: "0.5",
+                                width: "1.6rem",
+                                height: "1.6rem",
+                              }}
+                            />
+                            <MoreVertIcon
+                              onClick={(e) => handleTypeChangeMF(e, form)}
+                              className={styles.moreVertIcon}
+                            />
+                          </>
                         )}
                       </div>
                     ) : null}
@@ -691,7 +788,19 @@ function FormsListWithWorkstep(props) {
               </div>
             ) : null}
             {tabValue === 1 ? (
-              <FormsOtherProcesses formAssociationData={formAssociationData} />
+              <div
+                style={{
+                  width: "100%",
+                  height: "80%",
+                  display: "flex",
+
+                  flexDirection: "row",
+                }}
+              >
+                <FormsOtherProcesses
+                  formAssociationData={formAssociationData}
+                />
+              </div>
             ) : null}
             {tabValue === 2 ? (
               <Templates
@@ -799,19 +908,22 @@ function FormsListWithWorkstep(props) {
                 <p style={{ fontWeight: "600" }}>
                   {getFormDetailsById(mfFormId).formName}
                 </p>
-                <button
-                  style={{
-                    width: "150px",
-                    height: "1.75rem",
-                    marginInline: "10px",
-                    color: "var(--button_color)",
-                    border: "1px solid var(--button_color)",
-                    borderRadius: "0.125rem",
-                  }}
-                  onClick={() => setopenCustomiseForm(true)}
-                >
-                  {t("customiseThisForm")}
-                </button>
+                <div>
+                  <button
+                    style={{
+                      width: "150px",
+                      height: "1.75rem",
+                      marginInline: "10px",
+                      color: "var(--button_color)",
+                      border: "1px solid var(--button_color)",
+                      borderRadius: "0.125rem",
+                    }}
+                    onClick={() => setopenCustomiseForm(true)}
+                  >
+                    {t("customiseThisForm")}
+                  </button>
+                  <CloseIcon onClick={() => setshowViewFormMF(false)} />
+                </div>
               </div>
               <div
                 id="mf_forms_show"
@@ -833,6 +945,37 @@ function FormsListWithWorkstep(props) {
     formAssociationData,
     setformAssociationData,
   }) => {
+    function sameMembers(arr1, arr2) {
+      const set1 = new Set(arr1);
+      const set2 = new Set(arr2);
+      return (
+        arr1.every((item) => set2.has(item)) &&
+        arr2.every((item) => set1.has(item))
+      );
+    }
+
+    const checkAllFormEnabled = (formId) => {
+      if (!formId) {
+        let actArr = [];
+        let assocArr = [];
+        allActivities.forEach((act) => {
+          actArr.push(+act.ActivityId);
+        });
+        formAssociationData.forEach((assocData) => {
+          if (assocData.activity?.operationType !== "D")
+            assocArr.push(+assocData.activity.actId);
+        });
+
+        return sameMembers(actArr, assocArr);
+      } else {
+        let flag = true;
+        let temp = global.structuredClone(formAssociationData);
+        temp.forEach((assocData) => {
+          if (assocData.formId != formId) flag = false;
+        });
+        return flag;
+      }
+    };
     const getCheckBoolFormAssoc = (formId, actId) => {
       let temp = false;
       formAssociationData?.some((assocData) => {
@@ -846,7 +989,6 @@ function FormsListWithWorkstep(props) {
     };
 
     const handleFormAssocChange = (e, actId, actName, formName) => {
-      console.log("bbbbbbbbbbbbbbbbbb", e.target.value, actId, actName);
       let temp = JSON.parse(JSON.stringify(formAssociationData));
       temp?.some((assocData) => {
         if (assocData.activity.actId == actId) {
@@ -877,6 +1019,90 @@ function FormsListWithWorkstep(props) {
       });
       return temp;
     };
+    const extraHeaders = [
+      { formName: "Form Enabled" },
+      { formName: "Workstep Name" },
+    ];
+
+    const checkFormEnabled = (actId) => {
+      let temp = false;
+      formAssociationData.forEach((assocData) => {
+        if (
+          assocData.activity.actId == actId &&
+          assocData.activity?.operationType !== "D"
+        )
+          temp = true;
+      });
+      return temp;
+    };
+
+    const formEnabledHandler = (e, act) => {
+      let temp = global.structuredClone(formAssociationData);
+      if (!e.target.checked) {
+        temp.forEach((assocData, index) => {
+          if (assocData.activity.actId == act.ActivityId) {
+            assocData.activity.operationType = "D";
+          }
+        });
+      } else {
+        temp.push({
+          formId: "-1",
+          activity: {
+            actId: act.ActivityId,
+            actName: act.ActivityName,
+          },
+        });
+      }
+      setformAssociationData(temp);
+    };
+
+    const formCheckHandler = (e, formId) => {
+      let temp = global.structuredClone(formAssociationData);
+
+      if (e.target.checked) {
+        temp = [];
+        allActivities.forEach((act) => {
+          temp.push({
+            formId: !!formId ? formId : "-1",
+            activity: {
+              actId: act.ActivityId,
+              actName: act.ActivityName,
+            },
+          });
+        });
+      } else {
+        temp = [];
+        allActivities.forEach((act) => {
+          temp.push({
+            formId: !!formId ? formId : "",
+            activity: {
+              actId: act.ActivityId,
+              actName: act.ActivityName,
+              operationType: "D",
+            },
+          });
+        });
+      }
+
+      setformAssociationData(temp);
+    };
+    const [open, setopen] = useState(false);
+    const handleClose = () => {
+      setAnchorElMF(null);
+      setopen(false);
+    };
+    const [anchorElMF, setAnchorElMF] = React.useState(null);
+    const [selectedPopoverForm, setselectedPopoverForm] = useState("");
+    const handleTypeChangeMF = (event, form) => {
+      setopen(true);
+      setAnchorElMF(event?.currentTarget);
+      setselectedPopoverForm(form);
+    };
+    const [viewChangeConfirmationBoolean, setviewChangeConfirmationBoolean] =
+      useState(false);
+    const viewChangeHandler = () => {
+      setviewChangeConfirmationBoolean(true);
+    };
 
     return (
       <div
@@ -887,6 +1113,74 @@ function FormsListWithWorkstep(props) {
           height: "100%",
         }}
       >
+        {viewChangeConfirmationBoolean ? (
+          <Modal
+            show={viewChangeConfirmationBoolean}
+            // backDropStyle={{ backgroundColor: "transparent" }}
+            style={{
+              top: "50%",
+              left: "50%",
+              width: "450px",
+              padding: "0",
+              zIndex: "1500",
+              transform: "translate(-50%,-50%)",
+              boxShadow: "0px 3px 6px #00000029",
+              border: "1px solid #D6D6D6",
+              borderRadius: "3px",
+            }}
+            modalClosed={() => setviewChangeConfirmationBoolean(false)}
+            children={
+              <ViewChangeModal
+                setformAssociationType={setformAssociationType}
+                setviewChangeConfirmationBoolean={
+                  setviewChangeConfirmationBoolean
+                }
+                formAssociationData={formAssociationData}
+                setformAssociationData={setformAssociationData}
+              />
+            }
+          />
+        ) : null}
+        <Popover
+          open={open}
+          anchorEl={anchorElMF}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "left",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+        >
+          <div
+            style={{
+              width: "10rem",
+              height: "5rem",
+              display: "flex",
+              flexDirection: "column",
+              padding: "0.5rem",
+              fontSize: "var(--base_text_font_size)",
+              border: "1px solid #70707075",
+              cursor: "pointer",
+            }}
+          >
+            <div
+              style={{ marginBlock: "4px" }}
+              onClick={() => handleViewForm(selectedPopoverForm)}
+            >
+              <img src={editIcon} alt={t("edit")} />
+              <span style={{ marginInline: "10px" }}>{t("edit")}</span>
+            </div>
+            <div>
+              <img src={deleteIcon} alt={t("delete")} />
+              <span style={{ color: "red", marginInline: "10px" }}>
+                {t("delete")}
+              </span>
+            </div>
+          </div>
+        </Popover>
         {openCreateFormPopover && <NewFormPopover />}
         <div
           style={{
@@ -906,31 +1200,17 @@ function FormsListWithWorkstep(props) {
                 height: "10%",
               }}
             >
-              {formAssociationType === "single" ? (
-                <p
-                  style={{
-                    fontSize: "var(--subtitle_text_font_size)",
-                    fontWeight: "600",
-                    color: "#0172C6",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => setformAssociationType("multiple")}
-                >
-                  {t("Workstepwiseformassociation")}
-                </p>
-              ) : (
-                <p
-                  style={{
-                    fontSize: "var(--subtitle_text_font_size)",
-                    fontWeight: "600",
-                    color: "#0172C6",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => setformAssociationType("single")}
-                >
-                  {t("singleFormCompleteProcess")}
-                </p>
-              )}
+              <p
+                style={{
+                  fontSize: "var(--subtitle_text_font_size)",
+                  fontWeight: "600",
+                  color: "#0172C6",
+                  cursor: "pointer",
+                }}
+                onClick={() => viewChangeHandler()}
+              >
+                {t("singleFormCompleteProcess")}
+              </p>
             </div>
           ) : null}
           <div
@@ -938,37 +1218,53 @@ function FormsListWithWorkstep(props) {
               overflowY: "scroll",
               overflowX: "scroll",
               width: "100%",
-              height: "65%",
+              height: "70%",
             }}
           >
             <div className={styles.multipleTableDiv}>
-              {[{ formName: "Workstep Name" }, ...allFormsList].map((form) => (
+              {[...extraHeaders, ...allFormsList].map((form) => (
                 <div
                   className={styles.multipleTableContainer}
                   style={{
-                    textAlign:
-                      form.formName === "Workstep Name" ? "left" : "center",
+                    // textAlign: "left",
                     alignItems: "center",
+                    flexDirection: "row",
                   }}
                   onMouseEnter={() => sethoverForm(form)}
                   onMouseLeave={() => sethoverForm(null)}
                 >
+                  {" "}
+                  {form.formName !== "Workstep Name" ? (
+                    <Checkbox
+                      checked={checkAllFormEnabled(form.formId)}
+                      onChange={(e) => formCheckHandler(e, form.formId)}
+                    />
+                  ) : null}
                   <p
                     style={{
                       fontSize: "var(--base_text_font_size)",
                       fontWeight: "bold",
                       marginBottom: "0",
+                      marginInline: "10px",
                     }}
                   >
                     {form.formName}
                   </p>
-                  {form.formId === hoverForm?.formId &&
+                  {/* {form.formId === hoverForm?.formId &&
                   form.formName !== "Workstep Name" &&
+                  form.formName !== "Form Enabled" &&
                   form.formId !== -1 ? (
                     <VisibilityOutlined
                       onClick={() => handleViewForm(form)}
                       fontSize="medium"
                       style={{ color: "black", opacity: "0.3" }}
+                    />
+                  ) : null} */}
+                  {form.formName !== "Workstep Name" &&
+                  form.formName !== "Form Enabled" ? (
+                    <MoreVertIcon
+                      onClick={(e) => handleTypeChangeMF(e, form)}
+                      className={styles.moreVertIcon}
                     />
                   ) : null}
                 </div>
@@ -980,7 +1276,16 @@ function FormsListWithWorkstep(props) {
                   className={styles.multipleTableDiv}
                   // onMouseEnter={() => sethoverForm(null)}
                 >
-                  {" "}
+                  <div
+                    className={styles.multipleTableContainer}
+                    // style={{ textAlign: "left" }}
+                  >
+                    <Checkbox
+                      checked={checkFormEnabled(act.ActivityId)}
+                      onChange={(e) => formEnabledHandler(e, act)}
+                    />
+                  </div>
+
                   <div
                     className={styles.multipleTableContainer}
                     // style={{ textAlign: "left" }}
@@ -1008,6 +1313,7 @@ function FormsListWithWorkstep(props) {
                           form.formId,
                           act.ActivityId
                         )}
+                        disabled={!checkFormEnabled(act.ActivityId)}
                         onChange={(e) =>
                           handleFormAssocChange(
                             e,
@@ -1016,7 +1322,7 @@ function FormsListWithWorkstep(props) {
                             form.formName
                           )
                         }
-                        size="small"
+                        size="medium"
                       />
                     </div>
                   ))}
@@ -1029,7 +1335,7 @@ function FormsListWithWorkstep(props) {
             <div
               style={{
                 width: "100%",
-                height: "25%",
+                height: "20%",
                 border: "1px dashed #606060",
                 display: "flex",
                 flexDirection: "row",
@@ -1126,19 +1432,23 @@ function FormsListWithWorkstep(props) {
               <p style={{ fontWeight: "600" }}>
                 {getFormDetailsById(mfFormId).formName}
               </p>
-              <button
-                style={{
-                  width: "150px",
-                  height: "1.75rem",
-                  marginInline: "10px",
-                  color: "var(--button_color)",
-                  border: "1px solid var(--button_color)",
-                  borderRadius: "0.125rem",
-                }}
-                // onClick={() => window.loa(true)}
-              >
-                {t("customiseThisForm")}
-              </button>
+              <div>
+                {" "}
+                <button
+                  style={{
+                    width: "150px",
+                    height: "1.75rem",
+                    marginInline: "10px",
+                    color: "var(--button_color)",
+                    border: "1px solid var(--button_color)",
+                    borderRadius: "0.125rem",
+                  }}
+                  // onClick={() => window.loa(true)}
+                >
+                  {t("customiseThisForm")}
+                </button>
+                <CloseIcon onClick={() => setshowViewFormMF(false)} />
+              </div>
             </div>
             <div
               id="mf_forms_show"
